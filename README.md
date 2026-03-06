@@ -1,6 +1,6 @@
 # Neural Speed Academy
 
-A desktop app for speed reading and cognitive training built with Python and Tkinter.
+A desktop application for speed reading and cognitive training built with Python and Tkinter.
 
 ## Features
 
