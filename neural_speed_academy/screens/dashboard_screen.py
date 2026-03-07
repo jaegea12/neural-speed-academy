@@ -50,7 +50,7 @@ class DashboardScreen(BaseScreen):
         self._create_section(grid, "PERCEPTION", 0, [
             ("🔢  Flash Numbers", self._get_callback("menu_flash")),
             ("🔤  Word Drills", self._get_callback("menu_words")),
-            ("👁️  Eye Priming", self._get_callback("start_priming")),
+            ("👁️  Eye Priming", self._get_callback("menu_priming")),
         ])
 
         self._create_section(grid, "SPAN & FOCUS", 1, [
@@ -60,6 +60,8 @@ class DashboardScreen(BaseScreen):
 
         self._create_section(grid, "APPLIED", 2, [
             ("📖  Pacer & Quiz", self._get_callback("setup_pacer")),
+            ("⚡  RSVP Reader", self._get_callback("setup_rsvp")),
+            ("📦  Chunking", self._get_callback("setup_chunking")),
             ("📈  Stats Analysis", self._get_callback("show_stats")),
             ("⚙️  Settings", self._get_callback("show_settings")),
         ])

@@ -102,20 +102,69 @@ EXERCISE_GUIDES = {
     "priming": (
         "EYE PRIMING",
         "HOW TO USE:\n"
-        "Follow the dot with your eyes only. Keep your head still. "
-        "This is a warm-up exercise before intensive training.\n\n"
+        "Follow the dot with your eyes only. Keep your head still.\n"
+        "SACCADE modes: the dot jumps between positions in structured patterns "
+        "(horizontal, vertical, diagonal, expanding). These train fast, accurate "
+        "eye jumps — the primary movement used in reading.\n"
+        "PURSUIT modes: the dot moves continuously along a path (line, circle, "
+        "figure-8). Track it smoothly without jumping ahead.\n\n"
         "THE SCIENCE:\n"
-        "The eyes are controlled by six extraocular muscles per eye. Like any "
-        "muscles, they perform better when warmed up. Smooth pursuit and saccadic "
-        "eye movements activate different neural circuits: the frontal eye fields "
-        "for voluntary saccades and the medial superior temporal area for smooth "
-        "pursuit (Krauzlis, 2004). Priming these circuits before training improves "
-        "accuracy and reduces fatigue.\n\n"
+        "The eyes are controlled by six extraocular muscles per eye. Saccades "
+        "and smooth pursuit engage different neural circuits: the frontal eye "
+        "fields for voluntary saccades and the medial superior temporal area "
+        "for smooth pursuit (Krauzlis, 2004). Training both systems improves "
+        "oculomotor flexibility. Sports vision research shows that structured "
+        "saccadic training improves reaction time and visual search speed "
+        "(Appelbaum & Erickson, 2018).\n\n"
         "BENEFITS:\n"
         "- Warms up extraocular muscles to reduce eye strain during exercises\n"
-        "- Activates the oculomotor system for faster, more accurate saccades\n"
-        "- Improves coordination between smooth pursuit and saccadic movements\n"
+        "- Saccade patterns train the exact eye movements used in reading\n"
+        "- Smooth pursuit develops tracking accuracy and eye-hand coordination\n"
+        "- Expanding saccades progressively increase oculomotor range\n"
         "- Reduces the risk of eye fatigue during extended training sessions"
+    ),
+    "rsvp": (
+        "RSVP (RAPID SERIAL VISUAL PRESENTATION)",
+        "HOW TO USE:\n"
+        "Paste your reading material or use the sample text. Set your target "
+        "WPM and press Start. Words appear one at a time at the center of the "
+        "screen. Keep your eyes fixed on the center — no eye movement needed.\n\n"
+        "THE SCIENCE:\n"
+        "RSVP eliminates the two biggest speed limiters in reading: saccadic "
+        "eye movements and regression. By presenting words at a fixed point, "
+        "the eyes stay still while the brain processes each word. Research by "
+        "Forster (1970) established RSVP as a standard paradigm in psycholinguistics. "
+        "At speeds above ~300 WPM, the brain is forced to abandon subvocalization "
+        "(internal speech) and process text visually, building a direct pathway "
+        "from visual input to comprehension.\n\n"
+        "BENEFITS:\n"
+        "- Eliminates eye movement overhead, isolating pure word processing speed\n"
+        "- Breaks the subvocalization habit by exceeding inner speech rate\n"
+        "- Trains rapid lexical access — recognizing words faster\n"
+        "- Builds comfort with higher reading speeds before applying them to "
+        "normal text\n"
+        "- Measurable: track your comfortable WPM over time"
+    ),
+    "chunking": (
+        "CHUNKING (PHRASE READING)",
+        "HOW TO USE:\n"
+        "Paste your text, choose how many words per chunk (2-6), set the display "
+        "speed, and press Start. Word groups flash at the center of the screen. "
+        "Read each group as a single unit of meaning.\n\n"
+        "THE SCIENCE:\n"
+        "Miller's Law (1956) established that working memory holds ~7 chunks of "
+        "information. By grouping words into meaningful phrases, you effectively "
+        "multiply the text processed per cognitive 'slot.' Skilled readers "
+        "naturally fixate on word groups rather than individual words — their "
+        "perceptual span covers 2-4 words per fixation (Rayner, 1998). Chunking "
+        "training accelerates this transition from word-by-word to phrase-level "
+        "reading.\n\n"
+        "BENEFITS:\n"
+        "- Trains the brain to process word groups as single units\n"
+        "- Directly reduces the number of fixations needed per line\n"
+        "- Builds the core skill that separates fast readers from slow ones\n"
+        "- Complements RSVP: RSVP trains speed, chunking trains breadth\n"
+        "- Improves reading comprehension by preserving phrase-level meaning"
     ),
 }
 
@@ -151,6 +200,23 @@ FLASH_TIMING = {
     "flash_duration": 50,
     "post_flash_delay": 500,
     "correction_display": 1500,
+}
+
+# RSVP configuration
+RSVP_CONFIG = {
+    "min_wpm": 200,
+    "max_wpm": 1200,
+    "default_wpm": 350,
+}
+
+# Chunking configuration
+CHUNKING_CONFIG = {
+    "min_chunk_size": 2,
+    "max_chunk_size": 6,
+    "default_chunk_size": 3,
+    "min_wpm": 150,
+    "max_wpm": 800,
+    "default_wpm": 250,
 }
 
 # User data configuration

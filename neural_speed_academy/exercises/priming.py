@@ -1,9 +1,9 @@
 """
-Eye Priming exercise for warming up extraocular muscles.
+Eye Priming exercises: structured saccades, smooth pursuit, and figure-8 tracking.
 """
 from __future__ import annotations
 
-import random
+import math
 import tkinter as tk
 from tkinter import messagebox
 
@@ -14,23 +14,41 @@ from neural_speed_academy.config import PRIMING_CONFIG
 
 class PrimingExercise(BaseExercise):
     """
-    Eye Priming exercise.
-    User follows a dot with their eyes to warm up eye muscles.
+    Multi-mode eye priming exercise.
+    Modes: structured saccades, smooth pursuit (line/circle/figure-8).
     """
 
     def __init__(self, root: tk.Tk, navigator):
         super().__init__(root, navigator)
-        self.count: int = 0
-        self.total: int = PRIMING_CONFIG["total_positions"]
         self.dot: tk.Label = None
         self.lbl_progress: tk.Label = None
+        self.lbl_mode: tk.Label = None
+        self.mode: str = ""
+        self.count: int = 0
+        self.total: int = 0
+        self.delay: int = 600
+        self._pattern: list = []
+        self._pattern_idx: int = 0
+        # Smooth pursuit state
+        self._t: float = 0.0
+        self._dt: float = 0.0
+        self._pursuit_steps: int = 0
+        self._pursuit_step: int = 0
+        self._running: bool = False
 
     @property
     def name(self) -> str:
         return "Eye Priming"
 
-    def start(self, **kwargs) -> None:
-        """Start the eye priming exercise."""
+    def start(self, mode: str = "saccade_h", delay: int = 600,
+              total: int = 20, **kwargs) -> None:
+        """Start a priming exercise with the given mode and speed."""
+        self.mode = mode
+        self.delay = delay
+        self.total = total
+        self.count = 0
+        self._running = True
+
         self.clear()
         self.add_nav_bar()
 
@@ -45,21 +63,38 @@ class PrimingExercise(BaseExercise):
         guide_btn.place(x=50, y=80)
         self.add_widget(guide_btn)
 
-        self.total = PRIMING_CONFIG["total_positions"]
-        self.count = 0
+        # Mode label
+        mode_labels = {
+            "saccade_h": "HORIZONTAL SACCADES",
+            "saccade_v": "VERTICAL SACCADES",
+            "saccade_diag": "DIAGONAL SACCADES",
+            "saccade_expand": "EXPANDING SACCADES",
+            "pursuit_line": "SMOOTH PURSUIT — LINE",
+            "pursuit_circle": "SMOOTH PURSUIT — CIRCLE",
+            "pursuit_figure8": "SMOOTH PURSUIT — FIGURE 8",
+        }
+        self.lbl_mode = tk.Label(
+            self.root,
+            text=mode_labels.get(mode, mode.upper()),
+            font=FONTS["counter"],
+            fg=COLORS["accent"],
+            bg=COLORS["bg"]
+        )
+        self.lbl_mode.place(relx=0.5, rely=0.08, anchor="center")
+        self.add_widget(self.lbl_mode)
 
         # Progress label
         self.lbl_progress = tk.Label(
             self.root,
-            text=f"WARMUP: 0/{self.total}",
+            text="0%",
             font=FONTS["section_header"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         )
-        self.lbl_progress.place(relx=0.5, rely=0.1, anchor="center")
+        self.lbl_progress.place(relx=0.5, rely=0.12, anchor="center")
         self.add_widget(self.lbl_progress)
 
-        # Dot to follow
+        # Dot
         self.dot = tk.Label(
             self.root,
             text="●",
@@ -70,20 +105,118 @@ class PrimingExercise(BaseExercise):
         self.dot.place(relx=0.5, rely=0.5, anchor="center")
         self.add_widget(self.dot)
 
-        self._run_loop()
+        if mode.startswith("saccade"):
+            self._build_saccade_pattern()
+            self.root.after(500, self._saccade_step)
+        elif mode.startswith("pursuit"):
+            self._init_pursuit()
+            self.root.after(500, self._pursuit_step_fn)
 
-    def _run_loop(self) -> None:
-        """Run the priming animation loop."""
-        if self.count < self.total:
-            pos = random.choice(PRIMING_CONFIG["positions"])
-            self.dot.place(relx=pos[0], rely=pos[1])
-            self.count += 1
-            self.lbl_progress.config(text=f"WARMUP: {self.count}/{self.total}")
-            self.root.after(PRIMING_CONFIG["delay_ms"], self._run_loop)
-        else:
+    # --- Saccade modes ---
+
+    def _build_saccade_pattern(self) -> None:
+        """Generate position sequence for the selected saccade pattern."""
+        n = self.total
+        if self.mode == "saccade_h":
+            # Alternating left-right at center height
+            self._pattern = [
+                (0.2, 0.5) if i % 2 == 0 else (0.8, 0.5)
+                for i in range(n)
+            ]
+        elif self.mode == "saccade_v":
+            # Alternating top-bottom at center width
+            self._pattern = [
+                (0.5, 0.25) if i % 2 == 0 else (0.5, 0.75)
+                for i in range(n)
+            ]
+        elif self.mode == "saccade_diag":
+            # Cycle through four diagonal corners
+            corners = [(0.2, 0.25), (0.8, 0.75), (0.8, 0.25), (0.2, 0.75)]
+            self._pattern = [corners[i % 4] for i in range(n)]
+        elif self.mode == "saccade_expand":
+            # Start narrow, expand amplitude over time
+            self._pattern = []
+            for i in range(n):
+                frac = 0.1 + 0.35 * (i / max(n - 1, 1))
+                if i % 2 == 0:
+                    self._pattern.append((0.5 - frac, 0.5))
+                else:
+                    self._pattern.append((0.5 + frac, 0.5))
+        self._pattern_idx = 0
+
+    def _saccade_step(self) -> None:
+        """Advance one step in the saccade pattern."""
+        if not self._running:
+            return
+        if self._pattern_idx >= len(self._pattern):
             self._complete_exercise()
+            return
+
+        x, y = self._pattern[self._pattern_idx]
+        self.dot.place(relx=x, rely=y, anchor="center")
+        self._pattern_idx += 1
+        pct = int(self._pattern_idx / len(self._pattern) * 100)
+        self.lbl_progress.config(text=f"{pct}%")
+        self.root.after(self.delay, self._saccade_step)
+
+    # --- Smooth pursuit modes ---
+
+    def _init_pursuit(self) -> None:
+        """Initialize smooth pursuit animation parameters."""
+        # 20ms per frame for smooth animation
+        frame_ms = 20
+        # Total duration based on delay * total (delay acts as speed factor)
+        duration_ms = self.delay * self.total // 10
+        self._pursuit_steps = duration_ms // frame_ms
+        self._pursuit_step = 0
+        self._dt = 1.0 / max(self._pursuit_steps, 1)
+        self._t = 0.0
+        self._frame_ms = frame_ms
+
+    def _pursuit_position(self, t: float) -> tuple:
+        """Calculate dot position for the current pursuit mode at time t (0..1)."""
+        if self.mode == "pursuit_line":
+            # Horizontal sweep, back and forth
+            cycles = 3
+            x = 0.5 + 0.35 * math.sin(2 * math.pi * cycles * t)
+            y = 0.5
+            return (x, y)
+        elif self.mode == "pursuit_circle":
+            # Clockwise circle
+            cycles = 2
+            angle = 2 * math.pi * cycles * t
+            x = 0.5 + 0.25 * math.cos(angle)
+            y = 0.5 + 0.25 * math.sin(angle)
+            return (x, y)
+        elif self.mode == "pursuit_figure8":
+            # Figure-8 (lemniscate)
+            cycles = 2
+            angle = 2 * math.pi * cycles * t
+            x = 0.5 + 0.3 * math.sin(angle)
+            y = 0.5 + 0.2 * math.sin(2 * angle)
+            return (x, y)
+        return (0.5, 0.5)
+
+    def _pursuit_step_fn(self) -> None:
+        """Advance one frame of smooth pursuit animation."""
+        if not self._running:
+            return
+        if self._pursuit_step >= self._pursuit_steps:
+            self._complete_exercise()
+            return
+
+        x, y = self._pursuit_position(self._t)
+        self.dot.place(relx=x, rely=y, anchor="center")
+        self._t += self._dt
+        self._pursuit_step += 1
+        pct = int(self._pursuit_step / self._pursuit_steps * 100)
+        self.lbl_progress.config(text=f"{pct}%")
+        self.root.after(self._frame_ms, self._pursuit_step_fn)
+
+    # --- Completion ---
 
     def _complete_exercise(self) -> None:
         """Handle exercise completion."""
+        self._running = False
         messagebox.showinfo("Warmup", "Eyes Primed!")
         self.navigator.to_dashboard()

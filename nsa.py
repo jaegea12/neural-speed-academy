@@ -14,12 +14,15 @@ from neural_speed_academy.screens.menu_screens import (
     FlashMenuScreen,
     WordsMenuScreen,
     EyespanMenuScreen,
+    PrimingMenuScreen,
 )
 from neural_speed_academy.screens.settings_screen import SettingsScreen
 from neural_speed_academy.exercises.flash import FlashExercise
 from neural_speed_academy.exercises.schulte import SchulteExercise
 from neural_speed_academy.exercises.priming import PrimingExercise
 from neural_speed_academy.exercises.pacer import PacerExercise
+from neural_speed_academy.exercises.rsvp import RsvpExercise
+from neural_speed_academy.exercises.chunking import ChunkingExercise
 
 
 class SpeedReadingApp:
@@ -43,6 +46,8 @@ class SpeedReadingApp:
         self.schulte_exercise = SchulteExercise(self.root, self.navigator)
         self.priming_exercise = PrimingExercise(self.root, self.navigator)
         self.pacer_exercise = PacerExercise(self.root, self.navigator)
+        self.rsvp_exercise = RsvpExercise(self.root, self.navigator)
+        self.chunking_exercise = ChunkingExercise(self.root, self.navigator)
         
         self._register_screens()
         
@@ -55,10 +60,12 @@ class SpeedReadingApp:
         exercise_callbacks = {
             "menu_flash": lambda: self.navigator.navigate_to("flash_menu"),
             "menu_words": lambda: self.navigator.navigate_to("words_menu"),
-            "start_priming": self.priming_exercise.start,
+            "menu_priming": lambda: self.navigator.navigate_to("priming_menu"),
             "menu_eyespan": lambda: self.navigator.navigate_to("eyespan_menu"),
             "start_schulte": self.schulte_exercise.start,
             "setup_pacer": self.pacer_exercise.start,
+            "setup_rsvp": self.rsvp_exercise.start,
+            "setup_chunking": self.chunking_exercise.start,
             "show_stats": lambda: self.navigator.navigate_to("stats"),
             "show_settings": lambda: self.navigator.navigate_to("settings"),
         }
@@ -86,6 +93,10 @@ class SpeedReadingApp:
         self.navigator.register_screen(
             "eyespan_menu",
             lambda: EyespanMenuScreen(self.root, self.navigator, self.flash_exercise)
+        )
+        self.navigator.register_screen(
+            "priming_menu",
+            lambda: PrimingMenuScreen(self.root, self.navigator, self.priming_exercise)
         )
         self.navigator.register_screen(
             "settings",

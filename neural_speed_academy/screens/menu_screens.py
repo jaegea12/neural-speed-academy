@@ -12,6 +12,7 @@ from neural_speed_academy.theme import COLORS, FONTS
 
 if TYPE_CHECKING:
     from neural_speed_academy.exercises.flash import FlashExercise
+    from neural_speed_academy.exercises.priming import PrimingExercise
 
 
 class BaseMenuScreen(BaseScreen):
@@ -288,3 +289,47 @@ class EyespanMenuScreen(BaseMenuScreen):
                         pady=6,
                         relief="flat"
                     ).grid(row=i + 1, column=col_idx, padx=10, pady=4)
+
+
+class PrimingMenuScreen(BaseMenuScreen):
+    """Menu screen for eye priming exercise selection."""
+
+    def __init__(self, root: tk.Tk, navigator, priming_exercise: "PrimingExercise"):
+        super().__init__(root, navigator)
+        self.priming_exercise = priming_exercise
+
+    def build(self, **kwargs) -> None:
+        """Build the priming menu UI."""
+        def run(mode: str, delay: int, total: int) -> Callable:
+            return lambda: self.priming_exercise.start(
+                mode=mode, delay=delay, total=total
+            )
+
+        sets = [
+            # Saccades — structured jumps
+            ("Horizontal Saccades (Slow)", run("saccade_h", 700, 20)),
+            ("Horizontal Saccades (Fast)", run("saccade_h", 400, 24)),
+            ("Vertical Saccades (Slow)", run("saccade_v", 700, 20)),
+            ("Vertical Saccades (Fast)", run("saccade_v", 400, 24)),
+            ("Diagonal Saccades (Slow)", run("saccade_diag", 700, 20)),
+            ("Diagonal Saccades (Fast)", run("saccade_diag", 400, 24)),
+            ("Expanding Saccades (Slow)", run("saccade_expand", 700, 20)),
+            ("Expanding Saccades (Fast)", run("saccade_expand", 400, 24)),
+            # Smooth pursuit — continuous tracking
+            ("Pursuit: Line (Slow)", run("pursuit_line", 800, 20)),
+            ("Pursuit: Line (Fast)", run("pursuit_line", 500, 20)),
+            ("Pursuit: Circle (Slow)", run("pursuit_circle", 800, 20)),
+            ("Pursuit: Circle (Fast)", run("pursuit_circle", 500, 20)),
+            ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", 800, 20)),
+            ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", 500, 20)),
+        ]
+
+        self._create_grid_menu(
+            "EYE PRIMING",
+            "priming",
+            sets,
+            col1_label="SACCADES (JUMPS)",
+            col2_label="SMOOTH PURSUIT (TRACKING)"
+        )
+
+
