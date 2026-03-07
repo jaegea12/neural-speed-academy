@@ -2,6 +2,7 @@
 Navigator for centralized screen routing.
 Decouples screens from each other by providing a single point of navigation.
 """
+from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Callable
 import tkinter as tk

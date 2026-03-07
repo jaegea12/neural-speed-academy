@@ -1,6 +1,7 @@
 """
 UI theme constants for Neural Speed Academy.
 """
+from __future__ import annotations
 
 # --- Original Color Scheme ---
 # COLORS = {

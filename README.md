@@ -13,7 +13,7 @@ A desktop application for speed reading and cognitive training built with Python
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.7+
 - Tkinter (included with Python on most systems)
 
 ## Running the Application

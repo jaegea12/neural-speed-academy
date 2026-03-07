@@ -1,6 +1,7 @@
 """
 Pacer exercise for guided reading with word highlighting.
 """
+from __future__ import annotations
 
 import tkinter as tk
 

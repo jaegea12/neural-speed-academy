@@ -1,6 +1,7 @@
 """
 Eye Priming exercise for warming up extraocular muscles.
 """
+from __future__ import annotations
 
 import random
 import tkinter as tk

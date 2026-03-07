@@ -1,6 +1,7 @@
 """
 Menu screens for exercise selection.
 """
+from __future__ import annotations
 
 import random
 import tkinter as tk

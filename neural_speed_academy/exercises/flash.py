@@ -1,6 +1,7 @@
 """
 Flash perception exercises: numbers, words, and eye-span.
 """
+from __future__ import annotations
 
 import random
 import tkinter as tk

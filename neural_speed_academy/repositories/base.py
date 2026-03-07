@@ -2,6 +2,7 @@
 Abstract base classes for repository pattern.
 Enables swapping storage backends (JSON, SQLite, cloud) without changing application code.
 """
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Optional

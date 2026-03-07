@@ -1,6 +1,7 @@
 """
 Schulte Grid exercise for focus and peripheral vision training.
 """
+from __future__ import annotations
 
 import random
 import tkinter as tk

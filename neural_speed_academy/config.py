@@ -1,6 +1,7 @@
 """
 Exercise configurations and data for Neural Speed Academy.
 """
+from __future__ import annotations
 
 # Word pairs for ambiguous word recognition exercises
 WORD_PAIRS = [

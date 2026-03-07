@@ -1,6 +1,7 @@
 """
 Login screen for user authentication.
 """
+from __future__ import annotations
 
 import tkinter as tk
 

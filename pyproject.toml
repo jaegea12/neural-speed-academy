@@ -1,0 +1,9 @@
+[project]
+name = "neural-speed-academy"
+version = "1.0.0"
+description = "A desktop application for speed reading and cognitive training"
+requires-python = ">=3.7"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends._legacy:_Backend"

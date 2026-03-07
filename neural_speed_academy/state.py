@@ -2,6 +2,7 @@
 State containers for Neural Speed Academy.
 Uses dataclasses for type safety and clarity.
 """
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
