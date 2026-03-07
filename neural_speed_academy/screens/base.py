@@ -97,19 +97,20 @@ class BaseScreen(ABC):
         title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
         win = tk.Toplevel(self.root)
         win.configure(bg=COLORS["card"])
-        win.geometry("600x400")
+        win.geometry("700x600")
         tk.Label(
             win,
             text=f"📘 {title}",
             font=FONTS["sub"],
             fg=COLORS["accent"],
             bg=COLORS["card"],
-        ).pack(pady=20)
+        ).pack(pady=(20, 10))
         tk.Label(
             win,
             text=text,
             font=FONTS["body"],
             fg=COLORS["text_on_card"],
             bg=COLORS["card"],
-            wraplength=500,
-        ).pack(pady=10)
+            wraplength=620,
+            justify="left",
+        ).pack(pady=10, padx=30)

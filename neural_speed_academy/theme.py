@@ -49,6 +49,27 @@ LIGHT_COLORS = {
     "reader_fg": "#1e293b",
 }
 
+SOFT_LIGHT_COLORS = {
+    "bg": "#faf7f2",
+    "card": "#ede9e3",
+    "fg": "#3d3929",
+    "accent": "#5a8a5e",
+    "action": "#5b7fa5",
+    "alert": "#c47a3a",
+    "highlight": "#e8d48b",
+    "priming": "#5a9e8f",
+    "grid_btn": "#7a9bb5",
+    "grid_solved": "#b5d4b8",
+    "success": "#5a8a5e",
+    "cross": "#a8a08e",
+    # Semantic roles
+    "btn_text": "#faf7f2",
+    "text_on_card": "#3d3929",
+    "muted": "#8a8475",
+    "reader_bg": "#f5f0e8",
+    "reader_fg": "#3d3929",
+}
+
 HIGH_CONTRAST_COLORS = {
     "bg": "#000000",
     "card": "#1a1a1a",
@@ -73,6 +94,7 @@ HIGH_CONTRAST_COLORS = {
 THEME_PROFILES = {
     "dark": DARK_COLORS,
     "light": LIGHT_COLORS,
+    "soft_light": SOFT_LIGHT_COLORS,
     "high_contrast": HIGH_CONTRAST_COLORS,
 }
 

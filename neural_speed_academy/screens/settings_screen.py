@@ -41,6 +41,7 @@ class SettingsScreen(BaseScreen):
         profiles = {
             "dark": "Dark Mode",
             "light": "Light Mode",
+            "soft_light": "Soft Light",
             "high_contrast": "High Contrast",
         }
 
