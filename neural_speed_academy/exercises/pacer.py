@@ -39,7 +39,7 @@ class PacerExercise(BaseExercise):
             container,
             text="📘 GUIDE",
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             command=lambda: self.show_guide("pacer")
         )
         guide_btn.place(x=50, y=20)
@@ -64,10 +64,10 @@ class PacerExercise(BaseExercise):
             text_frame,
             height=6,
             width=60,
-            font=("Georgia", 12),
+            font=FONTS["pacer_text"],
             bg=COLORS["card"],
-            fg="white",
-            insertbackground="white",
+            fg=COLORS["text_on_card"],
+            insertbackground=COLORS["text_on_card"],
             bd=0
         )
         text_input.pack()
@@ -77,7 +77,7 @@ class PacerExercise(BaseExercise):
         tk.Label(
             content,
             text="Target Speed (WPM):",
-            font=("Segoe UI", 12),
+            font=FONTS["slider_label"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         ).pack(pady=(10, 0))
@@ -90,7 +90,7 @@ class PacerExercise(BaseExercise):
             to=PACER_CONFIG["max_wpm"],
             orient="horizontal",
             bg=COLORS["bg"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             length=400,
             highlightthickness=0
         ).pack(pady=5)
@@ -104,8 +104,8 @@ class PacerExercise(BaseExercise):
             text="START READING",
             command=lambda: self._run_pacer(text_input.get("1.0", tk.END), wpm_var.get()),
             bg=COLORS["success"],
-            fg="#0f172a",
-            font=("Segoe UI", 16, "bold"),
+            fg=COLORS["btn_text"],
+            font=FONTS["btn_lg"],
             width=30,
             pady=10,
             relief="flat",
@@ -124,9 +124,9 @@ class PacerExercise(BaseExercise):
         exit_btn = tk.Button(
             self.root,
             text="✖",
-            font=("Arial", 14),
+            font=FONTS["exit_btn"],
             bg=COLORS["alert"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             command=self.navigator.to_dashboard,
             bd=0
         )
@@ -137,7 +137,7 @@ class PacerExercise(BaseExercise):
         self.lbl_progress = tk.Label(
             self.root,
             text="0%",
-            font=("Segoe UI", 14, "bold"),
+            font=FONTS["section_header"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         )
@@ -151,8 +151,8 @@ class PacerExercise(BaseExercise):
         text_widget = tk.Text(
             self.root,
             font=FONTS["pacer"],
-            bg="#e2e8f0",
-            fg="#0f172a",
+            bg=COLORS["reader_bg"],
+            fg=COLORS["reader_fg"],
             wrap="word",
             padx=100,
             pady=100
@@ -222,7 +222,7 @@ class PacerExercise(BaseExercise):
             text="Summarize what you read:",
             font=FONTS["header"],
             bg=COLORS["bg"],
-            fg="white"
+            fg=COLORS["text_on_card"]
         ).pack(pady=20)
 
         summary_text = tk.Text(self.root, height=5)
@@ -234,7 +234,7 @@ class PacerExercise(BaseExercise):
             text="Done",
             command=self.navigator.to_dashboard,
             bg=COLORS["accent"],
-            fg="#0f172a",
-            font=("Segoe UI", 12, "bold"),
+            fg=COLORS["btn_text"],
+            font=FONTS["btn_bold"],
             width=15
         ).pack()

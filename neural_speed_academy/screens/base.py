@@ -72,8 +72,8 @@ class BaseScreen(ABC):
             bar,
             text="🏠 HUB",
             bg=COLORS["accent"],
-            fg="#0f172a",
-            font=("Segoe UI", 10, "bold"),
+            fg=COLORS["btn_text"],
+            font=FONTS["btn_sm"],
             relief="flat",
             command=self.navigator.to_dashboard,
         ).pack(side="left", padx=20, pady=10)
@@ -85,7 +85,7 @@ class BaseScreen(ABC):
                 text=stats,
                 bg=COLORS["card"],
                 fg=COLORS["accent"],
-                font=("Segoe UI", 11, "bold"),
+                font=FONTS["nav_stats"],
             ).pack(side="right", padx=20)
 
         return bar
@@ -109,7 +109,7 @@ class BaseScreen(ABC):
             win,
             text=text,
             font=FONTS["body"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             bg=COLORS["card"],
             wraplength=500,
         ).pack(pady=10)

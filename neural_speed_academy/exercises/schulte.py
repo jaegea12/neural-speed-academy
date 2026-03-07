@@ -40,7 +40,7 @@ class SchulteExercise(BaseExercise):
             self.root,
             text="📘 GUIDE",
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             command=lambda: self.show_guide("schulte")
         )
         guide_btn.place(x=50, y=80)
@@ -59,7 +59,7 @@ class SchulteExercise(BaseExercise):
         self.lbl_target = tk.Label(
             stats_frame,
             text=f"FIND: {self.target}",
-            font=("Segoe UI", 16, "bold"),
+            font=FONTS["grid_btn"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         )
@@ -68,7 +68,7 @@ class SchulteExercise(BaseExercise):
         self.lbl_score = tk.Label(
             stats_frame,
             text=f"SCORE: {self.score}",
-            font=("Segoe UI", 16, "bold"),
+            font=FONTS["grid_btn"],
             fg=COLORS["accent"],
             bg=COLORS["bg"]
         )
@@ -91,9 +91,9 @@ class SchulteExercise(BaseExercise):
                     text=str(val),
                     width=6,
                     height=3,
-                    font=("Segoe UI", 16, "bold"),
+                    font=FONTS["grid_btn"],
                     bg=COLORS["grid_btn"],
-                    fg="white",
+                    fg=COLORS["text_on_card"],
                     relief="raised"
                 )
                 btn.configure(command=lambda b=btn, v=val: self._on_click(v, b))

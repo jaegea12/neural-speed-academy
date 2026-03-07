@@ -37,7 +37,7 @@ class DashboardScreen(BaseScreen):
             header,
             text="TRAINING DASHBOARD",
             font=FONTS["header"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             bg=COLORS["card"],
         ).pack()
 
@@ -61,6 +61,7 @@ class DashboardScreen(BaseScreen):
         self._create_section(grid, "APPLIED", 2, [
             ("📖  Pacer & Quiz", self._get_callback("setup_pacer")),
             ("📈  Stats Analysis", self._get_callback("show_stats")),
+            ("⚙️  Settings", self._get_callback("show_settings")),
         ])
 
         # Logout button
@@ -68,7 +69,7 @@ class DashboardScreen(BaseScreen):
             self.root,
             text="LOGOUT",
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             command=self.navigator.logout,
         )
         logout_btn.place(relx=0.95, rely=0.95, anchor="e")
@@ -92,7 +93,7 @@ class DashboardScreen(BaseScreen):
         tk.Label(
             frame,
             text=title,
-            font=("Segoe UI", 14, "bold"),
+            font=FONTS["section_header"],
             fg=COLORS["accent"],
             bg=COLORS["bg"],
         ).pack(pady=(0, 15))
@@ -102,9 +103,9 @@ class DashboardScreen(BaseScreen):
                 frame,
                 text=text,
                 command=command,
-                font=("Segoe UI", 11),
+                font=FONTS["btn"],
                 bg=COLORS["accent"],
-                fg="#0f172a",
+                fg=COLORS["btn_text"],
                 width=30,
                 pady=8,
                 relief="flat",

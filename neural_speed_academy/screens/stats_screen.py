@@ -63,7 +63,7 @@ class StatsScreen(BaseScreen):
             summary_frame,
             text=f"TOTAL XP: {user.xp}",
             font=FONTS["sub"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             bg=COLORS["card"]
         ).pack(side="left", expand=True)
 
@@ -73,7 +73,7 @@ class StatsScreen(BaseScreen):
             summary_frame,
             text=f"CURRENT LEVEL: {level}",
             font=FONTS["sub"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             bg=COLORS["card"]
         ).pack(side="left", expand=True)
 
@@ -82,7 +82,7 @@ class StatsScreen(BaseScreen):
             summary_frame,
             text=f"STREAK: {user.streak} Days",
             font=FONTS["sub"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             bg=COLORS["card"]
         ).pack(side="left", expand=True)
 
@@ -91,7 +91,7 @@ class StatsScreen(BaseScreen):
         tk.Label(
             parent,
             text="SESSION HISTORY",
-            font=("Segoe UI", 14, "bold"),
+            font=FONTS["section_header"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         ).pack(anchor="w")
@@ -102,15 +102,15 @@ class StatsScreen(BaseScreen):
         style.configure(
             "Treeview",
             background=COLORS["card"],
-            foreground="white",
+            foreground=COLORS["text_on_card"],
             fieldbackground=COLORS["card"],
-            font=("Segoe UI", 10)
+            font=FONTS["treeview"]
         )
         style.configure(
             "Treeview.Heading",
             background=COLORS["grid_btn"],
-            foreground="white",
-            font=("Segoe UI", 10, "bold")
+            foreground=COLORS["text_on_card"],
+            font=FONTS["treeview_heading"]
         )
         style.map("Treeview", background=[("selected", COLORS["accent"])])
 

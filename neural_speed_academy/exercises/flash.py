@@ -55,7 +55,7 @@ class FlashExercise(BaseExercise):
             fg=COLORS["fg"], bg=COLORS["bg"]
         )
         self.lbl_cross = tk.Label(
-            self.root, text="+", font=("Arial", 50),
+            self.root, text="+", font=FONTS["cross"],
             fg=COLORS["cross"], bg=COLORS["bg"]
         )
 
@@ -118,7 +118,7 @@ class FlashExercise(BaseExercise):
         cnt_str = f"ROUND: {self.current_round}/{self.rounds_total}   |   CORRECT: {self.correct_count}"
         label = tk.Label(
             self.root, text=cnt_str,
-            font=("Segoe UI", 12, "bold"),
+            font=FONTS["counter"],
             fg=COLORS["accent"], bg=COLORS["bg"]
         )
         label.pack(pady=5)
@@ -228,11 +228,11 @@ class FlashExercise(BaseExercise):
 
         entry = tk.Entry(
             self.input_frame,
-            font=("Segoe UI", 24),
+            font=FONTS["input"],
             bg=COLORS["card"],
-            fg="white",
+            fg=COLORS["text_on_card"],
             justify="center",
-            insertbackground="white"
+            insertbackground=COLORS["text_on_card"]
         )
         entry.pack(pady=10)
         entry.focus_set()
@@ -243,8 +243,8 @@ class FlashExercise(BaseExercise):
             text="CHECK",
             command=lambda: self._verify(entry.get()),
             bg=COLORS["accent"],
-            fg="#0f172a",
-            font=("Segoe UI", 12, "bold")
+            fg=COLORS["btn_text"],
+            font=FONTS["btn_bold"]
         ).pack()
 
     def _verify(self, user_input: str) -> None:

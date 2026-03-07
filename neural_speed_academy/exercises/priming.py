@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise
-from neural_speed_academy.theme import COLORS
+from neural_speed_academy.theme import COLORS, FONTS
 from neural_speed_academy.config import PRIMING_CONFIG
 
 
@@ -39,7 +39,7 @@ class PrimingExercise(BaseExercise):
             self.root,
             text="📘 GUIDE",
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             command=lambda: self.show_guide("priming")
         )
         guide_btn.place(x=50, y=80)
@@ -52,7 +52,7 @@ class PrimingExercise(BaseExercise):
         self.lbl_progress = tk.Label(
             self.root,
             text=f"WARMUP: 0/{self.total}",
-            font=("Segoe UI", 14, "bold"),
+            font=FONTS["section_header"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         )
@@ -63,7 +63,7 @@ class PrimingExercise(BaseExercise):
         self.dot = tk.Label(
             self.root,
             text="●",
-            font=("Arial", 30),
+            font=FONTS["priming_dot"],
             fg=COLORS["priming"],
             bg=COLORS["bg"]
         )

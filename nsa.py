@@ -15,6 +15,7 @@ from neural_speed_academy.screens.menu_screens import (
     WordsMenuScreen,
     EyespanMenuScreen,
 )
+from neural_speed_academy.screens.settings_screen import SettingsScreen
 from neural_speed_academy.exercises.flash import FlashExercise
 from neural_speed_academy.exercises.schulte import SchulteExercise
 from neural_speed_academy.exercises.priming import PrimingExercise
@@ -59,6 +60,7 @@ class SpeedReadingApp:
             "start_schulte": self.schulte_exercise.start,
             "setup_pacer": self.pacer_exercise.start,
             "show_stats": lambda: self.navigator.navigate_to("stats"),
+            "show_settings": lambda: self.navigator.navigate_to("settings"),
         }
         
         self.navigator.register_screen(
@@ -84,6 +86,10 @@ class SpeedReadingApp:
         self.navigator.register_screen(
             "eyespan_menu",
             lambda: EyespanMenuScreen(self.root, self.navigator, self.flash_exercise)
+        )
+        self.navigator.register_screen(
+            "settings",
+            lambda: SettingsScreen(self.root, self.navigator)
         )
 
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ class BaseMenuScreen(BaseScreen):
             container,
             text="📘 READ GUIDE",
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             command=lambda: self.show_guide(guide_key)
         ).pack(pady=5)
 
@@ -64,16 +64,16 @@ class BaseMenuScreen(BaseScreen):
         tk.Label(
             grid,
             text=col1_label,
-            font=("Segoe UI", 10, "bold"),
-            fg="#94a3b8",
+            font=FONTS["menu_header"],
+            fg=COLORS["muted"],
             bg=COLORS["bg"]
         ).grid(row=0, column=0, pady=10)
 
         tk.Label(
             grid,
             text=col2_label,
-            font=("Segoe UI", 10, "bold"),
-            fg="#94a3b8",
+            font=FONTS["menu_header"],
+            fg=COLORS["muted"],
             bg=COLORS["bg"]
         ).grid(row=0, column=1, pady=10)
 
@@ -86,8 +86,8 @@ class BaseMenuScreen(BaseScreen):
                     text=name,
                     command=cmd,
                     bg=COLORS["accent"],
-                    fg="#0f172a",
-                    font=("Segoe UI", 11),
+                    fg=COLORS["btn_text"],
+                    font=FONTS["btn"],
                     width=35,
                     pady=8,
                     relief="flat"
@@ -100,8 +100,8 @@ class BaseMenuScreen(BaseScreen):
                     text=name,
                     command=cmd,
                     bg=COLORS["accent"],
-                    fg="#0f172a",
-                    font=("Segoe UI", 11),
+                    fg=COLORS["btn_text"],
+                    font=FONTS["btn"],
                     width=35,
                     pady=8,
                     relief="flat"
@@ -200,7 +200,7 @@ class EyespanMenuScreen(BaseMenuScreen):
             container,
             text="📘 READ GUIDE",
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             command=lambda: self.show_guide("eyespan")
         ).pack(pady=5)
 
@@ -265,7 +265,7 @@ class EyespanMenuScreen(BaseMenuScreen):
             tk.Label(
                 grid,
                 text=title,
-                font=("Segoe UI", 12, "bold"),
+                font=FONTS["btn_bold"],
                 fg=COLORS["accent"],
                 bg=COLORS["bg"]
             ).grid(row=0, column=idx, padx=10, pady=10)
@@ -282,8 +282,8 @@ class EyespanMenuScreen(BaseMenuScreen):
                         text=name,
                         command=cmd,
                         bg=COLORS["accent"],
-                        fg="#0f172a",
-                        font=("Segoe UI", 10),
+                        fg=COLORS["btn_text"],
+                        font=FONTS["menu_btn"],
                         width=28,
                         pady=6,
                         relief="flat"

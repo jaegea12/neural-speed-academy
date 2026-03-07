@@ -38,9 +38,9 @@ class LoginScreen(BaseScreen):
             font=FONTS["sub"],
             justify="center",
             bg=COLORS["card"],
-            fg="#94a3b8",
+            fg=COLORS["muted"],
             relief="flat",
-            insertbackground="white",
+            insertbackground=COLORS["text_on_card"],
         )
         self.entry.pack(pady=20, ipadx=10, ipady=8)
         self.entry.insert(0, "Type your name")
@@ -54,9 +54,9 @@ class LoginScreen(BaseScreen):
         tk.Button(
             container,
             text="START TRAINING",
-            font=("Segoe UI", 12, "bold"),
+            font=FONTS["btn_bold"],
             bg=COLORS["accent"],
-            fg="#0f172a",
+            fg=COLORS["btn_text"],
             relief="flat",
             command=self._do_login,
         ).pack()
@@ -65,13 +65,13 @@ class LoginScreen(BaseScreen):
         """Clear placeholder on focus."""
         if self.entry.get() == "Type your name":
             self.entry.delete(0, "end")
-            self.entry.config(fg="white")
+            self.entry.config(fg=COLORS["text_on_card"])
 
     def _on_entry_blur(self, event) -> None:
         """Restore placeholder if empty."""
         if self.entry.get() == "":
             self.entry.insert(0, "Type your name")
-            self.entry.config(fg="#94a3b8")
+            self.entry.config(fg=COLORS["muted"])
 
     def _do_login(self) -> None:
         """Handle login action."""
