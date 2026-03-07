@@ -9,7 +9,7 @@ from typing import Callable, Optional
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, FONTS
-from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG
+from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG, FLASH_TIMING
 
 
 class FlashExercise(BaseExercise):
@@ -130,8 +130,8 @@ class FlashExercise(BaseExercise):
         # Prepare content
         self._prepare_content()
 
-        # Sequence: Cross -> Dots (800ms) -> Flash
-        self.root.after(800, self._show_pre_flash_dots)
+        # Sequence: Cross -> Dots -> Flash
+        self.root.after(FLASH_TIMING["cross_duration"], self._show_pre_flash_dots)
 
     def _prepare_content(self) -> None:
         """Prepare the content to flash based on mode."""
@@ -174,7 +174,7 @@ class FlashExercise(BaseExercise):
     def _show_pre_flash_dots(self) -> None:
         """Change cross to dots before flash."""
         self.lbl_cross.config(text="••", fg=COLORS["accent"])
-        self.root.after(400, self._do_flash)
+        self.root.after(FLASH_TIMING["dots_duration"], self._do_flash)
 
     def _do_flash(self) -> None:
         """Flash the content briefly."""
@@ -195,8 +195,10 @@ class FlashExercise(BaseExercise):
         else:
             self.lbl_flash_center.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Use non-blocking after() instead of time.sleep()
-        self.root.after(50, self._hide_flash)
+        # Force Tkinter to render the widget before starting the hide timer,
+        # otherwise the 50ms window can elapse before the label is painted.
+        self.root.update_idletasks()
+        self.root.after(FLASH_TIMING["flash_duration"], self._hide_flash)
 
     def _hide_flash(self) -> None:
         """Hide flash content after brief display."""
@@ -206,7 +208,7 @@ class FlashExercise(BaseExercise):
         else:
             self.lbl_flash_center.place_forget()
 
-        self.root.after(500, self._show_input)
+        self.root.after(FLASH_TIMING["post_flash_delay"], self._show_input)
 
     def _show_input(self) -> None:
         """Show input field for user response."""
@@ -267,7 +269,7 @@ class FlashExercise(BaseExercise):
             self.lbl_flash_center.place(relx=0.5, rely=0.5, anchor="center")
 
         self.root.update()
-        self.root.after(1500, self._next_round)
+        self.root.after(FLASH_TIMING["correction_display"], self._next_round)
 
     def _complete_exercise(self) -> None:
         """Handle exercise completion."""
