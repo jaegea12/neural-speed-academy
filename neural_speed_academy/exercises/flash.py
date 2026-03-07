@@ -159,15 +159,25 @@ class FlashExercise(BaseExercise):
             if m == "m":
                 m = random.choice(["h", "v"])
 
+            # Clamp positions so labels don't extend past screen edges.
+            # Reserve a margin proportional to digit count to account for
+            # the label width (anchor="center" means half the label extends
+            # in each direction).
+            margin = 0.03 * d + 0.02
+
             if m == "h":
+                l_relx = max(margin, 0.5 - w)
+                r_relx = min(1.0 - margin, 0.5 + w)
                 self.flash_coords = {
-                    "l_relx": 0.5 - w, "l_rely": 0.5,
-                    "r_relx": 0.5 + w, "r_rely": 0.5
+                    "l_relx": l_relx, "l_rely": 0.5,
+                    "r_relx": r_relx, "r_rely": 0.5
                 }
             else:
+                l_rely = max(margin, 0.5 - w)
+                r_rely = min(1.0 - margin, 0.5 + w)
                 self.flash_coords = {
-                    "l_relx": 0.5, "l_rely": 0.5 - w,
-                    "r_relx": 0.5, "r_rely": 0.5 + w
+                    "l_relx": 0.5, "l_rely": l_rely,
+                    "r_relx": 0.5, "r_rely": r_rely
                 }
             self.lbl_flash_left.place_forget()
             self.lbl_flash_right.place_forget()

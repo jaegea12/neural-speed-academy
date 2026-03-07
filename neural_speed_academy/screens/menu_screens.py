@@ -214,31 +214,46 @@ class EyespanMenuScreen(BaseMenuScreen):
 
         col1_h = [
             ("1 Digit (Narrow 30%)", run("h", 30, 1, 1, 10)),
+            ("1 Digit (Medium 50%)", run("h", 50, 1, 1, 10)),
             ("1 Digit (Wide 70%)", run("h", 70, 1, 1, 10)),
             ("2 Digits (Narrow 30%)", run("h", 30, 2, 2, 10)),
+            ("2 Digits (Medium 50%)", run("h", 50, 2, 2, 10)),
             ("2 Digits (Wide 70%)", run("h", 70, 2, 2, 10)),
             ("3 Digits (Narrow 30%)", run("h", 30, 3, 3, 10)),
-            ("3 Digits (Wide 80%)", run("h", 80, 3, 3, 12)),
-            ("Elite 4 Digits (Max)", run("h", 90, 4, 4, 15)),
+            ("3 Digits (Medium 50%)", run("h", 50, 3, 3, 12)),
+            ("3 Digits (Wide 70%)", run("h", 70, 3, 3, 12)),
+            ("4 Digits (Medium 50%)", run("h", 50, 4, 4, 12)),
+            ("4 Digits (Wide 70%)", run("h", 70, 4, 4, 15)),
+            ("Elite 4 Digits (Max 90%)", run("h", 90, 4, 4, 15)),
         ]
 
         col2_v = [
             ("1 Digit (Narrow 30%)", run("v", 30, 1, 1, 10)),
+            ("1 Digit (Medium 50%)", run("v", 50, 1, 1, 10)),
+            ("1 Digit (Wide 70%)", run("v", 70, 1, 1, 10)),
+            ("2 Digits (Narrow 30%)", run("v", 30, 2, 2, 10)),
             ("2 Digits (Medium 50%)", run("v", 50, 2, 2, 10)),
+            ("2 Digits (Wide 70%)", run("v", 70, 2, 2, 10)),
             ("3 Digits (Narrow 30%)", run("v", 30, 3, 3, 10)),
+            ("3 Digits (Medium 50%)", run("v", 50, 3, 3, 12)),
             ("3 Digits (Wide 70%)", run("v", 70, 3, 3, 12)),
-            ("Overlap 2-4 (Wide)", run("v", 80, 2, 4, 15)),
-            ("Elite 4-6 Digits (Max)", run("v", 90, 4, 6, 20)),
+            ("4 Digits (Medium 50%)", run("v", 50, 4, 4, 12)),
+            ("Overlap 2-4 (Wide 80%)", run("v", 80, 2, 4, 15)),
+            ("Elite 4-6 Digits (Max 90%)", run("v", 90, 4, 6, 20)),
         ]
 
         col3_m = [
-            ("1 Digit Mix", run("m", 40, 1, 1, 10)),
-            ("2 Digits Mix", run("m", 50, 2, 2, 12)),
-            ("Standard Mix (3 Digits)", run("m", 50, 3, 3, 12)),
-            ("Overlap Mix (2-3 Digits)", run("m", 60, 2, 3, 12)),
-            ("Overlap Mix (3-5 Digits)", run("m", 70, 3, 5, 15)),
-            ("Wide Range (2-6 Digits)", run("m", 80, 2, 6, 15)),
-            ("Master Chaos (2-8 Digits)", run("m", 90, 2, 8, 20)),
+            ("1 Digit (Narrow 30%)", run("m", 30, 1, 1, 10)),
+            ("1 Digit (Medium 50%)", run("m", 50, 1, 1, 10)),
+            ("2 Digits (Medium 50%)", run("m", 50, 2, 2, 12)),
+            ("2 Digits (Wide 70%)", run("m", 70, 2, 2, 12)),
+            ("3 Digits (Medium 50%)", run("m", 50, 3, 3, 12)),
+            ("3 Digits (Wide 70%)", run("m", 70, 3, 3, 12)),
+            ("Overlap 2-3 (Medium 50%)", run("m", 50, 2, 3, 12)),
+            ("Overlap 2-3 (Wide 60%)", run("m", 60, 2, 3, 12)),
+            ("Overlap 3-5 (Wide 70%)", run("m", 70, 3, 5, 15)),
+            ("Wide Range 2-6 (80%)", run("m", 80, 2, 6, 15)),
+            ("Master Chaos 2-8 (90%)", run("m", 90, 2, 8, 20)),
         ]
 
         # Three-column grid
