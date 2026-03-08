@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, theme_manager, screen_metrics
 from neural_speed_academy.config import CHUNKING_CONFIG, USER_DATA_CONFIG
 
 
@@ -80,7 +80,7 @@ class ChunkingExercise(BaseExercise):
         fm = self._text_input.fontMetrics()
         line_h = fm.lineSpacing()
         self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(1100)
+        self._text_input.setFixedWidth(screen_metrics.text_input_w)
         self._text_input.setPlainText(theme_manager.training_text)
         cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
 

@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
 
 if TYPE_CHECKING:
     from neural_speed_academy.navigation.navigator import Navigator
@@ -49,7 +49,7 @@ class BaseScreen(QWidget):
         c = COLORS
         bar = QFrame()
         bar.setStyleSheet(f"background-color: {c['card']};")
-        bar.setFixedHeight(56)
+        bar.setFixedHeight(screen_metrics.nav_bar_h)
         bar_layout = QHBoxLayout(bar)
         bar_layout.setContentsMargins(12, 6, 12, 6)
         bar_layout.setSpacing(6)

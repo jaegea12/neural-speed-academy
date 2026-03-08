@@ -18,7 +18,7 @@ from PyQt6.QtGui import (
 )
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, theme_manager, screen_metrics
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
 # ── Keyword extraction ──
@@ -164,7 +164,7 @@ class PacerExercise(BaseExercise):
         fm = self._text_input.fontMetrics()
         line_h = fm.lineSpacing()
         self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(1100)
+        self._text_input.setFixedWidth(screen_metrics.text_input_w)
         self._text_input.setPlainText(theme_manager.training_text)
         cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
 
@@ -380,10 +380,10 @@ class PacerExercise(BaseExercise):
         )
         self._layout.addWidget(self._progress_bar)
 
-        # Reader page — A4-ish proportions, capped for screen safety
-        fov = theme_manager.fov_config
+        # Reader page — scaled to screen
+        fov = screen_metrics.fov_scaled()
         page_w = fov["page_width"]
-        page_h = min(int(page_w * 1.35), 900)
+        page_h = screen_metrics.reader_h
         font_size = fov["font_size"]
 
         self._reader = _HighlightReader()
@@ -463,7 +463,7 @@ class PacerExercise(BaseExercise):
         # Fallback: estimate using font metrics and widget width
         fm = self._reader.fontMetrics()
         avg_char_w = fm.averageCharWidth()
-        fov = theme_manager.fov_config
+        fov = screen_metrics.fov_scaled()
         usable_w = fov["page_width"] - 2 * fov["pad_x"] - 20
         chars_per_line = max(20, usable_w // max(avg_char_w, 1))
         pos = 0

@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
 
 
 class BaseMenuScreen(BaseScreen):
@@ -36,8 +36,10 @@ class BaseMenuScreen(BaseScreen):
         title: str,
         guide_key: str,
         columns: list[tuple[str, list[tuple[str, Callable]]]],
-        btn_width: int = 340,
+        btn_width: int | None = None,
     ) -> None:
+        if btn_width is None:
+            btn_width = screen_metrics.menu_btn_w
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar()
@@ -153,7 +155,6 @@ class BaseMenuScreen(BaseScreen):
                 (col1_label, sets[:half]),
                 (col2_label, sets[half:]),
             ],
-            btn_width=280,
         )
 
 

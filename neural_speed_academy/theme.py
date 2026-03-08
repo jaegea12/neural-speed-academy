@@ -368,6 +368,108 @@ theme_manager.on_change(_sync_colors)
 
 # --- PyQt6 helpers ---
 
+class ScreenMetrics:
+    """Computes layout dimensions scaled to the actual screen size.
+    All values are designed for 1920x1080 and scaled proportionally."""
+
+    REF_W = 1920
+    REF_H = 1080
+
+    def __init__(self) -> None:
+        self._w = self.REF_W
+        self._h = self.REF_H
+        self._sx = 1.0
+        self._sy = 1.0
+
+    def init_from_screen(self) -> None:
+        """Call after QApplication is created."""
+        from PyQt6.QtWidgets import QApplication
+        screen = QApplication.primaryScreen()
+        if screen:
+            geo = screen.availableGeometry()
+            self._w = geo.width()
+            self._h = geo.height()
+        self._sx = self._w / self.REF_W
+        self._sy = self._h / self.REF_H
+
+    @property
+    def screen_w(self) -> int:
+        return self._w
+
+    @property
+    def screen_h(self) -> int:
+        return self._h
+
+    def sw(self, ref_px: int) -> int:
+        """Scale a width value."""
+        return int(ref_px * self._sx)
+
+    def sh(self, ref_px: int) -> int:
+        """Scale a height value."""
+        return int(ref_px * self._sy)
+
+    def s(self, ref_px: int) -> int:
+        """Scale uniformly (uses the smaller factor to avoid overflow)."""
+        return int(ref_px * min(self._sx, self._sy))
+
+    # ── Pre-computed layout values ──
+
+    @property
+    def text_input_w(self) -> int:
+        """Text input width (~57% of screen)."""
+        return self.sw(1100)
+
+    @property
+    def text_input_h(self) -> int:
+        """Text input height for 15 lines (scaled)."""
+        return self.sh(290)
+
+    @property
+    def dashboard_btn_w(self) -> int:
+        return self.sw(360)
+
+    @property
+    def menu_btn_w(self) -> int:
+        return self.sw(340)
+
+    @property
+    def schulte_cell(self) -> int:
+        """Schulte grid cell size scaled to screen."""
+        fov_cells = {"narrow": 90, "standard": 110, "wide": 120, "full": 130}
+        fov = theme_manager.fov if theme_manager else "standard"
+        return self.s(fov_cells.get(fov, 110))
+
+    @property
+    def reader_w(self) -> int:
+        """Pacer reader page width from FOV, scaled."""
+        fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
+        return self.sw(fov["page_width"])
+
+    @property
+    def reader_h(self) -> int:
+        """Pacer reader page height — A4-ish, capped to screen."""
+        w = self.reader_w
+        return min(int(w * 1.35), self._h - 120)
+
+    @property
+    def nav_bar_h(self) -> int:
+        return self.sh(56)
+
+    def fov_scaled(self) -> dict:
+        """Return the active FOV preset with dimensions scaled to screen."""
+        fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
+        return {
+            "page_width": self.sw(fov["page_width"]),
+            "pad_x": self.sw(fov["pad_x"]),
+            "pad_y": self.sh(fov["pad_y"]),
+            "font_size": max(10, self.s(fov["font_size"])),
+            "label": fov.get("label", ""),
+        }
+
+
+screen_metrics = ScreenMetrics()
+
+
 def font_css(key: str) -> str:
     """Return QSS font-family, font-size, font-weight declarations."""
     spec = FONTS[key]

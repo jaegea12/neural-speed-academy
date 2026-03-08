@@ -7,7 +7,7 @@ import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
-from neural_speed_academy.theme import COLORS, theme_manager
+from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
 from neural_speed_academy.navigation.navigator import Navigator
 
@@ -41,6 +41,7 @@ class NeuralSpeedAcademy:
 
         # Load persisted app settings
         theme_manager.load()
+        screen_metrics.init_from_screen()
 
         # Main window
         self.window = QMainWindow()

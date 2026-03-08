@@ -12,11 +12,13 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
 
 
 class DashboardScreen(BaseScreen):
-    BTN_WIDTH = 360
+    @property
+    def BTN_WIDTH(self) -> int:
+        return screen_metrics.dashboard_btn_w
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):

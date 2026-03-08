@@ -52,11 +52,9 @@ class SchulteExercise(BaseExercise):
         self.target = 1
         self.score = 0
 
-        # Scale button size based on FOV setting
-        # Standard training grid is ~20x20cm; cells need to be large
-        # enough to require real saccadic eye movements
-        fov_sizes = {"narrow": 90, "standard": 110, "wide": 120, "full": 130}
-        btn_size = fov_sizes.get(theme_manager.fov, 110)
+        # Cell size scaled to screen dimensions
+        from neural_speed_academy.theme import screen_metrics
+        btn_size = screen_metrics.schulte_cell
 
         # Stats
         stats = QHBoxLayout()
