@@ -1,16 +1,11 @@
 """
 Neural Speed Academy — PyQt6 entry point.
-
-Batch 1: Core infrastructure + main screens.
-Screens not yet ported (introduction, menu_screens, paths_screen, exercises)
-show a placeholder until batch 2.
 """
 from __future__ import annotations
 
 import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
-from PyQt6.QtCore import Qt
 
 from neural_speed_academy.theme import COLORS, theme_manager
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
@@ -21,50 +16,21 @@ from neural_speed_academy.screens.login_screen import LoginScreen
 from neural_speed_academy.screens.settings_screen import SettingsScreen
 from neural_speed_academy.screens.dashboard_screen import DashboardScreen
 from neural_speed_academy.screens.stats_screen import StatsScreen
+from neural_speed_academy.screens.introduction_screen import IntroductionScreen
+from neural_speed_academy.screens.menu_screens import (
+    FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, PrimingMenuScreen,
+)
+from neural_speed_academy.screens.paths_screen import PathSelectionScreen
+from neural_speed_academy.screens.path_session_screen import (
+    PathSessionScreen, PathBuilderScreen,
+)
 
-
-class PlaceholderScreen:
-    """Temporary stand-in for screens not yet ported to PyQt6."""
-
-    def __init__(self, navigator, label: str):
-        from neural_speed_academy.screens.base import BaseScreen
-
-        class _Placeholder(BaseScreen):
-            def build(self_inner, **kwargs):
-                from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget, QPushButton
-                c = COLORS
-                self_inner.setStyleSheet(f"background-color: {c['bg']};")
-                self_inner.add_nav_bar()
-
-                body = QWidget()
-                body.setStyleSheet(f"background-color: {c['bg']};")
-                bl = QVBoxLayout(body)
-                bl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-                from neural_speed_academy.theme import make_qfont
-                lbl = QLabel(f"{label}\n\n(Coming in batch 2)")
-                lbl.setFont(make_qfont("header"))
-                lbl.setStyleSheet(f"color: {c['muted']};")
-                lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                bl.addWidget(lbl)
-
-                back = QPushButton("BACK")
-                back.setFont(make_qfont("btn_bold"))
-                back.setStyleSheet(
-                    f"background-color: {c['accent']}; color: {c['btn_text']}; "
-                    f"border: none; padding: 8px 30px; border-radius: 4px;"
-                )
-                back.setCursor(Qt.CursorShape.PointingHandCursor)
-                back.clicked.connect(navigator.go_back)
-                bl.addWidget(back, alignment=Qt.AlignmentFlag.AlignCenter)
-
-                self_inner._layout.addWidget(body, 1)
-
-        self._cls = _Placeholder
-        self._navigator = navigator
-
-    def __call__(self):
-        return self._cls(self._navigator)
+from neural_speed_academy.exercises.flash import FlashExercise
+from neural_speed_academy.exercises.rsvp import RsvpExercise
+from neural_speed_academy.exercises.chunking import ChunkingExercise
+from neural_speed_academy.exercises.pacer import PacerExercise
+from neural_speed_academy.exercises.schulte import SchulteExercise
+from neural_speed_academy.exercises.priming import PrimingExercise
 
 
 class NeuralSpeedAcademy:
@@ -90,6 +56,15 @@ class NeuralSpeedAcademy:
 
         # Navigator
         self.navigator = Navigator(self.stack, self.user_repo)
+        self.navigator._app = self
+
+        # Exercises
+        self.flash_exercise = FlashExercise(self.navigator)
+        self.rsvp_exercise = RsvpExercise(self.navigator)
+        self.chunking_exercise = ChunkingExercise(self.navigator)
+        self.pacer_exercise = PacerExercise(self.navigator)
+        self.schulte_exercise = SchulteExercise(self.navigator)
+        self.priming_exercise = PrimingExercise(self.navigator)
 
         # Register screens
         self._register_screens()
@@ -97,42 +72,38 @@ class NeuralSpeedAcademy:
     def _register_screens(self) -> None:
         nav = self.navigator
 
-        # Core screens (ported)
         nav.register_screen(
-            "main_menu",
-            lambda: MainMenuScreen(nav),
-        )
+            "main_menu", lambda: MainMenuScreen(nav))
         nav.register_screen(
-            "login",
-            lambda: LoginScreen(nav),
-        )
+            "login", lambda: LoginScreen(nav))
         nav.register_screen(
-            "settings",
-            lambda: SettingsScreen(nav),
-        )
+            "settings", lambda: SettingsScreen(nav))
         nav.register_screen(
-            "dashboard",
-            lambda: DashboardScreen(nav, self._exercise_callbacks()),
-        )
+            "dashboard", lambda: DashboardScreen(nav, self._exercise_callbacks()))
         nav.register_screen(
-            "stats",
-            lambda: StatsScreen(nav),
-        )
+            "stats", lambda: StatsScreen(nav))
+        nav.register_screen(
+            "introduction", lambda: IntroductionScreen(nav))
+        nav.register_screen(
+            "paths", lambda: PathSelectionScreen(nav))
+        nav.register_screen(
+            "path_session", lambda: PathSessionScreen(nav))
+        nav.register_screen(
+            "path_builder", lambda: PathBuilderScreen(nav))
 
-        # Placeholder screens (batch 2)
-        placeholders = [
-            ("introduction", "INTRODUCTION"),
-            ("paths", "TRAINING PATHS"),
-            ("path_session", "PATH SESSION"),
-            ("path_builder", "PATH BUILDER"),
-            ("flash_menu", "FLASH NUMBERS"),
-            ("words_menu", "WORD DRILLS"),
-            ("eyespan_menu", "EYE-SPAN"),
-            ("priming_menu", "EYE PRIMING"),
-        ]
-        for name, label in placeholders:
-            ph = PlaceholderScreen(nav, label)
-            nav.register_screen(name, ph)
+        # Exercise menu screens
+        nav.register_screen(
+            "flash_menu",
+            lambda: FlashMenuScreen(nav, self.flash_exercise))
+        nav.register_screen(
+            "words_menu",
+            lambda: WordsMenuScreen(nav, self.flash_exercise))
+        nav.register_screen(
+            "eyespan_menu",
+            lambda: EyespanMenuScreen(nav, self.flash_exercise))
+        nav.register_screen(
+            "priming_menu",
+            lambda: PrimingMenuScreen(nav, self.priming_exercise))
 
     def _exercise_callbacks(self) -> dict:
         nav = self.navigator
@@ -141,10 +112,10 @@ class NeuralSpeedAcademy:
             "menu_words": lambda: nav.navigate_to("words_menu"),
             "menu_eyespan": lambda: nav.navigate_to("eyespan_menu"),
             "menu_priming": lambda: nav.navigate_to("priming_menu"),
-            "start_schulte": lambda: nav.navigate_to("flash_menu"),
-            "setup_pacer": lambda: nav.navigate_to("flash_menu"),
-            "setup_rsvp": lambda: nav.navigate_to("flash_menu"),
-            "setup_chunking": lambda: nav.navigate_to("flash_menu"),
+            "start_schulte": lambda: nav.launch_exercise(SchulteExercise),
+            "setup_pacer": lambda: nav.launch_exercise(PacerExercise),
+            "setup_rsvp": lambda: nav.launch_exercise(RsvpExercise),
+            "setup_chunking": lambda: nav.launch_exercise(ChunkingExercise),
             "show_paths": lambda: nav.navigate_to("paths"),
             "show_stats": lambda: nav.navigate_to("stats"),
         }

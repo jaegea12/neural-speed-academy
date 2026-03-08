@@ -4,30 +4,22 @@ Flash perception exercises: numbers, words, and eye-span.
 from __future__ import annotations
 
 import random
-import tkinter as tk
 from typing import Callable, Optional
 
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
+)
+from PyQt6.QtCore import Qt
+
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, make_qfont
 from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG, FLASH_TIMING
 
 
 class FlashExercise(BaseExercise):
-    """
-    Flash perception exercise for numbers, words, and eye-span training.
-    Shows content briefly and asks user to recall it.
-    """
 
-    def __init__(self, root: tk.Tk, navigator):
-        super().__init__(root, navigator)
-        
-        # Flash widgets - created fresh each exercise to avoid destruction issues
-        self.lbl_flash_center: Optional[tk.Label] = None
-        self.lbl_flash_left: Optional[tk.Label] = None
-        self.lbl_flash_right: Optional[tk.Label] = None
-        self.lbl_cross: Optional[tk.Label] = None
-        
-        # Exercise state
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
         self.mode: str = ""
         self.rounds_total: int = 0
         self.current_round: int = 0
@@ -35,232 +27,198 @@ class FlashExercise(BaseExercise):
         self.target_val: str = ""
         self.level_logic: Optional[Callable] = None
         self.span_config: dict = {}
-        self.flash_coords: dict = {}
-        self.input_frame: Optional[tk.Frame] = None
         self.word_pairs = WORD_PAIRS
-
-    def _create_flash_widgets(self) -> None:
-        """Create flash display widgets."""
-        # Word mode uses proportional RSVP font; numbers use monospace flash font
-        font = FONTS["rsvp"] if self.mode == "flash_word" else FONTS["flash"]
-        self.lbl_flash_center = tk.Label(
-            self.root, text="", font=font,
-            fg=COLORS["fg"], bg=COLORS["bg"]
-        )
-        self.lbl_flash_left = tk.Label(
-            self.root, text="", font=font,
-            fg=COLORS["fg"], bg=COLORS["bg"]
-        )
-        self.lbl_flash_right = tk.Label(
-            self.root, text="", font=font,
-            fg=COLORS["fg"], bg=COLORS["bg"]
-        )
-        self.lbl_cross = tk.Label(
-            self.root, text="+", font=FONTS["cross"],
-            fg=COLORS["cross"], bg=COLORS["bg"]
-        )
 
     @property
     def name(self) -> str:
         return "Flash Perception"
 
-    def start(self, mode: str, rounds: int, level_func: Callable, span_config: dict = None, **kwargs) -> None:
-        """
-        Start the flash exercise.
-        
-        Args:
-            mode: "flash_num", "flash_word", or "eyespan"
-            rounds: Number of rounds
-            level_func: Function that returns digit count for current round
-            span_config: For eyespan mode, dict with "mode" and "width"
-        """
+    def start(self, mode: str, rounds: int, level_func: Callable,
+              span_config: dict = None, **kwargs) -> None:
         self.mode = mode
         self.rounds_total = rounds
         self.current_round = 0
         self.correct_count = 0
         self.level_logic = level_func
         self.span_config = span_config or {}
-        
-        # Create fresh flash widgets
-        self._create_flash_widgets()
-        
         self._next_round()
 
-    def _clear_flash_widgets(self) -> None:
-        """Hide all flash-related widgets."""
-        if self.lbl_flash_center:
-            self.lbl_flash_center.place_forget()
-        if self.lbl_flash_left:
-            self.lbl_flash_left.place_forget()
-        if self.lbl_flash_right:
-            self.lbl_flash_right.place_forget()
-        if self.lbl_cross:
-            self.lbl_cross.place_forget()
-        if self.input_frame:
-            self.input_frame.destroy()
-            self.input_frame = None
-
     def _next_round(self) -> None:
-        """Advance to next round or complete exercise."""
         if self.current_round >= self.rounds_total:
             self._complete_exercise()
             return
 
-        self._clear_flash_widgets()
-        self.clear()
+        self._clear()
         self._running = True
-        
-        # Recreate flash widgets after clear destroys them
-        self._create_flash_widgets()
-        
         self.add_nav_bar()
         self.current_round += 1
 
-        # Counter widget
-        cnt_str = f"ROUND: {self.current_round}/{self.rounds_total}   |   CORRECT: {self.correct_count}"
-        label = tk.Label(
-            self.root, text=cnt_str,
-            font=FONTS["counter"],
-            fg=COLORS["accent"], bg=COLORS["bg"]
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Counter
+        cnt = QLabel(
+            f"ROUND: {self.current_round}/{self.rounds_total}   |   "
+            f"CORRECT: {self.correct_count}"
         )
-        label.pack(pady=5)
-        self.add_widget(label)
+        cnt.setFont(make_qfont("counter"))
+        cnt.setStyleSheet(f"color: {c['accent']};")
+        cnt.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(cnt)
+
+        # Central area for flash content
+        self._flash_area = QWidget()
+        self._flash_area.setStyleSheet(f"background-color: {c['bg']};")
+        self._flash_layout = QVBoxLayout(self._flash_area)
+        self._flash_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._flash_area, 1)
 
         # Show cross
-        self.lbl_cross.config(fg=COLORS["cross"], text="+")
-        self.lbl_cross.place(relx=0.5, rely=0.5, anchor="center")
+        self._cross = QLabel("+")
+        self._cross.setFont(make_qfont("cross"))
+        self._cross.setStyleSheet(f"color: {c['cross']};")
+        self._cross.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._flash_layout.addWidget(self._cross)
 
         # Prepare content
         self._prepare_content()
 
         # Sequence: Cross -> Dots -> Flash
-        self.root.after(FLASH_TIMING["cross_duration"], self._show_pre_flash_dots)
+        self._after(FLASH_TIMING["cross_duration"], self._show_pre_flash_dots)
 
     def _prepare_content(self) -> None:
-        """Prepare the content to flash based on mode."""
         if self.mode == "flash_num":
             d = self.level_logic(self.current_round)
-            self.target_val = str(random.randint(10**(d-1), (10**d)-1))
-            self.lbl_flash_center.config(text=self.target_val, fg=COLORS["fg"])
-            
+            self.target_val = str(random.randint(10 ** (d - 1), (10 ** d) - 1))
         elif self.mode == "flash_word":
             self.target_val = random.choice(random.choice(self.word_pairs))
-            self.lbl_flash_center.config(text=self.target_val, fg=COLORS["fg"])
-            
         elif self.mode == "eyespan":
             d = self.level_logic(self.current_round)
-            low, high = 10**(d-1), (10**d)-1
+            low, high = 10 ** (d - 1), (10 ** d) - 1
             n1 = str(random.randint(low, high))
             n2 = str(random.randint(low, high))
             self.target_val = f"{n1} {n2}"
-            self.lbl_flash_left.config(text=n1, fg=COLORS["fg"])
-            self.lbl_flash_right.config(text=n2, fg=COLORS["fg"])
-
-            w = self.span_config.get("width", 50) / 200.0
-            m = self.span_config.get("mode", "h")
-            if m == "m":
-                m = random.choice(["h", "v"])
-
-            # Clamp positions so labels don't extend past screen edges.
-            # Reserve a margin proportional to digit count to account for
-            # the label width (anchor="center" means half the label extends
-            # in each direction).
-            margin = 0.03 * d + 0.02
-
-            if m == "h":
-                l_relx = max(margin, 0.5 - w)
-                r_relx = min(1.0 - margin, 0.5 + w)
-                self.flash_coords = {
-                    "l_relx": l_relx, "l_rely": 0.5,
-                    "r_relx": r_relx, "r_rely": 0.5
-                }
-            else:
-                l_rely = max(margin, 0.5 - w)
-                r_rely = min(1.0 - margin, 0.5 + w)
-                self.flash_coords = {
-                    "l_relx": 0.5, "l_rely": l_rely,
-                    "r_relx": 0.5, "r_rely": r_rely
-                }
-            self.lbl_flash_left.place_forget()
-            self.lbl_flash_right.place_forget()
+            self._eyespan_left = n1
+            self._eyespan_right = n2
 
     def _show_pre_flash_dots(self) -> None:
-        """Change cross to dots before flash."""
         if not self._running:
             return
-        self.lbl_cross.config(text="••", fg=COLORS["accent"])
-        self.root.after(FLASH_TIMING["dots_duration"], self._do_flash)
+        c = COLORS
+        self._cross.setText("\u2022\u2022")
+        self._cross.setStyleSheet(f"color: {c['accent']};")
+        self._after(FLASH_TIMING["dots_duration"], self._do_flash)
 
     def _do_flash(self) -> None:
-        """Flash the content briefly."""
         if not self._running:
             return
-        self.lbl_cross.place_forget()
+        c = COLORS
+        self._cross.setVisible(False)
 
-        # Show content
+        font_key = "rsvp" if self.mode == "flash_word" else "flash"
+
         if self.mode == "eyespan":
-            self.lbl_flash_left.place(
-                relx=self.flash_coords["l_relx"],
-                rely=self.flash_coords["l_rely"],
-                anchor="center"
-            )
-            self.lbl_flash_right.place(
-                relx=self.flash_coords["r_relx"],
-                rely=self.flash_coords["r_rely"],
-                anchor="center"
-            )
-        else:
-            self.lbl_flash_center.place(relx=0.5, rely=0.5, anchor="center")
+            row = QHBoxLayout()
+            row.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Force Tkinter to render the widget before starting the hide timer,
-        # otherwise the 50ms window can elapse before the label is painted.
-        self.root.update_idletasks()
-        self.root.after(FLASH_TIMING["flash_duration"], self._hide_flash)
+            span_mode = self.span_config.get("mode", "h")
+            if span_mode == "m":
+                span_mode = random.choice(["h", "v"])
+
+            width_pct = self.span_config.get("width", 50)
+            spacing = int(width_pct * 4)
+
+            self._lbl_left = QLabel(self._eyespan_left)
+            self._lbl_left.setFont(make_qfont(font_key))
+            self._lbl_left.setStyleSheet(f"color: {c['fg']};")
+            self._lbl_left.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            self._lbl_right = QLabel(self._eyespan_right)
+            self._lbl_right.setFont(make_qfont(font_key))
+            self._lbl_right.setStyleSheet(f"color: {c['fg']};")
+            self._lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            if span_mode == "h":
+                row.addSpacing(spacing)
+                row.addWidget(self._lbl_left)
+                row.addSpacing(spacing * 2)
+                row.addWidget(self._lbl_right)
+                row.addSpacing(spacing)
+                self._flash_layout.addLayout(row)
+            else:
+                col = QVBoxLayout()
+                col.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(spacing // 2)
+                col.addWidget(self._lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(spacing)
+                col.addWidget(self._lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(spacing // 2)
+                self._flash_layout.addLayout(col)
+        else:
+            self._lbl_center = QLabel(self.target_val)
+            self._lbl_center.setFont(make_qfont(font_key))
+            self._lbl_center.setStyleSheet(f"color: {c['fg']};")
+            self._lbl_center.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self._flash_layout.addWidget(self._lbl_center)
+
+        self._after(FLASH_TIMING["flash_duration"], self._hide_flash)
 
     def _hide_flash(self) -> None:
-        """Hide flash content after brief display."""
         if not self._running:
             return
-        if self.mode == "eyespan":
-            self.lbl_flash_left.place_forget()
-            self.lbl_flash_right.place_forget()
-        else:
-            self.lbl_flash_center.place_forget()
+        # Clear flash area content
+        while self._flash_layout.count():
+            item = self._flash_layout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.setVisible(False)
+            sub = item.layout()
+            if sub:
+                while sub.count():
+                    si = sub.takeAt(0)
+                    sw = si.widget()
+                    if sw:
+                        sw.setVisible(False)
 
-        self.root.after(FLASH_TIMING["post_flash_delay"], self._show_input)
+        self._after(FLASH_TIMING["post_flash_delay"], self._show_input)
 
     def _show_input(self) -> None:
-        """Show input field for user response."""
         if not self._running:
             return
-        self.input_frame = tk.Frame(self.root, bg=COLORS["bg"])
-        self.input_frame.place(relx=0.5, rely=0.7, anchor="center")
+        c = COLORS
 
-        entry = tk.Entry(
-            self.input_frame,
-            font=FONTS["input"],
-            bg=COLORS["card"],
-            fg=COLORS["text_on_card"],
-            justify="center",
-            insertbackground=COLORS["text_on_card"]
+        input_widget = QWidget()
+        input_layout = QVBoxLayout(input_widget)
+        input_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._entry = QLineEdit()
+        self._entry.setFont(make_qfont("input"))
+        self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._entry.setStyleSheet(
+            f"QLineEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 8px 16px; border-radius: 4px; min-width: 200px; }}"
         )
-        entry.pack(pady=10)
-        entry.focus_set()
-        entry.bind("<Return>", lambda e: self._verify(entry.get()))
+        self._entry.returnPressed.connect(
+            lambda: self._verify(self._entry.text())
+        )
+        input_layout.addWidget(self._entry)
 
-        tk.Button(
-            self.input_frame,
-            text="CHECK",
-            command=lambda: self._verify(entry.get()),
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"],
-            cursor="hand2",
-            relief="flat",
-        ).pack()
+        check_btn = QPushButton("CHECK")
+        check_btn.setFont(make_qfont("btn_bold"))
+        check_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 6px 20px; border-radius: 3px; }}"
+        )
+        check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        check_btn.clicked.connect(
+            lambda: self._verify(self._entry.text())
+        )
+        input_layout.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._flash_layout.addWidget(input_widget)
+        self._entry.setFocus()
 
     def _verify(self, user_input: str) -> None:
-        """Verify user input against target."""
         if user_input.upper().strip() == self.target_val:
             self.correct_count += 1
             self._next_round()
@@ -268,40 +226,33 @@ class FlashExercise(BaseExercise):
             self._show_correction()
 
     def _show_correction(self) -> None:
-        """Show the correct answer."""
-        if self.input_frame:
-            self.input_frame.destroy()
-            self.input_frame = None
+        if not self._running:
+            return
+        c = COLORS
 
-        # Redisplay content in alert color
-        if self.mode == "eyespan":
-            self.lbl_flash_left.config(fg=COLORS["alert"])
-            self.lbl_flash_right.config(fg=COLORS["alert"])
-            self.lbl_flash_left.place(
-                relx=self.flash_coords["l_relx"],
-                rely=self.flash_coords["l_rely"],
-                anchor="center"
-            )
-            self.lbl_flash_right.place(
-                relx=self.flash_coords["r_relx"],
-                rely=self.flash_coords["r_rely"],
-                anchor="center"
-            )
-        else:
-            self.lbl_flash_center.config(fg=COLORS["alert"])
-            self.lbl_flash_center.place(relx=0.5, rely=0.5, anchor="center")
+        # Clear flash area and show correct answer
+        while self._flash_layout.count():
+            item = self._flash_layout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
 
-        self.root.update()
-        self.root.after(FLASH_TIMING["correction_display"], self._next_round)
+        font_key = "rsvp" if self.mode == "flash_word" else "flash"
+        correction = QLabel(self.target_val)
+        correction.setFont(make_qfont(font_key))
+        correction.setStyleSheet(f"color: {c['alert']};")
+        correction.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._flash_layout.addWidget(correction)
+
+        self._after(FLASH_TIMING["correction_display"], self._next_round)
 
     def _complete_exercise(self) -> None:
-        """Handle exercise completion."""
         xp_gained = self.correct_count * USER_DATA_CONFIG["xp_per_correct"]
         result = ExerciseResult(
             exercise_name=self.mode.upper(),
             score=self.correct_count,
             total=self.rounds_total,
-            xp_gained=xp_gained
+            xp_gained=xp_gained,
         )
         is_pb = self.complete(result)
         self.show_result_screen(result, is_personal_best=is_pb)

@@ -5,14 +5,18 @@ Supports word, chunk, line, and multi-line pacing with a keyword quiz.
 from __future__ import annotations
 
 import re
-import tkinter as tk
-from tkinter import messagebox
+
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QTextEdit, QSlider, QRadioButton, QButtonGroup, QFrame, QMessageBox,
+)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QTextCursor, QTextCharFormat, QColor, QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, FONTS, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, theme_manager
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
-# Common words excluded from keyword extraction
 _STOP_WORDS = frozenset(
     "the a an and or but in on at to for of is it that this with from by as "
     "are was were be been has have had do does did not no nor so if then than "
@@ -23,14 +27,8 @@ _STOP_WORDS = frozenset(
     "these those being both same own too up out off down".split()
 )
 
-# Default page dimensions — overridden by FOV settings
-PAGE_WIDTH = 620
-PAGE_PAD_X = 60
-PAGE_PAD_Y = 50
-
 
 def _extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
-    """Extract significant words from text for quiz scoring."""
     words = re.findall(r"[a-zA-Z]+", text.lower())
     freq: dict[str, int] = {}
     for w in words:
@@ -41,525 +39,319 @@ def _extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
 
 
 class PacerExercise(BaseExercise):
-    """
-    Pacer reading exercise with multiple highlight modes.
-    Highlights text at a configurable WPM rate, then quizzes comprehension.
-    """
 
     MODES = {
         "word": "Single Word",
         "chunk": "Chunk (2-3 words)",
         "line": "Full Line",
-        "multi_line": "Multi-Line (2-3)",
-        "z_pattern": "Z-Pattern",
     }
 
-    def __init__(self, root: tk.Tk, navigator):
-        super().__init__(root, navigator)
-        self.pacer_state: dict = {}
-        self.lbl_progress: tk.Label | None = None
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
         self._source_text: str = ""
+        self._words: list[str] = []
+        self._steps: list[tuple[int, int]] = []
+        self._step_idx: int = 0
+        self._delay: int = 200
 
     @property
     def name(self) -> str:
         return "Pacer"
 
     def start(self, **kwargs) -> None:
-        """Show the pacer configuration screen."""
-        self.clear()
+        self._clear()
+        self._running = True
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True, fill="both")
-        self.add_widget(container)
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-        tk.Button(
-            container, text="GUIDE",
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            cursor="hand2",
-            command=lambda: self.show_guide("pacer"),
-        ).place(x=50, y=20)
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.setSpacing(8)
 
-        content = tk.Frame(container, bg=COLORS["bg"])
-        content.pack(expand=True)
+        guide_btn = QPushButton("GUIDE")
+        guide_btn.setFont(make_qfont("btn_sm"))
+        guide_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 4px 12px; border-radius: 3px;"
+        )
+        guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        guide_btn.clicked.connect(lambda: self.show_guide("pacer"))
+        cl.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        tk.Label(
-            content, text="PACER CONFIGURATION",
-            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=(0, 10))
+        title = QLabel("PACER CONFIGURATION")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
         # Text input
-        text_frame = tk.Frame(content, bg=COLORS["card"], padx=2, pady=2)
-        text_frame.pack(pady=5)
-
-        text_input = tk.Text(
-            text_frame, height=6, width=60,
-            font=FONTS["pacer_text"],
-            bg=COLORS["card"], fg=COLORS["text_on_card"],
-            insertbackground=COLORS["text_on_card"],
-            wrap="word", bd=0,
+        self._text_input = QTextEdit()
+        self._text_input.setFont(make_qfont("pacer_text"))
+        self._text_input.setStyleSheet(
+            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        text_input.pack()
-        text_input.insert("1.0", theme_manager.training_text)
+        self._text_input.setFixedHeight(150)
+        self._text_input.setPlainText(theme_manager.training_text)
+        cl.addWidget(self._text_input)
 
         # WPM slider
-        tk.Label(
-            content, text="Target Speed (WPM):",
-            font=FONTS["slider_label"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=(10, 0))
+        wpm_lbl = QLabel("Target Speed (WPM):")
+        wpm_lbl.setFont(make_qfont("slider_label"))
+        wpm_lbl.setStyleSheet(f"color: {c['fg']};")
+        cl.addWidget(wpm_lbl)
 
-        wpm_var = tk.IntVar(value=PACER_CONFIG["default_wpm"])
-        tk.Scale(
-            content, variable=wpm_var,
-            from_=PACER_CONFIG["min_wpm"], to=PACER_CONFIG["max_wpm"],
-            orient="horizontal", bg=COLORS["bg"], fg=COLORS["text_on_card"],
-            length=400, highlightthickness=0,
-        ).pack(pady=5)
+        self._wpm_display = QLabel(str(PACER_CONFIG["default_wpm"]))
+        self._wpm_display.setFont(make_qfont("counter"))
+        self._wpm_display.setStyleSheet(f"color: {c['accent']};")
+        self._wpm_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Highlight mode selector
-        tk.Label(
-            content, text="Highlight Mode:",
-            font=FONTS["slider_label"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=(10, 0))
-
-        mode_var = tk.StringVar(value="word")
-        mode_frame = tk.Frame(content, bg=COLORS["bg"])
-        mode_frame.pack(pady=5)
-
-        # Multi-line count selector (shown/hidden based on mode)
-        ml_frame = tk.Frame(content, bg=COLORS["bg"])
-        ml_label = tk.Label(
-            ml_frame, text="Lines per step:",
-            font=FONTS["slider_label"], fg=COLORS["fg"], bg=COLORS["bg"],
+        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
+        self._wpm_slider.setRange(PACER_CONFIG["min_wpm"], PACER_CONFIG["max_wpm"])
+        self._wpm_slider.setValue(PACER_CONFIG["default_wpm"])
+        self._wpm_slider.setFixedWidth(400)
+        self._wpm_slider.setStyleSheet(
+            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
         )
-        ml_label.pack(side="left", padx=(0, 10))
-        ml_var = tk.IntVar(value=2)
-        ml_scale = tk.Scale(
-            ml_frame, variable=ml_var, from_=2, to=5,
-            orient="horizontal", bg=COLORS["bg"], fg=COLORS["text_on_card"],
-            length=200, highlightthickness=0,
+        self._wpm_slider.valueChanged.connect(
+            lambda v: self._wpm_display.setText(str(v))
         )
-        ml_scale.pack(side="left")
+        cl.addWidget(self._wpm_slider, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._wpm_display)
 
-        def _on_mode_change(*_args):
-            if mode_var.get() in ("multi_line", "z_pattern"):
-                ml_frame.pack(pady=5)
-            else:
-                ml_frame.pack_forget()
+        # Mode selector
+        mode_lbl = QLabel("Highlight Mode:")
+        mode_lbl.setFont(make_qfont("slider_label"))
+        mode_lbl.setStyleSheet(f"color: {c['fg']};")
+        cl.addWidget(mode_lbl)
 
-        mode_var.trace_add("write", _on_mode_change)
-
+        self._mode_group = QButtonGroup(self)
+        mode_row = QHBoxLayout()
         for key, label in self.MODES.items():
-            tk.Radiobutton(
-                mode_frame, text=label, variable=mode_var, value=key,
-                font=FONTS["btn"], fg=COLORS["fg"], bg=COLORS["bg"],
-                selectcolor=COLORS["card"],
-                activebackground=COLORS["bg"], activeforeground=COLORS["fg"],
-                indicatoron=True, anchor="w",
-            ).pack(side="left", padx=8)
+            rb = QRadioButton(label)
+            rb.setFont(make_qfont("btn"))
+            rb.setStyleSheet(
+                f"QRadioButton {{ color: {c['fg']}; background: transparent; spacing: 8px; }}"
+            )
+            rb.setProperty("mode_key", key)
+            if key == "word":
+                rb.setChecked(True)
+            self._mode_group.addButton(rb)
+            mode_row.addWidget(rb)
+        cl.addLayout(mode_row)
 
         # Start button
-        btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
-        btn_frame.pack(side="bottom", fill="x")
+        start_btn = QPushButton("START READING")
+        start_btn.setFont(make_qfont("btn_lg"))
+        start_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
+            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+        )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(self._start_from_ui)
+        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        def _start():
-            self._run_pacer(
-                text_input.get("1.0", tk.END), wpm_var.get(),
-                mode_var.get(), ml_var.get(),
-            )
+        hint = QLabel("Ctrl+Enter to start")
+        hint.setFont(make_qfont("btn_sm"))
+        hint.setStyleSheet(f"color: {c['muted']};")
+        cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        tk.Button(
-            btn_frame, text="START READING",
-            command=_start,
-            bg=COLORS["success"], fg=COLORS["btn_text"],
-            font=FONTS["btn_lg"], width=30, pady=10,
-            relief="flat", cursor="hand2",
-        ).pack()
+        self._layout.addWidget(container, 1)
 
-        tk.Label(
-            btn_frame, text="Ctrl+Enter to start",
-            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
-        ).pack(pady=(4, 0))
+    def _start_from_ui(self) -> None:
+        text = self._text_input.toPlainText()
+        wpm = self._wpm_slider.value()
+        mode = "word"
+        for btn in self._mode_group.buttons():
+            if btn.isChecked():
+                mode = btn.property("mode_key")
+                break
+        self._run_pacer(text, wpm, mode)
 
-        # Ctrl+Enter to start from text area
-        text_input.bind("<Control-Return>", lambda e: _start())
-
-    # ── Pacer execution ────────────────────────────────────────
-
-    def _run_pacer(self, text: str, wpm: int, mode: str,
-                   n_lines: int = 2) -> None:
-        """Start the pacing animation."""
+    def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
         words = text.split()
         if not words:
-            messagebox.showinfo("No Text", "Please enter some text before starting.")
+            QMessageBox.information(self, "No Text", "Please enter some text before starting.")
             return
 
         self._source_text = text
-        self.clear()
+        self._words = words
+
+        # Build steps as (char_start, char_end) in the full text
+        self._steps = self._build_steps(text, words, mode)
+        self._step_idx = 0
+
+        avg_words = len(words) / max(len(self._steps), 1)
+        self._delay = int(60000 / wpm * avg_words)
+
+        self._clear()
+        self._running = True
+
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
         # Exit button
-        exit_btn = tk.Button(
-            self.root, text="✖",
-            font=FONTS["exit_btn"],
-            bg=COLORS["alert"], fg=COLORS["text_on_card"],
-            command=self.navigator.finish_exercise, bd=0,
+        exit_btn = QPushButton("\u2716")
+        exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
         )
-        exit_btn.place(relx=0.95, rely=0.05, anchor="center")
-        self.add_widget(exit_btn)
+        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_btn.clicked.connect(self.navigator.finish_exercise)
+        self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
 
-        # Progress label
-        self.lbl_progress = tk.Label(
-            self.root, text="0%",
-            font=FONTS["section_header"],
-            fg=COLORS["fg"], bg=COLORS["bg"],
-        )
-        self.lbl_progress.place(relx=0.5, rely=0.03, anchor="center")
-        self.add_widget(self.lbl_progress)
+        # Progress
+        self._lbl_progress = QLabel("0%")
+        self._lbl_progress.setFont(make_qfont("section_header"))
+        self._lbl_progress.setStyleSheet(f"color: {c['fg']};")
+        self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_progress)
 
-        # Mode label
-        mode_text = self.MODES.get(mode, mode)
-        if mode == "multi_line":
-            mode_text = f"Multi-Line ({n_lines} lines)"
-        mode_label = tk.Label(
-            self.root, text=mode_text,
-            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
-        )
-        mode_label.place(relx=0.5, rely=0.065, anchor="center")
-        self.add_widget(mode_label)
-
-        # Read FOV settings
+        # Reader page
         fov = theme_manager.fov_config
         page_w = fov["page_width"]
-        pad_x = fov["pad_x"]
-        pad_y = fov["pad_y"]
         font_size = fov["font_size"]
-        pacer_font = (FONTS["pacer"][0], font_size)
 
-        # Book-page container — DIN A4 proportions
-        page_frame = tk.Frame(
-            self.root, bg=COLORS["reader_bg"],
-            width=page_w, highlightthickness=1,
-            highlightbackground=COLORS["muted"],
+        self._reader = QTextEdit()
+        reader_font = QFont("Georgia", font_size)
+        self._reader.setFont(reader_font)
+        self._reader.setStyleSheet(
+            f"QTextEdit {{ background-color: {c['reader_bg']}; color: {c['reader_fg']}; "
+            f"border: 1px solid {c['muted']}; padding: {fov['pad_y']}px {fov['pad_x']}px; }}"
         )
-        page_frame.place(
-            relx=0.5, rely=0.54, anchor="center",
-            width=page_w, relheight=0.88,
-        )
-        page_frame.pack_propagate(False)
-        self.add_widget(page_frame)
+        self._reader.setFixedWidth(page_w)
+        self._reader.setReadOnly(True)
+        self._reader.setPlainText(" ".join(words))
+        self._layout.addWidget(self._reader, 1, Qt.AlignmentFlag.AlignCenter)
 
-        text_widget = tk.Text(
-            page_frame,
-            font=pacer_font,
-            bg=COLORS["reader_bg"], fg=COLORS["reader_fg"],
-            wrap="word",
-            padx=pad_x, pady=pad_y,
-            relief="flat", cursor="arrow",
-            spacing1=4, spacing3=4,
-        )
-        text_widget.pack(fill="both", expand=True)
-        text_widget.insert("1.0", " ".join(words))
-        text_widget.config(state="disabled")
+        # Highlight format
+        self._hl_fmt = QTextCharFormat()
+        self._hl_fmt.setBackground(QColor(c["highlight"]))
 
-        # Highlight tag
-        text_widget.tag_config("hl", background=COLORS["highlight"])
+        self._normal_fmt = QTextCharFormat()
+        self._normal_fmt.setBackground(QColor(c["reader_bg"]))
 
-        # Bring controls to front
-        exit_btn.lift()
-        self.lbl_progress.lift()
-        mode_label.lift()
+        self._after(500, self._pacer_step)
 
-        # Build step units based on mode
-        steps = self._build_steps(text_widget, words, mode, n_lines)
-
-        # WPM applies to words; scale delay by words-per-step
-        avg_words_per_step = len(words) / max(len(steps), 1)
-        delay = int(60000 / wpm * avg_words_per_step)
-
-        self._running = True
-        self.pacer_state = {
-            "step_idx": 0,
-            "steps": steps,
-            "delay": delay,
-            "widget": text_widget,
-            "total_words": len(words),
-            "mode": mode,
-            "n_lines": n_lines,
-        }
-
-        self._pacer_step()
-
-    def _build_steps(
-        self, widget: tk.Text, words: list[str], mode: str,
-        n_lines: int = 2,
-    ) -> list[tuple[str, str]]:
-        """Build (start_index, end_index) pairs for each highlight step."""
+    def _build_steps(self, text: str, words: list[str],
+                     mode: str) -> list[tuple[int, int]]:
+        full = " ".join(words)
+        steps = []
         if mode == "word":
-            return self._steps_by_word(words)
+            pos = 0
+            for w in words:
+                steps.append((pos, pos + len(w)))
+                pos += len(w) + 1
         elif mode == "chunk":
-            return self._steps_by_chunk(words, chunk_size=3)
+            chunk_size = 3
+            pos = 0
+            for i in range(0, len(words), chunk_size):
+                chunk = " ".join(words[i:i + chunk_size])
+                steps.append((pos, pos + len(chunk)))
+                pos += len(chunk) + 1
         elif mode == "line":
-            display_lines = self._get_display_lines(widget)
-            return display_lines if display_lines else [("1.0", "end")]
-        elif mode == "multi_line":
-            return self._steps_by_multi_line(widget, n_lines=n_lines)
-        elif mode == "z_pattern":
-            return self._steps_z_pattern(widget, words, n_lines)
-        return self._steps_by_word(words)
-
-    @staticmethod
-    def _steps_by_word(words: list[str]) -> list[tuple[str, str]]:
-        """One step per word."""
-        steps = []
-        pos = 0
-        for w in words:
-            start = f"1.0 + {pos}c"
-            end = f"1.0 + {pos + len(w)}c"
-            steps.append((start, end))
-            pos += len(w) + 1
-        return steps
-
-    @staticmethod
-    def _steps_by_chunk(
-        words: list[str], chunk_size: int = 3,
-    ) -> list[tuple[str, str]]:
-        """One step per N-word chunk."""
-        steps = []
-        pos = 0
-        for i in range(0, len(words), chunk_size):
-            chunk = words[i:i + chunk_size]
-            chunk_text = " ".join(chunk)
-            start = f"1.0 + {pos}c"
-            end = f"1.0 + {pos + len(chunk_text)}c"
-            steps.append((start, end))
-            pos += len(chunk_text) + 1
-        return steps
-
-    @staticmethod
-    def _get_display_lines(widget: tk.Text) -> list[tuple[str, str]]:
-        """Get display line boundaries using Tk display line indices.
-
-        Uses 'display linestart' and 'display lineend' to handle
-        word-wrapped text correctly.
-        """
-        widget.update_idletasks()
-        lines = []
-        idx = "1.0"
-        end_idx = widget.index("end - 1c")
-        while widget.compare(idx, "<=", end_idx):
-            dl_start = widget.index(f"{idx} display linestart")
-            dl_end = widget.index(f"{idx} display lineend")
-            if not lines or widget.compare(dl_start, ">", lines[-1][0]):
-                lines.append((dl_start, dl_end))
-            # Move to next display line
-            next_idx = widget.index(f"{dl_end} + 1 display char")
-            if widget.compare(next_idx, "<=", idx):
-                break
-            idx = next_idx
-        return lines
-
-    @staticmethod
-    def _steps_by_multi_line(
-        widget: tk.Text, n_lines: int = 2,
-    ) -> list[list[tuple[str, str]]]:
-        """Chunk-sweep across groups of N display lines.
-
-        Each step is a list of (start, end) ranges — one per line in
-        the group at the same horizontal column position. This creates
-        a vertical highlight band that sweeps left-to-right.
-        """
-        lines = PacerExercise._get_display_lines(widget)
-        if not lines:
-            return [[("1.0", "end")]]
-
-        steps: list[list[tuple[str, str]]] = []
-        chunk_size = 3
-
-        for i in range(0, len(lines), n_lines):
-            group = lines[i:i + n_lines]
-
-            # Get words per line in this group
-            line_contents = []
-            for dl_start, dl_end in group:
-                text = widget.get(dl_start, dl_end)
-                line_contents.append((dl_start, dl_end, text, text.split()))
-
-            # Use the first line to determine chunk positions
-            first_start, first_end, first_text, first_words = line_contents[0]
-            if not first_words:
-                steps.append([(group[0][0], group[-1][1])])
-                continue
-
-            char_offset = 0
-            for ci in range(0, len(first_words), chunk_size):
-                chunk = first_words[ci:ci + chunk_size]
-                chunk_text = " ".join(chunk)
-                pos = first_text.find(chunk_text, char_offset)
-                if pos < 0:
-                    continue
-
-                # Build ranges: highlight same column band on each line
-                ranges = []
-                for dl_start, dl_end, lt, lw in line_contents:
-                    line_len = len(lt)
-                    # Clamp to line length
-                    s = min(pos, line_len)
-                    e = min(pos + len(chunk_text), line_len)
-                    if s < e:
-                        ranges.append((
-                            f"{dl_start} + {s}c",
-                            f"{dl_start} + {e}c",
-                        ))
-                    else:
-                        # Line is shorter, highlight what's there
-                        ranges.append((dl_start, dl_end))
-
-                if ranges:
-                    steps.append(ranges)
-                char_offset = pos + len(chunk_text)
-
-        return steps if steps else [[("1.0", "end")]]
-
-    @staticmethod
-    def _steps_z_pattern(
-        widget: tk.Text, words: list[str], n_lines: int = 2,
-    ) -> list:
-        """Z-pattern across groups of N display lines.
-
-        For each N-line group, produces 3 steps that sweep
-        left → center → right. Each step highlights the same
-        horizontal third across all lines in the group, creating
-        a vertical band that traces a Z path down the page.
-        """
-        lines = PacerExercise._get_display_lines(widget)
-        if not lines:
-            return [("1.0", "end")]
-
-        steps: list = []
-        for i in range(0, len(lines), n_lines):
-            group = lines[i:i + n_lines]
-
-            # Get column extents from the first line in the group
-            dl_start, dl_end = group[0]
-            start_int = int(widget.index(dl_start).split(".")[1])
-            end_int = int(widget.index(dl_end).split(".")[1])
-            span = end_int - start_int
-            if span <= 0:
-                steps.append([(dl_start, dl_end)])
-                continue
-
-            seg = max(span // 3, 1)
-
-            # 3 sweeps: left, center, right
-            for s in range(3):
-                s_start_col = start_int + s * seg
-                s_end_col = start_int + (s + 1) * seg if s < 2 else end_int
-
-                ranges = []
-                for g_start, g_end in group:
-                    row = widget.index(g_start).split(".")[0]
-                    line_end_col = int(widget.index(g_end).split(".")[1])
-                    # Clamp to actual line length
-                    cs = min(s_start_col, line_end_col)
-                    ce = min(s_end_col, line_end_col)
-                    if cs < ce:
-                        ranges.append((f"{row}.{cs}", f"{row}.{ce}"))
-                if ranges:
-                    steps.append(ranges)
-
-        return steps
+            # Approximate line breaks at ~60 chars
+            line_len = 60
+            pos = 0
+            while pos < len(full):
+                end = min(pos + line_len, len(full))
+                # Find word boundary
+                if end < len(full):
+                    space = full.rfind(" ", pos, end)
+                    if space > pos:
+                        end = space
+                steps.append((pos, end))
+                pos = end + 1 if end < len(full) else end
+        return steps if steps else [(0, len(full))]
 
     def _pacer_step(self) -> None:
-        """Advance to next highlight step."""
         if not self._running:
             return
-        state = self.pacer_state
-        widget = state["widget"]
-
-        try:
-            if not widget.winfo_exists():
-                return
-        except tk.TclError:
+        if self._step_idx >= len(self._steps):
+            self._quiz_phase()
             return
 
-        steps = state["steps"]
-        idx = state["step_idx"]
+        start, end = self._steps[self._step_idx]
 
-        if idx < len(steps):
-            step = steps[idx]
+        # Clear previous highlight
+        cursor = self._reader.textCursor()
+        cursor.select(QTextCursor.SelectionType.Document)
+        cursor.setCharFormat(self._normal_fmt)
 
-            widget.config(state="normal")
-            widget.tag_remove("hl", "1.0", "end")
+        # Apply new highlight
+        cursor.setPosition(start)
+        cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
+        cursor.setCharFormat(self._hl_fmt)
 
-            # Step is either a (start, end) tuple or a list of ranges
-            if isinstance(step, list):
-                for start, end in step:
-                    widget.tag_add("hl", start, end)
-                see_target = step[0][0]
-            else:
-                start, end = step
-                widget.tag_add("hl", start, end)
-                see_target = start
+        # Scroll to visible
+        self._reader.setTextCursor(cursor)
+        self._reader.ensureCursorVisible()
 
-            widget.see(see_target)
-            widget.config(state="disabled")
+        pct = int(100 * self._step_idx / len(self._steps))
+        self._lbl_progress.setText(f"PROGRESS: {pct}%")
 
-            pct = int(100 * idx / len(steps))
-            self.lbl_progress.config(text=f"PROGRESS: {pct}%")
+        self._step_idx += 1
+        self._after(self._delay, self._pacer_step)
 
-            state["step_idx"] += 1
-            self.root.after(state["delay"], self._pacer_step)
-        else:
-            self._quiz_phase()
-
-    # ── Quiz phase ─────────────────────────────────────────────
+    # ── Quiz phase ──
 
     def _quiz_phase(self) -> None:
-        """Keyword-based comprehension quiz after reading."""
-        self.clear()
+        self._clear()
+        self._running = True
         self.add_nav_bar()
 
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
         self._keywords = _extract_keywords(self._source_text)
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True)
-        self.add_widget(container)
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.setSpacing(8)
 
-        tk.Label(
-            container, text="COMPREHENSION CHECK",
-            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=(0, 10))
+        title = QLabel("COMPREHENSION CHECK")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
-        tk.Label(
-            container,
-            text="Summarize what you just read in your own words.",
-            font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=(0, 15))
+        desc = QLabel("Summarize what you just read in your own words.")
+        desc.setFont(make_qfont("body"))
+        desc.setStyleSheet(f"color: {c['fg']};")
+        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(desc)
 
-        text_frame = tk.Frame(container, bg=COLORS["card"], padx=2, pady=2)
-        text_frame.pack(pady=5)
-
-        self._quiz_input = tk.Text(
-            text_frame, height=6, width=60,
-            font=FONTS["pacer_text"],
-            bg=COLORS["card"], fg=COLORS["text_on_card"],
-            insertbackground=COLORS["text_on_card"],
-            wrap="word", bd=0,
+        self._quiz_input = QTextEdit()
+        self._quiz_input.setFont(make_qfont("pacer_text"))
+        self._quiz_input.setStyleSheet(
+            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        self._quiz_input.pack()
-        self._quiz_input.focus_set()
+        self._quiz_input.setFixedHeight(150)
+        cl.addWidget(self._quiz_input)
 
-        tk.Button(
-            container, text="CHECK",
-            command=self._score_quiz,
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"], width=20, pady=8,
-            relief="flat", cursor="hand2",
-        ).pack(pady=15)
+        check_btn = QPushButton("CHECK")
+        check_btn.setFont(make_qfont("btn_bold"))
+        check_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 30px; border-radius: 4px; }}"
+        )
+        check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        check_btn.clicked.connect(self._score_quiz)
+        cl.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._layout.addWidget(container, 1)
+        self._quiz_input.setFocus()
 
     def _score_quiz(self) -> None:
-        """Score the summary against extracted keywords."""
-        summary = self._quiz_input.get("1.0", "end").lower()
+        summary = self._quiz_input.toPlainText().lower()
         summary_words = set(re.findall(r"[a-zA-Z]+", summary))
 
         matched = [kw for kw in self._keywords if kw in summary_words]
@@ -568,64 +360,66 @@ class PacerExercise(BaseExercise):
 
         xp = score * USER_DATA_CONFIG["xp_per_correct"]
         result = ExerciseResult(
-            exercise_name="PACER",
-            score=score,
-            total=total,
-            xp_gained=xp,
+            exercise_name="PACER", score=score, total=total, xp_gained=xp,
         )
         is_pb = self.complete(result)
 
-        # Show results
-        self.clear()
+        # Show results with keyword breakdown
+        self._clear()
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True)
-        self.add_widget(container)
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-        tk.Label(
-            container, text="RESULTS",
-            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=(0, 15))
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.setSpacing(6)
 
-        tk.Label(
-            container,
-            text=f"Key concepts recalled: {score}/{total}",
-            font=FONTS["btn_lg"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=5)
+        title = QLabel("RESULTS")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
-        tk.Label(
-            container,
-            text=f"XP earned: +{xp}",
-            font=FONTS["counter"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=5)
+        score_lbl = QLabel(f"Key concepts recalled: {score}/{total}")
+        score_lbl.setFont(make_qfont("btn_lg"))
+        score_lbl.setStyleSheet(f"color: {c['fg']};")
+        score_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(score_lbl)
+
+        xp_lbl = QLabel(f"XP earned: +{xp}")
+        xp_lbl.setFont(make_qfont("counter"))
+        xp_lbl.setStyleSheet(f"color: {c['accent']};")
+        xp_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(xp_lbl)
 
         if is_pb:
-            tk.Label(
-                container,
-                text="NEW PERSONAL BEST!",
-                font=FONTS["btn_bold"], fg=COLORS["success"], bg=COLORS["bg"],
-            ).pack(pady=(10, 0))
+            pb = QLabel("NEW PERSONAL BEST!")
+            pb.setFont(make_qfont("btn_bold"))
+            pb.setStyleSheet(f"color: {c['success']};")
+            pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(pb)
 
-        # Show which keywords were found/missed
-        kw_frame = tk.Frame(container, bg=COLORS["bg"])
-        kw_frame.pack(pady=15)
-
+        # Keyword breakdown
         for kw in self._keywords:
             found = kw in summary_words
-            color = COLORS["success"] if found else COLORS["alert"]
-            marker = "✓" if found else "✗"
-            tk.Label(
-                kw_frame,
-                text=f"  {marker}  {kw}",
-                font=FONTS["body"], fg=color, bg=COLORS["bg"],
-                anchor="w", width=30,
-            ).pack(anchor="w")
+            color = c["success"] if found else c["alert"]
+            marker = "\u2713" if found else "\u2717"
+            lbl = QLabel(f"  {marker}  {kw}")
+            lbl.setFont(make_qfont("body"))
+            lbl.setStyleSheet(f"color: {color};")
+            cl.addWidget(lbl, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        tk.Button(
-            container, text="CONTINUE",
-            command=self.navigator.finish_exercise,
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"], width=20, pady=8,
-            relief="flat", cursor="hand2",
-        ).pack(pady=15)
+        cont_btn = QPushButton("CONTINUE")
+        cont_btn.setFont(make_qfont("btn_bold"))
+        cont_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px;"
+        )
+        cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cont_btn.clicked.connect(self.navigator.finish_exercise)
+        cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._layout.addWidget(container, 1)

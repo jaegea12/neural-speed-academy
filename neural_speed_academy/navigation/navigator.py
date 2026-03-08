@@ -126,6 +126,22 @@ class Navigator:
     def to_stats(self) -> None:
         self.navigate_to("stats")
 
+    def launch_exercise(self, exercise_cls, **kwargs) -> None:
+        """Create and show an exercise widget in the stack."""
+        if self._current_name:
+            self._history.append(self._current_name)
+        self._current_name = "exercise"
+
+        while self.stack.count() > 0:
+            old = self.stack.widget(0)
+            self.stack.removeWidget(old)
+            old.deleteLater()
+
+        ex = exercise_cls(self)
+        self.stack.addWidget(ex)
+        self.stack.setCurrentWidget(ex)
+        ex.start(**kwargs)
+
     def go_back(self) -> None:
         if self._history:
             target = self._history.pop()

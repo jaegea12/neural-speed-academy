@@ -3,242 +3,211 @@ Chunking exercise: flash multi-word phrases to train block reading.
 """
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import messagebox
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QSlider, QMessageBox,
+)
+from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, FONTS, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, theme_manager
 from neural_speed_academy.config import CHUNKING_CONFIG, USER_DATA_CONFIG
 
 
 class ChunkingExercise(BaseExercise):
-    """
-    Chunking exercise: displays multi-word phrases at configurable speed.
-    Trains the brain to read in word groups instead of single words.
-    """
 
-    def __init__(self, root: tk.Tk, navigator):
-        super().__init__(root, navigator)
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
         self.chunks: list = []
         self.chunk_idx: int = 0
         self.wpm: int = 250
         self.chunk_size: int = 3
-        self.lbl_chunk: tk.Label = None
-        self.lbl_progress: tk.Label = None
-        self._running: bool = False
 
     @property
     def name(self) -> str:
         return "Chunking"
 
     def start(self, **kwargs) -> None:
-        """Show the chunking configuration screen."""
-        self.clear()
+        self._clear()
+        self._running = True
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True, fill="both")
-        self.add_widget(container)
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-        # Guide button
-        tk.Button(
-            container,
-            text="GUIDE",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            cursor="hand2",
-            command=lambda: self.show_guide("chunking"),
-        ).place(x=50, y=20)
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.setSpacing(8)
 
-        content = tk.Frame(container, bg=COLORS["bg"])
-        content.pack(expand=True)
+        guide_btn = QPushButton("GUIDE")
+        guide_btn.setFont(make_qfont("btn_sm"))
+        guide_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 4px 12px; border-radius: 3px;"
+        )
+        guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        guide_btn.clicked.connect(lambda: self.show_guide("chunking"))
+        cl.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        tk.Label(
-            content,
-            text="CHUNKING CONFIGURATION",
-            font=FONTS["header"],
-            fg=COLORS["accent"],
-            bg=COLORS["bg"]
-        ).pack(pady=(0, 10))
+        title = QLabel("CHUNKING CONFIGURATION")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
         # Text input
-        text_frame = tk.Frame(content, bg=COLORS["card"], padx=2, pady=2)
-        text_frame.pack(pady=5)
-
-        text_input = tk.Text(
-            text_frame,
-            height=6,
-            width=60,
-            font=FONTS["pacer_text"],
-            bg=COLORS["card"],
-            fg=COLORS["text_on_card"],
-            insertbackground=COLORS["text_on_card"],
-            bd=0
+        self._text_input = QTextEdit()
+        self._text_input.setFont(make_qfont("pacer_text"))
+        self._text_input.setStyleSheet(
+            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        text_input.pack()
-        text_input.insert("1.0", theme_manager.training_text)
+        self._text_input.setFixedHeight(150)
+        self._text_input.setPlainText(theme_manager.training_text)
+        cl.addWidget(self._text_input)
 
-        # Chunk size selector
-        tk.Label(
-            content,
-            text="Words Per Chunk:",
-            font=FONTS["slider_label"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        ).pack(pady=(10, 0))
+        # Chunk size slider
+        chunk_lbl = QLabel("Words Per Chunk:")
+        chunk_lbl.setFont(make_qfont("slider_label"))
+        chunk_lbl.setStyleSheet(f"color: {c['fg']};")
+        cl.addWidget(chunk_lbl)
 
-        chunk_var = tk.IntVar(value=kwargs.get("chunk_size", CHUNKING_CONFIG["default_chunk_size"]))
-        tk.Scale(
-            content,
-            variable=chunk_var,
-            from_=CHUNKING_CONFIG["min_chunk_size"],
-            to=CHUNKING_CONFIG["max_chunk_size"],
-            orient="horizontal",
-            bg=COLORS["bg"],
-            fg=COLORS["text_on_card"],
-            length=300,
-            highlightthickness=0
-        ).pack(pady=5)
+        init_chunk = kwargs.get("chunk_size", CHUNKING_CONFIG["default_chunk_size"])
+        self._chunk_display = QLabel(str(init_chunk))
+        self._chunk_display.setFont(make_qfont("counter"))
+        self._chunk_display.setStyleSheet(f"color: {c['accent']};")
+        self._chunk_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._chunk_slider = QSlider(Qt.Orientation.Horizontal)
+        self._chunk_slider.setRange(
+            CHUNKING_CONFIG["min_chunk_size"], CHUNKING_CONFIG["max_chunk_size"]
+        )
+        self._chunk_slider.setValue(init_chunk)
+        self._chunk_slider.setFixedWidth(300)
+        self._chunk_slider.setStyleSheet(
+            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+        self._chunk_slider.valueChanged.connect(
+            lambda v: self._chunk_display.setText(str(v))
+        )
+        cl.addWidget(self._chunk_slider, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._chunk_display)
 
         # WPM slider
-        tk.Label(
-            content,
-            text="Display Speed (WPM equivalent):",
-            font=FONTS["slider_label"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        ).pack(pady=(10, 0))
+        wpm_lbl = QLabel("Display Speed (WPM equivalent):")
+        wpm_lbl.setFont(make_qfont("slider_label"))
+        wpm_lbl.setStyleSheet(f"color: {c['fg']};")
+        cl.addWidget(wpm_lbl)
 
-        wpm_var = tk.IntVar(value=kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"]))
-        tk.Scale(
-            content,
-            variable=wpm_var,
-            from_=CHUNKING_CONFIG["min_wpm"],
-            to=CHUNKING_CONFIG["max_wpm"],
-            orient="horizontal",
-            bg=COLORS["bg"],
-            fg=COLORS["text_on_card"],
-            length=400,
-            highlightthickness=0
-        ).pack(pady=5)
+        init_wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+        self._wpm_display = QLabel(str(init_wpm))
+        self._wpm_display.setFont(make_qfont("counter"))
+        self._wpm_display.setStyleSheet(f"color: {c['accent']};")
+        self._wpm_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
+        self._wpm_slider.setRange(CHUNKING_CONFIG["min_wpm"], CHUNKING_CONFIG["max_wpm"])
+        self._wpm_slider.setValue(init_wpm)
+        self._wpm_slider.setFixedWidth(400)
+        self._wpm_slider.setStyleSheet(
+            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+        self._wpm_slider.valueChanged.connect(
+            lambda v: self._wpm_display.setText(str(v))
+        )
+        cl.addWidget(self._wpm_slider, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._wpm_display)
 
         # Start button
-        btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
-        btn_frame.pack(side="bottom", fill="x")
+        start_btn = QPushButton("START CHUNKING")
+        start_btn.setFont(make_qfont("btn_lg"))
+        start_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
+            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+        )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(self._start_from_ui)
+        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        def _start():
-            self._run_chunking(
-                text_input.get("1.0", tk.END),
-                chunk_var.get(),
-                wpm_var.get(),
-            )
+        hint = QLabel("Ctrl+Enter to start")
+        hint.setFont(make_qfont("btn_sm"))
+        hint.setStyleSheet(f"color: {c['muted']};")
+        cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        tk.Button(
-            btn_frame,
-            text="START CHUNKING",
-            command=_start,
-            bg=COLORS["success"],
-            fg=COLORS["btn_text"],
-            font=FONTS["btn_lg"],
-            width=30,
-            pady=10,
-            relief="flat",
-            cursor="hand2",
-        ).pack()
+        self._layout.addWidget(container, 1)
 
-        tk.Label(
-            btn_frame, text="Ctrl+Enter to start",
-            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
-        ).pack(pady=(4, 0))
-
-        # Ctrl+Enter to start from text area
-        text_input.bind("<Control-Return>", lambda e: _start())
+    def _start_from_ui(self) -> None:
+        text = self._text_input.toPlainText()
+        self._run_chunking(text, self._chunk_slider.value(), self._wpm_slider.value())
 
     def _build_chunks(self, text: str, size: int) -> list:
-        """Split text into chunks of the given word count."""
         words = text.split()
-        return [
-            " ".join(words[i:i + size])
-            for i in range(0, len(words), size)
-        ]
+        return [" ".join(words[i:i + size]) for i in range(0, len(words), size)]
 
     def _run_chunking(self, text: str, chunk_size: int, wpm: int) -> None:
-        """Start the chunking display."""
         self.chunks = self._build_chunks(text, chunk_size)
         if not self.chunks:
-            messagebox.showinfo("No Text", "Please enter some text before starting.")
+            QMessageBox.information(self, "No Text", "Please enter some text before starting.")
             return
 
         self.chunk_size = chunk_size
         self.wpm = wpm
         self.chunk_idx = 0
-        # Delay per chunk: account for multiple words per chunk
         self._delay = int(60000 * chunk_size / wpm)
 
-        self.clear()
+        self._clear()
         self._running = True
-        self.root.configure(bg=COLORS["bg"])
 
-        # Exit button
-        exit_btn = tk.Button(
-            self.root,
-            text="✖",
-            font=FONTS["exit_btn"],
-            bg=COLORS["alert"],
-            fg=COLORS["text_on_card"],
-            command=self._stop,
-            bd=0
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
+        exit_btn = QPushButton("\u2716")
+        exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
         )
-        exit_btn.place(relx=0.95, rely=0.05, anchor="center")
-        self.add_widget(exit_btn)
+        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_btn.clicked.connect(self._stop)
+        self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
 
-        # Progress
-        self.lbl_progress = tk.Label(
-            self.root,
-            text=f"0% | {chunk_size}-word chunks | {wpm} WPM",
-            font=FONTS["counter"],
-            fg=COLORS["accent"],
-            bg=COLORS["bg"]
-        )
-        self.lbl_progress.place(relx=0.5, rely=0.1, anchor="center")
-        self.add_widget(self.lbl_progress)
+        self._lbl_progress = QLabel(f"0% | {chunk_size}-word chunks | {wpm} WPM")
+        self._lbl_progress.setFont(make_qfont("counter"))
+        self._lbl_progress.setStyleSheet(f"color: {c['accent']};")
+        self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_progress)
 
-        # Chunk display
-        self.lbl_chunk = tk.Label(
-            self.root,
-            text="",
-            font=FONTS["rsvp"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        )
-        self.lbl_chunk.place(relx=0.5, rely=0.5, anchor="center")
-        self.add_widget(self.lbl_chunk)
+        self._lbl_chunk = QLabel("")
+        self._lbl_chunk.setFont(make_qfont("rsvp"))
+        self._lbl_chunk.setStyleSheet(f"color: {c['fg']};")
+        self._lbl_chunk.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_chunk, 1)
 
-        self.root.after(500, self._flash_chunk)
+        self._after(500, self._flash_chunk)
 
     def _flash_chunk(self) -> None:
-        """Display the next chunk."""
         if not self._running:
             return
         if self.chunk_idx >= len(self.chunks):
             self._complete_exercise()
             return
 
-        self.lbl_chunk.config(text=self.chunks[self.chunk_idx])
+        self._lbl_chunk.setText(self.chunks[self.chunk_idx])
         self.chunk_idx += 1
         pct = int(self.chunk_idx / len(self.chunks) * 100)
-        self.lbl_progress.config(
-            text=f"{pct}% | {self.chunk_size}-word chunks | {self.wpm} WPM"
+        self._lbl_progress.setText(
+            f"{pct}% | {self.chunk_size}-word chunks | {self.wpm} WPM"
         )
-        self.root.after(self._delay, self._flash_chunk)
+        self._after(self._delay, self._flash_chunk)
 
     def _stop(self) -> None:
-        """Stop and return to dashboard."""
         self._running = False
         self.navigator.finish_exercise()
 
     def _complete_exercise(self) -> None:
-        """Handle exercise completion."""
         self._running = False
         total_words = sum(len(c.split()) for c in self.chunks)
         xp = total_words // 10
@@ -246,7 +215,7 @@ class ChunkingExercise(BaseExercise):
             exercise_name="CHUNKING",
             score=total_words,
             total=total_words,
-            xp_gained=xp
+            xp_gained=xp,
         )
         is_pb = self.complete(result)
         self.show_result_screen(

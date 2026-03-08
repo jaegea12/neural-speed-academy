@@ -5,38 +5,39 @@ All modes target ~45 seconds duration for an effective warmup.
 from __future__ import annotations
 
 import math
-import tkinter as tk
+
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
+from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, make_qfont
+
+MODE_LABELS = {
+    "saccade_h": "HORIZONTAL SACCADES",
+    "saccade_v": "VERTICAL SACCADES",
+    "saccade_diag": "DIAGONAL SACCADES",
+    "saccade_expand": "EXPANDING SACCADES",
+    "pursuit_line": "SMOOTH PURSUIT \u2014 LINE",
+    "pursuit_circle": "SMOOTH PURSUIT \u2014 CIRCLE",
+    "pursuit_figure8": "SMOOTH PURSUIT \u2014 FIGURE 8",
+}
 
 
 class PrimingExercise(BaseExercise):
-    """
-    Multi-mode eye priming exercise.
-    Modes: structured saccades, smooth pursuit (line/circle/figure-8).
-    Duration is controlled explicitly via duration_s for consistency.
-    """
 
-    def __init__(self, root: tk.Tk, navigator):
-        super().__init__(root, navigator)
-        self.dot: tk.Label = None
-        self.lbl_progress: tk.Label = None
-        self.lbl_mode: tk.Label = None
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
         self.mode: str = ""
         self.duration_s: float = 45.0
         self.delay: int = 600
-        # Saccade state
         self._pattern: list = []
         self._pattern_idx: int = 0
-        # Smooth pursuit state
         self._t: float = 0.0
         self._dt: float = 0.0
         self._pursuit_steps: int = 0
         self._pursuit_step: int = 0
         self._frame_ms: int = 20
         self._cycles: int = 3
-        self._running: bool = False
 
     @property
     def name(self) -> str:
@@ -44,90 +45,70 @@ class PrimingExercise(BaseExercise):
 
     def start(self, mode: str = "saccade_h", delay: int = 600,
               duration_s: float = 45.0, cycles: int = 0, **kwargs) -> None:
-        """
-        Start a priming exercise.
-
-        Args:
-            mode: Exercise pattern (saccade_h/v/diag/expand, pursuit_line/circle/figure8)
-            delay: Milliseconds between saccade jumps (ignored for pursuit)
-            duration_s: Total exercise duration in seconds
-            cycles: Number of pursuit cycles (0 = auto, ~4s per cycle)
-        """
         self.mode = mode
         self.delay = delay
         self.duration_s = duration_s
         self._requested_cycles = cycles
 
-        self.clear()
+        self._clear()
         self._running = True
         self.add_nav_bar()
 
-        # Guide button
-        guide_btn = tk.Button(
-            self.root,
-            text="GUIDE",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            cursor="hand2",
-            command=lambda: self.show_guide("priming"),
-        )
-        guide_btn.place(x=50, y=80)
-        self.add_widget(guide_btn)
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-        # Mode label
-        mode_labels = {
-            "saccade_h": "HORIZONTAL SACCADES",
-            "saccade_v": "VERTICAL SACCADES",
-            "saccade_diag": "DIAGONAL SACCADES",
-            "saccade_expand": "EXPANDING SACCADES",
-            "pursuit_line": "SMOOTH PURSUIT — LINE",
-            "pursuit_circle": "SMOOTH PURSUIT — CIRCLE",
-            "pursuit_figure8": "SMOOTH PURSUIT — FIGURE 8",
-        }
-        self.lbl_mode = tk.Label(
-            self.root,
-            text=mode_labels.get(mode, mode.upper()),
-            font=FONTS["counter"],
-            fg=COLORS["accent"],
-            bg=COLORS["bg"]
+        guide_btn = QPushButton("GUIDE")
+        guide_btn.setFont(make_qfont("btn_sm"))
+        guide_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 4px 12px; border-radius: 3px;"
         )
-        self.lbl_mode.place(relx=0.5, rely=0.08, anchor="center")
-        self.add_widget(self.lbl_mode)
+        guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        guide_btn.clicked.connect(lambda: self.show_guide("priming"))
+        self._layout.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        # Progress label
-        self.lbl_progress = tk.Label(
-            self.root,
-            text="0%",
-            font=FONTS["section_header"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        )
-        self.lbl_progress.place(relx=0.5, rely=0.12, anchor="center")
-        self.add_widget(self.lbl_progress)
+        self._lbl_mode = QLabel(MODE_LABELS.get(mode, mode.upper()))
+        self._lbl_mode.setFont(make_qfont("counter"))
+        self._lbl_mode.setStyleSheet(f"color: {c['accent']};")
+        self._lbl_mode.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_mode)
 
-        # Dot
-        self.dot = tk.Label(
-            self.root,
-            text="●",
-            font=FONTS["priming_dot"],
-            fg=COLORS["priming"],
-            bg=COLORS["bg"]
-        )
-        self.dot.place(relx=0.5, rely=0.5, anchor="center")
-        self.add_widget(self.dot)
+        self._lbl_progress = QLabel("0%")
+        self._lbl_progress.setFont(make_qfont("section_header"))
+        self._lbl_progress.setStyleSheet(f"color: {c['fg']};")
+        self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_progress)
+
+        # Canvas area for the dot
+        self._canvas = QWidget()
+        self._canvas.setStyleSheet(f"background-color: {c['bg']};")
+        self._canvas.setMinimumSize(800, 500)
+        self._layout.addWidget(self._canvas, 1)
+
+        self._dot = QLabel("\u25cf", self._canvas)
+        self._dot.setFont(make_qfont("priming_dot"))
+        self._dot.setStyleSheet(f"color: {c['priming']};")
+        self._dot.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._dot.setFixedSize(40, 40)
+        self._dot.move(400, 250)
 
         if mode.startswith("saccade"):
             self._build_saccade_pattern()
-            self.root.after(500, self._saccade_step)
+            self._after(500, self._saccade_step)
         elif mode.startswith("pursuit"):
             self._init_pursuit()
-            self.root.after(500, self._pursuit_step_fn)
+            self._after(500, self._pursuit_step_fn)
+
+    def _place_dot(self, relx: float, rely: float) -> None:
+        w = self._canvas.width()
+        h = self._canvas.height()
+        x = int(relx * w) - 20
+        y = int(rely * h) - 20
+        self._dot.move(max(0, x), max(0, y))
 
     # --- Saccade modes ---
 
     def _build_saccade_pattern(self) -> None:
-        """Generate position sequence sized to fill duration_s."""
-        # Number of jumps = duration / delay
         n = max(int(self.duration_s * 1000 / self.delay), 10)
 
         if self.mode == "saccade_h":
@@ -154,7 +135,6 @@ class PrimingExercise(BaseExercise):
         self._pattern_idx = 0
 
     def _saccade_step(self) -> None:
-        """Advance one step in the saccade pattern."""
         if not self._running:
             return
         if self._pattern_idx >= len(self._pattern):
@@ -162,16 +142,15 @@ class PrimingExercise(BaseExercise):
             return
 
         x, y = self._pattern[self._pattern_idx]
-        self.dot.place(relx=x, rely=y, anchor="center")
+        self._place_dot(x, y)
         self._pattern_idx += 1
         pct = int(self._pattern_idx / len(self._pattern) * 100)
-        self.lbl_progress.config(text=f"{pct}%")
-        self.root.after(self.delay, self._saccade_step)
+        self._lbl_progress.setText(f"{pct}%")
+        self._after(self.delay, self._saccade_step)
 
     # --- Smooth pursuit modes ---
 
     def _init_pursuit(self) -> None:
-        """Initialize smooth pursuit animation to fill duration_s."""
         self._frame_ms = 20
         total_ms = int(self.duration_s * 1000)
         self._pursuit_steps = total_ms // self._frame_ms
@@ -181,16 +160,13 @@ class PrimingExercise(BaseExercise):
         if self._requested_cycles > 0:
             self._cycles = self._requested_cycles
         else:
-            # Default: ~4 seconds per cycle for comfortable tracking
             self._cycles = max(int(self.duration_s / 4), 2)
 
     def _pursuit_position(self, t: float) -> tuple:
-        """Calculate dot position for the current pursuit mode at time t (0..1)."""
         c = self._cycles
         if self.mode == "pursuit_line":
             x = 0.5 + 0.35 * math.sin(2 * math.pi * c * t)
-            y = 0.5
-            return (x, y)
+            return (x, 0.5)
         elif self.mode == "pursuit_circle":
             angle = 2 * math.pi * c * t
             x = 0.5 + 0.25 * math.cos(angle)
@@ -204,7 +180,6 @@ class PrimingExercise(BaseExercise):
         return (0.5, 0.5)
 
     def _pursuit_step_fn(self) -> None:
-        """Advance one frame of smooth pursuit animation."""
         if not self._running:
             return
         if self._pursuit_step >= self._pursuit_steps:
@@ -212,39 +187,48 @@ class PrimingExercise(BaseExercise):
             return
 
         x, y = self._pursuit_position(self._t)
-        self.dot.place(relx=x, rely=y, anchor="center")
+        self._place_dot(x, y)
         self._t += self._dt
         self._pursuit_step += 1
         pct = int(self._pursuit_step / self._pursuit_steps * 100)
-        self.lbl_progress.config(text=f"{pct}%")
-        self.root.after(self._frame_ms, self._pursuit_step_fn)
+        self._lbl_progress.setText(f"{pct}%")
+        self._after(self._frame_ms, self._pursuit_step_fn)
 
     # --- Completion ---
 
     def _complete_exercise(self) -> None:
-        """Handle exercise completion."""
         self._running = False
-        self.clear()
+        self._clear()
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True)
-        self.add_widget(container)
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-        tk.Label(
-            container, text="WARMUP COMPLETE",
-            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=(0, 15))
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        tk.Label(
-            container, text="Eyes primed and ready for training.",
-            font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=10)
+        title = QLabel("WARMUP COMPLETE")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
-        tk.Button(
-            container, text="CONTINUE",
-            command=self.navigator.finish_exercise,
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"], width=20, pady=8,
-            relief="flat", cursor="hand2",
-        ).pack(pady=25)
+        body = QLabel("Eyes primed and ready for training.")
+        body.setFont(make_qfont("body"))
+        body.setStyleSheet(f"color: {c['fg']};")
+        body.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(body)
+
+        cont_btn = QPushButton("CONTINUE")
+        cont_btn.setFont(make_qfont("btn_bold"))
+        cont_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px;"
+        )
+        cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cont_btn.clicked.connect(self.navigator.finish_exercise)
+        cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._layout.addWidget(container, 1)
