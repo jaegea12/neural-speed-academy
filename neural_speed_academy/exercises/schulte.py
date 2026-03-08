@@ -7,11 +7,13 @@ import random
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGridLayout,
+    QSlider,
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
 from neural_speed_academy.config import SCHULTE_CONFIG
 
 
@@ -27,6 +29,8 @@ class SchulteExercise(BaseExercise):
     def name(self) -> str:
         return "Schulte Grid"
 
+    # ── Config screen ──
+
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
@@ -35,6 +39,22 @@ class SchulteExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setContentsMargins(40, 10, 40, 10)
+        cl.setSpacing(6)
+
+        slider_groove = (
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+
+        # Top row: guide button
+        top = QHBoxLayout()
+        top.setContentsMargins(0, 0, 0, 0)
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
@@ -43,17 +63,111 @@ class SchulteExercise(BaseExercise):
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("schulte"))
-        self._layout.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        top.addWidget(guide_btn)
+        top.addStretch()
+        cl.addLayout(top)
 
-        from neural_speed_academy.theme import theme_manager, FOV_PRESETS
+        title = QLabel("SCHULTE GRID CONFIGURATION")
+        title.setFont(make_qfont("section_header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
-        grid_size = SCHULTE_CONFIG["grid_size"]
+        cl.addSpacing(12)
+
+        # Grid size: label + slider + value in one row
+        size_row = QHBoxLayout()
+        size_row.setContentsMargins(0, 0, 0, 0)
+        size_row.setSpacing(8)
+        size_row.addStretch()
+        size_lbl = QLabel("Grid size:")
+        size_lbl.setFont(make_qfont("slider_label"))
+        size_lbl.setStyleSheet(f"color: {c['fg']};")
+        size_row.addWidget(size_lbl)
+
+        self._size_slider = QSlider(Qt.Orientation.Horizontal)
+        self._size_slider.setRange(3, 7)
+        self._size_slider.setValue(SCHULTE_CONFIG["grid_size"])
+        self._size_slider.setFixedWidth(200)
+        self._size_slider.setStyleSheet(slider_groove)
+
+        self._size_display = QLabel(self._grid_label(SCHULTE_CONFIG["grid_size"]))
+        self._size_display.setFont(make_qfont("counter"))
+        self._size_display.setStyleSheet(f"color: {c['accent']};")
+        self._size_display.setFixedWidth(50)
+        self._size_slider.valueChanged.connect(
+            lambda v: self._size_display.setText(self._grid_label(v))
+        )
+        size_row.addWidget(self._size_slider)
+        size_row.addWidget(self._size_display)
+        size_row.addStretch()
+        cl.addLayout(size_row)
+
+        # Description
+        desc = QLabel("Smaller grids are easier. 5\u00d75 is the classic Schulte table.")
+        desc.setFont(make_qfont("body"))
+        desc.setStyleSheet(f"color: {c['muted']};")
+        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(desc)
+
+        # Cell count preview
+        self._count_lbl = QLabel(self._count_text(SCHULTE_CONFIG["grid_size"]))
+        self._count_lbl.setFont(make_qfont("body"))
+        self._count_lbl.setStyleSheet(f"color: {c['muted']};")
+        self._count_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._size_slider.valueChanged.connect(
+            lambda v: self._count_lbl.setText(self._count_text(v))
+        )
+        cl.addWidget(self._count_lbl)
+
+        cl.addSpacing(8)
+
+        # Start button + hint
+        start_btn = QPushButton("START")
+        start_btn.setFont(make_qfont("btn_lg"))
+        start_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['success']}; "
+            f"color: {c['btn_text']}; "
+            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+        )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(self._start_grid)
+        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        hint = QLabel("Ctrl+Enter to start")
+        hint.setFont(make_qfont("btn_sm"))
+        hint.setStyleSheet(f"color: {c['muted']};")
+        cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._layout.addWidget(container, 1)
+
+        # Ctrl+Enter shortcut
+        shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self._start_grid)
+
+    @staticmethod
+    def _grid_label(n: int) -> str:
+        return f"{n}\u00d7{n}"
+
+    @staticmethod
+    def _count_text(n: int) -> str:
+        return f"Numbers 1\u2013{n * n}"
+
+    # ── Grid screen ──
+
+    def _start_grid(self) -> None:
+        grid_size = self._size_slider.value()
+        self._clear()
+        self._running = True
+        self.add_nav_bar()
+
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
         self.max_num = grid_size * grid_size
         self.target = 1
         self.score = 0
 
-        # Cell size scaled to screen dimensions
-        from neural_speed_academy.theme import screen_metrics
         btn_size = screen_metrics.schulte_cell
 
         # Stats
