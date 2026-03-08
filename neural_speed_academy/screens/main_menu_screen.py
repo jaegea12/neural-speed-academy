@@ -96,14 +96,44 @@ class MainMenuScreen(BaseScreen):
 
     def _show_info(self) -> None:
         """Show application information."""
-        messagebox.showinfo(
-            "About Neural Speed Academy",
-            "Neural Speed Academy\n\n"
-            "A desktop application for speed reading\n"
-            "and cognitive training.\n\n"
-            "Created by ADAM JÄGER\n"
-            "© 2025"
-        )
+        win = tk.Toplevel(self.root)
+        win.title("About")
+        win.configure(bg=COLORS["card"])
+        win.geometry("460x340")
+        win.transient(self.root)
+        win.grab_set()
+
+        tk.Label(
+            win, text="NEURAL SPEED ACADEMY",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["card"],
+        ).pack(pady=(30, 10))
+
+        tk.Label(
+            win,
+            text=(
+                "A desktop application for speed reading\n"
+                "and cognitive training.\n\n"
+                "Exercises based on established techniques:\n"
+                "RSVP, guided pacing, Schulte grids,\n"
+                "peripheral vision training, and chunking."
+            ),
+            font=FONTS["body"], fg=COLORS["text_on_card"], bg=COLORS["card"],
+            justify="center",
+        ).pack(pady=10)
+
+        tk.Label(
+            win, text="Created by Adam Jaeger\n\u00a9 2025",
+            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["card"],
+        ).pack(pady=(10, 0))
+
+        tk.Button(
+            win, text="CLOSE", font=FONTS["btn_bold"],
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            relief="flat", width=12, pady=6, cursor="hand2",
+            command=win.destroy,
+        ).pack(pady=15)
+
+        win.bind("<Escape>", lambda e: win.destroy())
 
     def _quit(self) -> None:
         """Quit the application after confirmation."""

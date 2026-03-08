@@ -121,6 +121,20 @@ class DashboardScreen(BaseScreen):
         self.add_widget(card)
 
         level = user.xp // 1000 + 1
+
+        # Level badge
+        badge_size = 32
+        badge = tk.Canvas(
+            card, width=badge_size, height=badge_size,
+            bg=COLORS["card"], highlightthickness=0,
+        )
+        badge.pack(side="left", padx=(0, 10))
+        badge.create_oval(2, 2, badge_size - 2, badge_size - 2,
+                          fill=COLORS["accent"], width=0)
+        badge.create_text(badge_size // 2, badge_size // 2,
+                          text=str(level), font=FONTS["btn_bold"],
+                          fill=COLORS["btn_text"])
+
         tk.Label(
             card,
             text=f"{user.name.upper()}   |   Level {level}   |   Streak: {user.streak} day{'s' if user.streak != 1 else ''}",

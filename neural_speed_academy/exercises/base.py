@@ -137,11 +137,15 @@ class BaseExercise(ABC):
     def show_guide(self, topic: str) -> None:
         """Display a guide popup."""
         from neural_speed_academy.config import EXERCISE_GUIDES
-        
+
         title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
         win = tk.Toplevel(self.root)
+        win.title(title)
         win.configure(bg=COLORS["card"])
         win.geometry("700x600")
+        win.transient(self.root)
+        win.grab_set()
+
         tk.Label(
             win,
             text=title,
@@ -157,7 +161,16 @@ class BaseExercise(ABC):
             bg=COLORS["card"],
             wraplength=620,
             justify="left",
-        ).pack(pady=10, padx=30)
+        ).pack(pady=10, padx=30, expand=True)
+
+        tk.Button(
+            win, text="CLOSE", font=FONTS["btn_bold"],
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            relief="flat", width=12, pady=6, cursor="hand2",
+            command=win.destroy,
+        ).pack(pady=(0, 20))
+
+        win.bind("<Escape>", lambda e: win.destroy())
 
     def complete(self, result: ExerciseResult) -> bool:
         """Handle exercise completion: save XP, log history, track personal bests.

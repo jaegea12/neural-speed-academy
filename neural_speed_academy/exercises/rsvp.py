@@ -120,6 +120,11 @@ class RsvpExercise(BaseExercise):
             cursor="hand2",
         ).pack()
 
+        tk.Label(
+            btn_frame, text="Ctrl+Enter to start",
+            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
+        ).pack(pady=(4, 0))
+
         # Ctrl+Enter to start from text area
         text_input.bind("<Control-Return>", lambda e: _start())
 

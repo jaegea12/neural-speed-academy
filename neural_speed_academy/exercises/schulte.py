@@ -40,7 +40,8 @@ class SchulteExercise(BaseExercise):
             text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
-            command=lambda: self.show_guide("schulte")
+            cursor="hand2",
+            command=lambda: self.show_guide("schulte"),
         )
         guide_btn.place(x=50, y=80)
         self.add_widget(guide_btn)
@@ -93,7 +94,8 @@ class SchulteExercise(BaseExercise):
                     font=FONTS["grid_btn"],
                     bg=COLORS["grid_btn"],
                     fg=COLORS["text_on_card"],
-                    relief="raised"
+                    relief="raised",
+                    cursor="hand2",
                 )
                 btn.configure(command=lambda b=btn, v=val: self._on_click(v, b))
                 btn.grid(row=i, column=j, padx=2, pady=2)

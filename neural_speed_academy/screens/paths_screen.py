@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import random
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from typing import Callable
 
 from neural_speed_academy.screens.base import BaseScreen
@@ -79,11 +79,12 @@ class PathSelectionScreen(BaseScreen):
             justify="left",
         ).pack(anchor="w", pady=(5, 5))
 
-        # Step count
+        # Step count and estimated time
         step_count = len(path_data["steps"])
+        est_min = step_count * 2
         tk.Label(
             card,
-            text=f"{step_count} exercises",
+            text=f"{step_count} exercises  ~{est_min} min",
             font=FONTS["btn_sm"],
             fg=COLORS["muted"],
             bg=COLORS["card"],
@@ -214,9 +215,37 @@ class PathSessionScreen(BaseScreen):
             bg=COLORS["bg"],
         ).pack(pady=5)
 
-        # Step list
-        list_frame = tk.Frame(container, bg=COLORS["bg"])
-        list_frame.pack(pady=10)
+        # Step list (scrollable for long paths)
+        list_outer = tk.Frame(container, bg=COLORS["bg"])
+        list_outer.pack(pady=10, fill="x")
+
+        max_visible = 12
+        needs_scroll = len(steps) > max_visible
+
+        if needs_scroll:
+            list_canvas = tk.Canvas(
+                list_outer, bg=COLORS["bg"], highlightthickness=0,
+                height=max_visible * 24,
+            )
+            list_scrollbar = ttk.Scrollbar(
+                list_outer, orient="vertical", command=list_canvas.yview,
+            )
+            list_canvas.configure(yscrollcommand=list_scrollbar.set)
+            list_scrollbar.pack(side="right", fill="y")
+            list_canvas.pack(side="left", fill="x", expand=True)
+
+            list_frame = tk.Frame(list_canvas, bg=COLORS["bg"])
+            list_canvas.create_window((0, 0), window=list_frame, anchor="nw")
+
+            def _on_mw(e):
+                list_canvas.yview_scroll(-1 * (e.delta // 120), "units")
+            list_canvas.bind_all("<MouseWheel>", _on_mw)
+            list_canvas.bind(
+                "<Destroy>", lambda e: self.root.unbind_all("<MouseWheel>"),
+            )
+        else:
+            list_frame = tk.Frame(list_outer, bg=COLORS["bg"])
+            list_frame.pack()
 
         for i, (ex_type, label, params) in enumerate(steps):
             if i < current:
@@ -238,6 +267,14 @@ class PathSessionScreen(BaseScreen):
                 anchor="w",
                 width=50,
             ).pack(anchor="w", pady=1)
+
+        if needs_scroll:
+            list_frame.update_idletasks()
+            list_canvas.configure(scrollregion=list_canvas.bbox("all"))
+            # Scroll to show current step
+            if current > 0:
+                frac = max(0, (current - 2)) / len(steps)
+                list_canvas.yview_moveto(frac)
 
         # Current step action
         ex_type, label, params = steps[current]
