@@ -4,6 +4,7 @@ Login screen for user authentication.
 from __future__ import annotations
 
 import tkinter as tk
+from tkinter import messagebox
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, FONTS
@@ -77,7 +78,9 @@ class LoginScreen(BaseScreen):
     def _do_login(self) -> None:
         """Handle login action."""
         name = self.entry.get().strip()
-        if name and name != "Type your name":
-            user = self.navigator.user_repo.get_or_create(name)
-            self.navigator.set_user(user)
-            self.navigator.complete_login()
+        if not name or name == "Type your name":
+            messagebox.showinfo("Name Required", "Please enter your name to continue.")
+            return
+        user = self.navigator.user_repo.get_or_create(name)
+        self.navigator.set_user(user)
+        self.navigator.complete_login()

@@ -53,6 +53,7 @@ class BaseExercise(ABC):
         self.root = root
         self.navigator = navigator
         self.widgets: list[tk.Widget] = []
+        self._running: bool = False
 
     @property
     @abstractmethod
@@ -62,6 +63,7 @@ class BaseExercise(ABC):
 
     def clear(self) -> None:
         """Remove all widgets created by this exercise."""
+        self._running = False
         for widget in self.widgets:
             try:
                 widget.destroy()
@@ -157,8 +159,12 @@ class BaseExercise(ABC):
             justify="left",
         ).pack(pady=10, padx=30)
 
-    def complete(self, result: ExerciseResult) -> None:
-        """Handle exercise completion: save XP, log history, track personal bests."""
+    def complete(self, result: ExerciseResult) -> bool:
+        """Handle exercise completion: save XP, log history, track personal bests.
+
+        Returns True if a new personal best was set.
+        """
+        is_pb = False
         user = self.navigator.get_user()
         if user:
             try:
@@ -168,7 +174,7 @@ class BaseExercise(ABC):
                     result=result.score_string(),
                     max_entries=USER_DATA_CONFIG["max_history_entries"],
                 )
-                user.update_personal_best(
+                is_pb = user.update_personal_best(
                     result.exercise_name, result.score, result.total,
                 )
                 self.navigator.save_user()
@@ -178,6 +184,61 @@ class BaseExercise(ABC):
                     "Save Error",
                     "Could not save your progress. Please try again."
                 )
+        return is_pb
+
+    def show_result_screen(self, result: ExerciseResult,
+                           is_personal_best: bool = False,
+                           details: str = "") -> None:
+        """Display a standardized result screen with score, XP, and continue button."""
+        self.clear()
+        self.add_nav_bar()
+
+        container = tk.Frame(self.root, bg=COLORS["bg"])
+        container.pack(expand=True)
+        self.add_widget(container)
+
+        tk.Label(
+            container, text="RESULTS",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=(0, 15))
+
+        # Score
+        tk.Label(
+            container,
+            text=f"Score: {result.score_string()}",
+            font=FONTS["btn_lg"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=5)
+
+        # Details line (exercise-specific info)
+        if details:
+            tk.Label(
+                container, text=details,
+                font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
+            ).pack(pady=2)
+
+        # XP
+        tk.Label(
+            container,
+            text=f"XP earned: +{result.xp_gained}",
+            font=FONTS["counter"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=5)
+
+        # Personal best indicator
+        if is_personal_best:
+            tk.Label(
+                container,
+                text="NEW PERSONAL BEST!",
+                font=FONTS["btn_bold"], fg=COLORS["success"], bg=COLORS["bg"],
+            ).pack(pady=(10, 0))
+
+        # Continue button
+        tk.Button(
+            container, text="CONTINUE",
+            command=self.navigator.finish_exercise,
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            font=FONTS["btn_bold"], width=20, pady=8,
+            relief="flat", cursor="hand2",
+        ).pack(pady=25)
 
     def handle_error(self, error: Exception, message: str = "An error occurred") -> None:
         """Handle exercise errors gracefully."""

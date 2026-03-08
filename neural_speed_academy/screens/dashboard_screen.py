@@ -42,6 +42,12 @@ class DashboardScreen(BaseScreen):
         except Exception:
             pass
 
+        # First-time user onboarding prompt
+        try:
+            self._build_onboarding(self.root)
+        except Exception:
+            pass
+
         # Navigation bar: Training Paths | Stats | Logout
         self._build_action_bar(self.root)
 
@@ -158,6 +164,54 @@ class DashboardScreen(BaseScreen):
             fg=COLORS["muted"],
             bg=COLORS["bg"],
         ).pack(side="left")
+
+    # ── Onboarding ──────────────────────────────────────────────
+
+    def _build_onboarding(self, parent) -> None:
+        """Show a welcome banner for first-time users with no history."""
+        user = self.navigator.get_user()
+        if not user or user.history:
+            return
+
+        banner = tk.Frame(parent, bg=COLORS["accent"], pady=12, padx=20)
+        banner.pack(fill="x", padx=40, pady=(10, 0))
+        self.add_widget(banner)
+
+        tk.Label(
+            banner,
+            text="Welcome! New to speed reading?",
+            font=FONTS["btn_bold"],
+            fg=COLORS["btn_text"],
+            bg=COLORS["accent"],
+        ).pack(side="left")
+
+        tk.Button(
+            banner,
+            text="START FOUNDATION PATH",
+            font=FONTS["btn_bold"],
+            bg=COLORS["btn_text"],
+            fg=COLORS["accent"],
+            relief="flat",
+            pady=4,
+            padx=12,
+            cursor="hand2",
+            command=self._start_foundation,
+        ).pack(side="right")
+
+    def _start_foundation(self) -> None:
+        """Activate the foundation path and navigate to it."""
+        from neural_speed_academy.config import TRAINING_PATHS
+        from neural_speed_academy.state import PathProgress
+
+        user = self.navigator.get_user()
+        if user and "foundation" in TRAINING_PATHS:
+            if "foundation" not in user.path_progress:
+                user.path_progress["foundation"] = PathProgress(
+                    path_id="foundation", current_step=0, completed=False,
+                )
+            user.active_path = "foundation"
+            self.navigator.save_user()
+            self.navigator.navigate_to("path_session")
 
     # ── Action bar (Paths / Stats) ─────────────────────────────
 

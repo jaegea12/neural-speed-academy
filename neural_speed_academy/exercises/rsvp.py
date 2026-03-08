@@ -121,6 +121,7 @@ class RsvpExercise(BaseExercise):
         """Start the RSVP display."""
         self.words = text.split()
         if not self.words:
+            messagebox.showinfo("No Text", "Please enter some text before starting.")
             return
 
         self.wpm = wpm
@@ -208,9 +209,6 @@ class RsvpExercise(BaseExercise):
             total=word_count,
             xp_gained=xp
         )
-        self.complete(result)
-        messagebox.showinfo(
-            "Done",
-            f"Read {word_count} words at {self.wpm} WPM\nXP: +{xp}"
-        )
-        self.navigator.finish_exercise()
+        is_pb = self.complete(result)
+        self.show_result_screen(result, is_personal_best=is_pb,
+                                details=f"Read {word_count} words at {self.wpm} WPM")

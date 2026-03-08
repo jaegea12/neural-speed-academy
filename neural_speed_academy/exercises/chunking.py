@@ -153,6 +153,7 @@ class ChunkingExercise(BaseExercise):
         """Start the chunking display."""
         self.chunks = self._build_chunks(text, chunk_size)
         if not self.chunks:
+            messagebox.showinfo("No Text", "Please enter some text before starting.")
             return
 
         self.chunk_size = chunk_size
@@ -234,10 +235,8 @@ class ChunkingExercise(BaseExercise):
             total=total_words,
             xp_gained=xp
         )
-        self.complete(result)
-        messagebox.showinfo(
-            "Done",
-            f"Read {total_words} words in {len(self.chunks)} chunks "
-            f"at {self.wpm} WPM\nXP: +{xp}"
+        is_pb = self.complete(result)
+        self.show_result_screen(
+            result, is_personal_best=is_pb,
+            details=f"Read {total_words} words in {len(self.chunks)} chunks at {self.wpm} WPM",
         )
-        self.navigator.finish_exercise()

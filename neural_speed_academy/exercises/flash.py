@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import random
 import tkinter as tk
-from tkinter import messagebox
 from typing import Callable, Optional
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
@@ -79,6 +78,7 @@ class FlashExercise(BaseExercise):
         self.correct_count = 0
         self.level_logic = level_func
         self.span_config = span_config or {}
+        self._running = True
         
         # Create fresh flash widgets
         self._create_flash_widgets()
@@ -184,11 +184,15 @@ class FlashExercise(BaseExercise):
 
     def _show_pre_flash_dots(self) -> None:
         """Change cross to dots before flash."""
+        if not self._running:
+            return
         self.lbl_cross.config(text="••", fg=COLORS["accent"])
         self.root.after(FLASH_TIMING["dots_duration"], self._do_flash)
 
     def _do_flash(self) -> None:
         """Flash the content briefly."""
+        if not self._running:
+            return
         self.lbl_cross.place_forget()
 
         # Show content
@@ -213,6 +217,8 @@ class FlashExercise(BaseExercise):
 
     def _hide_flash(self) -> None:
         """Hide flash content after brief display."""
+        if not self._running:
+            return
         if self.mode == "eyespan":
             self.lbl_flash_left.place_forget()
             self.lbl_flash_right.place_forget()
@@ -223,6 +229,8 @@ class FlashExercise(BaseExercise):
 
     def _show_input(self) -> None:
         """Show input field for user response."""
+        if not self._running:
+            return
         self.input_frame = tk.Frame(self.root, bg=COLORS["bg"])
         self.input_frame.place(relx=0.5, rely=0.7, anchor="center")
 
@@ -291,7 +299,5 @@ class FlashExercise(BaseExercise):
             total=self.rounds_total,
             xp_gained=xp_gained
         )
-        self.complete(result)
-        messagebox.showinfo("Done", f"Score: {self.correct_count}/{self.rounds_total}")
-        self._clear_flash_widgets()
-        self.navigator.finish_exercise()
+        is_pb = self.complete(result)
+        self.show_result_screen(result, is_personal_best=is_pb)

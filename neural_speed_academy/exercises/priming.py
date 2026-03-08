@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import math
 import tkinter as tk
-from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise
 from neural_speed_academy.theme import COLORS, FONTS
@@ -224,5 +223,27 @@ class PrimingExercise(BaseExercise):
     def _complete_exercise(self) -> None:
         """Handle exercise completion."""
         self._running = False
-        messagebox.showinfo("Warmup", "Eyes Primed!")
-        self.navigator.finish_exercise()
+        self.clear()
+        self.add_nav_bar()
+
+        container = tk.Frame(self.root, bg=COLORS["bg"])
+        container.pack(expand=True)
+        self.add_widget(container)
+
+        tk.Label(
+            container, text="WARMUP COMPLETE",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=(0, 15))
+
+        tk.Label(
+            container, text="Eyes primed and ready for training.",
+            font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=10)
+
+        tk.Button(
+            container, text="CONTINUE",
+            command=self.navigator.finish_exercise,
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            font=FONTS["btn_bold"], width=20, pady=8,
+            relief="flat", cursor="hand2",
+        ).pack(pady=25)

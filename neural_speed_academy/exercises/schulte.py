@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import random
 import tkinter as tk
-from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, FONTS
@@ -133,9 +132,6 @@ class SchulteExercise(BaseExercise):
             total=self.max_num,
             xp_gained=self.score
         )
-        self.complete(result)
-        messagebox.showinfo(
-            "Done",
-            f"Grid Cleared!\nFinal Score: {self.score}\nXP Gained: {self.score}"
-        )
-        self.navigator.finish_exercise()
+        is_pb = self.complete(result)
+        self.show_result_screen(result, is_personal_best=is_pb,
+                                details="Grid cleared!")

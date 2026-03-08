@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import re
 import tkinter as tk
+from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, FONTS, theme_manager
@@ -179,6 +180,7 @@ class PacerExercise(BaseExercise):
         """Start the pacing animation."""
         words = text.split()
         if not words:
+            messagebox.showinfo("No Text", "Please enter some text before starting.")
             return
 
         self._source_text = text
@@ -263,6 +265,7 @@ class PacerExercise(BaseExercise):
         avg_words_per_step = len(words) / max(len(steps), 1)
         delay = int(60000 / wpm * avg_words_per_step)
 
+        self._running = True
         self.pacer_state = {
             "step_idx": 0,
             "steps": steps,
@@ -457,6 +460,8 @@ class PacerExercise(BaseExercise):
 
     def _pacer_step(self) -> None:
         """Advance to next highlight step."""
+        if not self._running:
+            return
         state = self.pacer_state
         widget = state["widget"]
 
@@ -557,7 +562,7 @@ class PacerExercise(BaseExercise):
             total=total,
             xp_gained=xp,
         )
-        self.complete(result)
+        is_pb = self.complete(result)
 
         # Show results
         self.clear()
@@ -580,9 +585,16 @@ class PacerExercise(BaseExercise):
 
         tk.Label(
             container,
-            text=f"XP earned: {xp}",
+            text=f"XP earned: +{xp}",
             font=FONTS["counter"], fg=COLORS["accent"], bg=COLORS["bg"],
         ).pack(pady=5)
+
+        if is_pb:
+            tk.Label(
+                container,
+                text="NEW PERSONAL BEST!",
+                font=FONTS["btn_bold"], fg=COLORS["success"], bg=COLORS["bg"],
+            ).pack(pady=(10, 0))
 
         # Show which keywords were found/missed
         kw_frame = tk.Frame(container, bg=COLORS["bg"])
