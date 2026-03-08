@@ -41,14 +41,14 @@ LIGHT_COLORS = {
     "bg": "#f8fafc",
     "card": "#e2e8f0",
     "fg": "#1e293b",
-    "accent": "#16a34a",
+    "accent": "#15803d",
     "action": "#2563eb",
-    "alert": "#ea580c",
+    "alert": "#c2410c",
     "highlight": "#fbbf24",
     "priming": "#0d9488",
     "grid_btn": "#3b82f6",
     "grid_solved": "#86efac",
-    "success": "#16a34a",
+    "success": "#15803d",
     "cross": "#94a3b8",
     # Semantic roles
     "btn_text": "#ffffff",
@@ -57,9 +57,9 @@ LIGHT_COLORS = {
     "reader_bg": "#ffffff",
     "reader_fg": "#1e293b",
     # Difficulty tiers
-    "diff_beginner": "#16a34a",
+    "diff_beginner": "#15803d",
     "diff_intermediate": "#2563eb",
-    "diff_advanced": "#ea580c",
+    "diff_advanced": "#c2410c",
     "diff_elite": "#dc2626",
 }
 
@@ -67,26 +67,26 @@ SOFT_LIGHT_COLORS = {
     "bg": "#faf7f2",
     "card": "#ede9e3",
     "fg": "#3d3929",
-    "accent": "#5a8a5e",
-    "action": "#5b7fa5",
-    "alert": "#c47a3a",
+    "accent": "#4a7a4e",
+    "action": "#4a6a8a",
+    "alert": "#9e5e20",
     "highlight": "#e8d48b",
-    "priming": "#5a9e8f",
-    "grid_btn": "#7a9bb5",
+    "priming": "#4a8e7e",
+    "grid_btn": "#5a8aaa",
     "grid_solved": "#b5d4b8",
-    "success": "#5a8a5e",
+    "success": "#4a7a4e",
     "cross": "#a8a08e",
     # Semantic roles
     "btn_text": "#faf7f2",
     "text_on_card": "#3d3929",
-    "muted": "#8a8475",
+    "muted": "#74705e",
     "reader_bg": "#f5f0e8",
     "reader_fg": "#3d3929",
     # Difficulty tiers
-    "diff_beginner": "#5a8a5e",
-    "diff_intermediate": "#5b7fa5",
-    "diff_advanced": "#c47a3a",
-    "diff_elite": "#b54a3a",
+    "diff_beginner": "#4a7a4e",
+    "diff_intermediate": "#4a6a8a",
+    "diff_advanced": "#9e5e20",
+    "diff_elite": "#a04030",
 }
 
 HIGH_CONTRAST_COLORS = {
@@ -115,10 +115,71 @@ HIGH_CONTRAST_COLORS = {
     "diff_elite": "#ff0000",
 }
 
+FOCUS_COLORS = {
+    # Warm sepia palette optimized for extended reading.
+    # Based on e-reader research (Benedetto et al., 2013): warm backgrounds
+    # reduce blue light exposure and visual fatigue. All text pairs exceed
+    # WCAG AA 4.5:1 contrast ratio.
+    "bg": "#f4ecd8",
+    "card": "#e8dfc8",
+    "fg": "#2c2416",
+    "accent": "#486828",
+    "action": "#3a5e7a",
+    "alert": "#985018",
+    "highlight": "#d4b85c",
+    "priming": "#3a7a6a",
+    "grid_btn": "#3a5e7a",
+    "grid_solved": "#a0c4a0",
+    "success": "#486828",
+    "cross": "#8a8070",
+    # Semantic roles
+    "btn_text": "#f4ecd8",
+    "text_on_card": "#2c2416",
+    "muted": "#6e6454",
+    "reader_bg": "#f4ecd8",
+    "reader_fg": "#2c2416",
+    # Difficulty tiers
+    "diff_beginner": "#486828",
+    "diff_intermediate": "#3a5e7a",
+    "diff_advanced": "#985018",
+    "diff_elite": "#8a3028",
+}
+
+TWILIGHT_COLORS = {
+    # Medium-dark warm gray — between Dark and Soft Light.
+    # Reduced blue emission for evening use while maintaining
+    # readability. All primary text pairs exceed WCAG AA 4.5:1.
+    "bg": "#2a2a30",
+    "card": "#383840",
+    "fg": "#d4d0c8",
+    "accent": "#7ab87a",
+    "action": "#6a9ec4",
+    "alert": "#d4884a",
+    "highlight": "#d4c46a",
+    "priming": "#5aaa9a",
+    "grid_btn": "#5a8ab4",
+    "grid_solved": "#2a5a2a",
+    "success": "#7ab87a",
+    "cross": "#6a6a6e",
+    # Semantic roles
+    "btn_text": "#1e1e22",
+    "text_on_card": "#e8e4dc",
+    "muted": "#9a968e",
+    "reader_bg": "#d4d0c8",
+    "reader_fg": "#1e1e22",
+    # Difficulty tiers
+    "diff_beginner": "#7ab87a",
+    "diff_intermediate": "#6a9ec4",
+    "diff_advanced": "#d4884a",
+    "diff_elite": "#c45a4a",
+}
+
 THEME_PROFILES = {
     "dark": DARK_COLORS,
-    "light": LIGHT_COLORS,
+    "twilight": TWILIGHT_COLORS,
     "soft_light": SOFT_LIGHT_COLORS,
+    "focus": FOCUS_COLORS,
+    "light": LIGHT_COLORS,
     "high_contrast": HIGH_CONTRAST_COLORS,
 }
 

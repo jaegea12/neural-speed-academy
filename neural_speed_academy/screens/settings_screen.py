@@ -40,9 +40,11 @@ class SettingsScreen(BaseScreen):
         ).pack(pady=(0, 15))
 
         profiles = {
-            "dark": "Dark Mode",
-            "light": "Light Mode",
+            "dark": "Dark",
+            "twilight": "Twilight",
             "soft_light": "Soft Light",
+            "focus": "Focus (Low Fatigue)",
+            "light": "Light",
             "high_contrast": "High Contrast",
         }
 
