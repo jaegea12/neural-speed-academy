@@ -300,28 +300,33 @@ class PrimingMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         """Build the priming menu UI."""
-        def run(mode: str, delay: int, total: int) -> Callable:
+        # All exercises target ~45s duration for an effective warmup.
+        # delay = ms between saccade jumps (controls speed, not duration).
+        # cycles = number of pursuit repetitions (more cycles = faster dot).
+        # duration_s = total exercise length in seconds.
+        def run(mode: str, delay: int = 600, duration_s: float = 45.0,
+                cycles: int = 0) -> Callable:
             return lambda: self.priming_exercise.start(
-                mode=mode, delay=delay, total=total
+                mode=mode, delay=delay, duration_s=duration_s, cycles=cycles
             )
 
         sets = [
             # Saccades — structured jumps
-            ("Horizontal Saccades (Slow)", run("saccade_h", 700, 20)),
-            ("Horizontal Saccades (Fast)", run("saccade_h", 400, 24)),
-            ("Vertical Saccades (Slow)", run("saccade_v", 700, 20)),
-            ("Vertical Saccades (Fast)", run("saccade_v", 400, 24)),
-            ("Diagonal Saccades (Slow)", run("saccade_diag", 700, 20)),
-            ("Diagonal Saccades (Fast)", run("saccade_diag", 400, 24)),
-            ("Expanding Saccades (Slow)", run("saccade_expand", 700, 20)),
-            ("Expanding Saccades (Fast)", run("saccade_expand", 400, 24)),
-            # Smooth pursuit — continuous tracking
-            ("Pursuit: Line (Slow)", run("pursuit_line", 800, 20)),
-            ("Pursuit: Line (Fast)", run("pursuit_line", 500, 20)),
-            ("Pursuit: Circle (Slow)", run("pursuit_circle", 800, 20)),
-            ("Pursuit: Circle (Fast)", run("pursuit_circle", 500, 20)),
-            ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", 800, 20)),
-            ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", 500, 20)),
+            ("Horizontal Saccades (Slow)", run("saccade_h", delay=700)),
+            ("Horizontal Saccades (Fast)", run("saccade_h", delay=400)),
+            ("Vertical Saccades (Slow)", run("saccade_v", delay=700)),
+            ("Vertical Saccades (Fast)", run("saccade_v", delay=400)),
+            ("Diagonal Saccades (Slow)", run("saccade_diag", delay=700)),
+            ("Diagonal Saccades (Fast)", run("saccade_diag", delay=400)),
+            ("Expanding Saccades (Slow)", run("saccade_expand", delay=700)),
+            ("Expanding Saccades (Fast)", run("saccade_expand", delay=400)),
+            # Smooth pursuit — slow ~5s/cycle, fast ~3s/cycle
+            ("Pursuit: Line (Slow)", run("pursuit_line", cycles=9)),
+            ("Pursuit: Line (Fast)", run("pursuit_line", cycles=15)),
+            ("Pursuit: Circle (Slow)", run("pursuit_circle", cycles=9)),
+            ("Pursuit: Circle (Fast)", run("pursuit_circle", cycles=15)),
+            ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", cycles=9)),
+            ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", cycles=15)),
         ]
 
         self._create_grid_menu(

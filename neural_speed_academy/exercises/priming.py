@@ -1,5 +1,6 @@
 """
 Eye Priming exercises: structured saccades, smooth pursuit, and figure-8 tracking.
+All modes target ~45 seconds duration for an effective warmup.
 """
 from __future__ import annotations
 
@@ -9,13 +10,13 @@ from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise
 from neural_speed_academy.theme import COLORS, FONTS
-from neural_speed_academy.config import PRIMING_CONFIG
 
 
 class PrimingExercise(BaseExercise):
     """
     Multi-mode eye priming exercise.
     Modes: structured saccades, smooth pursuit (line/circle/figure-8).
+    Duration is controlled explicitly via duration_s for consistency.
     """
 
     def __init__(self, root: tk.Tk, navigator):
@@ -24,9 +25,9 @@ class PrimingExercise(BaseExercise):
         self.lbl_progress: tk.Label = None
         self.lbl_mode: tk.Label = None
         self.mode: str = ""
-        self.count: int = 0
-        self.total: int = 0
+        self.duration_s: float = 45.0
         self.delay: int = 600
+        # Saccade state
         self._pattern: list = []
         self._pattern_idx: int = 0
         # Smooth pursuit state
@@ -34,6 +35,8 @@ class PrimingExercise(BaseExercise):
         self._dt: float = 0.0
         self._pursuit_steps: int = 0
         self._pursuit_step: int = 0
+        self._frame_ms: int = 20
+        self._cycles: int = 3
         self._running: bool = False
 
     @property
@@ -41,12 +44,20 @@ class PrimingExercise(BaseExercise):
         return "Eye Priming"
 
     def start(self, mode: str = "saccade_h", delay: int = 600,
-              total: int = 20, **kwargs) -> None:
-        """Start a priming exercise with the given mode and speed."""
+              duration_s: float = 45.0, cycles: int = 0, **kwargs) -> None:
+        """
+        Start a priming exercise.
+
+        Args:
+            mode: Exercise pattern (saccade_h/v/diag/expand, pursuit_line/circle/figure8)
+            delay: Milliseconds between saccade jumps (ignored for pursuit)
+            duration_s: Total exercise duration in seconds
+            cycles: Number of pursuit cycles (0 = auto, ~4s per cycle)
+        """
         self.mode = mode
         self.delay = delay
-        self.total = total
-        self.count = 0
+        self.duration_s = duration_s
+        self._requested_cycles = cycles
         self._running = True
 
         self.clear()
@@ -115,26 +126,24 @@ class PrimingExercise(BaseExercise):
     # --- Saccade modes ---
 
     def _build_saccade_pattern(self) -> None:
-        """Generate position sequence for the selected saccade pattern."""
-        n = self.total
+        """Generate position sequence sized to fill duration_s."""
+        # Number of jumps = duration / delay
+        n = max(int(self.duration_s * 1000 / self.delay), 10)
+
         if self.mode == "saccade_h":
-            # Alternating left-right at center height
             self._pattern = [
                 (0.2, 0.5) if i % 2 == 0 else (0.8, 0.5)
                 for i in range(n)
             ]
         elif self.mode == "saccade_v":
-            # Alternating top-bottom at center width
             self._pattern = [
                 (0.5, 0.25) if i % 2 == 0 else (0.5, 0.75)
                 for i in range(n)
             ]
         elif self.mode == "saccade_diag":
-            # Cycle through four diagonal corners
             corners = [(0.2, 0.25), (0.8, 0.75), (0.8, 0.25), (0.2, 0.75)]
             self._pattern = [corners[i % 4] for i in range(n)]
         elif self.mode == "saccade_expand":
-            # Start narrow, expand amplitude over time
             self._pattern = []
             for i in range(n):
                 frac = 0.1 + 0.35 * (i / max(n - 1, 1))
@@ -162,36 +171,33 @@ class PrimingExercise(BaseExercise):
     # --- Smooth pursuit modes ---
 
     def _init_pursuit(self) -> None:
-        """Initialize smooth pursuit animation parameters."""
-        # 20ms per frame for smooth animation
-        frame_ms = 20
-        # Total duration based on delay * total (delay acts as speed factor)
-        duration_ms = self.delay * self.total // 10
-        self._pursuit_steps = duration_ms // frame_ms
+        """Initialize smooth pursuit animation to fill duration_s."""
+        self._frame_ms = 20
+        total_ms = int(self.duration_s * 1000)
+        self._pursuit_steps = total_ms // self._frame_ms
         self._pursuit_step = 0
         self._dt = 1.0 / max(self._pursuit_steps, 1)
         self._t = 0.0
-        self._frame_ms = frame_ms
+        if self._requested_cycles > 0:
+            self._cycles = self._requested_cycles
+        else:
+            # Default: ~4 seconds per cycle for comfortable tracking
+            self._cycles = max(int(self.duration_s / 4), 2)
 
     def _pursuit_position(self, t: float) -> tuple:
         """Calculate dot position for the current pursuit mode at time t (0..1)."""
+        c = self._cycles
         if self.mode == "pursuit_line":
-            # Horizontal sweep, back and forth
-            cycles = 3
-            x = 0.5 + 0.35 * math.sin(2 * math.pi * cycles * t)
+            x = 0.5 + 0.35 * math.sin(2 * math.pi * c * t)
             y = 0.5
             return (x, y)
         elif self.mode == "pursuit_circle":
-            # Clockwise circle
-            cycles = 2
-            angle = 2 * math.pi * cycles * t
+            angle = 2 * math.pi * c * t
             x = 0.5 + 0.25 * math.cos(angle)
             y = 0.5 + 0.25 * math.sin(angle)
             return (x, y)
         elif self.mode == "pursuit_figure8":
-            # Figure-8 (lemniscate)
-            cycles = 2
-            angle = 2 * math.pi * cycles * t
+            angle = 2 * math.pi * c * t
             x = 0.5 + 0.3 * math.sin(angle)
             y = 0.5 + 0.2 * math.sin(2 * angle)
             return (x, y)
