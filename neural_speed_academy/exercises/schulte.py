@@ -253,7 +253,7 @@ class SchulteExercise(BaseExercise):
                 btn.setFixedSize(btn_size, btn_size)
                 btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['grid_btn']}; "
-                    f"color: {c['text_on_card']}; border: none; "
+                    f"color: {c['grid_text']}; border: none; "
                     f"border-radius: 4px; }}"
                     f"QPushButton:hover {{ opacity: 0.9; }}"
                 )
@@ -272,7 +272,7 @@ class SchulteExercise(BaseExercise):
         if value == self.target:
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['grid_solved']}; "
-                f"color: {c['text_on_card']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
             )
             button.setEnabled(False)
             self.target += 1
@@ -287,7 +287,7 @@ class SchulteExercise(BaseExercise):
             orig_style = button.styleSheet()
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['alert']}; "
-                f"color: {c['text_on_card']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
             )
             self._after(200, lambda: button.setStyleSheet(orig_style))
 

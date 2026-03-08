@@ -144,8 +144,8 @@ class StatsScreen(BaseScreen):
             f"QTableWidget {{ background-color: {c['card']}; "
             f"color: {c['text_on_card']}; border: none; "
             f"gridline-color: {c['bg']}; {font_css('treeview')} }}"
-            f"QHeaderView::section {{ background-color: {c['grid_btn']}; "
-            f"color: {c['text_on_card']}; border: none; padding: 4px; "
+            f"QHeaderView::section {{ background-color: {c['action']}; "
+            f"color: {c['btn_text']}; border: none; padding: 4px; "
             f"{font_css('treeview_heading')} }}"
         )
         table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
