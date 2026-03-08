@@ -1,21 +1,27 @@
 """
-Pacer exercise for guided reading with configurable highlight modes.
-Supports word, chunk, line, and multi-line pacing with a keyword quiz.
+Pacer exercise with 5 highlight modes, peripheral dimming, live WPM bar,
+display-line-aware stepping, and keyword comprehension quiz.
 """
 from __future__ import annotations
 
 import re
+import time
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QTextEdit, QSlider, QRadioButton, QButtonGroup, QFrame, QMessageBox,
+    QProgressBar,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QTextCursor, QTextCharFormat, QColor, QFont
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import (
+    QTextCursor, QTextCharFormat, QColor, QFont, QKeySequence, QShortcut,
+)
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, theme_manager
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
+
+# ── Keyword extraction ──
 
 _STOP_WORDS = frozenset(
     "the a an and or but in on at to for of is it that this with from by as "
@@ -38,13 +44,35 @@ def _extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
     return ranked[:max_keywords]
 
 
+# ── Helpers ──
+
+def _radio_style(c: dict) -> str:
+    return (
+        f"QRadioButton {{ color: {c['fg']}; background: transparent; spacing: 8px; }}"
+        f"QRadioButton::indicator {{ width: 14px; height: 14px; "
+        f"border: 2px solid {c['muted']}; border-radius: 7px; "
+        f"background: transparent; }}"
+        f"QRadioButton::indicator:checked {{ "
+        f"border: 2px solid {c['accent']}; "
+        f"background: {c['accent']}; }}"
+    )
+
+
+def _dim_color(hex_color: str, alpha: float = 0.30) -> QColor:
+    """Return a QColor with reduced alpha for peripheral dimming."""
+    qc = QColor(hex_color)
+    qc.setAlphaF(alpha)
+    return qc
+
+
 class PacerExercise(BaseExercise):
 
     MODES = {
-        "word": "Single Word",
-        "chunk": "Chunk (2-3 words)",
-        "line": "Full Line",
-        "multi": "Multi-Line Sweep",
+        "word": "Word",
+        "chunk": "Chunk",
+        "line": "Line",
+        "multi": "Multi-Line",
+        "zpattern": "Z-Pattern",
     }
 
     def __init__(self, navigator, parent: QWidget | None = None):
@@ -54,10 +82,14 @@ class PacerExercise(BaseExercise):
         self._steps: list[tuple[int, int]] = []
         self._step_idx: int = 0
         self._delay: int = 200
+        self._n_lines: int = 3
+        self._start_time: float = 0.0
 
     @property
     def name(self) -> str:
         return "Pacer"
+
+    # ── Config screen ──
 
     def start(self, **kwargs) -> None:
         self._clear()
@@ -74,7 +106,7 @@ class PacerExercise(BaseExercise):
         cl.setContentsMargins(80, 5, 80, 5)
         cl.setSpacing(4)
 
-        # Top row: guide + title
+        # Guide button
         top = QHBoxLayout()
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
@@ -138,16 +170,7 @@ class PacerExercise(BaseExercise):
         mode_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(mode_lbl)
 
-        rb_style = (
-            f"QRadioButton {{ color: {c['fg']}; background: transparent; spacing: 8px; }}"
-            f"QRadioButton::indicator {{ width: 14px; height: 14px; "
-            f"border: 2px solid {c['muted']}; border-radius: 7px; "
-            f"background: transparent; }}"
-            f"QRadioButton::indicator:checked {{ "
-            f"border: 2px solid {c['accent']}; "
-            f"background: {c['accent']}; }}"
-        )
-
+        rb_style = _radio_style(c)
         self._mode_group = QButtonGroup(self)
         mode_row = QHBoxLayout()
         mode_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -160,7 +183,42 @@ class PacerExercise(BaseExercise):
                 rb.setChecked(True)
             self._mode_group.addButton(rb)
             mode_row.addWidget(rb)
+        self._mode_group.buttonClicked.connect(self._on_mode_changed)
         cl.addLayout(mode_row)
+
+        # N-lines slider (visible only for multi / z-pattern)
+        self._nlines_frame = QFrame()
+        self._nlines_frame.setStyleSheet("background: transparent;")
+        nf_layout = QVBoxLayout(self._nlines_frame)
+        nf_layout.setContentsMargins(0, 0, 0, 0)
+        nf_layout.setSpacing(2)
+
+        nlines_lbl = QLabel("Lines per step:")
+        nlines_lbl.setFont(make_qfont("slider_label"))
+        nlines_lbl.setStyleSheet(f"color: {c['fg']};")
+        nf_layout.addWidget(nlines_lbl)
+
+        self._nlines_display = QLabel("3")
+        self._nlines_display.setFont(make_qfont("counter"))
+        self._nlines_display.setStyleSheet(f"color: {c['accent']};")
+        self._nlines_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._nlines_slider = QSlider(Qt.Orientation.Horizontal)
+        self._nlines_slider.setRange(2, 5)
+        self._nlines_slider.setValue(3)
+        self._nlines_slider.setFixedWidth(200)
+        self._nlines_slider.setStyleSheet(
+            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+        self._nlines_slider.valueChanged.connect(
+            lambda v: self._nlines_display.setText(str(v))
+        )
+        nf_layout.addWidget(self._nlines_slider, alignment=Qt.AlignmentFlag.AlignCenter)
+        nf_layout.addWidget(self._nlines_display)
+
+        self._nlines_frame.setVisible(False)
+        cl.addWidget(self._nlines_frame, alignment=Qt.AlignmentFlag.AlignCenter)
 
         # Start button
         start_btn = QPushButton("START READING")
@@ -180,6 +238,16 @@ class PacerExercise(BaseExercise):
 
         self._layout.addWidget(container, 1)
 
+        # Ctrl+Enter shortcut
+        shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self._start_from_ui)
+
+    def _on_mode_changed(self, btn: QRadioButton) -> None:
+        mode = btn.property("mode_key")
+        self._nlines_frame.setVisible(mode in ("multi", "zpattern"))
+
+    # ── Launch reading ──
+
     def _start_from_ui(self) -> None:
         text = self._text_input.toPlainText()
         wpm = self._wpm_slider.value()
@@ -188,23 +256,21 @@ class PacerExercise(BaseExercise):
             if btn.isChecked():
                 mode = btn.property("mode_key")
                 break
+        self._n_lines = self._nlines_slider.value()
         self._run_pacer(text, wpm, mode)
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
         words = text.split()
         if not words:
-            QMessageBox.information(self, "No Text", "Please enter some text before starting.")
+            QMessageBox.information(
+                self, "No Text", "Please enter some text before starting."
+            )
             return
 
         self._source_text = text
         self._words = words
-
-        # Build steps as (char_start, char_end) in the full text
-        self._steps = self._build_steps(text, words, mode)
-        self._step_idx = 0
-
-        avg_words = len(words) / max(len(self._steps), 1)
-        self._delay = int(60000 / wpm * avg_words)
+        self._wpm_target = wpm
+        self._mode = mode
 
         self._clear()
         self._running = True
@@ -212,7 +278,10 @@ class PacerExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
-        # Exit button
+        # Top bar: exit + WPM indicator
+        top_bar = QHBoxLayout()
+        top_bar.setContentsMargins(10, 6, 10, 2)
+
         exit_btn = QPushButton("\u2716")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
@@ -221,14 +290,28 @@ class PacerExercise(BaseExercise):
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self.navigator.finish_exercise)
-        self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        top_bar.addWidget(exit_btn)
 
-        # Progress
-        self._lbl_progress = QLabel("0%")
-        self._lbl_progress.setFont(make_qfont("section_header"))
-        self._lbl_progress.setStyleSheet(f"color: {c['fg']};")
-        self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._layout.addWidget(self._lbl_progress)
+        top_bar.addStretch()
+
+        self._wpm_label = QLabel(f"WPM: {wpm}")
+        self._wpm_label.setFont(make_qfont("counter"))
+        self._wpm_label.setStyleSheet(f"color: {c['accent']};")
+        top_bar.addWidget(self._wpm_label)
+
+        self._layout.addLayout(top_bar)
+
+        # Progress bar
+        self._progress_bar = QProgressBar()
+        self._progress_bar.setRange(0, 100)
+        self._progress_bar.setValue(0)
+        self._progress_bar.setFixedHeight(6)
+        self._progress_bar.setTextVisible(False)
+        self._progress_bar.setStyleSheet(
+            f"QProgressBar {{ background: {c['card']}; border: none; border-radius: 3px; }}"
+            f"QProgressBar::chunk {{ background: {c['accent']}; border-radius: 3px; }}"
+        )
+        self._layout.addWidget(self._progress_bar)
 
         # Reader page
         fov = theme_manager.fov_config
@@ -244,62 +327,144 @@ class PacerExercise(BaseExercise):
         )
         self._reader.setFixedWidth(page_w)
         self._reader.setReadOnly(True)
-        self._reader.setPlainText(" ".join(words))
+
+        joined = " ".join(words)
+        self._reader.setPlainText(joined)
         self._layout.addWidget(self._reader, 1, Qt.AlignmentFlag.AlignCenter)
 
-        # Highlight format
+        # Build highlight/dim formats
         self._hl_fmt = QTextCharFormat()
         self._hl_fmt.setBackground(QColor(c["highlight"]))
+        self._hl_fmt.setForeground(QColor(c["reader_fg"]))
+
+        self._dim_fmt = QTextCharFormat()
+        self._dim_fmt.setForeground(_dim_color(c["reader_fg"], 0.30))
+        self._dim_fmt.setBackground(QColor(c["reader_bg"]))
 
         self._normal_fmt = QTextCharFormat()
         self._normal_fmt.setBackground(QColor(c["reader_bg"]))
+        self._normal_fmt.setForeground(QColor(c["reader_fg"]))
 
-        self._after(500, self._pacer_step)
+        # Defer step building so QTextEdit has laid out the text
+        QTimer.singleShot(100, self._build_and_start)
 
-    def _build_steps(self, text: str, words: list[str],
-                     mode: str) -> list[tuple[int, int]]:
-        full = " ".join(words)
-        steps = []
+    def _build_and_start(self) -> None:
+        joined = " ".join(self._words)
+        self._steps = self._build_steps(joined, self._words, self._mode)
+        self._step_idx = 0
+
+        avg_words = len(self._words) / max(len(self._steps), 1)
+        self._delay = int(60000 / self._wpm_target * avg_words)
+
+        self._start_time = time.monotonic()
+        self._words_shown = 0
+        self._after(300, self._pacer_step)
+
+    # ── Display-line detection ──
+
+    def _get_display_lines(self, text: str) -> list[tuple[int, int]]:
+        """Use QTextEdit layout to find actual wrapped line boundaries."""
+        doc = self._reader.document()
+        lines: list[tuple[int, int]] = []
+        block = doc.begin()
+        while block.isValid():
+            layout = block.layout()
+            if layout:
+                block_start = block.position()
+                for i in range(layout.lineCount()):
+                    line = layout.lineAt(i)
+                    start = block_start + line.textStart()
+                    length = line.textLength()
+                    # Trim trailing whitespace/newline from length
+                    end = start + length
+                    while end > start and text[end - 1:end] in (" ", "\n"):
+                        end -= 1
+                    if end > start:
+                        lines.append((start, end))
+            block = block.next()
+        return lines if lines else [(0, len(text))]
+
+    # ── Step building ──
+
+    def _build_steps(
+        self, text: str, words: list[str], mode: str
+    ) -> list[tuple[int, int]]:
         if mode == "word":
-            pos = 0
-            for w in words:
-                steps.append((pos, pos + len(w)))
-                pos += len(w) + 1
+            return self._steps_word(text, words)
         elif mode == "chunk":
-            chunk_size = 3
-            pos = 0
-            for i in range(0, len(words), chunk_size):
-                chunk = " ".join(words[i:i + chunk_size])
-                steps.append((pos, pos + len(chunk)))
-                pos += len(chunk) + 1
+            return self._steps_chunk(text, words)
         elif mode == "line":
-            line_len = 60
-            pos = 0
-            while pos < len(full):
-                end = min(pos + line_len, len(full))
-                if end < len(full):
-                    space = full.rfind(" ", pos, end)
-                    if space > pos:
-                        end = space
-                steps.append((pos, end))
-                pos = end + 1 if end < len(full) else end
+            return self._steps_line(text)
         elif mode == "multi":
-            # Sweep 3 lines at a time
-            line_len = 60
-            lines = []
-            pos = 0
-            while pos < len(full):
-                end = min(pos + line_len, len(full))
-                if end < len(full):
-                    space = full.rfind(" ", pos, end)
-                    if space > pos:
-                        end = space
-                lines.append((pos, end))
-                pos = end + 1 if end < len(full) else end
-            for i in range(0, len(lines), 3):
-                group = lines[i:i + 3]
-                steps.append((group[0][0], group[-1][1]))
-        return steps if steps else [(0, len(full))]
+            return self._steps_multi(text)
+        elif mode == "zpattern":
+            return self._steps_zpattern(text)
+        return [(0, len(text))]
+
+    def _steps_word(self, text: str, words: list[str]) -> list[tuple[int, int]]:
+        steps = []
+        pos = 0
+        for w in words:
+            idx = text.find(w, pos)
+            if idx == -1:
+                idx = pos
+            steps.append((idx, idx + len(w)))
+            pos = idx + len(w)
+        return steps or [(0, len(text))]
+
+    def _steps_chunk(self, text: str, words: list[str]) -> list[tuple[int, int]]:
+        chunk_size = 3
+        steps = []
+        pos = 0
+        for i in range(0, len(words), chunk_size):
+            chunk = " ".join(words[i : i + chunk_size])
+            idx = text.find(chunk, pos)
+            if idx == -1:
+                idx = pos
+            steps.append((idx, idx + len(chunk)))
+            pos = idx + len(chunk)
+        return steps or [(0, len(text))]
+
+    def _steps_line(self, text: str) -> list[tuple[int, int]]:
+        return self._get_display_lines(text)
+
+    def _steps_multi(self, text: str) -> list[tuple[int, int]]:
+        lines = self._get_display_lines(text)
+        n = self._n_lines
+        steps = []
+        for i in range(0, len(lines), n):
+            group = lines[i : i + n]
+            steps.append((group[0][0], group[-1][1]))
+        return steps or [(0, len(text))]
+
+    def _steps_zpattern(self, text: str) -> list[tuple[int, int]]:
+        """Z-pattern: sweep n_lines as 3 segments (left→right, right→left, left→right).
+
+        Each group of n_lines is split into 3 horizontal segments to simulate
+        the Z-shaped eye movement pattern used in speed reading.
+        """
+        lines = self._get_display_lines(text)
+        n = self._n_lines
+        steps = []
+        for i in range(0, len(lines), n):
+            group = lines[i : i + n]
+            # Treat the whole group as one block, split into 3 segments
+            block_start = group[0][0]
+            block_end = group[-1][1]
+            block_len = block_end - block_start
+            if block_len <= 0:
+                steps.append((block_start, block_end))
+                continue
+            seg = block_len // 3
+            s1 = block_start
+            s2 = block_start + seg
+            s3 = block_start + 2 * seg
+            steps.append((s1, s2))
+            steps.append((s2, s3))
+            steps.append((s3, block_end))
+        return steps or [(0, len(text))]
+
+    # ── Pacer step ──
 
     def _pacer_step(self) -> None:
         if not self._running:
@@ -309,23 +474,36 @@ class PacerExercise(BaseExercise):
             return
 
         start, end = self._steps[self._step_idx]
+        full_len = len(" ".join(self._words))
 
-        # Clear previous highlight
         cursor = self._reader.textCursor()
-        cursor.select(QTextCursor.SelectionType.Document)
-        cursor.setCharFormat(self._normal_fmt)
 
-        # Apply new highlight
+        # Dim entire document first (peripheral dimming)
+        cursor.setPosition(0)
+        cursor.setPosition(full_len, QTextCursor.MoveMode.KeepAnchor)
+        cursor.setCharFormat(self._dim_fmt)
+
+        # Highlight active segment
         cursor.setPosition(start)
         cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
         cursor.setCharFormat(self._hl_fmt)
 
-        # Scroll to visible
+        # Scroll to active segment
         self._reader.setTextCursor(cursor)
         self._reader.ensureCursorVisible()
 
-        pct = int(100 * self._step_idx / len(self._steps))
-        self._lbl_progress.setText(f"PROGRESS: {pct}%")
+        # Update progress bar
+        pct = int(100 * (self._step_idx + 1) / len(self._steps))
+        self._progress_bar.setValue(pct)
+
+        # Update live WPM
+        self._words_shown += len(
+            " ".join(self._words)[start:end].split()
+        )
+        elapsed = time.monotonic() - self._start_time
+        if elapsed > 0.5:
+            live_wpm = int(self._words_shown / (elapsed / 60))
+            self._wpm_label.setText(f"WPM: {live_wpm}")
 
         self._step_idx += 1
         self._after(self._delay, self._pacer_step)
@@ -395,7 +573,7 @@ class PacerExercise(BaseExercise):
         )
         is_pb = self.complete(result)
 
-        # Show results with keyword breakdown
+        # Results screen with keyword breakdown
         self._clear()
         self.add_nav_bar()
 
@@ -433,7 +611,6 @@ class PacerExercise(BaseExercise):
             pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             cl.addWidget(pb)
 
-        # Keyword breakdown
         for kw in self._keywords:
             found = kw in summary_words
             color = c["success"] if found else c["alert"]
