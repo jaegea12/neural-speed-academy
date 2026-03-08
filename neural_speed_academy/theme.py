@@ -130,6 +130,7 @@ FONTS = {
     "sub": ("Segoe UI", 12),
     "body": ("Segoe UI", 11),
     "flash": ("Consolas", 90, "bold"),
+    "rsvp": ("Segoe UI", 48, "bold"),
     "pacer": ("Georgia", 22),
     "btn": ("Segoe UI", 11),
     "btn_bold": ("Segoe UI", 12, "bold"),
@@ -154,22 +155,48 @@ FONTS = {
 
 
 DEFAULT_PROFILE = "dark"
+DEFAULT_TRAINING_TEXT = (
+    "Speed reading is the process of rapidly recognizing and absorbing phrases "
+    "or sentences on a page all at once rather than identifying individual words. "
+    "The amount of information that we process seems to be growing by the day, "
+    "whether it is emails, reports, websites, or books. We are likely to feel "
+    "pressured to get through this information more quickly so that we can stay "
+    "informed and make better decisions. Most people read at an average rate of "
+    "250 words per minute, though some are naturally quicker than others. But the "
+    "ability to speed read could mean that you double this rate. We do not "
+    "necessarily read each letter in a word or each word in a sentence. Instead, "
+    "we use context and prior knowledge to fill in the gaps. The key to speed "
+    "reading is to train your eyes and brain to process information more "
+    "efficiently. This involves reducing subvocalization, expanding your visual "
+    "span, and minimizing regression. With practice, you can learn to take in "
+    "more words per fixation and move through text more fluidly. The goal is not "
+    "just to read faster but to maintain or improve comprehension while doing so."
+)
 SETTINGS_FILE = "nsa_settings.json"
 
 
 class ThemeManager:
-    """Manages the active color profile and notifies listeners on change.
+    """Manages app-level settings: color profile and shared training text.
 
     Settings are stored in a JSON file independent of user profiles.
     """
 
     def __init__(self, profile: str = DEFAULT_PROFILE):
         self._profile = profile
+        self._training_text = DEFAULT_TRAINING_TEXT
         self._listeners: list = []
 
     @property
     def profile(self) -> str:
         return self._profile
+
+    @property
+    def training_text(self) -> str:
+        return self._training_text
+
+    @training_text.setter
+    def training_text(self, value: str) -> None:
+        self._training_text = value.strip() or DEFAULT_TRAINING_TEXT
 
     @property
     def colors(self) -> dict:
@@ -189,8 +216,12 @@ class ThemeManager:
     def save(self) -> None:
         """Persist current settings to disk."""
         try:
+            data = {
+                "profile": self._profile,
+                "training_text": self._training_text,
+            }
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
-                json.dump({"profile": self._profile}, f, indent=2)
+                json.dump(data, f, indent=2)
         except IOError:
             pass
 
@@ -204,12 +235,16 @@ class ThemeManager:
             profile = data.get("profile", DEFAULT_PROFILE)
             if profile in THEME_PROFILES:
                 self.set_profile(profile)
+            text = data.get("training_text", "")
+            if text:
+                self._training_text = text
         except (IOError, json.JSONDecodeError, TypeError):
             pass
 
     def reset_defaults(self) -> None:
         """Reset to default settings and save."""
         self.set_profile(DEFAULT_PROFILE)
+        self._training_text = DEFAULT_TRAINING_TEXT
         self.save()
 
     @staticmethod

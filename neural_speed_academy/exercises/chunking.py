@@ -7,22 +7,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, FONTS, theme_manager
 from neural_speed_academy.config import CHUNKING_CONFIG, USER_DATA_CONFIG
-
-SAMPLE_TEXT = (
-    "Speed reading is not about skipping words or skimming the surface. "
-    "It is about training the brain to process groups of words as single "
-    "units of meaning. Just as a skilled musician reads chords rather than "
-    "individual notes, a skilled reader perceives phrases rather than "
-    "isolated words. This ability, called chunking, leverages the brain's "
-    "natural pattern recognition. Research shows that working memory can "
-    "hold approximately seven chunks of information at once. By grouping "
-    "words into meaningful phrases, you effectively multiply the amount "
-    "of text your brain can process in each fixation. The key is practice: "
-    "repeated exposure to phrase-level reading gradually rewires the visual "
-    "processing pipeline to default to larger units."
-)
 
 
 class ChunkingExercise(BaseExercise):
@@ -89,7 +75,7 @@ class ChunkingExercise(BaseExercise):
             bd=0
         )
         text_input.pack()
-        text_input.insert("1.0", SAMPLE_TEXT)
+        text_input.insert("1.0", theme_manager.training_text)
 
         # Chunk size selector
         tk.Label(
@@ -207,7 +193,7 @@ class ChunkingExercise(BaseExercise):
         self.lbl_chunk = tk.Label(
             self.root,
             text="",
-            font=FONTS["pacer"],
+            font=FONTS["rsvp"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         )

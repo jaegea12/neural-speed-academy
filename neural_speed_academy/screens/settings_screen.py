@@ -67,6 +67,43 @@ class SettingsScreen(BaseScreen):
             )
             rb.pack(pady=4)
 
+        # Training text section
+        tk.Label(
+            container,
+            text="TRAINING TEXT",
+            font=FONTS["section_header"],
+            fg=COLORS["accent"],
+            bg=COLORS["bg"],
+        ).pack(pady=(25, 5))
+
+        tk.Label(
+            container,
+            text="Used as the default text for Pacer, RSVP, and Chunking exercises",
+            font=FONTS["body"],
+            fg=COLORS["muted"],
+            bg=COLORS["bg"],
+        ).pack(pady=(0, 8))
+
+        text_frame = tk.Frame(container, bg=COLORS["card"])
+        text_frame.pack(fill="x", padx=20)
+
+        self.text_box = tk.Text(
+            text_frame,
+            font=FONTS["body"],
+            bg=COLORS["card"],
+            fg=COLORS["text_on_card"],
+            insertbackground=COLORS["text_on_card"],
+            wrap="word",
+            height=8,
+            width=60,
+            relief="flat",
+            padx=8,
+            pady=8,
+        )
+        self.text_box.pack(fill="x")
+        self.text_box.insert("1.0", theme_manager.training_text)
+
+        # Buttons
         btn_row = tk.Frame(container, bg=COLORS["bg"])
         btn_row.pack(pady=(20, 0))
 
@@ -97,8 +134,9 @@ class SettingsScreen(BaseScreen):
         ).pack(side="left", padx=6)
 
     def _apply_and_save(self) -> None:
-        """Apply the selected theme, save to disk, and refresh."""
+        """Apply the selected theme and training text, save to disk, and refresh."""
         theme_manager.set_profile(self.selected.get())
+        theme_manager.training_text = self.text_box.get("1.0", "end")
         theme_manager.save()
         self.show()
 

@@ -6,7 +6,7 @@ from __future__ import annotations
 import tkinter as tk
 
 from neural_speed_academy.exercises.base import BaseExercise
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, FONTS, theme_manager
 from neural_speed_academy.config import PACER_CONFIG
 
 
@@ -71,7 +71,7 @@ class PacerExercise(BaseExercise):
             bd=0
         )
         text_input.pack()
-        text_input.insert("1.0", "Paste your reading material here...")
+        text_input.insert("1.0", theme_manager.training_text)
 
         # WPM slider
         tk.Label(

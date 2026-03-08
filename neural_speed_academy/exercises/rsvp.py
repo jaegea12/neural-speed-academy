@@ -8,22 +8,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, FONTS, theme_manager
 from neural_speed_academy.config import RSVP_CONFIG, USER_DATA_CONFIG
-
-SAMPLE_TEXT = (
-    "The human brain processes visual information far faster than most people "
-    "realize. Research at MIT has shown that the visual system can identify "
-    "images seen for as little as thirteen milliseconds. When reading, the "
-    "bottleneck is rarely perception itself but rather the habit of "
-    "subvocalization, the internal voice that reads each word aloud in your "
-    "mind. By presenting words faster than the speed of inner speech, RSVP "
-    "training forces the brain to process text visually rather than "
-    "phonologically. Over time this builds a direct pathway from visual input "
-    "to comprehension, bypassing the slower auditory loop. Studies have shown "
-    "that trained readers can sustain comprehension at speeds well above four "
-    "hundred words per minute using this technique."
-)
 
 
 class RsvpExercise(BaseExercise):
@@ -89,7 +75,7 @@ class RsvpExercise(BaseExercise):
             bd=0
         )
         text_input.pack()
-        text_input.insert("1.0", SAMPLE_TEXT)
+        text_input.insert("1.0", theme_manager.training_text)
 
         # WPM slider
         tk.Label(
@@ -182,7 +168,7 @@ class RsvpExercise(BaseExercise):
         self.lbl_word = tk.Label(
             self.root,
             text="",
-            font=FONTS["flash"],
+            font=FONTS["rsvp"],
             fg=COLORS["fg"],
             bg=COLORS["bg"]
         )
