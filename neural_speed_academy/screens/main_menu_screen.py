@@ -43,12 +43,12 @@ class MainMenuScreen(BaseScreen):
         # Buttons
         btn_cfg = dict(
             width=30, pady=12, relief="flat",
-            font=FONTS["btn_bold"],
+            font=FONTS["btn_bold"], cursor="hand2",
         )
 
         tk.Button(
             container,
-            text="▶  START TRAINING",
+            text="START TRAINING",
             bg=COLORS["accent"], fg=COLORS["btn_text"],
             command=lambda: self.navigator.navigate_to("login"),
             **btn_cfg,
@@ -56,7 +56,7 @@ class MainMenuScreen(BaseScreen):
 
         tk.Button(
             container,
-            text="📖  INTRODUCTION",
+            text="INTRODUCTION",
             bg=COLORS["action"], fg=COLORS["btn_text"],
             command=lambda: self.navigator.navigate_to("introduction"),
             **btn_cfg,
@@ -64,7 +64,7 @@ class MainMenuScreen(BaseScreen):
 
         tk.Button(
             container,
-            text="🛤️  TRAINING PATHS",
+            text="TRAINING PATHS",
             bg=COLORS["action"], fg=COLORS["btn_text"],
             command=lambda: self.navigator.navigate_to("paths"),
             **btn_cfg,
@@ -72,7 +72,15 @@ class MainMenuScreen(BaseScreen):
 
         tk.Button(
             container,
-            text="ℹ️  INFORMATION",
+            text="SETTINGS",
+            bg=COLORS["card"], fg=COLORS["fg"],
+            command=lambda: self.navigator.navigate_to("settings"),
+            **btn_cfg,
+        ).pack(pady=6)
+
+        tk.Button(
+            container,
+            text="INFORMATION",
             bg=COLORS["card"], fg=COLORS["fg"],
             command=self._show_info,
             **btn_cfg,
@@ -80,7 +88,7 @@ class MainMenuScreen(BaseScreen):
 
         tk.Button(
             container,
-            text="✖  QUIT",
+            text="QUIT",
             bg=COLORS["alert"], fg=COLORS["btn_text"],
             command=self._quit,
             **btn_cfg,

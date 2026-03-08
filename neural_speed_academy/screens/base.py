@@ -98,7 +98,7 @@ class BaseScreen(ABC):
                 ).pack(side="left", padx=2)
 
         if user:
-            stats = f"👤 {user.name.upper()} | XP: {user.xp}"
+            stats = f"{user.name.upper()} | XP: {user.xp}"
             tk.Label(
                 bar,
                 text=stats,
@@ -119,7 +119,7 @@ class BaseScreen(ABC):
         win.geometry("700x600")
         tk.Label(
             win,
-            text=f"📘 {title}",
+            text=title,
             font=FONTS["sub"],
             fg=COLORS["accent"],
             bg=COLORS["card"],

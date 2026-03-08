@@ -53,9 +53,9 @@ class BaseMenuScreen(BaseScreen):
         ).pack(pady=10)
 
         tk.Button(
-            container, text="📘 READ GUIDE",
+            container, text="READ GUIDE",
             bg=COLORS["accent"], fg=COLORS["btn_text"],
-            command=lambda: self.show_guide(guide_key)
+            cursor="hand2", command=lambda: self.show_guide(guide_key),
         ).pack(pady=5)
 
         grid = tk.Frame(container, bg=COLORS["bg"])
@@ -84,7 +84,7 @@ class BaseMenuScreen(BaseScreen):
                         grid, text=name, command=cmd,
                         bg=COLORS[color_key], fg=COLORS["btn_text"],
                         font=FONTS["menu_btn"], width=btn_width,
-                        pady=6, relief="flat"
+                        pady=6, relief="flat", cursor="hand2",
                     )
                     btn.grid(row=i + 1, column=col_idx, padx=10, pady=4)
                     if i >= cutoff:
@@ -111,7 +111,7 @@ class BaseMenuScreen(BaseScreen):
                 container, text="▼ SHOW ADVANCED",
                 bg=COLORS["card"], fg=COLORS["fg"],
                 font=FONTS["btn_sm"], relief="flat",
-                command=toggle_advanced
+                cursor="hand2", command=toggle_advanced,
             )
             toggle_btn.pack(pady=5)
 
@@ -143,10 +143,11 @@ class BaseMenuScreen(BaseScreen):
         # Guide button
         tk.Button(
             container,
-            text="📘 READ GUIDE",
+            text="READ GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
-            command=lambda: self.show_guide(guide_key)
+            cursor="hand2",
+            command=lambda: self.show_guide(guide_key),
         ).pack(pady=5)
 
         # Grid
@@ -187,15 +188,10 @@ class BaseMenuScreen(BaseScreen):
                 global_idx = i
                 color_key = self._difficulty_color(global_idx, len(col1_items))
                 btn = tk.Button(
-                    grid,
-                    text=name,
-                    command=cmd,
-                    bg=COLORS[color_key],
-                    fg=COLORS["btn_text"],
-                    font=FONTS["btn"],
-                    width=35,
-                    pady=8,
-                    relief="flat"
+                    grid, text=name, command=cmd,
+                    bg=COLORS[color_key], fg=COLORS["btn_text"],
+                    font=FONTS["btn"], width=35,
+                    pady=8, relief="flat", cursor="hand2",
                 )
                 btn.grid(row=i + 1, column=0, padx=15, pady=5)
                 if i >= cutoff:
@@ -207,15 +203,10 @@ class BaseMenuScreen(BaseScreen):
                 global_idx = i
                 color_key = self._difficulty_color(global_idx, len(col2_items))
                 btn = tk.Button(
-                    grid,
-                    text=name,
-                    command=cmd,
-                    bg=COLORS[color_key],
-                    fg=COLORS["btn_text"],
-                    font=FONTS["btn"],
-                    width=35,
-                    pady=8,
-                    relief="flat"
+                    grid, text=name, command=cmd,
+                    bg=COLORS[color_key], fg=COLORS["btn_text"],
+                    font=FONTS["btn"], width=35,
+                    pady=8, relief="flat", cursor="hand2",
                 )
                 btn.grid(row=i + 1, column=1, padx=15, pady=5)
                 if i >= cutoff:
@@ -242,7 +233,7 @@ class BaseMenuScreen(BaseScreen):
                 container, text="▼ SHOW ADVANCED",
                 bg=COLORS["card"], fg=COLORS["fg"],
                 font=FONTS["btn_sm"], relief="flat",
-                command=toggle_advanced
+                cursor="hand2", command=toggle_advanced,
             )
             toggle_btn.pack(pady=5)
 

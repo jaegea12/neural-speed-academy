@@ -66,7 +66,7 @@ class PrimingExercise(BaseExercise):
         # Guide button
         guide_btn = tk.Button(
             self.root,
-            text="📘 GUIDE",
+            text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             command=lambda: self.show_guide("priming")

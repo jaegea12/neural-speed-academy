@@ -119,6 +119,7 @@ class PathSelectionScreen(BaseScreen):
             relief="flat",
             width=15,
             pady=6,
+            cursor="hand2",
             command=lambda pid=path_id: self._start_path(pid),
         ).pack()
 
@@ -255,17 +256,19 @@ class PathSessionScreen(BaseScreen):
             relief="flat",
             width=35,
             pady=12,
+            cursor="hand2",
             command=lambda: self._launch_step(ex_type, params, path_id, current),
         ).pack(pady=20)
 
         # Skip button
         tk.Button(
             container,
-            text="SKIP THIS STEP →",
+            text="SKIP THIS STEP",
             font=FONTS["btn_sm"],
             bg=COLORS["card"],
             fg=COLORS["fg"],
             relief="flat",
+            cursor="hand2",
             command=lambda: self._advance_step(path_id, current),
         ).pack()
 

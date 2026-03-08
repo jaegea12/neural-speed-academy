@@ -58,6 +58,7 @@ class LoginScreen(BaseScreen):
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             relief="flat",
+            cursor="hand2",
             command=self._do_login,
         ).pack()
 

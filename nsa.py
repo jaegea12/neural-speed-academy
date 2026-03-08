@@ -3,7 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from typing import Optional
 
-from neural_speed_academy.theme import COLORS
+from neural_speed_academy.theme import COLORS, theme_manager
 from neural_speed_academy.state import UserProfile
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
 from neural_speed_academy.navigation.navigator import Navigator
@@ -38,6 +38,9 @@ class SpeedReadingApp:
             self.root.geometry("1280x800")
         self.root.configure(bg=COLORS["bg"])
 
+        # Load persisted app settings (theme, etc.)
+        theme_manager.load()
+
         # Repository for user data persistence
         self.user_repo = JsonUserRepository()
 
@@ -71,7 +74,6 @@ class SpeedReadingApp:
             "setup_rsvp": self.rsvp_exercise.start,
             "setup_chunking": self.chunking_exercise.start,
             "show_stats": lambda: self.navigator.navigate_to("stats"),
-            "show_settings": lambda: self.navigator.navigate_to("settings"),
             "show_paths": lambda: self.navigator.navigate_to("paths"),
         }
 

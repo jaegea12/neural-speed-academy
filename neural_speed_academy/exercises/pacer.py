@@ -37,7 +37,7 @@ class PacerExercise(BaseExercise):
         # Guide button
         guide_btn = tk.Button(
             container,
-            text="📘 GUIDE",
+            text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             command=lambda: self.show_guide("pacer")

@@ -57,7 +57,7 @@ class ChunkingExercise(BaseExercise):
         # Guide button
         tk.Button(
             container,
-            text="📘 GUIDE",
+            text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             command=lambda: self.show_guide("chunking")

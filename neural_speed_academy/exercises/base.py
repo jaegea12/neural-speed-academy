@@ -118,7 +118,7 @@ class BaseExercise(ABC):
                 ).pack(side="left", padx=2)
 
         if user:
-            stats = f"👤 {user.name.upper()} | XP: {user.xp}"
+            stats = f"{user.name.upper()} | XP: {user.xp}"
             tk.Label(
                 bar,
                 text=stats,
@@ -139,7 +139,7 @@ class BaseExercise(ABC):
         win.geometry("700x600")
         tk.Label(
             win,
-            text=f"📘 {title}",
+            text=title,
             font=FONTS["sub"],
             fg=COLORS["accent"],
             bg=COLORS["card"],

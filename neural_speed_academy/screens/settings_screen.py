@@ -1,5 +1,6 @@
 """
 Settings screen for theme selection.
+Settings are app-level and independent of user profiles.
 """
 from __future__ import annotations
 
@@ -26,7 +27,7 @@ class SettingsScreen(BaseScreen):
             text="SETTINGS",
             font=FONTS["header"],
             fg=COLORS["fg"],
-            bg=COLORS["bg"]
+            bg=COLORS["bg"],
         ).pack(pady=(0, 30))
 
         # Theme section
@@ -35,7 +36,7 @@ class SettingsScreen(BaseScreen):
             text="COLOR PROFILE",
             font=FONTS["section_header"],
             fg=COLORS["accent"],
-            bg=COLORS["bg"]
+            bg=COLORS["bg"],
         ).pack(pady=(0, 15))
 
         profiles = {
@@ -66,20 +67,42 @@ class SettingsScreen(BaseScreen):
             )
             rb.pack(pady=4)
 
+        btn_row = tk.Frame(container, bg=COLORS["bg"])
+        btn_row.pack(pady=(20, 0))
+
         tk.Button(
-            container,
-            text="APPLY",
+            btn_row,
+            text="APPLY & SAVE",
             font=FONTS["btn_bold"],
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             relief="flat",
-            width=20,
+            width=16,
             pady=8,
-            command=self._apply_theme,
-        ).pack(pady=(20, 0))
+            cursor="hand2",
+            command=self._apply_and_save,
+        ).pack(side="left", padx=6)
 
-    def _apply_theme(self) -> None:
-        """Apply the selected theme and refresh the screen."""
+        tk.Button(
+            btn_row,
+            text="DEFAULT SETTINGS",
+            font=FONTS["btn_bold"],
+            bg=COLORS["card"],
+            fg=COLORS["fg"],
+            relief="flat",
+            width=16,
+            pady=8,
+            cursor="hand2",
+            command=self._reset_defaults,
+        ).pack(side="left", padx=6)
+
+    def _apply_and_save(self) -> None:
+        """Apply the selected theme, save to disk, and refresh."""
         theme_manager.set_profile(self.selected.get())
-        # Re-show this screen to reflect the new colors
+        theme_manager.save()
+        self.show()
+
+    def _reset_defaults(self) -> None:
+        """Reset to default settings, save, and refresh."""
+        theme_manager.reset_defaults()
         self.show()

@@ -1,8 +1,12 @@
 """
 UI theme constants for Neural Speed Academy.
 Supports multiple color profiles with runtime switching.
+Settings are persisted to a JSON file independent of user profiles.
 """
 from __future__ import annotations
+
+import json
+import os
 
 
 # --- Color Profiles ---
@@ -149,10 +153,17 @@ FONTS = {
 }
 
 
-class ThemeManager:
-    """Manages the active color profile and notifies listeners on change."""
+DEFAULT_PROFILE = "dark"
+SETTINGS_FILE = "nsa_settings.json"
 
-    def __init__(self, profile: str = "dark"):
+
+class ThemeManager:
+    """Manages the active color profile and notifies listeners on change.
+
+    Settings are stored in a JSON file independent of user profiles.
+    """
+
+    def __init__(self, profile: str = DEFAULT_PROFILE):
         self._profile = profile
         self._listeners: list = []
 
@@ -175,13 +186,39 @@ class ThemeManager:
         """Register a callback for theme changes."""
         self._listeners.append(callback)
 
+    def save(self) -> None:
+        """Persist current settings to disk."""
+        try:
+            with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+                json.dump({"profile": self._profile}, f, indent=2)
+        except IOError:
+            pass
+
+    def load(self) -> None:
+        """Load settings from disk. Falls back to defaults on error."""
+        if not os.path.exists(SETTINGS_FILE):
+            return
+        try:
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            profile = data.get("profile", DEFAULT_PROFILE)
+            if profile in THEME_PROFILES:
+                self.set_profile(profile)
+        except (IOError, json.JSONDecodeError, TypeError):
+            pass
+
+    def reset_defaults(self) -> None:
+        """Reset to default settings and save."""
+        self.set_profile(DEFAULT_PROFILE)
+        self.save()
+
     @staticmethod
     def available_profiles() -> list:
         return list(THEME_PROFILES.keys())
 
 
 # Global theme manager instance
-theme_manager = ThemeManager("dark")
+theme_manager = ThemeManager(DEFAULT_PROFILE)
 
 
 def get_colors() -> dict:
