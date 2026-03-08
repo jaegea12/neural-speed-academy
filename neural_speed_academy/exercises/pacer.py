@@ -124,10 +124,18 @@ class PacerExercise(BaseExercise):
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.setContentsMargins(40, 5, 40, 5)
-        cl.setSpacing(4)
+        cl.setSpacing(2)
 
-        # Guide button
+        slider_groove = (
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+
+        # Top row: guide + title
         top = QHBoxLayout()
+        top.setContentsMargins(0, 0, 0, 0)
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
@@ -146,55 +154,61 @@ class PacerExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input
+        # Text input — 60% width, taller
         self._text_input = QTextEdit()
         self._text_input.setFont(make_qfont("pacer_text"))
         self._text_input.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"QTextEdit {{ background-color: {c['card']}; "
+            f"color: {c['text_on_card']}; "
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        self._text_input.setFixedHeight(120)
-        self._text_input.setMinimumWidth(700)
+        self._text_input.setMinimumHeight(180)
+        self._text_input.setMaximumWidth(960)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input)
+        cl.addWidget(self._text_input, 1, Qt.AlignmentFlag.AlignCenter)
 
-        # WPM slider
-        wpm_lbl = QLabel("Target Speed (WPM):")
+        # WPM: label + slider + value in one compact row
+        wpm_row = QHBoxLayout()
+        wpm_row.setContentsMargins(0, 0, 0, 0)
+        wpm_row.setSpacing(8)
+        wpm_row.addStretch()
+        wpm_lbl = QLabel("Target WPM:")
         wpm_lbl.setFont(make_qfont("slider_label"))
         wpm_lbl.setStyleSheet(f"color: {c['fg']};")
-        wpm_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(wpm_lbl)
+        wpm_row.addWidget(wpm_lbl)
+
+        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
+        self._wpm_slider.setRange(
+            PACER_CONFIG["min_wpm"], PACER_CONFIG["max_wpm"]
+        )
+        self._wpm_slider.setValue(PACER_CONFIG["default_wpm"])
+        self._wpm_slider.setFixedWidth(300)
+        self._wpm_slider.setStyleSheet(slider_groove)
 
         self._wpm_display = QLabel(str(PACER_CONFIG["default_wpm"]))
         self._wpm_display.setFont(make_qfont("counter"))
         self._wpm_display.setStyleSheet(f"color: {c['accent']};")
-        self._wpm_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
-        self._wpm_slider.setRange(PACER_CONFIG["min_wpm"], PACER_CONFIG["max_wpm"])
-        self._wpm_slider.setValue(PACER_CONFIG["default_wpm"])
-        self._wpm_slider.setFixedWidth(400)
-        self._wpm_slider.setStyleSheet(
-            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
+        self._wpm_display.setFixedWidth(50)
         self._wpm_slider.valueChanged.connect(
             lambda v: self._wpm_display.setText(str(v))
         )
-        cl.addWidget(self._wpm_slider, alignment=Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(self._wpm_display)
+        wpm_row.addWidget(self._wpm_slider)
+        wpm_row.addWidget(self._wpm_display)
+        wpm_row.addStretch()
+        cl.addLayout(wpm_row)
 
-        # Mode selector
-        mode_lbl = QLabel("Highlight Mode:")
+        # Mode selector: label + radios in one row
+        mode_row = QHBoxLayout()
+        mode_row.setContentsMargins(0, 0, 0, 0)
+        mode_row.setSpacing(8)
+        mode_row.addStretch()
+        mode_lbl = QLabel("Mode:")
         mode_lbl.setFont(make_qfont("slider_label"))
         mode_lbl.setStyleSheet(f"color: {c['fg']};")
-        mode_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(mode_lbl)
+        mode_row.addWidget(mode_lbl)
 
         rb_style = _radio_style(c)
         self._mode_group = QButtonGroup(self)
-        mode_row = QHBoxLayout()
-        mode_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
         for key, label in self.MODES.items():
             rb = QRadioButton(label)
             rb.setFont(make_qfont("btn"))
@@ -205,75 +219,76 @@ class PacerExercise(BaseExercise):
             self._mode_group.addButton(rb)
             mode_row.addWidget(rb)
         self._mode_group.buttonClicked.connect(self._on_mode_changed)
+        mode_row.addStretch()
         cl.addLayout(mode_row)
 
-        slider_groove = (
-            f"QSlider::groove:horizontal {{ background: {c['card']}; "
-            f"height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
-            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
-
-        # Chunk size slider (always visible)
-        chunk_lbl = QLabel("Words per chunk:")
+        # Chunk size: label + slider + value in one row
+        chunk_row = QHBoxLayout()
+        chunk_row.setContentsMargins(0, 0, 0, 0)
+        chunk_row.setSpacing(8)
+        chunk_row.addStretch()
+        chunk_lbl = QLabel("Words/chunk:")
         chunk_lbl.setFont(make_qfont("slider_label"))
         chunk_lbl.setStyleSheet(f"color: {c['fg']};")
-        chunk_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(chunk_lbl)
-
-        self._chunk_display = QLabel("3")
-        self._chunk_display.setFont(make_qfont("counter"))
-        self._chunk_display.setStyleSheet(f"color: {c['accent']};")
-        self._chunk_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        chunk_row.addWidget(chunk_lbl)
 
         self._chunk_slider = QSlider(Qt.Orientation.Horizontal)
         self._chunk_slider.setRange(1, 10)
         self._chunk_slider.setValue(3)
-        self._chunk_slider.setFixedWidth(300)
+        self._chunk_slider.setFixedWidth(200)
         self._chunk_slider.setStyleSheet(slider_groove)
+
+        self._chunk_display = QLabel("3")
+        self._chunk_display.setFont(make_qfont("counter"))
+        self._chunk_display.setStyleSheet(f"color: {c['accent']};")
+        self._chunk_display.setFixedWidth(30)
         self._chunk_slider.valueChanged.connect(
             lambda v: self._chunk_display.setText(str(v))
         )
-        cl.addWidget(self._chunk_slider, alignment=Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(self._chunk_display)
+        chunk_row.addWidget(self._chunk_slider)
+        chunk_row.addWidget(self._chunk_display)
+        chunk_row.addStretch()
+        cl.addLayout(chunk_row)
 
-        # N-lines slider (visible only for multi / z-pattern)
+        # N-lines: label + slider + value in one row (multi/z-pattern only)
         self._nlines_frame = QFrame()
         self._nlines_frame.setStyleSheet("background: transparent;")
-        nf_layout = QVBoxLayout(self._nlines_frame)
-        nf_layout.setContentsMargins(0, 0, 0, 0)
-        nf_layout.setSpacing(2)
-
-        nlines_lbl = QLabel("Lines per group:")
+        nlines_row = QHBoxLayout(self._nlines_frame)
+        nlines_row.setContentsMargins(0, 0, 0, 0)
+        nlines_row.setSpacing(8)
+        nlines_row.addStretch()
+        nlines_lbl = QLabel("Lines/group:")
         nlines_lbl.setFont(make_qfont("slider_label"))
         nlines_lbl.setStyleSheet(f"color: {c['fg']};")
-        nlines_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        nf_layout.addWidget(nlines_lbl)
-
-        self._nlines_display = QLabel("3")
-        self._nlines_display.setFont(make_qfont("counter"))
-        self._nlines_display.setStyleSheet(f"color: {c['accent']};")
-        self._nlines_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        nlines_row.addWidget(nlines_lbl)
 
         self._nlines_slider = QSlider(Qt.Orientation.Horizontal)
         self._nlines_slider.setRange(2, 5)
         self._nlines_slider.setValue(3)
-        self._nlines_slider.setFixedWidth(200)
+        self._nlines_slider.setFixedWidth(150)
         self._nlines_slider.setStyleSheet(slider_groove)
+
+        self._nlines_display = QLabel("3")
+        self._nlines_display.setFont(make_qfont("counter"))
+        self._nlines_display.setStyleSheet(f"color: {c['accent']};")
+        self._nlines_display.setFixedWidth(20)
         self._nlines_slider.valueChanged.connect(
             lambda v: self._nlines_display.setText(str(v))
         )
-        nf_layout.addWidget(self._nlines_slider, alignment=Qt.AlignmentFlag.AlignCenter)
-        nf_layout.addWidget(self._nlines_display)
+        nlines_row.addWidget(self._nlines_slider)
+        nlines_row.addWidget(self._nlines_display)
+        nlines_row.addStretch()
 
         self._nlines_frame.setVisible(False)
-        cl.addWidget(self._nlines_frame, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._nlines_frame)
 
-        # Start button
+        # Start button + hint
+        cl.addSpacing(4)
         start_btn = QPushButton("START READING")
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
+            f"QPushButton {{ background-color: {c['success']}; "
+            f"color: {c['btn_text']}; "
             f"border: none; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
