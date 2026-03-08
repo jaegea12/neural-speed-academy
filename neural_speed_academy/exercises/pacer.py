@@ -135,16 +135,26 @@ class PacerExercise(BaseExercise):
         mode_lbl = QLabel("Highlight Mode:")
         mode_lbl.setFont(make_qfont("slider_label"))
         mode_lbl.setStyleSheet(f"color: {c['fg']};")
+        mode_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(mode_lbl)
+
+        rb_style = (
+            f"QRadioButton {{ color: {c['fg']}; background: transparent; spacing: 8px; }}"
+            f"QRadioButton::indicator {{ width: 14px; height: 14px; "
+            f"border: 2px solid {c['muted']}; border-radius: 7px; "
+            f"background: transparent; }}"
+            f"QRadioButton::indicator:checked {{ "
+            f"border: 2px solid {c['accent']}; "
+            f"background: {c['accent']}; }}"
+        )
 
         self._mode_group = QButtonGroup(self)
         mode_row = QHBoxLayout()
+        mode_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
         for key, label in self.MODES.items():
             rb = QRadioButton(label)
             rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(
-                f"QRadioButton {{ color: {c['fg']}; background: transparent; spacing: 8px; }}"
-            )
+            rb.setStyleSheet(rb_style)
             rb.setProperty("mode_key", key)
             if key == "word":
                 rb.setChecked(True)
