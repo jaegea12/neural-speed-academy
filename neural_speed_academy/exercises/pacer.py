@@ -309,9 +309,10 @@ class PacerExercise(BaseExercise):
         )
         self._layout.addWidget(self._progress_bar)
 
-        # Reader page — width from FOV, height fills available space
+        # Reader page — A4-ish proportions, capped for screen safety
         fov = theme_manager.fov_config
         page_w = fov["page_width"]
+        page_h = min(int(page_w * 1.35), 900)
         font_size = fov["font_size"]
 
         self._reader = QTextEdit()
@@ -324,7 +325,7 @@ class PacerExercise(BaseExercise):
             f"border: 1px solid {c['muted']}; "
             f"padding: {py}px {px}px; }}"
         )
-        self._reader.setFixedWidth(page_w)
+        self._reader.setFixedSize(page_w, page_h)
         self._reader.setReadOnly(True)
         self._reader.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
@@ -503,9 +504,9 @@ class PacerExercise(BaseExercise):
     def _steps_multi(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
-        """Chunk-width highlight sweeping line-by-line through n_lines groups.
-        The overlay height matches the current line; n_lines controls how
-        many lines are processed before jumping to the next block."""
+        """Chunk-width highlight spanning n_lines in height, sweeping
+        left-to-right across the first line of each group, then jumping
+        down to the next group."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
@@ -513,15 +514,20 @@ class PacerExercise(BaseExercise):
         steps: list[tuple[int, int, int, int]] = []
         for i in range(0, len(lines), n):
             group = lines[i : i + n]
-            for ls, le in group:
-                steps.extend(self._chunk_line(text, ls, le, 3, ls, le))
+            gs = group[0][0]
+            ge = group[-1][1]
+            # Sweep across the first line; overlay height spans all n_lines
+            first_ls, first_le = group[0]
+            steps.extend(
+                self._chunk_line(text, first_ls, first_le, 3, gs, ge)
+            )
         return steps or [(0, len(text), 0, len(text))]
 
     def _steps_zpattern(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
-        """Z-pattern: each n_lines group is swept line-by-line.
-        Overlay height matches the current line."""
+        """Z-pattern: 3 sweeps per n_lines group (left→right, right→left,
+        left→right). Overlay height spans the full group."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
@@ -529,8 +535,16 @@ class PacerExercise(BaseExercise):
         steps: list[tuple[int, int, int, int]] = []
         for i in range(0, len(lines), n):
             group = lines[i : i + n]
-            for ls, le in group:
-                steps.extend(self._chunk_line(text, ls, le, 3, ls, le))
+            gs = group[0][0]
+            ge = group[-1][1]
+            block_len = ge - gs
+            if block_len <= 0:
+                steps.append((gs, ge, gs, ge))
+                continue
+            seg = block_len // 3
+            steps.append((gs, gs + seg, gs, ge))
+            steps.append((gs + seg, gs + 2 * seg, gs, ge))
+            steps.append((gs + 2 * seg, ge, gs, ge))
         return steps or [(0, len(text), 0, len(text))]
 
     # ── Overlay positioning ──
