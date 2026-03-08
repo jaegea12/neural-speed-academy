@@ -42,7 +42,7 @@ class SettingsScreen(BaseScreen):
 
         # Fixed-width inner container for centered look
         inner = QFrame()
-        inner.setFixedWidth(600)
+        inner.setFixedWidth(750)
         inner.setStyleSheet("background: transparent;")
         il = QVBoxLayout(inner)
         il.setSpacing(6)

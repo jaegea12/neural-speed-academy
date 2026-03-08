@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
-    QMessageBox,
+    QMessageBox, QDialog, QScrollArea,
 )
 from PyQt6.QtCore import Qt, QTimer
 
@@ -140,19 +140,53 @@ class BaseExercise(QWidget):
     def show_guide(self, topic: str) -> None:
         from neural_speed_academy.config import EXERCISE_GUIDES
         c = COLORS
-        title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
-        msg = QMessageBox(self)
-        msg.setWindowTitle(title)
-        msg.setText(text)
-        msg.setStyleSheet(
-            f"QMessageBox {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; }}"
-            f"QMessageBox QLabel {{ color: {c['text_on_card']}; }}"
-            f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
-            f"padding: 6px 20px; border-radius: 3px; }}"
+        guide_title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(guide_title)
+        dlg.setMinimumSize(600, 400)
+        dlg.setStyleSheet(f"background-color: {c['card']};")
+
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(20, 15, 20, 15)
+        layout.setSpacing(10)
+
+        heading = QLabel(guide_title)
+        heading.setFont(make_qfont("section_header"))
+        heading.setStyleSheet(f"color: {c['accent']};")
+        heading.setWordWrap(True)
+        layout.addWidget(heading)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(
+            f"QScrollArea {{ border: none; background: transparent; }}"
         )
-        msg.exec()
+        body_widget = QWidget()
+        body_layout = QVBoxLayout(body_widget)
+        body_layout.setContentsMargins(0, 0, 0, 0)
+
+        body = QLabel(text)
+        body.setFont(make_qfont("body"))
+        body.setStyleSheet(f"color: {c['text_on_card']};")
+        body.setWordWrap(True)
+        body_layout.addWidget(body)
+        body_layout.addStretch()
+
+        scroll.setWidget(body_widget)
+        layout.addWidget(scroll, 1)
+
+        close_btn = QPushButton("CLOSE")
+        close_btn.setFont(make_qfont("btn_bold"))
+        close_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 6px 20px; border-radius: 3px;"
+        )
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.clicked.connect(dlg.accept)
+        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        dlg.exec()
 
     def complete(self, result: ExerciseResult) -> bool:
         """Save XP, log history, track personal bests. Returns True if new PB."""

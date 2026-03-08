@@ -39,7 +39,7 @@ class RsvpExercise(BaseExercise):
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setContentsMargins(80, 10, 80, 10)
+        cl.setContentsMargins(40, 10, 40, 10)
         cl.setSpacing(6)
 
         # Guide
@@ -67,9 +67,9 @@ class RsvpExercise(BaseExercise):
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
         self._text_input.setFixedHeight(120)
-        self._text_input.setMaximumWidth(600)
+        self._text_input.setMinimumWidth(700)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._text_input)
 
         # WPM slider
         wpm_label = QLabel("Words Per Minute:")

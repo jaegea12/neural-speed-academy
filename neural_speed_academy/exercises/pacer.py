@@ -12,9 +12,9 @@ from PyQt6.QtWidgets import (
     QTextEdit, QSlider, QRadioButton, QButtonGroup, QFrame, QMessageBox,
     QProgressBar,
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QRect
 from PyQt6.QtGui import (
-    QTextCursor, QColor, QFont, QKeySequence, QShortcut,
+    QTextCursor, QColor, QFont, QKeySequence, QShortcut, QPainter,
 )
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
@@ -58,6 +58,32 @@ def _radio_style(c: dict) -> str:
     )
 
 
+class _HighlightReader(QTextEdit):
+    """QTextEdit that paints a highlight rectangle behind the text."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self._hl_rect: QRect | None = None
+        self._hl_color: QColor = QColor(255, 224, 71, 80)
+
+    def set_highlight(self, rect: QRect | None) -> None:
+        self._hl_rect = rect
+        self.viewport().update()
+
+    def set_highlight_color(self, color: QColor) -> None:
+        self._hl_color = color
+
+    def paintEvent(self, event) -> None:
+        if self._hl_rect is not None:
+            painter = QPainter(self.viewport())
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            painter.setBrush(self._hl_color)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRoundedRect(self._hl_rect, 3, 3)
+            painter.end()
+        super().paintEvent(event)
+
+
 class PacerExercise(BaseExercise):
 
     MODES = {
@@ -97,7 +123,7 @@ class PacerExercise(BaseExercise):
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setContentsMargins(80, 5, 80, 5)
+        cl.setContentsMargins(40, 5, 40, 5)
         cl.setSpacing(4)
 
         # Guide button
@@ -128,6 +154,7 @@ class PacerExercise(BaseExercise):
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
         self._text_input.setFixedHeight(120)
+        self._text_input.setMinimumWidth(700)
         self._text_input.setPlainText(theme_manager.training_text)
         cl.addWidget(self._text_input)
 
@@ -343,7 +370,7 @@ class PacerExercise(BaseExercise):
         page_h = min(int(page_w * 1.35), 900)
         font_size = fov["font_size"]
 
-        self._reader = QTextEdit()
+        self._reader = _HighlightReader()
         reader_font = QFont("Georgia", font_size)
         self._reader.setFont(reader_font)
         px, py = fov["pad_x"], fov["pad_y"]
@@ -362,24 +389,13 @@ class PacerExercise(BaseExercise):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
 
-        joined = " ".join(words)
-        self._reader.setPlainText(joined)
-
-        # Highlight overlay — child of viewport so cursorRect coords
-        # map directly without offset translation
-        vp = self._reader.viewport()
-        self._overlay = QWidget(vp)
+        # Set highlight color
         hl_color = QColor(c["highlight"])
         hl_color.setAlpha(80)
-        self._overlay.setStyleSheet(
-            f"background-color: rgba({hl_color.red()},{hl_color.green()},"
-            f"{hl_color.blue()},{hl_color.alpha()}); border-radius: 3px;"
-        )
-        self._overlay.setAttribute(
-            Qt.WidgetAttribute.WA_TransparentForMouseEvents
-        )
-        self._overlay.setGeometry(0, 0, 0, 0)
-        self._overlay.show()
+        self._reader.set_highlight_color(hl_color)
+
+        joined = " ".join(words)
+        self._reader.setPlainText(joined)
 
         self._layout.addWidget(
             self._reader, 1, Qt.AlignmentFlag.AlignCenter
@@ -543,14 +559,14 @@ class PacerExercise(BaseExercise):
             steps.append((gs + 2 * seg, ge, gs, ge))
         return steps or [(0, len(text), 0, len(text))]
 
-    # ── Overlay positioning ──
+    # ── Highlight positioning ──
 
-    def _overlay_rect(
+    def _highlight_rect(
         self, start: int, end: int, group_start: int, group_end: int,
-    ) -> tuple[int, int, int, int]:
-        """Compute pixel rect for the highlight overlay.
+    ) -> QRect:
+        """Compute pixel QRect for the highlight.
         Width from (start, end), height from (group_start, group_end).
-        Coordinates are in viewport space (overlay is a viewport child)."""
+        Coordinates are in viewport space."""
         cursor = self._reader.textCursor()
 
         # Horizontal extent from the chunk characters
@@ -574,7 +590,7 @@ class PacerExercise(BaseExercise):
         y = rg1.top()
         h = max(rg2.bottom() - rg1.top(), r1.height())
 
-        return x, y, w, h
+        return QRect(x, y, w, h)
 
     # ── Pacer step ──
 
@@ -582,16 +598,15 @@ class PacerExercise(BaseExercise):
         if not self._running:
             return
         if self._step_idx >= len(self._steps):
-            self._overlay.hide()
+            self._reader.set_highlight(None)
             self._quiz_phase()
             return
 
         start, end, gs, ge = self._steps[self._step_idx]
 
-        # Position the overlay highlight
-        ox, oy, ow, oh = self._overlay_rect(start, end, gs, ge)
-        self._overlay.setGeometry(ox, oy, ow, oh)
-        self._overlay.show()
+        # Paint highlight behind text
+        rect = self._highlight_rect(start, end, gs, ge)
+        self._reader.set_highlight(rect)
 
         # Scroll so the highlighted area is visible
         cursor = self._reader.textCursor()
