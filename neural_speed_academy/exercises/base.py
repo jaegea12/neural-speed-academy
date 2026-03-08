@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
-    QMessageBox, QDialog, QScrollArea,
+    QMessageBox,
 )
 from PyQt6.QtCore import Qt, QTimer
 
@@ -138,64 +138,8 @@ class BaseExercise(QWidget):
         return bar
 
     def show_guide(self, topic: str) -> None:
-        from PyQt6.QtGui import QFont
-        from neural_speed_academy.config import EXERCISE_GUIDES
-        c = COLORS
-        guide_title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
-
-        dlg = QDialog(self)
-        dlg.setWindowTitle(guide_title)
-        dlg.setMinimumSize(720, 500)
-        dlg.setStyleSheet(f"background-color: {c['card']};")
-
-        layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(30, 25, 30, 20)
-        layout.setSpacing(12)
-
-        heading = QLabel(guide_title)
-        heading.setFont(make_qfont("header"))
-        heading.setStyleSheet(f"color: {c['accent']};")
-        heading.setWordWrap(True)
-        layout.addWidget(heading)
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setStyleSheet(
-            f"QScrollArea {{ border: none; background: transparent; }}"
-            f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
-            f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
-            f"border-radius: 4px; min-height: 30px; }}"
-            f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
-            f"{{ height: 0; }}"
-        )
-        body_widget = QWidget()
-        body_layout = QVBoxLayout(body_widget)
-        body_layout.setContentsMargins(5, 5, 5, 5)
-
-        body = QLabel(text)
-        body_font = QFont("Segoe UI", 13)
-        body.setFont(body_font)
-        body.setStyleSheet(
-            f"color: {c['text_on_card']}; line-height: 1.5;"
-        )
-        body.setWordWrap(True)
-        body_layout.addWidget(body)
-        body_layout.addStretch()
-
-        scroll.setWidget(body_widget)
-        layout.addWidget(scroll, 1)
-
-        close_btn = QPushButton("CLOSE")
-        close_btn.setFont(make_qfont("btn_bold"))
-        close_btn.setStyleSheet(
-            f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 30px; border-radius: 4px;"
-        )
-        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        close_btn.clicked.connect(dlg.accept)
-        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        dlg.exec()
+        from neural_speed_academy.screens.base import _show_guide_dialog
+        _show_guide_dialog(self, topic)
 
     def complete(self, result: ExerciseResult) -> bool:
         """Save XP, log history, track personal bests. Returns True if new PB."""

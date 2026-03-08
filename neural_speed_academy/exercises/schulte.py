@@ -120,6 +120,46 @@ class SchulteExercise(BaseExercise):
         )
         cl.addWidget(self._count_lbl)
 
+        cl.addSpacing(4)
+
+        # Cell size (FOV): label + slider + value in one row
+        cell_row = QHBoxLayout()
+        cell_row.setContentsMargins(0, 0, 0, 0)
+        cell_row.setSpacing(8)
+        cell_row.addStretch()
+        cell_lbl = QLabel("Cell size:")
+        cell_lbl.setFont(make_qfont("slider_label"))
+        cell_lbl.setStyleSheet(f"color: {c['fg']};")
+        cell_row.addWidget(cell_lbl)
+
+        self._cell_slider = QSlider(Qt.Orientation.Horizontal)
+        self._cell_slider.setRange(0, 3)
+        self._cell_slider.setValue(1)  # default: Medium
+        self._cell_slider.setFixedWidth(200)
+        self._cell_slider.setStyleSheet(slider_groove)
+
+        self._cell_display = QLabel(self._cell_label(1))
+        self._cell_display.setFont(make_qfont("counter"))
+        self._cell_display.setStyleSheet(f"color: {c['accent']};")
+        self._cell_display.setFixedWidth(70)
+        self._cell_slider.valueChanged.connect(
+            lambda v: self._cell_display.setText(self._cell_label(v))
+        )
+        cell_row.addWidget(self._cell_slider)
+        cell_row.addWidget(self._cell_display)
+        cell_row.addStretch()
+        cl.addLayout(cell_row)
+
+        cell_desc = QLabel(
+            "Smaller cells require wider peripheral vision. "
+            "Increase grid size or decrease cell size as you progress."
+        )
+        cell_desc.setFont(make_qfont("body"))
+        cell_desc.setStyleSheet(f"color: {c['muted']};")
+        cell_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cell_desc.setWordWrap(True)
+        cl.addWidget(cell_desc)
+
         cl.addSpacing(8)
 
         # Start button + hint
@@ -145,6 +185,9 @@ class SchulteExercise(BaseExercise):
         shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
         shortcut.activated.connect(self._start_grid)
 
+    # Reference cell sizes (px at 1920×1080), scaled by ScreenMetrics
+    _CELL_PRESETS = {0: ("Small", 70), 1: ("Medium", 100), 2: ("Large", 120), 3: ("XL", 140)}
+
     @staticmethod
     def _grid_label(n: int) -> str:
         return f"{n}\u00d7{n}"
@@ -153,10 +196,19 @@ class SchulteExercise(BaseExercise):
     def _count_text(n: int) -> str:
         return f"Numbers 1\u2013{n * n}"
 
+    @classmethod
+    def _cell_label(cls, idx: int) -> str:
+        return cls._CELL_PRESETS[idx][0]
+
+    @classmethod
+    def _cell_px(cls, idx: int) -> int:
+        return screen_metrics.s(cls._CELL_PRESETS[idx][1])
+
     # ── Grid screen ──
 
     def _start_grid(self) -> None:
         grid_size = self._size_slider.value()
+        cell_idx = self._cell_slider.value()
         self._clear()
         self._running = True
         self.add_nav_bar()
@@ -168,7 +220,7 @@ class SchulteExercise(BaseExercise):
         self.target = 1
         self.score = 0
 
-        btn_size = screen_metrics.schulte_cell
+        btn_size = self._cell_px(cell_idx)
 
         # Stats
         stats = QHBoxLayout()
