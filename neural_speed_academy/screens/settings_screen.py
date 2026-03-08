@@ -208,12 +208,12 @@ class SettingsScreen(BaseScreen):
             self.text_box.insert("1.0", text)
 
     def _apply_and_save(self) -> None:
-        """Apply all settings, save to disk, and refresh."""
+        """Apply all settings, save to disk, and return to main menu."""
         theme_manager.set_profile(self.selected.get())
         theme_manager.fov = self.fov_var.get()
         theme_manager.training_text = self.text_box.get("1.0", "end")
         theme_manager.save()
-        self.show()
+        self.navigator.navigate_to("main_menu")
 
     def _reset_defaults(self) -> None:
         """Reset to default settings, save, and refresh."""
