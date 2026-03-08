@@ -1,25 +1,62 @@
 """
-Pacer exercise for guided reading with word highlighting.
+Pacer exercise for guided reading with configurable highlight modes.
+Supports word, chunk, line, and multi-line pacing with a keyword quiz.
 """
 from __future__ import annotations
 
+import re
 import tkinter as tk
 
-from neural_speed_academy.exercises.base import BaseExercise
+from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, FONTS, theme_manager
-from neural_speed_academy.config import PACER_CONFIG
+from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
+
+# Common words excluded from keyword extraction
+_STOP_WORDS = frozenset(
+    "the a an and or but in on at to for of is it that this with from by as "
+    "are was were be been has have had do does did not no nor so if then than "
+    "can will would could should may might shall its you your we our they them "
+    "he she his her my me us who what when where how all each every some any "
+    "also just about more most very much many such only other into over after "
+    "before between through during without again further once here there which "
+    "these those being both same own too up out off down".split()
+)
+
+# Page dimensions (pixels)
+PAGE_WIDTH = 680
+PAGE_PAD_X = 50
+PAGE_PAD_Y = 40
+
+
+def _extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
+    """Extract significant words from text for quiz scoring."""
+    words = re.findall(r"[a-zA-Z]+", text.lower())
+    freq: dict[str, int] = {}
+    for w in words:
+        if len(w) >= 4 and w not in _STOP_WORDS:
+            freq[w] = freq.get(w, 0) + 1
+    ranked = sorted(freq, key=lambda w: freq[w], reverse=True)
+    return ranked[:max_keywords]
 
 
 class PacerExercise(BaseExercise):
     """
-    Pacer reading exercise.
-    Highlights words at a configurable WPM rate to train reading speed.
+    Pacer reading exercise with multiple highlight modes.
+    Highlights text at a configurable WPM rate, then quizzes comprehension.
     """
+
+    MODES = {
+        "word": "Single Word",
+        "chunk": "Chunk (2-3 words)",
+        "line": "Full Line",
+        "multi_line": "Multi-Line (2-3)",
+    }
 
     def __init__(self, root: tk.Tk, navigator):
         super().__init__(root, navigator)
         self.pacer_state: dict = {}
-        self.lbl_progress: tk.Label = None
+        self.lbl_progress: tk.Label | None = None
+        self._source_text: str = ""
 
     @property
     def name(self) -> str:
@@ -34,26 +71,19 @@ class PacerExercise(BaseExercise):
         container.pack(expand=True, fill="both")
         self.add_widget(container)
 
-        # Guide button
-        guide_btn = tk.Button(
-            container,
-            text="GUIDE",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            command=lambda: self.show_guide("pacer")
-        )
-        guide_btn.place(x=50, y=20)
+        tk.Button(
+            container, text="GUIDE",
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            cursor="hand2",
+            command=lambda: self.show_guide("pacer"),
+        ).place(x=50, y=20)
 
-        # Content frame
         content = tk.Frame(container, bg=COLORS["bg"])
         content.pack(expand=True)
 
         tk.Label(
-            content,
-            text="PACER CONFIGURATION",
-            font=FONTS["header"],
-            fg=COLORS["accent"],
-            bg=COLORS["bg"]
+            content, text="PACER CONFIGURATION",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
         ).pack(pady=(0, 10))
 
         # Text input
@@ -61,180 +91,371 @@ class PacerExercise(BaseExercise):
         text_frame.pack(pady=5)
 
         text_input = tk.Text(
-            text_frame,
-            height=6,
-            width=60,
+            text_frame, height=6, width=60,
             font=FONTS["pacer_text"],
-            bg=COLORS["card"],
-            fg=COLORS["text_on_card"],
+            bg=COLORS["card"], fg=COLORS["text_on_card"],
             insertbackground=COLORS["text_on_card"],
-            bd=0
+            wrap="word", bd=0,
         )
         text_input.pack()
         text_input.insert("1.0", theme_manager.training_text)
 
         # WPM slider
         tk.Label(
-            content,
-            text="Target Speed (WPM):",
-            font=FONTS["slider_label"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
+            content, text="Target Speed (WPM):",
+            font=FONTS["slider_label"], fg=COLORS["fg"], bg=COLORS["bg"],
         ).pack(pady=(10, 0))
 
         wpm_var = tk.IntVar(value=PACER_CONFIG["default_wpm"])
         tk.Scale(
-            content,
-            variable=wpm_var,
-            from_=PACER_CONFIG["min_wpm"],
-            to=PACER_CONFIG["max_wpm"],
-            orient="horizontal",
-            bg=COLORS["bg"],
-            fg=COLORS["text_on_card"],
-            length=400,
-            highlightthickness=0
+            content, variable=wpm_var,
+            from_=PACER_CONFIG["min_wpm"], to=PACER_CONFIG["max_wpm"],
+            orient="horizontal", bg=COLORS["bg"], fg=COLORS["text_on_card"],
+            length=400, highlightthickness=0,
         ).pack(pady=5)
+
+        # Highlight mode selector
+        tk.Label(
+            content, text="Highlight Mode:",
+            font=FONTS["slider_label"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=(10, 0))
+
+        mode_var = tk.StringVar(value="word")
+        mode_frame = tk.Frame(content, bg=COLORS["bg"])
+        mode_frame.pack(pady=5)
+
+        for key, label in self.MODES.items():
+            tk.Radiobutton(
+                mode_frame, text=label, variable=mode_var, value=key,
+                font=FONTS["btn"], fg=COLORS["fg"], bg=COLORS["bg"],
+                selectcolor=COLORS["card"],
+                activebackground=COLORS["bg"], activeforeground=COLORS["fg"],
+                indicatoron=True, anchor="w",
+            ).pack(side="left", padx=8)
 
         # Start button
         btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
         btn_frame.pack(side="bottom", fill="x")
 
         tk.Button(
-            btn_frame,
-            text="START READING",
-            command=lambda: self._run_pacer(text_input.get("1.0", tk.END), wpm_var.get()),
-            bg=COLORS["success"],
-            fg=COLORS["btn_text"],
-            font=FONTS["btn_lg"],
-            width=30,
-            pady=10,
-            relief="flat",
-            cursor="hand2"
+            btn_frame, text="START READING",
+            command=lambda: self._run_pacer(
+                text_input.get("1.0", tk.END), wpm_var.get(), mode_var.get(),
+            ),
+            bg=COLORS["success"], fg=COLORS["btn_text"],
+            font=FONTS["btn_lg"], width=30, pady=10,
+            relief="flat", cursor="hand2",
         ).pack()
 
-    def _run_pacer(self, text: str, wpm: int) -> None:
+    # ── Pacer execution ────────────────────────────────────────
+
+    def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
         """Start the pacing animation."""
         words = text.split()
-        self.clear()
-
         if not words:
             return
 
+        self._source_text = text
+        self.clear()
+
         # Exit button
         exit_btn = tk.Button(
-            self.root,
-            text="✖",
+            self.root, text="✖",
             font=FONTS["exit_btn"],
-            bg=COLORS["alert"],
-            fg=COLORS["text_on_card"],
-            command=self.navigator.finish_exercise,
-            bd=0
+            bg=COLORS["alert"], fg=COLORS["text_on_card"],
+            command=self.navigator.finish_exercise, bd=0,
         )
         exit_btn.place(relx=0.95, rely=0.05, anchor="center")
         self.add_widget(exit_btn)
 
         # Progress label
         self.lbl_progress = tk.Label(
-            self.root,
-            text="0%",
+            self.root, text="0%",
             font=FONTS["section_header"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
+            fg=COLORS["fg"], bg=COLORS["bg"],
         )
-        self.lbl_progress.place(relx=0.5, rely=0.05, anchor="center")
+        self.lbl_progress.place(relx=0.5, rely=0.03, anchor="center")
         self.add_widget(self.lbl_progress)
 
-        # Calculate delay from WPM
-        delay = int(60000 / wpm)
-
-        # Text widget
-        text_widget = tk.Text(
-            self.root,
-            font=FONTS["pacer"],
-            bg=COLORS["reader_bg"],
-            fg=COLORS["reader_fg"],
-            wrap="word",
-            padx=100,
-            pady=100
+        # Mode label
+        mode_label = tk.Label(
+            self.root, text=self.MODES.get(mode, mode),
+            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
         )
-        text_widget.place(relx=0, rely=0.1, relwidth=1, relheight=0.9)
+        mode_label.place(relx=0.5, rely=0.065, anchor="center")
+        self.add_widget(mode_label)
+
+        # Book-page text widget — centered, constrained width
+        page_frame = tk.Frame(
+            self.root, bg=COLORS["reader_bg"],
+            width=PAGE_WIDTH, highlightthickness=1,
+            highlightbackground=COLORS["muted"],
+        )
+        page_frame.place(
+            relx=0.5, rely=0.55, anchor="center",
+            width=PAGE_WIDTH, relheight=0.82,
+        )
+        page_frame.pack_propagate(False)
+        self.add_widget(page_frame)
+
+        text_widget = tk.Text(
+            page_frame,
+            font=FONTS["pacer"],
+            bg=COLORS["reader_bg"], fg=COLORS["reader_fg"],
+            wrap="word",
+            padx=PAGE_PAD_X, pady=PAGE_PAD_Y,
+            relief="flat", cursor="arrow",
+            spacing1=4, spacing3=4,
+        )
+        text_widget.pack(fill="both", expand=True)
         text_widget.insert("1.0", " ".join(words))
         text_widget.config(state="disabled")
         text_widget.tag_config("h", background=COLORS["highlight"])
-        self.add_widget(text_widget)
 
         # Bring controls to front
         exit_btn.lift()
         self.lbl_progress.lift()
+        mode_label.lift()
 
-        # Initialize state
+        # Build step units based on mode
+        steps = self._build_steps(text_widget, words, mode)
+
+        # WPM applies to words; scale delay by words-per-step
+        avg_words_per_step = len(words) / max(len(steps), 1)
+        delay = int(60000 / wpm * avg_words_per_step)
+
         self.pacer_state = {
-            "idx": 0,
-            "words": words,
+            "step_idx": 0,
+            "steps": steps,
             "delay": delay,
-            "widget": text_widget
+            "widget": text_widget,
+            "total_words": len(words),
         }
 
         self._pacer_step()
 
+    def _build_steps(
+        self, widget: tk.Text, words: list[str], mode: str,
+    ) -> list[tuple[str, str]]:
+        """Build (start_index, end_index) pairs for each highlight step."""
+        full_text = " ".join(words)
+        if mode == "word":
+            return self._steps_by_word(words)
+        elif mode == "chunk":
+            return self._steps_by_chunk(words, chunk_size=3)
+        elif mode == "line":
+            return self._steps_by_line(widget)
+        elif mode == "multi_line":
+            return self._steps_by_multi_line(widget, n_lines=2)
+        return self._steps_by_word(words)
+
+    @staticmethod
+    def _steps_by_word(words: list[str]) -> list[tuple[str, str]]:
+        """One step per word."""
+        steps = []
+        pos = 0
+        for w in words:
+            start = f"1.0 + {pos}c"
+            end = f"1.0 + {pos + len(w)}c"
+            steps.append((start, end))
+            pos += len(w) + 1
+        return steps
+
+    @staticmethod
+    def _steps_by_chunk(
+        words: list[str], chunk_size: int = 3,
+    ) -> list[tuple[str, str]]:
+        """One step per N-word chunk."""
+        steps = []
+        pos = 0
+        for i in range(0, len(words), chunk_size):
+            chunk = words[i:i + chunk_size]
+            chunk_text = " ".join(chunk)
+            start = f"1.0 + {pos}c"
+            end = f"1.0 + {pos + len(chunk_text)}c"
+            steps.append((start, end))
+            pos += len(chunk_text) + 1
+        return steps
+
+    @staticmethod
+    def _steps_by_line(widget: tk.Text) -> list[tuple[str, str]]:
+        """One step per display line (as wrapped by the widget)."""
+        widget.update_idletasks()
+        steps = []
+        idx = "1.0"
+        while True:
+            line_end = widget.index(f"{idx} lineend")
+            if widget.compare(idx, ">=", "end - 1c"):
+                break
+            steps.append((idx, line_end))
+            next_idx = widget.index(f"{line_end} + 1c")
+            if widget.compare(next_idx, "<=", idx):
+                break
+            idx = next_idx
+        return steps if steps else [("1.0", "end")]
+
+    @staticmethod
+    def _steps_by_multi_line(
+        widget: tk.Text, n_lines: int = 2,
+    ) -> list[tuple[str, str]]:
+        """One step per N display lines."""
+        widget.update_idletasks()
+        lines: list[tuple[str, str]] = []
+        idx = "1.0"
+        while True:
+            line_end = widget.index(f"{idx} lineend")
+            if widget.compare(idx, ">=", "end - 1c"):
+                break
+            lines.append((idx, line_end))
+            next_idx = widget.index(f"{line_end} + 1c")
+            if widget.compare(next_idx, "<=", idx):
+                break
+            idx = next_idx
+
+        steps = []
+        for i in range(0, len(lines), n_lines):
+            group = lines[i:i + n_lines]
+            steps.append((group[0][0], group[-1][1]))
+        return steps if steps else [("1.0", "end")]
+
     def _pacer_step(self) -> None:
-        """Advance to next word in pacer."""
-        idx = self.pacer_state["idx"]
-        words = self.pacer_state["words"]
-        text_widget = self.pacer_state["widget"]
+        """Advance to next highlight step."""
+        state = self.pacer_state
+        widget = state["widget"]
 
         try:
-            if not text_widget.winfo_exists():
+            if not widget.winfo_exists():
                 return
         except tk.TclError:
             return
 
-        if idx < len(words):
-            text_widget.config(state="normal")
-            text_widget.tag_remove("h", "1.0", "end")
+        steps = state["steps"]
+        idx = state["step_idx"]
 
-            # Find word position
-            start = "1.0"
-            for _ in range(idx):
-                start = text_widget.search(" ", start, stopindex="end") + "+1c"
-            end = text_widget.search(" ", start, stopindex="end") or "end"
+        if idx < len(steps):
+            start, end = steps[idx]
 
-            text_widget.tag_add("h", start, end)
-            text_widget.see(start)
-            text_widget.config(state="disabled")
+            widget.config(state="normal")
+            widget.tag_remove("h", "1.0", "end")
+            widget.tag_add("h", start, end)
+            widget.see(start)
+            widget.config(state="disabled")
 
-            # Update progress
-            progress = int((idx / len(words)) * 100)
-            self.lbl_progress.config(text=f"PROGRESS: {progress}%")
+            pct = int(100 * idx / len(steps))
+            self.lbl_progress.config(text=f"PROGRESS: {pct}%")
 
-            self.pacer_state["idx"] += 1
-            self.root.after(self.pacer_state["delay"], self._pacer_step)
+            state["step_idx"] += 1
+            self.root.after(state["delay"], self._pacer_step)
         else:
             self._quiz_phase()
 
+    # ── Quiz phase ─────────────────────────────────────────────
+
     def _quiz_phase(self) -> None:
-        """Show quiz/summary phase after reading."""
+        """Keyword-based comprehension quiz after reading."""
         self.clear()
         self.add_nav_bar()
 
-        tk.Label(
-            self.root,
-            text="Summarize what you read:",
-            font=FONTS["header"],
-            bg=COLORS["bg"],
-            fg=COLORS["text_on_card"]
-        ).pack(pady=20)
+        self._keywords = _extract_keywords(self._source_text)
 
-        summary_text = tk.Text(self.root, height=5)
-        summary_text.pack()
-        self.add_widget(summary_text)
+        container = tk.Frame(self.root, bg=COLORS["bg"])
+        container.pack(expand=True)
+        self.add_widget(container)
+
+        tk.Label(
+            container, text="COMPREHENSION CHECK",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=(0, 10))
+
+        tk.Label(
+            container,
+            text="Summarize what you just read in your own words.",
+            font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=(0, 15))
+
+        text_frame = tk.Frame(container, bg=COLORS["card"], padx=2, pady=2)
+        text_frame.pack(pady=5)
+
+        self._quiz_input = tk.Text(
+            text_frame, height=6, width=60,
+            font=FONTS["pacer_text"],
+            bg=COLORS["card"], fg=COLORS["text_on_card"],
+            insertbackground=COLORS["text_on_card"],
+            wrap="word", bd=0,
+        )
+        self._quiz_input.pack()
+        self._quiz_input.focus_set()
 
         tk.Button(
-            self.root,
-            text="Done",
+            container, text="CHECK",
+            command=self._score_quiz,
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            font=FONTS["btn_bold"], width=20, pady=8,
+            relief="flat", cursor="hand2",
+        ).pack(pady=15)
+
+    def _score_quiz(self) -> None:
+        """Score the summary against extracted keywords."""
+        summary = self._quiz_input.get("1.0", "end").lower()
+        summary_words = set(re.findall(r"[a-zA-Z]+", summary))
+
+        matched = [kw for kw in self._keywords if kw in summary_words]
+        score = len(matched)
+        total = len(self._keywords)
+
+        xp = score * USER_DATA_CONFIG["xp_per_correct"]
+        result = ExerciseResult(
+            exercise_name="PACER",
+            score=score,
+            total=total,
+            xp_gained=xp,
+        )
+        self.complete(result)
+
+        # Show results
+        self.clear()
+        self.add_nav_bar()
+
+        container = tk.Frame(self.root, bg=COLORS["bg"])
+        container.pack(expand=True)
+        self.add_widget(container)
+
+        tk.Label(
+            container, text="RESULTS",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=(0, 15))
+
+        tk.Label(
+            container,
+            text=f"Key concepts recalled: {score}/{total}",
+            font=FONTS["btn_lg"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=5)
+
+        tk.Label(
+            container,
+            text=f"XP earned: {xp}",
+            font=FONTS["counter"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=5)
+
+        # Show which keywords were found/missed
+        kw_frame = tk.Frame(container, bg=COLORS["bg"])
+        kw_frame.pack(pady=15)
+
+        for kw in self._keywords:
+            found = kw in summary_words
+            color = COLORS["success"] if found else COLORS["alert"]
+            marker = "✓" if found else "✗"
+            tk.Label(
+                kw_frame,
+                text=f"  {marker}  {kw}",
+                font=FONTS["body"], fg=color, bg=COLORS["bg"],
+                anchor="w", width=30,
+            ).pack(anchor="w")
+
+        tk.Button(
+            container, text="CONTINUE",
             command=self.navigator.finish_exercise,
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"],
-            width=15
-        ).pack()
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            font=FONTS["btn_bold"], width=20, pady=8,
+            relief="flat", cursor="hand2",
+        ).pack(pady=15)

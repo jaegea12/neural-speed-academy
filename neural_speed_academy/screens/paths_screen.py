@@ -339,6 +339,8 @@ class PathSessionScreen(BaseScreen):
             )
         elif ex_type == "schulte":
             app.schulte_exercise.start()
+        elif ex_type == "pacer":
+            app.pacer_exercise.start()
         elif ex_type == "rsvp":
             app.rsvp_exercise.start()
         elif ex_type == "chunking":

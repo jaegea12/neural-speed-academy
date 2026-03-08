@@ -244,6 +244,7 @@ TRAINING_PATHS = {
             ("priming", "Eye Priming: Smooth Pursuit Circle", {"mode": "pursuit_circle", "cycles": 10}),
             ("flash", "Flash: 4 Digits Fixed", {"digits": 4, "rounds": 10}),
             ("eyespan", "Eye-Span: Horizontal 40%", {"mode": "h", "width": 40, "low": 2, "high": 2, "rounds": 10}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
     "path_300": {
@@ -264,6 +265,7 @@ TRAINING_PATHS = {
             ("rsvp", "RSVP: 300 WPM", {"wpm": 300}),
             ("chunking", "Chunking: 3-Word Phrases", {"chunk_size": 3, "wpm": 250}),
             ("schulte", "Schulte Grid", {}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
     "path_400": {
@@ -280,6 +282,7 @@ TRAINING_PATHS = {
             ("rsvp", "RSVP: 400 WPM", {"wpm": 400}),
             ("chunking", "Chunking: 4-Word Phrases", {"chunk_size": 4, "wpm": 350}),
             ("schulte", "Schulte Grid", {}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
     "path_600": {
@@ -296,6 +299,7 @@ TRAINING_PATHS = {
             ("rsvp", "RSVP: 600 WPM", {"wpm": 600}),
             ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 500}),
             ("schulte", "Schulte Grid", {}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
     "path_800": {
@@ -312,6 +316,7 @@ TRAINING_PATHS = {
             ("rsvp", "RSVP: 800 WPM", {"wpm": 800}),
             ("chunking", "Chunking: 6-Word Phrases", {"chunk_size": 6, "wpm": 700}),
             ("schulte", "Schulte Grid", {}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
     "perception_master": {
