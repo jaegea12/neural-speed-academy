@@ -53,8 +53,10 @@ class SchulteExercise(BaseExercise):
         self.score = 0
 
         # Scale button size based on FOV setting
-        fov_sizes = {"narrow": 60, "standard": 75, "wide": 90, "full": 100}
-        btn_size = fov_sizes.get(theme_manager.fov, 75)
+        # Standard training grid is ~20x20cm; cells need to be large
+        # enough to require real saccadic eye movements
+        fov_sizes = {"narrow": 90, "standard": 110, "wide": 120, "full": 130}
+        btn_size = fov_sizes.get(theme_manager.fov, 110)
 
         # Stats
         stats = QHBoxLayout()
@@ -75,7 +77,7 @@ class SchulteExercise(BaseExercise):
         # Grid
         grid_widget = QWidget()
         grid = QGridLayout(grid_widget)
-        grid.setSpacing(4)
+        grid.setSpacing(6)
 
         nums = list(range(1, self.max_num + 1))
         random.shuffle(nums)

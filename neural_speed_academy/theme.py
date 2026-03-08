@@ -199,7 +199,7 @@ FONTS = {
     "btn_sm": ("Segoe UI", 11, "bold"),
     "section_header": ("Segoe UI", 14, "bold"),
     "counter": ("Segoe UI", 12, "bold"),
-    "grid_btn": ("Segoe UI", 16, "bold"),
+    "grid_btn": ("Segoe UI", 20, "bold"),
     "input": ("Segoe UI", 24),
     "input_sm": ("Segoe UI", 12),
     "cross": ("Arial", 50),
