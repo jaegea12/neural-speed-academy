@@ -7,7 +7,7 @@ from __future__ import annotations
 import tkinter as tk
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, FONTS, theme_manager
+from neural_speed_academy.theme import COLORS, FONTS, FOV_PRESETS, theme_manager
 
 
 class SettingsScreen(BaseScreen):
@@ -66,6 +66,42 @@ class SettingsScreen(BaseScreen):
                 width=20,
             )
             rb.pack(pady=4)
+
+        # FOV section
+        tk.Label(
+            container,
+            text="FIELD OF VIEW",
+            font=FONTS["section_header"],
+            fg=COLORS["accent"],
+            bg=COLORS["bg"],
+        ).pack(pady=(25, 5))
+
+        tk.Label(
+            container,
+            text="Controls page width and font size in the Pacer exercise",
+            font=FONTS["body"],
+            fg=COLORS["muted"],
+            bg=COLORS["bg"],
+        ).pack(pady=(0, 8))
+
+        self.fov_var = tk.StringVar(value=theme_manager.fov)
+
+        for key, preset in FOV_PRESETS.items():
+            tk.Radiobutton(
+                container,
+                text=preset["label"],
+                variable=self.fov_var,
+                value=key,
+                font=FONTS["btn"],
+                fg=COLORS["fg"],
+                bg=COLORS["bg"],
+                selectcolor=COLORS["card"],
+                activebackground=COLORS["bg"],
+                activeforeground=COLORS["fg"],
+                indicatoron=True,
+                anchor="w",
+                width=20,
+            ).pack(pady=2)
 
         # Training text section
         tk.Label(
@@ -134,8 +170,9 @@ class SettingsScreen(BaseScreen):
         ).pack(side="left", padx=6)
 
     def _apply_and_save(self) -> None:
-        """Apply the selected theme and training text, save to disk, and refresh."""
+        """Apply all settings, save to disk, and refresh."""
         theme_manager.set_profile(self.selected.get())
+        theme_manager.fov = self.fov_var.get()
         theme_manager.training_text = self.text_box.get("1.0", "end")
         theme_manager.save()
         self.show()

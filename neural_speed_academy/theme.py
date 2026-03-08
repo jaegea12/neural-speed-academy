@@ -131,7 +131,7 @@ FONTS = {
     "body": ("Segoe UI", 11),
     "flash": ("Consolas", 90, "bold"),
     "rsvp": ("Segoe UI", 48, "bold"),
-    "pacer": ("Georgia", 22),
+    "pacer": ("Georgia", 16),
     "btn": ("Segoe UI", 11),
     "btn_bold": ("Segoe UI", 12, "bold"),
     "btn_lg": ("Segoe UI", 16, "bold"),
@@ -155,6 +155,15 @@ FONTS = {
 
 
 DEFAULT_PROFILE = "dark"
+DEFAULT_FOV = "standard"
+
+# FOV presets: (page_width, pad_x, pad_y, font_size)
+FOV_PRESETS = {
+    "narrow":   {"page_width": 480, "pad_x": 50, "pad_y": 45, "font_size": 18, "label": "Narrow (Beginner)"},
+    "standard": {"page_width": 620, "pad_x": 60, "pad_y": 50, "font_size": 16, "label": "Standard"},
+    "wide":     {"page_width": 780, "pad_x": 70, "pad_y": 50, "font_size": 14, "label": "Wide (Advanced)"},
+    "full":     {"page_width": 940, "pad_x": 80, "pad_y": 50, "font_size": 13, "label": "Full (Expert)"},
+}
 DEFAULT_TRAINING_TEXT = (
     "Speed reading is the process of rapidly recognizing and absorbing phrases "
     "or sentences on a page all at once rather than identifying individual words. "
@@ -184,6 +193,7 @@ class ThemeManager:
     def __init__(self, profile: str = DEFAULT_PROFILE):
         self._profile = profile
         self._training_text = DEFAULT_TRAINING_TEXT
+        self._fov = DEFAULT_FOV
         self._listeners: list = []
 
     @property
@@ -197,6 +207,20 @@ class ThemeManager:
     @training_text.setter
     def training_text(self, value: str) -> None:
         self._training_text = value.strip() or DEFAULT_TRAINING_TEXT
+
+    @property
+    def fov(self) -> str:
+        return self._fov
+
+    @fov.setter
+    def fov(self, value: str) -> None:
+        if value in FOV_PRESETS:
+            self._fov = value
+
+    @property
+    def fov_config(self) -> dict:
+        """Return the active FOV preset values."""
+        return FOV_PRESETS.get(self._fov, FOV_PRESETS[DEFAULT_FOV])
 
     @property
     def colors(self) -> dict:
@@ -219,6 +243,7 @@ class ThemeManager:
             data = {
                 "profile": self._profile,
                 "training_text": self._training_text,
+                "fov": self._fov,
             }
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
@@ -238,6 +263,9 @@ class ThemeManager:
             text = data.get("training_text", "")
             if text:
                 self._training_text = text
+            fov = data.get("fov", DEFAULT_FOV)
+            if fov in FOV_PRESETS:
+                self._fov = fov
         except (IOError, json.JSONDecodeError, TypeError):
             pass
 
@@ -245,6 +273,7 @@ class ThemeManager:
         """Reset to default settings and save."""
         self.set_profile(DEFAULT_PROFILE)
         self._training_text = DEFAULT_TRAINING_TEXT
+        self._fov = DEFAULT_FOV
         self.save()
 
     @staticmethod

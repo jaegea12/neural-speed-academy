@@ -22,7 +22,7 @@ _STOP_WORDS = frozenset(
     "these those being both same own too up out off down".split()
 )
 
-# Page dimensions — DIN A4 proportions (1:1.414)
+# Default page dimensions — overridden by FOV settings
 PAGE_WIDTH = 620
 PAGE_PAD_X = 60
 PAGE_PAD_Y = 50
@@ -214,25 +214,33 @@ class PacerExercise(BaseExercise):
         mode_label.place(relx=0.5, rely=0.065, anchor="center")
         self.add_widget(mode_label)
 
-        # Book-page container — centered, constrained width
+        # Read FOV settings
+        fov = theme_manager.fov_config
+        page_w = fov["page_width"]
+        pad_x = fov["pad_x"]
+        pad_y = fov["pad_y"]
+        font_size = fov["font_size"]
+        pacer_font = (FONTS["pacer"][0], font_size)
+
+        # Book-page container — DIN A4 proportions
         page_frame = tk.Frame(
             self.root, bg=COLORS["reader_bg"],
-            width=PAGE_WIDTH, highlightthickness=1,
+            width=page_w, highlightthickness=1,
             highlightbackground=COLORS["muted"],
         )
         page_frame.place(
             relx=0.5, rely=0.54, anchor="center",
-            width=PAGE_WIDTH, relheight=0.88,
+            width=page_w, relheight=0.88,
         )
         page_frame.pack_propagate(False)
         self.add_widget(page_frame)
 
         text_widget = tk.Text(
             page_frame,
-            font=FONTS["pacer"],
+            font=pacer_font,
             bg=COLORS["reader_bg"], fg=COLORS["reader_fg"],
             wrap="word",
-            padx=PAGE_PAD_X, pady=PAGE_PAD_Y,
+            padx=pad_x, pady=pad_y,
             relief="flat", cursor="arrow",
             spacing1=4, spacing3=4,
         )
