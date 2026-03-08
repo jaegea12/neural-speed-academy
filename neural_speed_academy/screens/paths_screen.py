@@ -374,9 +374,9 @@ class PathSessionScreen(BaseScreen):
         elif ex_type == "pacer":
             app.pacer_exercise.start()
         elif ex_type == "rsvp":
-            app.rsvp_exercise.start()
+            app.rsvp_exercise.start(**params)
         elif ex_type == "chunking":
-            app.chunking_exercise.start()
+            app.chunking_exercise.start(**params)
 
     def _show_path_complete(self, path_data: dict) -> None:
         """Display a path completion screen."""

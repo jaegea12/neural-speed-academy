@@ -87,7 +87,7 @@ class ChunkingExercise(BaseExercise):
             bg=COLORS["bg"]
         ).pack(pady=(10, 0))
 
-        chunk_var = tk.IntVar(value=CHUNKING_CONFIG["default_chunk_size"])
+        chunk_var = tk.IntVar(value=kwargs.get("chunk_size", CHUNKING_CONFIG["default_chunk_size"]))
         tk.Scale(
             content,
             variable=chunk_var,
@@ -109,7 +109,7 @@ class ChunkingExercise(BaseExercise):
             bg=COLORS["bg"]
         ).pack(pady=(10, 0))
 
-        wpm_var = tk.IntVar(value=CHUNKING_CONFIG["default_wpm"])
+        wpm_var = tk.IntVar(value=kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"]))
         tk.Scale(
             content,
             variable=wpm_var,

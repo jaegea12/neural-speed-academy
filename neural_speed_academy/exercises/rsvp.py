@@ -87,7 +87,7 @@ class RsvpExercise(BaseExercise):
             bg=COLORS["bg"]
         ).pack(pady=(10, 0))
 
-        wpm_var = tk.IntVar(value=RSVP_CONFIG["default_wpm"])
+        wpm_var = tk.IntVar(value=kwargs.get("wpm", RSVP_CONFIG["default_wpm"]))
         tk.Scale(
             content,
             variable=wpm_var,
