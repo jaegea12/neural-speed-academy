@@ -47,6 +47,18 @@ class DashboardScreen(BaseScreen):
         except Exception:
             pass
 
+        # Continue path button if there's an active path
+        try:
+            self._build_continue_button(self.root)
+        except Exception:
+            pass
+
+        # Personal bests row
+        try:
+            self._build_personal_bests(self.root)
+        except Exception:
+            pass
+
         # Exercise grid container
         grid = tk.Frame(self.root, bg=COLORS["bg"])
         grid.pack(fill="both", expand=True, pady=20)
@@ -73,6 +85,7 @@ class DashboardScreen(BaseScreen):
             ("📖  Pacer & Quiz", self._get_callback("setup_pacer")),
             ("⚡  RSVP Reader", self._get_callback("setup_rsvp")),
             ("📦  Chunking", self._get_callback("setup_chunking")),
+            ("🛤️  Training Paths", self._get_callback("show_paths")),
             ("📈  Stats Analysis", self._get_callback("show_stats")),
             ("⚙️  Settings", self._get_callback("show_settings")),
         ])
@@ -111,7 +124,7 @@ class DashboardScreen(BaseScreen):
         # Right: last played
         last_text = "No sessions yet"
         if user.history:
-            last = user.history[-1]
+            last = user.history[0]
             last_text = f"Last: {last.exercise} — {last.result} ({last.timestamp})"
         tk.Label(
             card,
@@ -144,6 +157,79 @@ class DashboardScreen(BaseScreen):
             fg=COLORS["muted"],
             bg=COLORS["bg"],
         ).pack(side="left")
+
+    def _build_continue_button(self, parent) -> None:
+        """Show a continue button if the user has an active training path."""
+        from neural_speed_academy.config import TRAINING_PATHS
+        user = self.navigator.get_user()
+        if not user or not user.active_path:
+            return
+        path_data = TRAINING_PATHS.get(user.active_path)
+        if not path_data:
+            return
+        pp = user.path_progress.get(user.active_path)
+        if not pp or pp.completed:
+            return
+
+        steps = path_data["steps"]
+        if pp.current_step >= len(steps):
+            return
+
+        _, step_label, _ = steps[pp.current_step]
+
+        btn_frame = tk.Frame(parent, bg=COLORS["bg"])
+        btn_frame.pack(fill="x", padx=40, pady=(10, 0))
+        self.add_widget(btn_frame)
+
+        tk.Button(
+            btn_frame,
+            text=f"▶  CONTINUE: {path_data['name']} — {step_label}",
+            font=FONTS["btn_bold"],
+            bg=COLORS["success"],
+            fg=COLORS["btn_text"],
+            relief="flat",
+            pady=10,
+            command=lambda: self.navigator.navigate_to("path_session"),
+        ).pack(fill="x")
+
+    def _build_personal_bests(self, parent) -> None:
+        """Show a compact row of personal bests if any exist."""
+        user = self.navigator.get_user()
+        if not user or not user.personal_bests:
+            return
+
+        frame = tk.Frame(parent, bg=COLORS["bg"])
+        frame.pack(fill="x", padx=40, pady=(10, 0))
+        self.add_widget(frame)
+
+        tk.Label(
+            frame,
+            text="PERSONAL BESTS",
+            font=FONTS["section_header"],
+            fg=COLORS["accent"],
+            bg=COLORS["bg"],
+        ).pack(anchor="w")
+
+        row = tk.Frame(frame, bg=COLORS["bg"])
+        row.pack(fill="x", pady=(4, 0))
+
+        for exercise, data in user.personal_bests.items():
+            cell = tk.Frame(row, bg=COLORS["card"], padx=12, pady=6)
+            cell.pack(side="left", padx=(0, 8))
+            tk.Label(
+                cell,
+                text=exercise,
+                font=FONTS["btn_sm"],
+                fg=COLORS["muted"],
+                bg=COLORS["card"],
+            ).pack()
+            tk.Label(
+                cell,
+                text=f"{data['score']}/{data['total']}  ({data['pct']}%)",
+                font=FONTS["btn_bold"],
+                fg=COLORS["text_on_card"],
+                bg=COLORS["card"],
+            ).pack()
 
     def _get_callback(self, name: str) -> Callable:
         """Get a callback by name, or return a no-op if not found."""

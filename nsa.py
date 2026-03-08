@@ -7,6 +7,8 @@ from neural_speed_academy.theme import COLORS
 from neural_speed_academy.state import UserProfile
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
 from neural_speed_academy.navigation.navigator import Navigator
+from neural_speed_academy.screens.main_menu_screen import MainMenuScreen
+from neural_speed_academy.screens.introduction_screen import IntroductionScreen
 from neural_speed_academy.screens.login_screen import LoginScreen
 from neural_speed_academy.screens.dashboard_screen import DashboardScreen
 from neural_speed_academy.screens.stats_screen import StatsScreen
@@ -17,6 +19,7 @@ from neural_speed_academy.screens.menu_screens import (
     PrimingMenuScreen,
 )
 from neural_speed_academy.screens.settings_screen import SettingsScreen
+from neural_speed_academy.screens.paths_screen import PathSelectionScreen, PathSessionScreen
 from neural_speed_academy.exercises.flash import FlashExercise
 from neural_speed_academy.exercises.schulte import SchulteExercise
 from neural_speed_academy.exercises.priming import PrimingExercise
@@ -28,19 +31,20 @@ from neural_speed_academy.exercises.chunking import ChunkingExercise
 class SpeedReadingApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Neural Speed Academy | Comprehensive Edition")
-        try: 
-            self.root.state('zoomed') 
-        except: 
+        self.root.title("Neural Speed Academy")
+        try:
+            self.root.state('zoomed')
+        except Exception:
             self.root.geometry("1280x800")
         self.root.configure(bg=COLORS["bg"])
-        
+
         # Repository for user data persistence
         self.user_repo = JsonUserRepository()
-        
+
         # Navigator for screen management
         self.navigator = Navigator(self.root, self.user_repo)
-        
+        self.navigator._app = self
+
         # Exercise instances
         self.flash_exercise = FlashExercise(self.root, self.navigator)
         self.schulte_exercise = SchulteExercise(self.root, self.navigator)
@@ -48,11 +52,11 @@ class SpeedReadingApp:
         self.pacer_exercise = PacerExercise(self.root, self.navigator)
         self.rsvp_exercise = RsvpExercise(self.root, self.navigator)
         self.chunking_exercise = ChunkingExercise(self.root, self.navigator)
-        
+
         self._register_screens()
-        
-        # Start with login screen
-        self.navigator.to_login()
+
+        # Start with main menu
+        self.navigator.navigate_to("main_menu")
 
     def _register_screens(self) -> None:
         """Register all screens with the navigator."""
@@ -68,8 +72,17 @@ class SpeedReadingApp:
             "setup_chunking": self.chunking_exercise.start,
             "show_stats": lambda: self.navigator.navigate_to("stats"),
             "show_settings": lambda: self.navigator.navigate_to("settings"),
+            "show_paths": lambda: self.navigator.navigate_to("paths"),
         }
-        
+
+        self.navigator.register_screen(
+            "main_menu",
+            lambda: MainMenuScreen(self.root, self.navigator)
+        )
+        self.navigator.register_screen(
+            "introduction",
+            lambda: IntroductionScreen(self.root, self.navigator)
+        )
         self.navigator.register_screen(
             "login",
             lambda: LoginScreen(self.root, self.navigator)
@@ -102,6 +115,15 @@ class SpeedReadingApp:
             "settings",
             lambda: SettingsScreen(self.root, self.navigator)
         )
+        self.navigator.register_screen(
+            "paths",
+            lambda: PathSelectionScreen(self.root, self.navigator)
+        )
+        self.navigator.register_screen(
+            "path_session",
+            lambda: PathSessionScreen(self.root, self.navigator)
+        )
+
 
 if __name__ == "__main__":
     root = tk.Tk()

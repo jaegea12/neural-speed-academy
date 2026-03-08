@@ -155,7 +155,7 @@ class BaseExercise(ABC):
         ).pack(pady=10, padx=30)
 
     def complete(self, result: ExerciseResult) -> None:
-        """Handle exercise completion: save XP, log history, show result."""
+        """Handle exercise completion: save XP, log history, track personal bests."""
         user = self.navigator.get_user()
         if user:
             try:
@@ -164,6 +164,9 @@ class BaseExercise(ABC):
                     exercise=result.exercise_name,
                     result=result.score_string(),
                     max_entries=USER_DATA_CONFIG["max_history_entries"],
+                )
+                user.update_personal_best(
+                    result.exercise_name, result.score, result.total,
                 )
                 self.navigator.save_user()
             except Exception as e:

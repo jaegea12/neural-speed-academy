@@ -21,6 +21,7 @@ class Navigator:
 
     # Human-readable labels for screen names
     SCREEN_LABELS = {
+        "main_menu": "Menu",
         "login": "Login",
         "dashboard": "HUB",
         "flash_menu": "Flash Numbers",
@@ -29,6 +30,9 @@ class Navigator:
         "priming_menu": "Eye Priming",
         "stats": "Stats",
         "settings": "Settings",
+        "introduction": "Introduction",
+        "paths": "Training Paths",
+        "path_session": "Path Session",
     }
 
     def __init__(
@@ -43,6 +47,7 @@ class Navigator:
         self._screen_registry: dict[str, Callable[[], "BaseScreen"]] = {}
         self._history: list[str] = []
         self._current_name: str = ""
+        self._app = None  # Set by NeuralSpeedAcademy after init
 
     def register_screen(self, name: str, factory: Callable[[], "BaseScreen"]) -> None:
         """Register a screen factory by name."""
@@ -84,9 +89,9 @@ class Navigator:
             self.user_repo.save(self.current_user)
 
     def logout(self) -> None:
-        """Clear the current user and navigate to login."""
+        """Clear the current user and navigate to main menu."""
         self.current_user = None
-        self.navigate_to("login")
+        self.navigate_to("main_menu")
 
     def to_login(self) -> None:
         """Navigate to login screen."""

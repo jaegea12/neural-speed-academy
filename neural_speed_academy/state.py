@@ -44,6 +44,29 @@ class HistoryEntry:
 
 
 @dataclass
+class PathProgress:
+    """Tracks progress through a training path."""
+    path_id: str
+    current_step: int = 0
+    completed: bool = False
+
+    def to_dict(self) -> dict:
+        return {
+            "path_id": self.path_id,
+            "current_step": self.current_step,
+            "completed": self.completed,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PathProgress":
+        return cls(
+            path_id=data.get("path_id", ""),
+            current_step=data.get("current_step", 0),
+            completed=data.get("completed", False),
+        )
+
+
+@dataclass
 class UserProfile:
     """User profile with XP, streak, and exercise history."""
     name: str
@@ -51,10 +74,53 @@ class UserProfile:
     streak: int = 1
     last_login: str = ""
     history: list[HistoryEntry] = field(default_factory=list)
+    active_path: Optional[str] = None
+    path_progress: dict = field(default_factory=dict)
+    personal_bests: dict = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.last_login:
             self.last_login = datetime.now().strftime("%Y-%m-%d")
+
+    def update_streak(self) -> None:
+        """Update login streak based on last_login date.
+
+        Increments streak if last login was yesterday, resets to 1 if
+        more than one day has passed, and leaves it unchanged if
+        already logged in today.
+        """
+        today = datetime.now().strftime("%Y-%m-%d")
+        if self.last_login == today:
+            return
+        try:
+            last = datetime.strptime(self.last_login, "%Y-%m-%d").date()
+            diff = (datetime.now().date() - last).days
+            if diff == 1:
+                self.streak += 1
+            elif diff > 1:
+                self.streak = 1
+        except (ValueError, TypeError):
+            self.streak = 1
+        self.last_login = today
+
+    def update_personal_best(self, exercise: str, score: int, total: int) -> bool:
+        """Update personal best for an exercise if the new score is higher.
+
+        Returns True if a new personal best was set.
+        """
+        if total == 0:
+            return False
+        pct = round(score / total * 100, 1)
+        prev = self.personal_bests.get(exercise)
+        if prev is None or pct > prev.get("pct", 0):
+            self.personal_bests[exercise] = {
+                "score": score,
+                "total": total,
+                "pct": pct,
+                "date": datetime.now().strftime("%Y-%m-%d"),
+            }
+            return True
+        return False
 
     def add_xp(self, amount: int) -> None:
         """Add XP to the user profile."""
@@ -68,12 +134,18 @@ class UserProfile:
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
+        pp = {}
+        for k, v in self.path_progress.items():
+            pp[k] = v.to_dict() if isinstance(v, PathProgress) else v
         return {
             "name": self.name,
             "xp": self.xp,
             "streak": self.streak,
             "last_login": self.last_login,
             "history": [h.to_dict() for h in self.history],
+            "active_path": self.active_path,
+            "path_progress": pp,
+            "personal_bests": self.personal_bests,
         }
 
     @classmethod
@@ -93,12 +165,19 @@ class UserProfile:
                         exercise=parts[1],
                         result=result,
                     ))
+        pp = {}
+        for k, v in data.get("path_progress", {}).items():
+            if isinstance(v, dict):
+                pp[k] = PathProgress.from_dict(v)
         return cls(
             name=data.get("name", ""),
             xp=data.get("xp", 0),
             streak=data.get("streak", 1),
             last_login=data.get("last_login", ""),
             history=history,
+            active_path=data.get("active_path"),
+            path_progress=pp,
+            personal_bests=data.get("personal_bests", {}),
         )
 
 

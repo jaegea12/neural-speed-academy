@@ -117,11 +117,14 @@ class JsonUserRepository(UserRepositoryInterface):
         """
         Get existing user or create a new one.
         Convenience method for login flow.
+        Updates the login streak on each call.
         """
         user = self.get(name)
         if user is None:
             user = UserProfile(name=name)
-            self.save(user)
+        else:
+            user.update_streak()
+        self.save(user)
         return user
 
     def add_history(self, name: str, exercise: str, result: str) -> None:
