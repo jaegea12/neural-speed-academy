@@ -124,7 +124,7 @@ class NeuralSpeedAcademy:
 
     def run(self) -> None:
         self.navigator.navigate_to("main_menu")
-        self.window.show()
+        self.window.showFullScreen()
         sys.exit(self.app.exec())
 
 
