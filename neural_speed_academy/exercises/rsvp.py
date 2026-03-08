@@ -126,10 +126,10 @@ class RsvpExercise(BaseExercise):
 
         self.wpm = wpm
         self.word_idx = 0
-        self._running = True
         delay = int(60000 / wpm)
 
         self.clear()
+        self._running = True
         self.root.configure(bg=COLORS["bg"])
 
         # Exit button

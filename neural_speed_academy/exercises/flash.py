@@ -78,7 +78,6 @@ class FlashExercise(BaseExercise):
         self.correct_count = 0
         self.level_logic = level_func
         self.span_config = span_config or {}
-        self._running = True
         
         # Create fresh flash widgets
         self._create_flash_widgets()
@@ -107,6 +106,7 @@ class FlashExercise(BaseExercise):
 
         self._clear_flash_widgets()
         self.clear()
+        self._running = True
         
         # Recreate flash widgets after clear destroys them
         self._create_flash_widgets()

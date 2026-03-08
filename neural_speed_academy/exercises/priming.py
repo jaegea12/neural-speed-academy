@@ -57,9 +57,9 @@ class PrimingExercise(BaseExercise):
         self.delay = delay
         self.duration_s = duration_s
         self._requested_cycles = cycles
-        self._running = True
 
         self.clear()
+        self._running = True
         self.add_nav_bar()
 
         # Guide button

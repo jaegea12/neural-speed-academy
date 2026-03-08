@@ -159,11 +159,11 @@ class ChunkingExercise(BaseExercise):
         self.chunk_size = chunk_size
         self.wpm = wpm
         self.chunk_idx = 0
-        self._running = True
         # Delay per chunk: account for multiple words per chunk
         self._delay = int(60000 * chunk_size / wpm)
 
         self.clear()
+        self._running = True
         self.root.configure(bg=COLORS["bg"])
 
         # Exit button
