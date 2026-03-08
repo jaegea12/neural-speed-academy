@@ -176,12 +176,7 @@ class PathSessionScreen(BaseScreen):
             pp.completed = True
             user.active_path = None
             self.navigator.user_repo.save(user)
-            messagebox.showinfo(
-                "Path Complete!",
-                f"You completed {path_data['name']}!\n"
-                f"All {len(steps)} exercises done."
-            )
-            self.navigator.to_dashboard()
+            self._show_path_complete(path_data)
             return
 
         container = tk.Frame(self.root, bg=COLORS["bg"])
@@ -345,6 +340,55 @@ class PathSessionScreen(BaseScreen):
             app.rsvp_exercise.start()
         elif ex_type == "chunking":
             app.chunking_exercise.start()
+
+    def _show_path_complete(self, path_data: dict) -> None:
+        """Display a path completion screen."""
+        container = tk.Frame(self.root, bg=COLORS["bg"])
+        container.pack(expand=True)
+        self.add_widget(container)
+
+        tk.Label(
+            container, text="PATH COMPLETE",
+            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
+        ).pack(pady=(0, 15))
+
+        tk.Label(
+            container,
+            text=path_data["name"],
+            font=FONTS["sub"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=5)
+
+        tk.Label(
+            container,
+            text=f"All {len(path_data['steps'])} exercises completed.",
+            font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(pady=5)
+
+        tk.Label(
+            container,
+            text="✓",
+            font=("Segoe UI", 48),
+            fg=COLORS["success"], bg=COLORS["bg"],
+        ).pack(pady=15)
+
+        btn_row = tk.Frame(container, bg=COLORS["bg"])
+        btn_row.pack(pady=15)
+
+        tk.Button(
+            btn_row, text="TRAINING PATHS",
+            font=FONTS["btn_bold"],
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            relief="flat", width=18, pady=8, cursor="hand2",
+            command=lambda: self.navigator.navigate_to("paths"),
+        ).pack(side="left", padx=6)
+
+        tk.Button(
+            btn_row, text="TRAINING HUB",
+            font=FONTS["btn_bold"],
+            bg=COLORS["action"], fg=COLORS["btn_text"],
+            relief="flat", width=18, pady=8, cursor="hand2",
+            command=self.navigator.to_dashboard,
+        ).pack(side="left", padx=6)
 
     def _advance_step(self, path_id: str, step_idx: int) -> None:
         """Advance to the next step and refresh the path session screen."""

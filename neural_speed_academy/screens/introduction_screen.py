@@ -73,11 +73,12 @@ class IntroductionScreen(BaseScreen):
         canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
 
-        # Mouse wheel scrolling
+        # Mouse wheel scrolling — unbind on canvas destroy to avoid leaks
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        self.root.bind_all("<MouseWheel>", _on_mousewheel)
+        canvas.bind("<Destroy>", lambda e: self.root.unbind_all("<MouseWheel>"))
 
         scrollbar.pack(side="right", fill="y")
         canvas.pack(side="left", fill="both", expand=True)
@@ -112,5 +113,6 @@ class IntroductionScreen(BaseScreen):
             relief="flat",
             width=20,
             pady=8,
+            cursor="hand2",
             command=lambda: self.navigator.navigate_to("main_menu"),
         ).pack(pady=(0, 40))

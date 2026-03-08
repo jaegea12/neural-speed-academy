@@ -46,7 +46,8 @@ class ChunkingExercise(BaseExercise):
             text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
-            command=lambda: self.show_guide("chunking")
+            cursor="hand2",
+            command=lambda: self.show_guide("chunking"),
         ).place(x=50, y=20)
 
         content = tk.Frame(container, bg=COLORS["bg"])
@@ -125,21 +126,28 @@ class ChunkingExercise(BaseExercise):
         btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
         btn_frame.pack(side="bottom", fill="x")
 
+        def _start():
+            self._run_chunking(
+                text_input.get("1.0", tk.END),
+                chunk_var.get(),
+                wpm_var.get(),
+            )
+
         tk.Button(
             btn_frame,
             text="START CHUNKING",
-            command=lambda: self._run_chunking(
-                text_input.get("1.0", tk.END),
-                chunk_var.get(),
-                wpm_var.get()
-            ),
+            command=_start,
             bg=COLORS["success"],
             fg=COLORS["btn_text"],
             font=FONTS["btn_lg"],
             width=30,
             pady=10,
             relief="flat",
+            cursor="hand2",
         ).pack()
+
+        # Ctrl+Enter to start from text area
+        text_input.bind("<Control-Return>", lambda e: _start())
 
     def _build_chunks(self, text: str, size: int) -> list:
         """Split text into chunks of the given word count."""

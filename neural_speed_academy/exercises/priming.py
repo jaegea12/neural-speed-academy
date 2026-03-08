@@ -68,7 +68,8 @@ class PrimingExercise(BaseExercise):
             text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
-            command=lambda: self.show_guide("priming")
+            cursor="hand2",
+            command=lambda: self.show_guide("priming"),
         )
         guide_btn.place(x=50, y=80)
         self.add_widget(guide_btn)

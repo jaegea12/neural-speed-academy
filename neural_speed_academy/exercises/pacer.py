@@ -162,16 +162,22 @@ class PacerExercise(BaseExercise):
         btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
         btn_frame.pack(side="bottom", fill="x")
 
-        tk.Button(
-            btn_frame, text="START READING",
-            command=lambda: self._run_pacer(
+        def _start():
+            self._run_pacer(
                 text_input.get("1.0", tk.END), wpm_var.get(),
                 mode_var.get(), ml_var.get(),
-            ),
+            )
+
+        tk.Button(
+            btn_frame, text="START READING",
+            command=_start,
             bg=COLORS["success"], fg=COLORS["btn_text"],
             font=FONTS["btn_lg"], width=30, pady=10,
             relief="flat", cursor="hand2",
         ).pack()
+
+        # Ctrl+Enter to start from text area
+        text_input.bind("<Control-Return>", lambda e: _start())
 
     # ── Pacer execution ────────────────────────────────────────
 

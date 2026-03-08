@@ -106,6 +106,7 @@ class MainMenuScreen(BaseScreen):
         )
 
     def _quit(self) -> None:
-        """Quit the application."""
-        self.root.destroy()
-        sys.exit(0)
+        """Quit the application after confirmation."""
+        if messagebox.askyesno("Quit", "Are you sure you want to quit?"):
+            self.root.destroy()
+            sys.exit(0)

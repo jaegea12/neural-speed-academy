@@ -60,9 +60,12 @@ class StatsScreen(BaseScreen):
         container.update_idletasks()
         canvas.configure(scrollregion=canvas.bbox("all"))
 
-        # Mouse wheel scrolling
-        canvas.bind_all("<MouseWheel>",
-                        lambda e: canvas.yview_scroll(-1 * (e.delta // 120), "units"))
+        # Mouse wheel scrolling — bind to root and unbind on destroy
+        def _on_mousewheel(e):
+            canvas.yview_scroll(-1 * (e.delta // 120), "units")
+
+        self._mw_binding = self.root.bind_all("<MouseWheel>", _on_mousewheel)
+        canvas.bind("<Destroy>", lambda e: self.root.unbind_all("<MouseWheel>"))
 
     def _show_no_user_message(self) -> None:
         """Show message when no user is logged in."""

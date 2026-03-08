@@ -46,7 +46,8 @@ class RsvpExercise(BaseExercise):
             text="GUIDE",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
-            command=lambda: self.show_guide("rsvp")
+            cursor="hand2",
+            command=lambda: self.show_guide("rsvp"),
         ).place(x=50, y=20)
 
         content = tk.Frame(container, bg=COLORS["bg"])
@@ -103,19 +104,24 @@ class RsvpExercise(BaseExercise):
         btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
         btn_frame.pack(side="bottom", fill="x")
 
+        def _start():
+            self._run_rsvp(text_input.get("1.0", tk.END), wpm_var.get())
+
         tk.Button(
             btn_frame,
             text="START RSVP",
-            command=lambda: self._run_rsvp(
-                text_input.get("1.0", tk.END), wpm_var.get()
-            ),
+            command=_start,
             bg=COLORS["success"],
             fg=COLORS["btn_text"],
             font=FONTS["btn_lg"],
             width=30,
             pady=10,
             relief="flat",
+            cursor="hand2",
         ).pack()
+
+        # Ctrl+Enter to start from text area
+        text_input.bind("<Control-Return>", lambda e: _start())
 
     def _run_rsvp(self, text: str, wpm: int) -> None:
         """Start the RSVP display."""
@@ -155,15 +161,6 @@ class RsvpExercise(BaseExercise):
         )
         self.lbl_progress.place(relx=0.5, rely=0.1, anchor="center")
         self.add_widget(self.lbl_progress)
-
-        # Fixation line
-        canvas = tk.Canvas(
-            self.root, bg=COLORS["bg"], highlightthickness=0,
-            width=200, height=2
-        )
-        canvas.place(relx=0.5, rely=0.52, anchor="center")
-        canvas.create_line(0, 1, 200, 1, fill=COLORS["muted"])
-        self.add_widget(canvas)
 
         # Word display
         self.lbl_word = tk.Label(
