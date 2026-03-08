@@ -61,9 +61,7 @@ def _radio_style(c: dict) -> str:
 class PacerExercise(BaseExercise):
 
     MODES = {
-        "word": "Word",
-        "chunk": "Chunk",
-        "line": "Line",
+        "single": "Single-Line",
         "multi": "Multi-Line",
         "zpattern": "Z-Pattern",
     }
@@ -78,6 +76,7 @@ class PacerExercise(BaseExercise):
         self._step_idx: int = 0
         self._delay: int = 200
         self._n_lines: int = 3
+        self._chunk_size: int = 3
         self._start_time: float = 0.0
 
     @property
@@ -174,12 +173,42 @@ class PacerExercise(BaseExercise):
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
             rb.setProperty("mode_key", key)
-            if key == "word":
+            if key == "single":
                 rb.setChecked(True)
             self._mode_group.addButton(rb)
             mode_row.addWidget(rb)
         self._mode_group.buttonClicked.connect(self._on_mode_changed)
         cl.addLayout(mode_row)
+
+        slider_groove = (
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+
+        # Chunk size slider (always visible)
+        chunk_lbl = QLabel("Words per chunk:")
+        chunk_lbl.setFont(make_qfont("slider_label"))
+        chunk_lbl.setStyleSheet(f"color: {c['fg']};")
+        chunk_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(chunk_lbl)
+
+        self._chunk_display = QLabel("3")
+        self._chunk_display.setFont(make_qfont("counter"))
+        self._chunk_display.setStyleSheet(f"color: {c['accent']};")
+        self._chunk_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._chunk_slider = QSlider(Qt.Orientation.Horizontal)
+        self._chunk_slider.setRange(1, 10)
+        self._chunk_slider.setValue(3)
+        self._chunk_slider.setFixedWidth(300)
+        self._chunk_slider.setStyleSheet(slider_groove)
+        self._chunk_slider.valueChanged.connect(
+            lambda v: self._chunk_display.setText(str(v))
+        )
+        cl.addWidget(self._chunk_slider, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._chunk_display)
 
         # N-lines slider (visible only for multi / z-pattern)
         self._nlines_frame = QFrame()
@@ -188,9 +217,10 @@ class PacerExercise(BaseExercise):
         nf_layout.setContentsMargins(0, 0, 0, 0)
         nf_layout.setSpacing(2)
 
-        nlines_lbl = QLabel("Lines per step:")
+        nlines_lbl = QLabel("Lines per group:")
         nlines_lbl.setFont(make_qfont("slider_label"))
         nlines_lbl.setStyleSheet(f"color: {c['fg']};")
+        nlines_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         nf_layout.addWidget(nlines_lbl)
 
         self._nlines_display = QLabel("3")
@@ -202,10 +232,7 @@ class PacerExercise(BaseExercise):
         self._nlines_slider.setRange(2, 5)
         self._nlines_slider.setValue(3)
         self._nlines_slider.setFixedWidth(200)
-        self._nlines_slider.setStyleSheet(
-            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
+        self._nlines_slider.setStyleSheet(slider_groove)
         self._nlines_slider.valueChanged.connect(
             lambda v: self._nlines_display.setText(str(v))
         )
@@ -246,12 +273,13 @@ class PacerExercise(BaseExercise):
     def _start_from_ui(self) -> None:
         text = self._text_input.toPlainText()
         wpm = self._wpm_slider.value()
-        mode = "word"
+        mode = "single"
         for btn in self._mode_group.buttons():
             if btn.isChecked():
                 mode = btn.property("mode_key")
                 break
         self._n_lines = self._nlines_slider.value()
+        self._chunk_size = self._chunk_slider.value()
         self._run_pacer(text, wpm, mode)
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
@@ -450,55 +478,23 @@ class PacerExercise(BaseExercise):
     def _build_steps(
         self, text: str, words: list[str], mode: str,
     ) -> list[tuple[int, int, int, int]]:
-        if mode == "word":
-            return self._steps_word(text, words)
-        elif mode == "chunk":
-            return self._steps_chunk(text, words)
-        elif mode == "line":
-            return self._steps_line(text)
+        if mode == "single":
+            return self._steps_single(text)
         elif mode == "multi":
             return self._steps_multi(text)
         elif mode == "zpattern":
             return self._steps_zpattern(text)
         return [(0, len(text), 0, len(text))]
 
-    def _steps_word(
-        self, text: str, words: list[str],
-    ) -> list[tuple[int, int, int, int]]:
-        steps: list[tuple[int, int, int, int]] = []
-        pos = 0
-        for w in words:
-            idx = text.find(w, pos)
-            if idx == -1:
-                idx = pos
-            steps.append((idx, idx + len(w), idx, idx + len(w)))
-            pos = idx + len(w)
-        return steps or [(0, len(text), 0, len(text))]
-
-    def _steps_chunk(
-        self, text: str, words: list[str],
-    ) -> list[tuple[int, int, int, int]]:
-        chunk_size = 3
-        steps: list[tuple[int, int, int, int]] = []
-        pos = 0
-        for i in range(0, len(words), chunk_size):
-            chunk = " ".join(words[i : i + chunk_size])
-            idx = text.find(chunk, pos)
-            if idx == -1:
-                idx = pos
-            end = idx + len(chunk)
-            steps.append((idx, end, idx, end))
-            pos = end
-        return steps or [(0, len(text), 0, len(text))]
-
-    def _steps_line(
+    def _steps_single(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
         """Chunk-width highlight sweeping across each display line."""
         lines = self._get_display_lines(text)
+        cs = self._chunk_size
         steps: list[tuple[int, int, int, int]] = []
         for ls, le in lines:
-            steps.extend(self._chunk_line(text, ls, le, 3))
+            steps.extend(self._chunk_line(text, ls, le, cs))
         return steps or [(0, len(text), 0, len(text))]
 
     def _steps_multi(
@@ -509,6 +505,7 @@ class PacerExercise(BaseExercise):
         down to the next group."""
         lines = self._get_display_lines(text)
         n = self._n_lines
+        cs = self._chunk_size
         if not lines:
             return [(0, len(text), 0, len(text))]
         steps: list[tuple[int, int, int, int]] = []
@@ -516,18 +513,17 @@ class PacerExercise(BaseExercise):
             group = lines[i : i + n]
             gs = group[0][0]
             ge = group[-1][1]
-            # Sweep across the first line; overlay height spans all n_lines
             first_ls, first_le = group[0]
             steps.extend(
-                self._chunk_line(text, first_ls, first_le, 3, gs, ge)
+                self._chunk_line(text, first_ls, first_le, cs, gs, ge)
             )
         return steps or [(0, len(text), 0, len(text))]
 
     def _steps_zpattern(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
-        """Z-pattern: 3 sweeps per n_lines group (left→right, right→left,
-        left→right). Overlay height spans the full group."""
+        """Z-pattern: 3 sweeps per n_lines group. Overlay height spans
+        the full group."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
