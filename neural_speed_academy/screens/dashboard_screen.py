@@ -78,19 +78,29 @@ class DashboardScreen(BaseScreen):
             ("Eye Priming", self._get_callback("menu_priming")),
         ])
 
-        # Logout at the bottom
+        # Bottom bar: Main Menu + Logout
+        bottom = tk.Frame(self.root, bg=COLORS["bg"])
+        bottom.pack(pady=(0, 12))
+        self.add_widget(bottom)
+
+        btn_cfg = dict(
+            font=FONTS["btn_sm"], relief="flat",
+            width=12, pady=4, cursor="hand2",
+        )
+
         tk.Button(
-            self.root,
-            text="LOGOUT",
-            font=FONTS["btn_sm"],
-            bg=COLORS["card"],
-            fg=COLORS["fg"],
-            relief="flat",
-            width=12,
-            pady=4,
-            cursor="hand2",
+            bottom, text="MAIN MENU",
+            bg=COLORS["action"], fg=COLORS["btn_text"],
+            command=lambda: self.navigator.navigate_to("main_menu"),
+            **btn_cfg,
+        ).pack(side="left", padx=4)
+
+        tk.Button(
+            bottom, text="LOGOUT",
+            bg=COLORS["card"], fg=COLORS["fg"],
             command=self.navigator.logout,
-        ).pack(pady=(0, 12))
+            **btn_cfg,
+        ).pack(side="left", padx=4)
 
     # ── User card ──────────────────────────────────────────────
 
