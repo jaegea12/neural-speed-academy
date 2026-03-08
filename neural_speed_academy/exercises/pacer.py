@@ -125,6 +125,29 @@ class PacerExercise(BaseExercise):
         mode_frame = tk.Frame(content, bg=COLORS["bg"])
         mode_frame.pack(pady=5)
 
+        # Multi-line count selector (shown/hidden based on mode)
+        ml_frame = tk.Frame(content, bg=COLORS["bg"])
+        ml_label = tk.Label(
+            ml_frame, text="Lines per step:",
+            font=FONTS["slider_label"], fg=COLORS["fg"], bg=COLORS["bg"],
+        )
+        ml_label.pack(side="left", padx=(0, 10))
+        ml_var = tk.IntVar(value=2)
+        ml_scale = tk.Scale(
+            ml_frame, variable=ml_var, from_=2, to=5,
+            orient="horizontal", bg=COLORS["bg"], fg=COLORS["text_on_card"],
+            length=200, highlightthickness=0,
+        )
+        ml_scale.pack(side="left")
+
+        def _on_mode_change(*_args):
+            if mode_var.get() == "multi_line":
+                ml_frame.pack(pady=5)
+            else:
+                ml_frame.pack_forget()
+
+        mode_var.trace_add("write", _on_mode_change)
+
         for key, label in self.MODES.items():
             tk.Radiobutton(
                 mode_frame, text=label, variable=mode_var, value=key,
@@ -141,7 +164,8 @@ class PacerExercise(BaseExercise):
         tk.Button(
             btn_frame, text="START READING",
             command=lambda: self._run_pacer(
-                text_input.get("1.0", tk.END), wpm_var.get(), mode_var.get(),
+                text_input.get("1.0", tk.END), wpm_var.get(),
+                mode_var.get(), ml_var.get(),
             ),
             bg=COLORS["success"], fg=COLORS["btn_text"],
             font=FONTS["btn_lg"], width=30, pady=10,
@@ -150,7 +174,8 @@ class PacerExercise(BaseExercise):
 
     # ── Pacer execution ────────────────────────────────────────
 
-    def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
+    def _run_pacer(self, text: str, wpm: int, mode: str,
+                   n_lines: int = 2) -> None:
         """Start the pacing animation."""
         words = text.split()
         if not words:
@@ -179,8 +204,11 @@ class PacerExercise(BaseExercise):
         self.add_widget(self.lbl_progress)
 
         # Mode label
+        mode_text = self.MODES.get(mode, mode)
+        if mode == "multi_line":
+            mode_text = f"Multi-Line ({n_lines} lines)"
         mode_label = tk.Label(
-            self.root, text=self.MODES.get(mode, mode),
+            self.root, text=mode_text,
             font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
         )
         mode_label.place(relx=0.5, rely=0.065, anchor="center")
@@ -219,7 +247,7 @@ class PacerExercise(BaseExercise):
         mode_label.lift()
 
         # Build step units based on mode
-        steps = self._build_steps(text_widget, words, mode)
+        steps = self._build_steps(text_widget, words, mode, n_lines)
 
         # WPM applies to words; scale delay by words-per-step
         avg_words_per_step = len(words) / max(len(steps), 1)
@@ -237,6 +265,7 @@ class PacerExercise(BaseExercise):
 
     def _build_steps(
         self, widget: tk.Text, words: list[str], mode: str,
+        n_lines: int = 2,
     ) -> list[tuple[str, str]]:
         """Build (start_index, end_index) pairs for each highlight step."""
         if mode == "word":
@@ -247,7 +276,7 @@ class PacerExercise(BaseExercise):
             display_lines = self._get_display_lines(widget)
             return display_lines if display_lines else [("1.0", "end")]
         elif mode == "multi_line":
-            return self._steps_by_multi_line(widget, n_lines=2)
+            return self._steps_by_multi_line(widget, n_lines=n_lines)
         elif mode == "z_pattern":
             return self._steps_z_pattern(widget, words)
         return self._steps_by_word(words)
@@ -307,11 +336,11 @@ class PacerExercise(BaseExercise):
     def _steps_by_multi_line(
         widget: tk.Text, n_lines: int = 2,
     ) -> list[tuple[str, str]]:
-        """Chunk-sweep across groups of N display lines.
+        """Sliding window of N full display lines.
 
-        Groups display lines into sets of n_lines, then splits each
-        group into horizontal segments so the highlight sweeps across
-        the multi-line block like the chunk mode does for single words.
+        Each step highlights N complete lines. The window advances
+        one line at a time so consecutive steps overlap, training
+        the eye to take in multiple lines per fixation.
         """
         lines = PacerExercise._get_display_lines(widget)
         if not lines:
@@ -319,34 +348,8 @@ class PacerExercise(BaseExercise):
 
         steps = []
         for i in range(0, len(lines), n_lines):
-            group = lines[i:i + n_lines]
-            group_start = group[0][0]
-            group_end = group[-1][1]
-
-            # Get the text content of this line group
-            content = widget.get(group_start, group_end)
-            group_words = content.split()
-            if not group_words:
-                steps.append((group_start, group_end))
-                continue
-
-            # Chunk the words within this line group (3 words per chunk)
-            chunk_size = 3
-            char_offset = 0
-            base_row = widget.index(group_start).split(".")[0]
-            base_col = int(widget.index(group_start).split(".")[1])
-
-            for ci in range(0, len(group_words), chunk_size):
-                chunk = group_words[ci:ci + chunk_size]
-                chunk_text = " ".join(chunk)
-                # Find chunk position within the group content
-                pos = content.find(chunk_text, char_offset)
-                if pos < 0:
-                    continue
-                c_start = f"{group_start} + {pos}c"
-                c_end = f"{group_start} + {pos + len(chunk_text)}c"
-                steps.append((c_start, c_end))
-                char_offset = pos + len(chunk_text)
+            end_idx = min(i + n_lines, len(lines)) - 1
+            steps.append((lines[i][0], lines[end_idx][1]))
 
         return steps if steps else [("1.0", "end")]
 
