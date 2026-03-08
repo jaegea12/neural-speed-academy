@@ -46,7 +46,7 @@ class DashboardScreen(BaseScreen):
 
         # Centered grid container
         grid = tk.Frame(self.root, bg=COLORS["bg"])
-        grid.place(relx=0.5, rely=0.55, anchor="center")
+        grid.pack(expand=True, pady=20)
         self.add_widget(grid)
 
         # Create sections
@@ -70,15 +70,16 @@ class DashboardScreen(BaseScreen):
         ])
 
         # Logout button
-        logout_btn = tk.Button(
-            self.root,
+        logout_frame = tk.Frame(self.root, bg=COLORS["bg"])
+        logout_frame.pack(fill="x", pady=(0, 10))
+        self.add_widget(logout_frame)
+        tk.Button(
+            logout_frame,
             text="LOGOUT",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             command=self.navigator.logout,
-        )
-        logout_btn.place(relx=0.95, rely=0.95, anchor="e")
-        self.add_widget(logout_btn)
+        ).pack(side="right", padx=40)
 
     def _build_user_card(self) -> None:
         """Build a compact user summary card below the header."""
