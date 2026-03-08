@@ -222,6 +222,7 @@ class DashboardScreen(BaseScreen):
             if "foundation" not in user.path_progress:
                 user.path_progress["foundation"] = PathProgress(
                     path_id="foundation", current_step=0, completed=False,
+                    start_xp=user.xp,
                 )
             user.active_path = "foundation"
             self.navigator.save_user()

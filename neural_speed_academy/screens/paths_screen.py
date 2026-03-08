@@ -137,8 +137,9 @@ class PathSelectionScreen(BaseScreen):
             # Restart
             pp.current_step = 0
             pp.completed = False
+            pp.start_xp = user.xp
         elif not pp:
-            pp = PathProgress(path_id=path_id)
+            pp = PathProgress(path_id=path_id, start_xp=user.xp)
             user.path_progress[path_id] = pp
 
         user.active_path = path_id
@@ -167,7 +168,7 @@ class PathSessionScreen(BaseScreen):
 
         pp = user.path_progress.get(path_id)
         if not pp:
-            pp = PathProgress(path_id=path_id)
+            pp = PathProgress(path_id=path_id, start_xp=user.xp)
             user.path_progress[path_id] = pp
 
         steps = path_data["steps"]
@@ -379,7 +380,9 @@ class PathSessionScreen(BaseScreen):
             app.chunking_exercise.start(**params)
 
     def _show_path_complete(self, path_data: dict) -> None:
-        """Display a path completion screen."""
+        """Display a path completion screen with session summary."""
+        user = self.navigator.get_user()
+
         container = tk.Frame(self.root, bg=COLORS["bg"])
         container.pack(expand=True)
         self.add_widget(container)
@@ -387,26 +390,50 @@ class PathSessionScreen(BaseScreen):
         tk.Label(
             container, text="PATH COMPLETE",
             font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=(0, 15))
+        ).pack(pady=(0, 10))
 
         tk.Label(
-            container,
-            text=path_data["name"],
+            container, text=path_data["name"],
             font=FONTS["sub"], fg=COLORS["fg"], bg=COLORS["bg"],
         ).pack(pady=5)
 
         tk.Label(
-            container,
-            text=f"All {len(path_data['steps'])} exercises completed.",
-            font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=5)
-
-        tk.Label(
-            container,
-            text="✓",
+            container, text="✓",
             font=("Segoe UI", 48),
             fg=COLORS["success"], bg=COLORS["bg"],
-        ).pack(pady=15)
+        ).pack(pady=(10, 5))
+
+        # Session summary card
+        summary = tk.Frame(container, bg=COLORS["card"], padx=20, pady=15)
+        summary.pack(padx=40, pady=10, fill="x")
+
+        step_count = len(path_data["steps"])
+        xp_earned = 0
+        if user:
+            pp = user.path_progress.get(path_data.get("id", ""), None)
+            # Try to find the matching PathProgress
+            for pid, prog in user.path_progress.items():
+                if prog.completed and path_data["name"] == TRAINING_PATHS.get(pid, {}).get("name"):
+                    xp_earned = user.xp - prog.start_xp
+                    break
+
+        stats = [
+            ("EXERCISES", str(step_count)),
+            ("XP EARNED", f"+{max(0, xp_earned)}"),
+            ("LEVEL", str(user.xp // 1000 + 1) if user else "—"),
+        ]
+
+        for label, value in stats:
+            cell = tk.Frame(summary, bg=COLORS["card"])
+            cell.pack(side="left", expand=True)
+            tk.Label(
+                cell, text=value,
+                font=FONTS["sub"], fg=COLORS["accent"], bg=COLORS["card"],
+            ).pack()
+            tk.Label(
+                cell, text=label,
+                font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["card"],
+            ).pack()
 
         btn_row = tk.Frame(container, bg=COLORS["bg"])
         btn_row.pack(pady=15)

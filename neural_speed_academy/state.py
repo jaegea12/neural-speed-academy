@@ -49,12 +49,14 @@ class PathProgress:
     path_id: str
     current_step: int = 0
     completed: bool = False
+    start_xp: int = 0
 
     def to_dict(self) -> dict:
         return {
             "path_id": self.path_id,
             "current_step": self.current_step,
             "completed": self.completed,
+            "start_xp": self.start_xp,
         }
 
     @classmethod
@@ -63,6 +65,7 @@ class PathProgress:
             path_id=data.get("path_id", ""),
             current_step=data.get("current_step", 0),
             completed=data.get("completed", False),
+            start_xp=data.get("start_xp", 0),
         )
 
 
