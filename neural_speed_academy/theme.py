@@ -364,3 +364,24 @@ def _sync_colors(profile: str) -> None:
 
 
 theme_manager.on_change(_sync_colors)
+
+
+# --- PyQt6 helpers ---
+
+def font_css(key: str) -> str:
+    """Return QSS font-family, font-size, font-weight declarations."""
+    spec = FONTS[key]
+    family = spec[0]
+    size = spec[1]
+    weight = "bold" if len(spec) > 2 and spec[2] == "bold" else "normal"
+    return f'font-family: "{family}"; font-size: {size}pt; font-weight: {weight};'
+
+
+def make_qfont(key: str):
+    """Create a QFont from a FONTS key."""
+    from PyQt6.QtGui import QFont
+    spec = FONTS[key]
+    font = QFont(spec[0], spec[1])
+    if len(spec) > 2 and spec[2] == "bold":
+        font.setBold(True)
+    return font

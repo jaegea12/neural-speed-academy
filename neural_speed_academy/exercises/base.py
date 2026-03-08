@@ -1,17 +1,20 @@
 """
-Base exercise class implementing the Template Method pattern.
-All exercises inherit from this to ensure consistent behavior.
+Base exercise class implementing the Template Method pattern for PyQt6.
 """
 from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional, Callable
-import tkinter as tk
-from tkinter import messagebox
+from typing import TYPE_CHECKING
 
-from neural_speed_academy.theme import COLORS, FONTS
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
+    QMessageBox,
+)
+from PyQt6.QtCore import Qt, QTimer
+
+from neural_speed_academy.theme import COLORS, make_qfont, font_css
 from neural_speed_academy.config import USER_DATA_CONFIG
 
 if TYPE_CHECKING:
@@ -21,162 +24,137 @@ logger = logging.getLogger(__name__)
 
 
 class ExerciseError(Exception):
-    """Base exception for exercise errors."""
     pass
 
 
 class ExerciseConfigError(ExerciseError):
-    """Raised when exercise configuration is invalid."""
     pass
 
 
 @dataclass
 class ExerciseResult:
-    """Result of a completed exercise."""
     exercise_name: str
     score: int
     total: int
     xp_gained: int
 
     def score_string(self) -> str:
-        """Format score as string."""
         return f"{self.score}/{self.total}"
 
 
-class BaseExercise(ABC):
-    """
-    Abstract base class for all exercises.
-    Implements Template Method pattern for consistent exercise flow.
-    """
+class BaseExercise(QWidget, ABC):
+    """Abstract base for all exercises. Renders into the navigator's stack."""
 
-    def __init__(self, root: tk.Tk, navigator: "Navigator"):
-        self.root = root
+    def __init__(self, navigator: "Navigator", parent: QWidget | None = None):
+        super().__init__(parent)
         self.navigator = navigator
-        self.widgets: list[tk.Widget] = []
         self._running: bool = False
+        self._layout = QVBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
+        self._timers: list[QTimer] = []
 
     @property
     @abstractmethod
     def name(self) -> str:
-        """Exercise name for logging."""
         pass
 
-    def clear(self) -> None:
-        """Remove all widgets created by this exercise."""
+    def _clear(self) -> None:
+        """Remove all child widgets and stop timers."""
         self._running = False
-        for widget in self.widgets:
-            try:
-                widget.destroy()
-            except tk.TclError:
-                pass
-        self.widgets.clear()
-        
-        for widget in self.root.winfo_children():
-            try:
-                widget.destroy()
-            except tk.TclError:
-                pass
+        for timer in self._timers:
+            timer.stop()
+        self._timers.clear()
+        while self._layout.count():
+            item = self._layout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
 
-    def add_widget(self, widget: tk.Widget) -> tk.Widget:
-        """Track a widget for cleanup."""
-        self.widgets.append(widget)
-        return widget
+    def _after(self, ms: int, callback) -> QTimer:
+        """Schedule a callback after ms milliseconds. Returns the timer."""
+        timer = QTimer(self)
+        timer.setSingleShot(True)
+        timer.timeout.connect(callback)
+        timer.start(ms)
+        self._timers.append(timer)
+        return timer
 
-    def add_nav_bar(self) -> tk.Frame:
-        """Add a navigation bar with Back, Training Hub, and Main Menu buttons."""
-        user = self.navigator.get_user()
+    def add_nav_bar(self) -> QFrame:
+        """Add a navigation bar (same pattern as BaseScreen)."""
+        c = COLORS
+        bar = QFrame()
+        bar.setStyleSheet(f"background-color: {c['card']};")
+        bar.setFixedHeight(50)
+        bar_layout = QHBoxLayout(bar)
+        bar_layout.setContentsMargins(10, 8, 10, 8)
 
-        bar = tk.Frame(self.root, bg=COLORS["card"], height=50)
-        bar.pack(fill="x", side="top")
-        self.add_widget(bar)
-
-        btn_frame = tk.Frame(bar, bg=COLORS["card"])
-        btn_frame.pack(side="left", padx=10, pady=8)
-
-        btn_cfg = dict(
-            font=FONTS["btn_sm"], relief="flat", bd=0,
-            cursor="hand2", pady=2, padx=8,
+        btn_style = (
+            f"QPushButton {{ {font_css('btn_sm')} border: none; "
+            f"padding: 2px 8px; border-radius: 3px; }}"
         )
 
-        # Back button
-        tk.Button(
-            btn_frame, text="← Back",
-            bg=COLORS["card"], fg=COLORS["fg"],
-            command=self.navigator.go_back,
-            **btn_cfg,
-        ).pack(side="left", padx=(0, 6))
+        back_btn = QPushButton("\u2190 Back")
+        back_btn.setStyleSheet(
+            btn_style
+            + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
+            + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
+        )
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.navigator.go_back)
+        bar_layout.addWidget(back_btn)
 
-        # Training Hub
-        tk.Button(
-            btn_frame, text="Training Hub",
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            command=self.navigator.to_dashboard,
-            **btn_cfg,
-        ).pack(side="left", padx=(0, 6))
+        hub_btn = QPushButton("Training Hub")
+        hub_btn.setStyleSheet(
+            btn_style
+            + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
+        )
+        hub_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        hub_btn.clicked.connect(self.navigator.to_dashboard)
+        bar_layout.addWidget(hub_btn)
 
-        # Main Menu
-        tk.Button(
-            btn_frame, text="Main Menu",
-            bg=COLORS["card"], fg=COLORS["fg"],
-            command=lambda: self.navigator.navigate_to("main_menu"),
-            **btn_cfg,
-        ).pack(side="left")
+        menu_btn = QPushButton("Main Menu")
+        menu_btn.setStyleSheet(
+            btn_style
+            + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
+            + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
+        )
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(lambda: self.navigator.navigate_to("main_menu"))
+        bar_layout.addWidget(menu_btn)
 
+        bar_layout.addStretch()
+
+        user = self.navigator.get_user()
         if user:
-            stats = f"{user.name.upper()} | XP: {user.xp}"
-            tk.Label(
-                bar,
-                text=stats,
-                bg=COLORS["card"],
-                fg=COLORS["accent"],
-                font=FONTS["nav_stats"],
-            ).pack(side="right", padx=20)
+            stats_label = QLabel(f"{user.name.upper()} | XP: {user.xp}")
+            stats_label.setFont(make_qfont("nav_stats"))
+            stats_label.setStyleSheet(
+                f"color: {c['accent']}; background: transparent;"
+            )
+            bar_layout.addWidget(stats_label)
 
+        self._layout.addWidget(bar)
         return bar
 
     def show_guide(self, topic: str) -> None:
-        """Display a guide popup."""
         from neural_speed_academy.config import EXERCISE_GUIDES
-
+        c = COLORS
         title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
-        win = tk.Toplevel(self.root)
-        win.title(title)
-        win.configure(bg=COLORS["card"])
-        win.geometry("700x600")
-        win.transient(self.root)
-        win.grab_set()
-
-        tk.Label(
-            win,
-            text=title,
-            font=FONTS["sub"],
-            fg=COLORS["accent"],
-            bg=COLORS["card"],
-        ).pack(pady=(20, 10))
-        tk.Label(
-            win,
-            text=text,
-            font=FONTS["body"],
-            fg=COLORS["text_on_card"],
-            bg=COLORS["card"],
-            wraplength=620,
-            justify="left",
-        ).pack(pady=10, padx=30, expand=True)
-
-        tk.Button(
-            win, text="CLOSE", font=FONTS["btn_bold"],
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            relief="flat", width=12, pady=6, cursor="hand2",
-            command=win.destroy,
-        ).pack(pady=(0, 20))
-
-        win.bind("<Escape>", lambda e: win.destroy())
+        msg = QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setStyleSheet(
+            f"QMessageBox {{ background-color: {c['card']}; "
+            f"color: {c['text_on_card']}; }}"
+            f"QPushButton {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; border: none; "
+            f"padding: 6px 20px; border-radius: 3px; }}"
+        )
+        msg.exec()
 
     def complete(self, result: ExerciseResult) -> bool:
-        """Handle exercise completion: save XP, log history, track personal bests.
-
-        Returns True if a new personal best was set.
-        """
+        """Save XP, log history, track personal bests. Returns True if new PB."""
         is_pb = False
         user = self.navigator.get_user()
         if user:
@@ -193,73 +171,81 @@ class BaseExercise(ABC):
                 self.navigator.save_user()
             except Exception as e:
                 logger.error(f"Failed to save exercise result: {e}")
-                messagebox.showwarning(
-                    "Save Error",
-                    "Could not save your progress. Please try again."
+                QMessageBox.warning(
+                    self, "Save Error",
+                    "Could not save your progress. Please try again.",
                 )
         return is_pb
 
-    def show_result_screen(self, result: ExerciseResult,
-                           is_personal_best: bool = False,
-                           details: str = "") -> None:
-        """Display a standardized result screen with score, XP, and continue button."""
-        self.clear()
+    def show_result_screen(
+        self,
+        result: ExerciseResult,
+        is_personal_best: bool = False,
+        details: str = "",
+    ) -> None:
+        """Display a standardized result screen."""
+        self._clear()
+        c = COLORS
+
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True)
-        self.add_widget(container)
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.setSpacing(8)
 
-        tk.Label(
-            container, text="RESULTS",
-            font=FONTS["header"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=(0, 15))
+        title = QLabel("RESULTS")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
-        # Score
-        tk.Label(
-            container,
-            text=f"Score: {result.score_string()}",
-            font=FONTS["btn_lg"], fg=COLORS["fg"], bg=COLORS["bg"],
-        ).pack(pady=5)
+        score_lbl = QLabel(f"Score: {result.score_string()}")
+        score_lbl.setFont(make_qfont("btn_lg"))
+        score_lbl.setStyleSheet(f"color: {c['fg']};")
+        score_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(score_lbl)
 
-        # Details line (exercise-specific info)
         if details:
-            tk.Label(
-                container, text=details,
-                font=FONTS["body"], fg=COLORS["fg"], bg=COLORS["bg"],
-            ).pack(pady=2)
+            det = QLabel(details)
+            det.setFont(make_qfont("body"))
+            det.setStyleSheet(f"color: {c['fg']};")
+            det.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(det)
 
-        # XP
-        tk.Label(
-            container,
-            text=f"XP earned: +{result.xp_gained}",
-            font=FONTS["counter"], fg=COLORS["accent"], bg=COLORS["bg"],
-        ).pack(pady=5)
+        xp_lbl = QLabel(f"XP earned: +{result.xp_gained}")
+        xp_lbl.setFont(make_qfont("counter"))
+        xp_lbl.setStyleSheet(f"color: {c['accent']};")
+        xp_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(xp_lbl)
 
-        # Personal best indicator
         if is_personal_best:
-            tk.Label(
-                container,
-                text="NEW PERSONAL BEST!",
-                font=FONTS["btn_bold"], fg=COLORS["success"], bg=COLORS["bg"],
-            ).pack(pady=(10, 0))
+            pb = QLabel("NEW PERSONAL BEST!")
+            pb.setFont(make_qfont("btn_bold"))
+            pb.setStyleSheet(f"color: {c['success']};")
+            pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(pb)
 
-        # Continue button
-        tk.Button(
-            container, text="CONTINUE",
-            command=self.navigator.finish_exercise,
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"], width=20, pady=8,
-            relief="flat", cursor="hand2",
-        ).pack(pady=25)
+        cl.addSpacing(15)
+
+        cont_btn = QPushButton("CONTINUE")
+        cont_btn.setFont(make_qfont("btn_bold"))
+        cont_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px;"
+        )
+        cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cont_btn.clicked.connect(self.navigator.finish_exercise)
+        cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._layout.addWidget(container, 1)
 
     def handle_error(self, error: Exception, message: str = "An error occurred") -> None:
-        """Handle exercise errors gracefully."""
         logger.error(f"{self.name} error: {error}")
-        messagebox.showerror("Error", f"{message}\n\nDetails: {str(error)}")
+        QMessageBox.critical(self, "Error", f"{message}\n\nDetails: {error}")
         self.navigator.finish_exercise()
 
     @abstractmethod
     def start(self, **config) -> None:
-        """Start the exercise with given configuration."""
         pass

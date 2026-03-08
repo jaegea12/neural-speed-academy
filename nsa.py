@@ -1,137 +1,159 @@
+"""
+Neural Speed Academy — PyQt6 entry point.
+
+Batch 1: Core infrastructure + main screens.
+Screens not yet ported (introduction, menu_screens, paths_screen, exercises)
+show a placeholder until batch 2.
+"""
 from __future__ import annotations
 
-import tkinter as tk
-from typing import Optional
+import sys
+
+from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtCore import Qt
 
 from neural_speed_academy.theme import COLORS, theme_manager
-from neural_speed_academy.state import UserProfile
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
 from neural_speed_academy.navigation.navigator import Navigator
+
 from neural_speed_academy.screens.main_menu_screen import MainMenuScreen
-from neural_speed_academy.screens.introduction_screen import IntroductionScreen
 from neural_speed_academy.screens.login_screen import LoginScreen
+from neural_speed_academy.screens.settings_screen import SettingsScreen
 from neural_speed_academy.screens.dashboard_screen import DashboardScreen
 from neural_speed_academy.screens.stats_screen import StatsScreen
-from neural_speed_academy.screens.menu_screens import (
-    FlashMenuScreen,
-    WordsMenuScreen,
-    EyespanMenuScreen,
-    PrimingMenuScreen,
-)
-from neural_speed_academy.screens.settings_screen import SettingsScreen
-from neural_speed_academy.screens.paths_screen import PathSelectionScreen, PathSessionScreen, PathBuilderScreen
-from neural_speed_academy.exercises.flash import FlashExercise
-from neural_speed_academy.exercises.schulte import SchulteExercise
-from neural_speed_academy.exercises.priming import PrimingExercise
-from neural_speed_academy.exercises.pacer import PacerExercise
-from neural_speed_academy.exercises.rsvp import RsvpExercise
-from neural_speed_academy.exercises.chunking import ChunkingExercise
 
 
-class SpeedReadingApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Neural Speed Academy")
-        try:
-            self.root.state('zoomed')
-        except Exception:
-            self.root.geometry("1280x800")
-        self.root.configure(bg=COLORS["bg"])
+class PlaceholderScreen:
+    """Temporary stand-in for screens not yet ported to PyQt6."""
 
-        # Load persisted app settings (theme, etc.)
+    def __init__(self, navigator, label: str):
+        from neural_speed_academy.screens.base import BaseScreen
+
+        class _Placeholder(BaseScreen):
+            def build(self_inner, **kwargs):
+                from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget, QPushButton
+                c = COLORS
+                self_inner.setStyleSheet(f"background-color: {c['bg']};")
+                self_inner.add_nav_bar()
+
+                body = QWidget()
+                body.setStyleSheet(f"background-color: {c['bg']};")
+                bl = QVBoxLayout(body)
+                bl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+                from neural_speed_academy.theme import make_qfont
+                lbl = QLabel(f"{label}\n\n(Coming in batch 2)")
+                lbl.setFont(make_qfont("header"))
+                lbl.setStyleSheet(f"color: {c['muted']};")
+                lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                bl.addWidget(lbl)
+
+                back = QPushButton("BACK")
+                back.setFont(make_qfont("btn_bold"))
+                back.setStyleSheet(
+                    f"background-color: {c['accent']}; color: {c['btn_text']}; "
+                    f"border: none; padding: 8px 30px; border-radius: 4px;"
+                )
+                back.setCursor(Qt.CursorShape.PointingHandCursor)
+                back.clicked.connect(navigator.go_back)
+                bl.addWidget(back, alignment=Qt.AlignmentFlag.AlignCenter)
+
+                self_inner._layout.addWidget(body, 1)
+
+        self._cls = _Placeholder
+        self._navigator = navigator
+
+    def __call__(self):
+        return self._cls(self._navigator)
+
+
+class NeuralSpeedAcademy:
+
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.app.setApplicationName("Neural Speed Academy")
+
+        # Load persisted app settings
         theme_manager.load()
 
-        # Repository for user data persistence
+        # Main window
+        self.window = QMainWindow()
+        self.window.setWindowTitle("Neural Speed Academy")
+        self.window.resize(1280, 800)
+
+        # Central stacked widget
+        self.stack = QStackedWidget()
+        self.window.setCentralWidget(self.stack)
+
+        # Repository
         self.user_repo = JsonUserRepository()
 
-        # Navigator for screen management
-        self.navigator = Navigator(self.root, self.user_repo)
-        self.navigator._app = self
+        # Navigator
+        self.navigator = Navigator(self.stack, self.user_repo)
 
-        # Exercise instances
-        self.flash_exercise = FlashExercise(self.root, self.navigator)
-        self.schulte_exercise = SchulteExercise(self.root, self.navigator)
-        self.priming_exercise = PrimingExercise(self.root, self.navigator)
-        self.pacer_exercise = PacerExercise(self.root, self.navigator)
-        self.rsvp_exercise = RsvpExercise(self.root, self.navigator)
-        self.chunking_exercise = ChunkingExercise(self.root, self.navigator)
-
+        # Register screens
         self._register_screens()
 
-        # Start with main menu
-        self.navigator.navigate_to("main_menu")
-
     def _register_screens(self) -> None:
-        """Register all screens with the navigator."""
-        # Exercise callbacks for dashboard
-        exercise_callbacks = {
-            "menu_flash": lambda: self.navigator.navigate_to("flash_menu"),
-            "menu_words": lambda: self.navigator.navigate_to("words_menu"),
-            "menu_priming": lambda: self.navigator.navigate_to("priming_menu"),
-            "menu_eyespan": lambda: self.navigator.navigate_to("eyespan_menu"),
-            "start_schulte": self.schulte_exercise.start,
-            "setup_pacer": self.pacer_exercise.start,
-            "setup_rsvp": self.rsvp_exercise.start,
-            "setup_chunking": self.chunking_exercise.start,
-            "show_stats": lambda: self.navigator.navigate_to("stats"),
-            "show_paths": lambda: self.navigator.navigate_to("paths"),
+        nav = self.navigator
+
+        # Core screens (ported)
+        nav.register_screen(
+            "main_menu",
+            lambda: MainMenuScreen(nav),
+        )
+        nav.register_screen(
+            "login",
+            lambda: LoginScreen(nav),
+        )
+        nav.register_screen(
+            "settings",
+            lambda: SettingsScreen(nav),
+        )
+        nav.register_screen(
+            "dashboard",
+            lambda: DashboardScreen(nav, self._exercise_callbacks()),
+        )
+        nav.register_screen(
+            "stats",
+            lambda: StatsScreen(nav),
+        )
+
+        # Placeholder screens (batch 2)
+        placeholders = [
+            ("introduction", "INTRODUCTION"),
+            ("paths", "TRAINING PATHS"),
+            ("path_session", "PATH SESSION"),
+            ("path_builder", "PATH BUILDER"),
+            ("flash_menu", "FLASH NUMBERS"),
+            ("words_menu", "WORD DRILLS"),
+            ("eyespan_menu", "EYE-SPAN"),
+            ("priming_menu", "EYE PRIMING"),
+        ]
+        for name, label in placeholders:
+            ph = PlaceholderScreen(nav, label)
+            nav.register_screen(name, ph)
+
+    def _exercise_callbacks(self) -> dict:
+        nav = self.navigator
+        return {
+            "menu_flash": lambda: nav.navigate_to("flash_menu"),
+            "menu_words": lambda: nav.navigate_to("words_menu"),
+            "menu_eyespan": lambda: nav.navigate_to("eyespan_menu"),
+            "menu_priming": lambda: nav.navigate_to("priming_menu"),
+            "start_schulte": lambda: nav.navigate_to("flash_menu"),
+            "setup_pacer": lambda: nav.navigate_to("flash_menu"),
+            "setup_rsvp": lambda: nav.navigate_to("flash_menu"),
+            "setup_chunking": lambda: nav.navigate_to("flash_menu"),
+            "show_paths": lambda: nav.navigate_to("paths"),
+            "show_stats": lambda: nav.navigate_to("stats"),
         }
 
-        self.navigator.register_screen(
-            "main_menu",
-            lambda: MainMenuScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "introduction",
-            lambda: IntroductionScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "login",
-            lambda: LoginScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "dashboard",
-            lambda: DashboardScreen(self.root, self.navigator, exercise_callbacks)
-        )
-        self.navigator.register_screen(
-            "stats",
-            lambda: StatsScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "flash_menu",
-            lambda: FlashMenuScreen(self.root, self.navigator, self.flash_exercise)
-        )
-        self.navigator.register_screen(
-            "words_menu",
-            lambda: WordsMenuScreen(self.root, self.navigator, self.flash_exercise)
-        )
-        self.navigator.register_screen(
-            "eyespan_menu",
-            lambda: EyespanMenuScreen(self.root, self.navigator, self.flash_exercise)
-        )
-        self.navigator.register_screen(
-            "priming_menu",
-            lambda: PrimingMenuScreen(self.root, self.navigator, self.priming_exercise)
-        )
-        self.navigator.register_screen(
-            "settings",
-            lambda: SettingsScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "paths",
-            lambda: PathSelectionScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "path_session",
-            lambda: PathSessionScreen(self.root, self.navigator)
-        )
-        self.navigator.register_screen(
-            "path_builder",
-            lambda: PathBuilderScreen(self.root, self.navigator)
-        )
+    def run(self) -> None:
+        self.navigator.navigate_to("main_menu")
+        self.window.show()
+        sys.exit(self.app.exec())
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = SpeedReadingApp(root)
-    root.mainloop()
+    NeuralSpeedAcademy().run()
