@@ -22,10 +22,10 @@ _STOP_WORDS = frozenset(
     "these those being both same own too up out off down".split()
 )
 
-# Page dimensions (pixels)
-PAGE_WIDTH = 680
-PAGE_PAD_X = 50
-PAGE_PAD_Y = 40
+# Page dimensions — DIN A4 proportions (1:1.414)
+PAGE_WIDTH = 620
+PAGE_PAD_X = 60
+PAGE_PAD_Y = 50
 
 
 def _extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
@@ -141,7 +141,7 @@ class PacerExercise(BaseExercise):
         ml_scale.pack(side="left")
 
         def _on_mode_change(*_args):
-            if mode_var.get() == "multi_line":
+            if mode_var.get() in ("multi_line", "z_pattern"):
                 ml_frame.pack(pady=5)
             else:
                 ml_frame.pack_forget()
@@ -221,8 +221,8 @@ class PacerExercise(BaseExercise):
             highlightbackground=COLORS["muted"],
         )
         page_frame.place(
-            relx=0.5, rely=0.55, anchor="center",
-            width=PAGE_WIDTH, relheight=0.82,
+            relx=0.5, rely=0.54, anchor="center",
+            width=PAGE_WIDTH, relheight=0.88,
         )
         page_frame.pack_propagate(False)
         self.add_widget(page_frame)
@@ -240,11 +240,8 @@ class PacerExercise(BaseExercise):
         text_widget.insert("1.0", " ".join(words))
         text_widget.config(state="disabled")
 
-        # Highlight tags — bright for active chunk, subtle for line context
+        # Highlight tag
         text_widget.tag_config("hl", background=COLORS["highlight"])
-        text_widget.tag_config("hl_bg", background=COLORS.get("highlight_bg", "#e8e8d0"))
-        # Ensure chunk highlight renders on top of block highlight
-        text_widget.tag_raise("hl", "hl_bg")
 
         # Bring controls to front
         exit_btn.lift()
@@ -285,7 +282,7 @@ class PacerExercise(BaseExercise):
         elif mode == "multi_line":
             return self._steps_by_multi_line(widget, n_lines=n_lines)
         elif mode == "z_pattern":
-            return self._steps_z_pattern(widget, words)
+            return self._steps_z_pattern(widget, words, n_lines)
         return self._steps_by_word(words)
 
     @staticmethod
@@ -342,102 +339,113 @@ class PacerExercise(BaseExercise):
     @staticmethod
     def _steps_by_multi_line(
         widget: tk.Text, n_lines: int = 2,
-    ) -> list[tuple[str, str]]:
+    ) -> list[list[tuple[str, str]]]:
         """Chunk-sweep across groups of N display lines.
 
-        Groups display lines into sets of n_lines, then produces
-        3-word chunk steps within each group. The highlight rectangle
-        spans the full N-line height but only the chunk width,
-        sweeping left-to-right across the line group.
+        Each step is a list of (start, end) ranges — one per line in
+        the group at the same horizontal column position. This creates
+        a vertical highlight band that sweeps left-to-right.
         """
         lines = PacerExercise._get_display_lines(widget)
         if not lines:
-            return [("1.0", "end")]
+            return [[("1.0", "end")]]
 
-        steps = []
+        steps: list[list[tuple[str, str]]] = []
         chunk_size = 3
 
         for i in range(0, len(lines), n_lines):
             group = lines[i:i + n_lines]
-            group_start = group[0][0]
-            group_end = group[-1][1]
 
-            content = widget.get(group_start, group_end)
-            group_words = content.split()
-            if not group_words:
-                steps.append((group_start, group_end))
+            # Get words per line in this group
+            line_contents = []
+            for dl_start, dl_end in group:
+                text = widget.get(dl_start, dl_end)
+                line_contents.append((dl_start, dl_end, text, text.split()))
+
+            # Use the first line to determine chunk positions
+            first_start, first_end, first_text, first_words = line_contents[0]
+            if not first_words:
+                steps.append([(group[0][0], group[-1][1])])
                 continue
 
             char_offset = 0
-            for ci in range(0, len(group_words), chunk_size):
-                chunk = group_words[ci:ci + chunk_size]
+            for ci in range(0, len(first_words), chunk_size):
+                chunk = first_words[ci:ci + chunk_size]
                 chunk_text = " ".join(chunk)
-                pos = content.find(chunk_text, char_offset)
+                pos = first_text.find(chunk_text, char_offset)
                 if pos < 0:
                     continue
-                c_start = f"{group_start} + {pos}c"
-                c_end = f"{group_start} + {pos + len(chunk_text)}c"
-                steps.append((c_start, c_end))
+
+                # Build ranges: highlight same column band on each line
+                ranges = []
+                for dl_start, dl_end, lt, lw in line_contents:
+                    line_len = len(lt)
+                    # Clamp to line length
+                    s = min(pos, line_len)
+                    e = min(pos + len(chunk_text), line_len)
+                    if s < e:
+                        ranges.append((
+                            f"{dl_start} + {s}c",
+                            f"{dl_start} + {e}c",
+                        ))
+                    else:
+                        # Line is shorter, highlight what's there
+                        ranges.append((dl_start, dl_end))
+
+                if ranges:
+                    steps.append(ranges)
                 char_offset = pos + len(chunk_text)
 
-        return steps if steps else [("1.0", "end")]
+        return steps if steps else [[("1.0", "end")]]
 
     @staticmethod
     def _steps_z_pattern(
-        widget: tk.Text, words: list[str],
-    ) -> list[tuple[str, str]]:
-        """Z-pattern: sweep across each line in thirds, then jump diagonally.
+        widget: tk.Text, words: list[str], n_lines: int = 2,
+    ) -> list:
+        """Z-pattern across groups of N display lines.
 
-        For each display line the highlight moves through three
-        horizontal segments (left → center → right), simulating the
-        Z-shaped eye movement used in advanced speed reading.
+        For each N-line group, produces 3 steps that sweep
+        left → center → right. Each step highlights the same
+        horizontal third across all lines in the group, creating
+        a vertical band that traces a Z path down the page.
         """
         lines = PacerExercise._get_display_lines(widget)
         if not lines:
             return [("1.0", "end")]
 
-        steps = []
-        for dl_start, dl_end in lines:
+        steps: list = []
+        for i in range(0, len(lines), n_lines):
+            group = lines[i:i + n_lines]
+
+            # Get column extents from the first line in the group
+            dl_start, dl_end = group[0]
             start_int = int(widget.index(dl_start).split(".")[1])
             end_int = int(widget.index(dl_end).split(".")[1])
-            line_row = widget.index(dl_start).split(".")[0]
             span = end_int - start_int
             if span <= 0:
-                steps.append((dl_start, dl_end))
+                steps.append([(dl_start, dl_end)])
                 continue
-            # Split line into 3 segments
+
             seg = max(span // 3, 1)
+
+            # 3 sweeps: left, center, right
             for s in range(3):
-                s_start = start_int + s * seg
-                s_end = start_int + (s + 1) * seg if s < 2 else end_int
-                steps.append((f"{line_row}.{s_start}", f"{line_row}.{s_end}"))
+                s_start_col = start_int + s * seg
+                s_end_col = start_int + (s + 1) * seg if s < 2 else end_int
+
+                ranges = []
+                for g_start, g_end in group:
+                    row = widget.index(g_start).split(".")[0]
+                    line_end_col = int(widget.index(g_end).split(".")[1])
+                    # Clamp to actual line length
+                    cs = min(s_start_col, line_end_col)
+                    ce = min(s_end_col, line_end_col)
+                    if cs < ce:
+                        ranges.append((f"{row}.{cs}", f"{row}.{ce}"))
+                if ranges:
+                    steps.append(ranges)
+
         return steps
-
-    def _apply_multi_line_highlight(
-        self, widget: tk.Text, start: str, end: str, n_lines: int,
-    ) -> None:
-        """Highlight the chunk text plus the surrounding N-line block.
-
-        Uses two tags:
-        - 'hl' (bright) on the chunk words themselves
-        - 'hl_bg' (subtle) on the full N-line block for context
-        """
-        # Find the display line that contains 'start'
-        dl_start = widget.index(f"{start} display linestart")
-
-        # Walk forward n_lines display lines to find the block end
-        block_end = dl_start
-        for _ in range(n_lines):
-            next_end = widget.index(f"{block_end} display lineend")
-            if widget.compare(next_end, "<=", block_end):
-                break
-            block_end = widget.index(f"{next_end} + 1c")
-        block_end = widget.index(f"{block_end} display lineend")
-
-        # Apply subtle background to the full block
-        widget.tag_add("hl_bg", dl_start, block_end)
-        # Apply bright highlight to the chunk
-        widget.tag_add("hl", start, end)
 
     def _pacer_step(self) -> None:
         """Advance to next highlight step."""
@@ -454,20 +462,22 @@ class PacerExercise(BaseExercise):
         idx = state["step_idx"]
 
         if idx < len(steps):
-            start, end = steps[idx]
+            step = steps[idx]
 
             widget.config(state="normal")
             widget.tag_remove("hl", "1.0", "end")
-            widget.tag_remove("hl_bg", "1.0", "end")
 
-            if state["mode"] == "multi_line":
-                self._apply_multi_line_highlight(
-                    widget, start, end, state["n_lines"],
-                )
+            # Step is either a (start, end) tuple or a list of ranges
+            if isinstance(step, list):
+                for start, end in step:
+                    widget.tag_add("hl", start, end)
+                see_target = step[0][0]
             else:
+                start, end = step
                 widget.tag_add("hl", start, end)
+                see_target = start
 
-            widget.see(start)
+            widget.see(see_target)
             widget.config(state="disabled")
 
             pct = int(100 * idx / len(steps))
