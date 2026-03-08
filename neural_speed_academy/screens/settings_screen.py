@@ -7,6 +7,7 @@ from __future__ import annotations
 import tkinter as tk
 
 from neural_speed_academy.screens.base import BaseScreen
+from neural_speed_academy.config import TEXT_LIBRARY
 from neural_speed_academy.theme import COLORS, FONTS, FOV_PRESETS, theme_manager
 
 
@@ -122,6 +123,33 @@ class SettingsScreen(BaseScreen):
             bg=COLORS["bg"],
         ).pack(pady=(0, 8))
 
+        # Text library selector
+        lib_frame = tk.Frame(container, bg=COLORS["bg"])
+        lib_frame.pack(fill="x", padx=20, pady=(0, 8))
+
+        tk.Label(
+            lib_frame, text="Load from library:",
+            font=FONTS["btn_sm"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(side="left", padx=(0, 8))
+
+        lib_names = list(TEXT_LIBRARY.keys())
+        self._lib_var = tk.StringVar(value="")
+
+        lib_menu = tk.OptionMenu(
+            lib_frame, self._lib_var, *lib_names,
+            command=self._load_library_text,
+        )
+        lib_menu.config(
+            font=FONTS["btn_sm"], bg=COLORS["card"],
+            fg=COLORS["text_on_card"], relief="flat",
+            highlightthickness=0, cursor="hand2",
+        )
+        lib_menu["menu"].config(
+            font=FONTS["btn_sm"], bg=COLORS["card"],
+            fg=COLORS["text_on_card"],
+        )
+        lib_menu.pack(side="left")
+
         text_frame = tk.Frame(container, bg=COLORS["card"])
         text_frame.pack(fill="x", padx=20)
 
@@ -170,6 +198,14 @@ class SettingsScreen(BaseScreen):
             cursor="hand2",
             command=self._reset_defaults,
         ).pack(side="left", padx=6)
+
+    def _load_library_text(self, name: str) -> None:
+        """Load a text from the built-in library into the text editor."""
+        entry = TEXT_LIBRARY.get(name)
+        if entry:
+            _difficulty, text = entry
+            self.text_box.delete("1.0", "end")
+            self.text_box.insert("1.0", text)
 
     def _apply_and_save(self) -> None:
         """Apply all settings, save to disk, and refresh."""
