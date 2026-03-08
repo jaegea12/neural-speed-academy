@@ -72,6 +72,12 @@ class SettingsScreen(BaseScreen):
 
         rb_style = _radio_style(c)
         self._profile_group = QButtonGroup(self)
+        profile_box = QFrame()
+        profile_box.setFixedWidth(250)
+        profile_box.setStyleSheet("background: transparent;")
+        pbl = QVBoxLayout(profile_box)
+        pbl.setContentsMargins(0, 0, 0, 0)
+        pbl.setSpacing(4)
         for key, label in profiles.items():
             rb = QRadioButton(label)
             rb.setFont(make_qfont("btn"))
@@ -80,7 +86,8 @@ class SettingsScreen(BaseScreen):
             if key == theme_manager.profile:
                 rb.setChecked(True)
             self._profile_group.addButton(rb)
-            il.addWidget(rb, alignment=Qt.AlignmentFlag.AlignCenter)
+            pbl.addWidget(rb)
+        il.addWidget(profile_box, alignment=Qt.AlignmentFlag.AlignCenter)
 
         il.addSpacing(15)
 
@@ -98,6 +105,12 @@ class SettingsScreen(BaseScreen):
         il.addWidget(fov_desc)
 
         self._fov_group = QButtonGroup(self)
+        fov_box = QFrame()
+        fov_box.setFixedWidth(250)
+        fov_box.setStyleSheet("background: transparent;")
+        fbl = QVBoxLayout(fov_box)
+        fbl.setContentsMargins(0, 0, 0, 0)
+        fbl.setSpacing(4)
         for key, preset in FOV_PRESETS.items():
             rb = QRadioButton(preset["label"])
             rb.setFont(make_qfont("btn"))
@@ -106,7 +119,8 @@ class SettingsScreen(BaseScreen):
             if key == theme_manager.fov:
                 rb.setChecked(True)
             self._fov_group.addButton(rb)
-            il.addWidget(rb, alignment=Qt.AlignmentFlag.AlignCenter)
+            fbl.addWidget(rb)
+        il.addWidget(fov_box, alignment=Qt.AlignmentFlag.AlignCenter)
 
         il.addSpacing(15)
 
