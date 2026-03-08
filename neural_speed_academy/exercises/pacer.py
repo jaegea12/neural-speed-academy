@@ -214,7 +214,7 @@ class PacerExercise(BaseExercise):
         mode_label.place(relx=0.5, rely=0.065, anchor="center")
         self.add_widget(mode_label)
 
-        # Book-page text widget — centered, constrained width
+        # Book-page container — centered, constrained width
         page_frame = tk.Frame(
             self.root, bg=COLORS["reader_bg"],
             width=PAGE_WIDTH, highlightthickness=1,
@@ -239,7 +239,12 @@ class PacerExercise(BaseExercise):
         text_widget.pack(fill="both", expand=True)
         text_widget.insert("1.0", " ".join(words))
         text_widget.config(state="disabled")
-        text_widget.tag_config("h", background=COLORS["highlight"])
+
+        # Highlight tags — bright for active chunk, subtle for line context
+        text_widget.tag_config("hl", background=COLORS["highlight"])
+        text_widget.tag_config("hl_bg", background=COLORS.get("highlight_bg", "#e8e8d0"))
+        # Ensure chunk highlight renders on top of block highlight
+        text_widget.tag_raise("hl", "hl_bg")
 
         # Bring controls to front
         exit_btn.lift()
@@ -259,6 +264,8 @@ class PacerExercise(BaseExercise):
             "delay": delay,
             "widget": text_widget,
             "total_words": len(words),
+            "mode": mode,
+            "n_lines": n_lines,
         }
 
         self._pacer_step()
@@ -336,20 +343,42 @@ class PacerExercise(BaseExercise):
     def _steps_by_multi_line(
         widget: tk.Text, n_lines: int = 2,
     ) -> list[tuple[str, str]]:
-        """Sliding window of N full display lines.
+        """Chunk-sweep across groups of N display lines.
 
-        Each step highlights N complete lines. The window advances
-        one line at a time so consecutive steps overlap, training
-        the eye to take in multiple lines per fixation.
+        Groups display lines into sets of n_lines, then produces
+        3-word chunk steps within each group. The highlight rectangle
+        spans the full N-line height but only the chunk width,
+        sweeping left-to-right across the line group.
         """
         lines = PacerExercise._get_display_lines(widget)
         if not lines:
             return [("1.0", "end")]
 
         steps = []
+        chunk_size = 3
+
         for i in range(0, len(lines), n_lines):
-            end_idx = min(i + n_lines, len(lines)) - 1
-            steps.append((lines[i][0], lines[end_idx][1]))
+            group = lines[i:i + n_lines]
+            group_start = group[0][0]
+            group_end = group[-1][1]
+
+            content = widget.get(group_start, group_end)
+            group_words = content.split()
+            if not group_words:
+                steps.append((group_start, group_end))
+                continue
+
+            char_offset = 0
+            for ci in range(0, len(group_words), chunk_size):
+                chunk = group_words[ci:ci + chunk_size]
+                chunk_text = " ".join(chunk)
+                pos = content.find(chunk_text, char_offset)
+                if pos < 0:
+                    continue
+                c_start = f"{group_start} + {pos}c"
+                c_end = f"{group_start} + {pos + len(chunk_text)}c"
+                steps.append((c_start, c_end))
+                char_offset = pos + len(chunk_text)
 
         return steps if steps else [("1.0", "end")]
 
@@ -384,6 +413,32 @@ class PacerExercise(BaseExercise):
                 steps.append((f"{line_row}.{s_start}", f"{line_row}.{s_end}"))
         return steps
 
+    def _apply_multi_line_highlight(
+        self, widget: tk.Text, start: str, end: str, n_lines: int,
+    ) -> None:
+        """Highlight the chunk text plus the surrounding N-line block.
+
+        Uses two tags:
+        - 'hl' (bright) on the chunk words themselves
+        - 'hl_bg' (subtle) on the full N-line block for context
+        """
+        # Find the display line that contains 'start'
+        dl_start = widget.index(f"{start} display linestart")
+
+        # Walk forward n_lines display lines to find the block end
+        block_end = dl_start
+        for _ in range(n_lines):
+            next_end = widget.index(f"{block_end} display lineend")
+            if widget.compare(next_end, "<=", block_end):
+                break
+            block_end = widget.index(f"{next_end} + 1c")
+        block_end = widget.index(f"{block_end} display lineend")
+
+        # Apply subtle background to the full block
+        widget.tag_add("hl_bg", dl_start, block_end)
+        # Apply bright highlight to the chunk
+        widget.tag_add("hl", start, end)
+
     def _pacer_step(self) -> None:
         """Advance to next highlight step."""
         state = self.pacer_state
@@ -402,8 +457,16 @@ class PacerExercise(BaseExercise):
             start, end = steps[idx]
 
             widget.config(state="normal")
-            widget.tag_remove("h", "1.0", "end")
-            widget.tag_add("h", start, end)
+            widget.tag_remove("hl", "1.0", "end")
+            widget.tag_remove("hl_bg", "1.0", "end")
+
+            if state["mode"] == "multi_line":
+                self._apply_multi_line_highlight(
+                    widget, start, end, state["n_lines"],
+                )
+            else:
+                widget.tag_add("hl", start, end)
+
             widget.see(start)
             widget.config(state="disabled")
 
