@@ -61,41 +61,44 @@ class BaseScreen(ABC):
         return widget
 
     def add_nav_bar(self) -> tk.Frame:
-        """Add a navigation bar with breadcrumbs and user stats."""
+        """Add a navigation bar with Back, Training Hub, and Main Menu buttons."""
         user = self.navigator.get_user()
 
         bar = tk.Frame(self.root, bg=COLORS["card"], height=50)
         bar.pack(fill="x", side="top")
         self.add_widget(bar)
 
-        # Breadcrumb navigation
-        crumb_frame = tk.Frame(bar, bg=COLORS["card"])
-        crumb_frame.pack(side="left", padx=10, pady=10)
+        btn_frame = tk.Frame(bar, bg=COLORS["card"])
+        btn_frame.pack(side="left", padx=10, pady=8)
 
-        crumbs = self.navigator.get_breadcrumbs()
-        for i, (label, screen_name) in enumerate(crumbs):
-            is_last = (i == len(crumbs) - 1)
-            # Last item is a label (current page), but only if there
-            # are multiple crumbs. A single crumb (HUB) stays clickable.
-            if is_last and len(crumbs) > 1:
-                tk.Label(
-                    crumb_frame, text=label,
-                    fg=COLORS["fg"], bg=COLORS["card"],
-                    font=FONTS["btn_sm"],
-                ).pack(side="left", padx=(0, 2))
-            else:
-                tk.Button(
-                    crumb_frame, text=label,
-                    bg=COLORS["accent"], fg=COLORS["btn_text"],
-                    font=FONTS["btn_sm"], relief="flat", bd=0,
-                    command=lambda sn=screen_name: self.navigator.navigate_to(sn),
-                ).pack(side="left", padx=(0, 2))
-            if not is_last:
-                tk.Label(
-                    crumb_frame, text="›",
-                    fg=COLORS["muted"], bg=COLORS["card"],
-                    font=FONTS["btn_sm"],
-                ).pack(side="left", padx=2)
+        btn_cfg = dict(
+            font=FONTS["btn_sm"], relief="flat", bd=0,
+            cursor="hand2", pady=2, padx=8,
+        )
+
+        # Back button
+        tk.Button(
+            btn_frame, text="← Back",
+            bg=COLORS["card"], fg=COLORS["fg"],
+            command=self.navigator.go_back,
+            **btn_cfg,
+        ).pack(side="left", padx=(0, 6))
+
+        # Training Hub
+        tk.Button(
+            btn_frame, text="Training Hub",
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            command=self.navigator.to_dashboard,
+            **btn_cfg,
+        ).pack(side="left", padx=(0, 6))
+
+        # Main Menu
+        tk.Button(
+            btn_frame, text="Main Menu",
+            bg=COLORS["card"], fg=COLORS["fg"],
+            command=lambda: self.navigator.navigate_to("main_menu"),
+            **btn_cfg,
+        ).pack(side="left")
 
         if user:
             stats = f"{user.name.upper()} | XP: {user.xp}"

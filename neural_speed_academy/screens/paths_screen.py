@@ -260,17 +260,44 @@ class PathSessionScreen(BaseScreen):
             command=lambda: self._launch_step(ex_type, params, path_id, current),
         ).pack(pady=20)
 
-        # Skip button
+        # Previous / Skip buttons
+        nav_row = tk.Frame(container, bg=COLORS["bg"])
+        nav_row.pack(pady=(0, 10))
+
+        if current > 0:
+            tk.Button(
+                nav_row,
+                text="← PREVIOUS STEP",
+                font=FONTS["btn_sm"],
+                bg=COLORS["card"],
+                fg=COLORS["fg"],
+                relief="flat",
+                cursor="hand2",
+                command=lambda: self._go_to_step(path_id, current - 1),
+            ).pack(side="left", padx=6)
+
         tk.Button(
-            container,
-            text="SKIP THIS STEP",
+            nav_row,
+            text="SKIP THIS STEP →",
             font=FONTS["btn_sm"],
             bg=COLORS["card"],
             fg=COLORS["fg"],
             relief="flat",
             cursor="hand2",
             command=lambda: self._advance_step(path_id, current),
-        ).pack()
+        ).pack(side="left", padx=6)
+
+    def _go_to_step(self, path_id: str, step_idx: int) -> None:
+        """Jump to a specific step in the path."""
+        user = self.navigator.get_user()
+        if not user:
+            return
+        pp = user.path_progress.get(path_id)
+        if pp:
+            pp.current_step = step_idx
+            pp.completed = False
+            self.navigator.user_repo.save(user)
+        self.navigator.navigate_to("path_session")
 
     def _launch_step(self, ex_type: str, params: dict, path_id: str,
                      step_idx: int) -> None:

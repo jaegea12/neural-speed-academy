@@ -59,8 +59,8 @@ class Navigator:
         if screen_name not in self._screen_registry:
             raise ValueError(f"Unknown screen: {screen_name}")
 
-        # Track history (dashboard resets the stack)
-        if screen_name == "dashboard":
+        # Track history (dashboard and main_menu reset the stack)
+        if screen_name in ("dashboard", "main_menu"):
             self._history = []
         elif self._current_name and self._current_name != "login":
             self._history.append(self._current_name)
@@ -155,5 +155,9 @@ class Navigator:
             self._history.pop()
             self._current_name = ""
             self.navigate_to(target)
-        else:
+        elif self._current_name == "dashboard":
+            self.navigate_to("main_menu")
+        elif self.current_user:
             self.to_dashboard()
+        else:
+            self.navigate_to("main_menu")
