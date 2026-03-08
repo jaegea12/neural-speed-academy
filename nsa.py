@@ -20,7 +20,7 @@ from neural_speed_academy.screens.introduction_screen import IntroductionScreen
 from neural_speed_academy.screens.menu_screens import (
     FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, PrimingMenuScreen,
 )
-from neural_speed_academy.screens.paths_screen import PathSelectionScreen
+from neural_speed_academy.screens.paths_screen import PathSelectionScreen, CustomPathsScreen
 from neural_speed_academy.screens.path_session_screen import (
     PathSessionScreen, PathBuilderScreen,
 )
@@ -86,6 +86,8 @@ class NeuralSpeedAcademy:
             "introduction", lambda: IntroductionScreen(nav))
         nav.register_screen(
             "paths", lambda: PathSelectionScreen(nav))
+        nav.register_screen(
+            "custom_paths", lambda: CustomPathsScreen(nav))
         nav.register_screen(
             "path_session", lambda: PathSessionScreen(nav))
         nav.register_screen(

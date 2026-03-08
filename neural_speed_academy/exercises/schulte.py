@@ -45,10 +45,16 @@ class SchulteExercise(BaseExercise):
         guide_btn.clicked.connect(lambda: self.show_guide("schulte"))
         self._layout.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
 
+        from neural_speed_academy.theme import theme_manager, FOV_PRESETS
+
         grid_size = SCHULTE_CONFIG["grid_size"]
         self.max_num = grid_size * grid_size
         self.target = 1
         self.score = 0
+
+        # Scale button size based on FOV setting
+        fov_sizes = {"narrow": 60, "standard": 75, "wide": 90, "full": 100}
+        btn_size = fov_sizes.get(theme_manager.fov, 75)
 
         # Stats
         stats = QHBoxLayout()
@@ -73,8 +79,6 @@ class SchulteExercise(BaseExercise):
 
         nums = list(range(1, self.max_num + 1))
         random.shuffle(nums)
-
-        btn_size = 70
         for i in range(grid_size):
             for j in range(grid_size):
                 val = nums.pop()

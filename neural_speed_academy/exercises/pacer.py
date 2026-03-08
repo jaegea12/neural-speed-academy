@@ -44,6 +44,7 @@ class PacerExercise(BaseExercise):
         "word": "Single Word",
         "chunk": "Chunk (2-3 words)",
         "line": "Full Line",
+        "multi": "Multi-Line Sweep",
     }
 
     def __init__(self, navigator, parent: QWidget | None = None):
@@ -70,8 +71,11 @@ class PacerExercise(BaseExercise):
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setSpacing(8)
+        cl.setContentsMargins(80, 5, 80, 5)
+        cl.setSpacing(4)
 
+        # Top row: guide + title
+        top = QHBoxLayout()
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
@@ -80,10 +84,12 @@ class PacerExercise(BaseExercise):
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("pacer"))
-        cl.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        top.addWidget(guide_btn)
+        top.addStretch()
+        cl.addLayout(top)
 
         title = QLabel("PACER CONFIGURATION")
-        title.setFont(make_qfont("header"))
+        title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
@@ -95,9 +101,10 @@ class PacerExercise(BaseExercise):
             f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        self._text_input.setFixedHeight(150)
+        self._text_input.setFixedHeight(120)
+        self._text_input.setMaximumWidth(600)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input)
+        cl.addWidget(self._text_input, alignment=Qt.AlignmentFlag.AlignCenter)
 
         # WPM slider
         wpm_lbl = QLabel("Target Speed (WPM):")
@@ -256,18 +263,32 @@ class PacerExercise(BaseExercise):
                 steps.append((pos, pos + len(chunk)))
                 pos += len(chunk) + 1
         elif mode == "line":
-            # Approximate line breaks at ~60 chars
             line_len = 60
             pos = 0
             while pos < len(full):
                 end = min(pos + line_len, len(full))
-                # Find word boundary
                 if end < len(full):
                     space = full.rfind(" ", pos, end)
                     if space > pos:
                         end = space
                 steps.append((pos, end))
                 pos = end + 1 if end < len(full) else end
+        elif mode == "multi":
+            # Sweep 3 lines at a time
+            line_len = 60
+            lines = []
+            pos = 0
+            while pos < len(full):
+                end = min(pos + line_len, len(full))
+                if end < len(full):
+                    space = full.rfind(" ", pos, end)
+                    if space > pos:
+                        end = space
+                lines.append((pos, end))
+                pos = end + 1 if end < len(full) else end
+            for i in range(0, len(lines), 3):
+                group = lines[i:i + 3]
+                steps.append((group[0][0], group[-1][1]))
         return steps if steps else [(0, len(full))]
 
     def _pacer_step(self) -> None:

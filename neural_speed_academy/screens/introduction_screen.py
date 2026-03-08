@@ -58,18 +58,22 @@ class IntroductionScreen(BaseScreen):
         self.add_nav_bar()
 
         scroll, content, cl = make_scroll_area(self._layout)
-        cl.setContentsMargins(40, 20, 40, 30)
+        cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        cl.setContentsMargins(80, 20, 80, 30)
 
         title = QLabel("INTRODUCTION TO SPEED READING")
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
         body = QLabel(INTRO_TEXT)
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['fg']};")
         body.setWordWrap(True)
-        cl.addWidget(body)
+        body.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        body.setFixedWidth(700)
+        cl.addWidget(body, alignment=Qt.AlignmentFlag.AlignCenter)
 
         back_btn = QPushButton("\u2190 BACK TO MENU")
         back_btn.setFont(make_qfont("btn_bold"))
