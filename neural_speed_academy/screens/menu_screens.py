@@ -36,7 +36,7 @@ class BaseMenuScreen(BaseScreen):
         title: str,
         guide_key: str,
         columns: list[tuple[str, list[tuple[str, Callable]]]],
-        btn_width: int = 220,
+        btn_width: int = 340,
     ) -> None:
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
@@ -45,31 +45,39 @@ class BaseMenuScreen(BaseScreen):
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
-        cl.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
+        cl.setContentsMargins(30, 20, 30, 20)
+        cl.setSpacing(10)
 
+        # Title row with guide button
+        title_row = QHBoxLayout()
+        title_row.addStretch()
         lbl = QLabel(title)
         lbl.setFont(make_qfont("header"))
         lbl.setStyleSheet(f"color: {c['fg']};")
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(lbl)
+        title_row.addWidget(lbl)
 
-        guide_btn = QPushButton("READ GUIDE")
+        guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: none; padding: 6px 16px; border-radius: 4px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide(guide_key))
-        cl.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        title_row.addWidget(guide_btn)
+        title_row.addStretch()
+        cl.addLayout(title_row)
+
+        cl.addStretch()
 
         grid = QGridLayout()
-        grid.setSpacing(6)
+        grid.setSpacing(10)
+        grid.setContentsMargins(40, 0, 40, 0)
 
         # Headers
         for idx, (header, _items) in enumerate(columns):
             h = QLabel(header)
-            h.setFont(make_qfont("btn_bold"))
+            h.setFont(make_qfont("menu_header"))
             h.setStyleSheet(f"color: {c['accent']};")
             h.setAlignment(Qt.AlignmentFlag.AlignCenter)
             grid.addWidget(h, 0, idx)
@@ -89,11 +97,14 @@ class BaseMenuScreen(BaseScreen):
                     btn.setStyleSheet(
                         f"QPushButton {{ background-color: {c[color_key]}; "
                         f"color: {c['btn_text']}; border: none; "
-                        f"padding: 6px; border-radius: 3px; }}"
+                        f"padding: 10px; border-radius: 4px; }}"
                     )
                     btn.setCursor(Qt.CursorShape.PointingHandCursor)
                     btn.clicked.connect(cmd)
-                    grid.addWidget(btn, i + 1, col_idx)
+                    grid.addWidget(
+                        btn, i + 1, col_idx,
+                        alignment=Qt.AlignmentFlag.AlignCenter,
+                    )
                     if i >= cutoff:
                         advanced_widgets.append(btn)
                         btn.setVisible(False)
@@ -101,13 +112,14 @@ class BaseMenuScreen(BaseScreen):
         cl.addLayout(grid)
 
         if advanced_widgets:
+            cl.addSpacing(6)
             self._adv_visible = False
             toggle = QPushButton("\u25bc SHOW ADVANCED")
             toggle.setFont(make_qfont("btn_sm"))
             toggle.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; "
                 f"color: {c['fg']}; border: none; "
-                f"padding: 4px 12px; border-radius: 3px; }}"
+                f"padding: 6px 16px; border-radius: 4px; }}"
             )
             toggle.setCursor(Qt.CursorShape.PointingHandCursor)
 
@@ -123,6 +135,7 @@ class BaseMenuScreen(BaseScreen):
             toggle.clicked.connect(_toggle)
             cl.addWidget(toggle, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        cl.addStretch()
         self._layout.addWidget(container, 1)
 
     def _create_grid_menu(

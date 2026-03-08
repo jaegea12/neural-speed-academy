@@ -16,7 +16,7 @@ from neural_speed_academy.theme import COLORS, make_qfont, font_css
 
 
 class DashboardScreen(BaseScreen):
-    BTN_WIDTH = 280
+    BTN_WIDTH = 360
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -43,7 +43,8 @@ class DashboardScreen(BaseScreen):
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
-        cl.setContentsMargins(40, 10, 40, 10)
+        cl.setContentsMargins(30, 12, 30, 12)
+        cl.setSpacing(10)
 
         self._build_user_card(cl)
         self._build_onboarding(cl)
@@ -53,7 +54,7 @@ class DashboardScreen(BaseScreen):
 
         # Exercise grid
         grid = QGridLayout()
-        grid.setSpacing(10)
+        grid.setSpacing(12)
 
         self._create_section(grid, "PERCEPTION", 0, [
             ("Flash Numbers", self._cb("menu_flash")),
@@ -69,25 +70,6 @@ class DashboardScreen(BaseScreen):
         ])
         cl.addLayout(grid)
         cl.addStretch()
-
-        # Bottom bar
-        bottom = QHBoxLayout()
-        bottom.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        for text, bg, fg, cb in [
-            ("MAIN MENU", c["action"], c["btn_text"],
-             lambda: self.navigator.navigate_to("main_menu")),
-            ("LOGOUT", c["card"], c["fg"], self.navigator.logout),
-        ]:
-            btn = QPushButton(text)
-            btn.setFont(make_qfont("btn_sm"))
-            btn.setStyleSheet(
-                f"QPushButton {{ background-color: {bg}; color: {fg}; "
-                f"border: none; padding: 4px 16px; border-radius: 3px; }}"
-            )
-            btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.clicked.connect(cb)
-            bottom.addWidget(btn)
-        cl.addLayout(bottom)
 
         self._layout.addWidget(content, 1)
 
@@ -203,21 +185,51 @@ class DashboardScreen(BaseScreen):
     def _build_action_bar(self, layout: QVBoxLayout) -> None:
         c = COLORS
         bar = QHBoxLayout()
+        bar.setSpacing(8)
+
+        action_style = (
+            f"QPushButton {{ background-color: {c['action']}; "
+            f"color: {c['btn_text']}; border: none; "
+            f"padding: 8px 24px; border-radius: 4px; }}"
+        )
+        exit_style = (
+            f"QPushButton {{ background-color: {c['card']}; "
+            f"color: {c['fg']}; border: none; "
+            f"padding: 8px 24px; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {c['muted']}; }}"
+        )
+
+        # Left: forward navigation
         for label, cb_name in [
             ("Training Paths", "show_paths"),
             ("Stats & History", "show_stats"),
         ]:
             btn = QPushButton(label)
             btn.setFont(make_qfont("btn_bold"))
-            btn.setStyleSheet(
-                f"QPushButton {{ background-color: {c['action']}; "
-                f"color: {c['btn_text']}; border: none; "
-                f"padding: 8px 20px; border-radius: 4px; min-width: 180px; }}"
-            )
+            btn.setStyleSheet(action_style)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(self._cb(cb_name))
             bar.addWidget(btn)
+
         bar.addStretch()
+
+        # Right: exit actions
+        menu_btn = QPushButton("Main Menu")
+        menu_btn.setFont(make_qfont("btn_bold"))
+        menu_btn.setStyleSheet(exit_style)
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(
+            lambda: self.navigator.navigate_to("main_menu")
+        )
+        bar.addWidget(menu_btn)
+
+        logout_btn = QPushButton("Logout")
+        logout_btn.setFont(make_qfont("btn_bold"))
+        logout_btn.setStyleSheet(exit_style)
+        logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        logout_btn.clicked.connect(self.navigator.logout)
+        bar.addWidget(logout_btn)
+
         layout.addLayout(bar)
 
     # ── Continue path ──
@@ -291,19 +303,19 @@ class DashboardScreen(BaseScreen):
                         items: list[tuple[str, Callable]]) -> None:
         c = COLORS
         header = QLabel(title)
-        header.setFont(make_qfont("menu_header"))
+        header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['muted']};")
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         grid.addWidget(header, 0, column)
 
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
-            btn.setFont(make_qfont("btn"))
+            btn.setFont(make_qfont("btn_bold"))
             btn.setFixedWidth(self.BTN_WIDTH)
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['accent']}; "
                 f"color: {c['btn_text']}; border: none; "
-                f"padding: 8px; border-radius: 4px; }}"
+                f"padding: 12px; border-radius: 4px; }}"
                 f"QPushButton:hover {{ background-color: {c['action']}; }}"
             )
             btn.setCursor(Qt.CursorShape.PointingHandCursor)

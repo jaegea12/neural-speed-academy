@@ -49,18 +49,19 @@ class BaseScreen(QWidget):
         c = COLORS
         bar = QFrame()
         bar.setStyleSheet(f"background-color: {c['card']};")
-        bar.setFixedHeight(50)
+        bar.setFixedHeight(56)
         bar_layout = QHBoxLayout(bar)
-        bar_layout.setContentsMargins(10, 8, 10, 8)
+        bar_layout.setContentsMargins(12, 6, 12, 6)
+        bar_layout.setSpacing(6)
 
-        btn_style = (
-            f"QPushButton {{ {font_css('btn_sm')} border: none; padding: 2px 8px; "
-            f"border-radius: 3px; }}"
+        nav_style = (
+            f"QPushButton {{ {font_css('btn_sm')} border: none; "
+            f"padding: 6px 16px; border-radius: 4px; }}"
         )
 
         back_btn = QPushButton("\u2190 Back")
         back_btn.setStyleSheet(
-            btn_style
+            nav_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
             + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
         )
@@ -70,7 +71,7 @@ class BaseScreen(QWidget):
 
         hub_btn = QPushButton("Training Hub")
         hub_btn.setStyleSheet(
-            btn_style
+            nav_style
             + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
         )
         hub_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -79,7 +80,7 @@ class BaseScreen(QWidget):
 
         menu_btn = QPushButton("Main Menu")
         menu_btn.setStyleSheet(
-            btn_style
+            nav_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
             + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
         )
@@ -103,39 +104,60 @@ class BaseScreen(QWidget):
 
     def show_guide(self, topic: str) -> None:
         """Display a guide popup for the given topic."""
+        from PyQt6.QtGui import QFont
         from neural_speed_academy.config import EXERCISE_GUIDES
 
         c = COLORS
-        title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
+        guide_title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
 
-        dialog = QDialog(self)
-        dialog.setWindowTitle(title)
-        dialog.setFixedSize(700, 600)
-        dialog.setStyleSheet(f"background-color: {c['card']};")
+        dlg = QDialog(self)
+        dlg.setWindowTitle(guide_title)
+        dlg.setMinimumSize(720, 500)
+        dlg.setStyleSheet(f"background-color: {c['card']};")
 
-        layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(30, 20, 30, 20)
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(30, 25, 30, 20)
+        layout.setSpacing(12)
 
-        title_lbl = QLabel(title)
-        title_lbl.setFont(make_qfont("sub"))
-        title_lbl.setStyleSheet(f"color: {c['accent']};")
-        title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title_lbl)
+        heading = QLabel(guide_title)
+        heading.setFont(make_qfont("header"))
+        heading.setStyleSheet(f"color: {c['accent']};")
+        heading.setWordWrap(True)
+        layout.addWidget(heading)
 
-        body_lbl = QLabel(text)
-        body_lbl.setFont(make_qfont("body"))
-        body_lbl.setStyleSheet(f"color: {c['text_on_card']};")
-        body_lbl.setWordWrap(True)
-        layout.addWidget(body_lbl, 1)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(
+            f"QScrollArea {{ border: none; background: transparent; }}"
+            f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
+            f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
+            f"border-radius: 4px; min-height: 30px; }}"
+            f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
+            f"{{ height: 0; }}"
+        )
+        body_widget = QWidget()
+        body_layout = QVBoxLayout(body_widget)
+        body_layout.setContentsMargins(5, 5, 5, 5)
+
+        body = QLabel(text)
+        body_font = QFont("Segoe UI", 13)
+        body.setFont(body_font)
+        body.setStyleSheet(f"color: {c['text_on_card']};")
+        body.setWordWrap(True)
+        body_layout.addWidget(body)
+        body_layout.addStretch()
+
+        scroll.setWidget(body_widget)
+        layout.addWidget(scroll, 1)
 
         close_btn = QPushButton("CLOSE")
         close_btn.setFont(make_qfont("btn_bold"))
         close_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 3px;"
+            f"border: none; padding: 8px 30px; border-radius: 4px;"
         )
         close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        close_btn.clicked.connect(dialog.accept)
+        close_btn.clicked.connect(dlg.accept)
         layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         dialog.exec()
