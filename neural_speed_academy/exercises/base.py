@@ -147,6 +147,7 @@ class BaseExercise(QWidget):
         msg.setStyleSheet(
             f"QMessageBox {{ background-color: {c['card']}; "
             f"color: {c['text_on_card']}; }}"
+            f"QMessageBox QLabel {{ color: {c['text_on_card']}; }}"
             f"QPushButton {{ background-color: {c['accent']}; "
             f"color: {c['btn_text']}; border: none; "
             f"padding: 6px 20px; border-radius: 3px; }}"

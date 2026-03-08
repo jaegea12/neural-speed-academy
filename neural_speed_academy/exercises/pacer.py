@@ -134,14 +134,14 @@ class PacerExercise(BaseExercise):
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
         self._text_input.setFixedHeight(120)
-        self._text_input.setMaximumWidth(600)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._text_input)
 
         # WPM slider
         wpm_lbl = QLabel("Target Speed (WPM):")
         wpm_lbl.setFont(make_qfont("slider_label"))
         wpm_lbl.setStyleSheet(f"color: {c['fg']};")
+        wpm_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(wpm_lbl)
 
         self._wpm_display = QLabel(str(PACER_CONFIG["default_wpm"]))
