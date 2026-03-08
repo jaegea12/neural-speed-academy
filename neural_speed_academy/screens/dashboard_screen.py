@@ -29,10 +29,14 @@ class DashboardScreen(BaseScreen):
         """Build the dashboard UI."""
         self.root.configure(bg=COLORS["bg"])
 
+        # Main scrollable area
+        main = tk.Frame(self.root, bg=COLORS["bg"])
+        main.pack(fill="both", expand=True)
+        self.add_widget(main)
+
         # Header
-        header = tk.Frame(self.root, bg=COLORS["card"], pady=20)
+        header = tk.Frame(main, bg=COLORS["card"], pady=15)
         header.pack(fill="x")
-        self.add_widget(header)
         tk.Label(
             header,
             text="TRAINING DASHBOARD",
@@ -42,12 +46,11 @@ class DashboardScreen(BaseScreen):
         ).pack()
 
         # User summary card
-        self._build_user_card()
+        self._build_user_card(main)
 
-        # Centered grid container
-        grid = tk.Frame(self.root, bg=COLORS["bg"])
-        grid.pack(expand=True, pady=20)
-        self.add_widget(grid)
+        # Exercise grid container
+        grid = tk.Frame(main, bg=COLORS["bg"])
+        grid.pack(pady=20)
 
         # Create sections
         self._create_section(grid, "PERCEPTION", 0, [
@@ -70,26 +73,22 @@ class DashboardScreen(BaseScreen):
         ])
 
         # Logout button
-        logout_frame = tk.Frame(self.root, bg=COLORS["bg"])
-        logout_frame.pack(fill="x", pady=(0, 10))
-        self.add_widget(logout_frame)
         tk.Button(
-            logout_frame,
+            main,
             text="LOGOUT",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             command=self.navigator.logout,
-        ).pack(side="right", padx=40)
+        ).pack(pady=(10, 20))
 
-    def _build_user_card(self) -> None:
+    def _build_user_card(self, parent: tk.Frame) -> None:
         """Build a compact user summary card below the header."""
         user = self.navigator.get_user()
         if not user:
             return
 
-        card = tk.Frame(self.root, bg=COLORS["card"], pady=8, padx=20)
+        card = tk.Frame(parent, bg=COLORS["card"], pady=8, padx=20)
         card.pack(fill="x", padx=40, pady=(10, 0))
-        self.add_widget(card)
 
         # Left: name + level
         level = int(user.xp / 1000) + 1
@@ -114,11 +113,10 @@ class DashboardScreen(BaseScreen):
             bg=COLORS["card"],
         ).pack(side="right")
 
-        # XP progress bar (canvas)
+        # XP progress bar
         xp_in_level = user.xp % 1000
-        bar_frame = tk.Frame(self.root, bg=COLORS["bg"])
+        bar_frame = tk.Frame(parent, bg=COLORS["bg"])
         bar_frame.pack(fill="x", padx=40, pady=(2, 0))
-        self.add_widget(bar_frame)
 
         bar_width = 400
         bar_height = 8
