@@ -160,7 +160,7 @@ class BaseScreen(QWidget):
         close_btn.clicked.connect(dlg.accept)
         layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        dialog.exec()
+        dlg.exec()
 
 
 def make_scroll_area(parent_layout: QVBoxLayout) -> tuple[QScrollArea, QWidget, QVBoxLayout]:
