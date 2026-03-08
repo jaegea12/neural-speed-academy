@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import (
-    QTextCursor, QTextCharFormat, QColor, QFont, QKeySequence, QShortcut,
+    QTextCursor, QColor, QFont, QKeySequence, QShortcut,
 )
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
@@ -58,17 +58,6 @@ def _radio_style(c: dict) -> str:
     )
 
 
-def _blend_toward_bg(fg_hex: str, bg_hex: str, fg_weight: float = 0.30) -> QColor:
-    """Blend fg toward bg to simulate dimming. QTextEdit ignores alpha on
-    foreground colors, so we produce a solid blended color instead."""
-    fg = QColor(fg_hex)
-    bg = QColor(bg_hex)
-    r = int(fg.red() * fg_weight + bg.red() * (1 - fg_weight))
-    g = int(fg.green() * fg_weight + bg.green() * (1 - fg_weight))
-    b = int(fg.blue() * fg_weight + bg.blue() * (1 - fg_weight))
-    return QColor(r, g, b)
-
-
 class PacerExercise(BaseExercise):
 
     MODES = {
@@ -83,7 +72,9 @@ class PacerExercise(BaseExercise):
         super().__init__(navigator, parent)
         self._source_text: str = ""
         self._words: list[str] = []
-        self._steps: list[tuple[int, int]] = []
+        # Each step: (char_start, char_end, group_start, group_end)
+        # group_start/group_end define the vertical extent for the overlay
+        self._steps: list[tuple[int, int, int, int]] = []
         self._step_idx: int = 0
         self._delay: int = 200
         self._n_lines: int = 3
@@ -289,20 +280,19 @@ class PacerExercise(BaseExercise):
         exit_btn = QPushButton("\u2716")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
+            f"QPushButton {{ background-color: {c['alert']}; "
+            f"color: {c['text_on_card']}; "
             f"border: none; padding: 4px 8px; border-radius: 3px; }}"
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self.navigator.finish_exercise)
         top_bar.addWidget(exit_btn)
-
         top_bar.addStretch()
 
         self._wpm_label = QLabel(f"WPM: {wpm}")
         self._wpm_label.setFont(make_qfont("counter"))
         self._wpm_label.setStyleSheet(f"color: {c['accent']};")
         top_bar.addWidget(self._wpm_label)
-
         self._layout.addLayout(top_bar)
 
         # Progress bar
@@ -312,49 +302,72 @@ class PacerExercise(BaseExercise):
         self._progress_bar.setFixedHeight(6)
         self._progress_bar.setTextVisible(False)
         self._progress_bar.setStyleSheet(
-            f"QProgressBar {{ background: {c['card']}; border: none; border-radius: 3px; }}"
-            f"QProgressBar::chunk {{ background: {c['accent']}; border-radius: 3px; }}"
+            f"QProgressBar {{ background: {c['card']}; "
+            f"border: none; border-radius: 3px; }}"
+            f"QProgressBar::chunk {{ background: {c['accent']}; "
+            f"border-radius: 3px; }}"
         )
         self._layout.addWidget(self._progress_bar)
 
-        # Reader page
+        # Reader page — A4-proportioned, sized from FOV
         fov = theme_manager.fov_config
         page_w = fov["page_width"]
+        page_h = int(page_w * 1.414)  # A4 ratio
         font_size = fov["font_size"]
 
-        self._reader = QTextEdit()
+        # Container holds the QTextEdit + overlay
+        page_container = QWidget()
+        page_container.setFixedSize(page_w, page_h)
+        page_container.setStyleSheet("background: transparent;")
+
+        self._reader = QTextEdit(page_container)
+        self._reader.setGeometry(0, 0, page_w, page_h)
         reader_font = QFont("Georgia", font_size)
         self._reader.setFont(reader_font)
+        px, py = fov["pad_x"], fov["pad_y"]
         self._reader.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['reader_bg']}; color: {c['reader_fg']}; "
-            f"border: 1px solid {c['muted']}; padding: {fov['pad_y']}px {fov['pad_x']}px; }}"
+            f"QTextEdit {{ background-color: {c['reader_bg']}; "
+            f"color: {c['reader_fg']}; "
+            f"border: 1px solid {c['muted']}; "
+            f"padding: {py}px {px}px; }}"
         )
-        self._reader.setFixedWidth(page_w)
         self._reader.setReadOnly(True)
+        self._reader.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self._reader.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
 
         joined = " ".join(words)
         self._reader.setPlainText(joined)
-        self._layout.addWidget(self._reader, 1, Qt.AlignmentFlag.AlignCenter)
 
-        # Build highlight/dim formats
-        self._hl_fmt = QTextCharFormat()
-        self._hl_fmt.setBackground(QColor(c["highlight"]))
-        self._hl_fmt.setForeground(QColor(c["reader_fg"]))
+        # Highlight overlay — sits on top of text, semi-transparent
+        self._overlay = QWidget(page_container)
+        hl_color = QColor(c["highlight"])
+        hl_color.setAlpha(90)
+        self._hl_rgba = (
+            f"rgba({hl_color.red()},{hl_color.green()},"
+            f"{hl_color.blue()},{hl_color.alpha()})"
+        )
+        self._overlay.setStyleSheet(
+            f"background-color: {self._hl_rgba}; border-radius: 3px;"
+        )
+        self._overlay.setGeometry(0, 0, 0, 0)
+        self._overlay.raise_()
 
-        self._dim_fmt = QTextCharFormat()
-        self._dim_fmt.setForeground(_blend_toward_bg(c["reader_fg"], c["reader_bg"], 0.30))
-        self._dim_fmt.setBackground(QColor(c["reader_bg"]))
+        self._layout.addWidget(
+            page_container, 1, Qt.AlignmentFlag.AlignCenter
+        )
 
-        self._normal_fmt = QTextCharFormat()
-        self._normal_fmt.setBackground(QColor(c["reader_bg"]))
-        self._normal_fmt.setForeground(QColor(c["reader_fg"]))
-
-        # Defer step building so QTextEdit has completed text layout
-        QTimer.singleShot(200, self._build_and_start)
+        # Defer step building until layout is done
+        QTimer.singleShot(250, self._build_and_start)
 
     def _build_and_start(self) -> None:
         joined = " ".join(self._words)
-        self._steps = self._build_steps(joined, self._words, self._mode)
+        self._steps = self._build_steps(
+            joined, self._words, self._mode
+        )
         self._step_idx = 0
 
         avg_words = len(self._words) / max(len(self._steps), 1)
@@ -381,7 +394,6 @@ class PacerExercise(BaseExercise):
                     start = block_start + line.textStart()
                     length = line.textLength()
                     end = start + length
-                    # Trim trailing whitespace
                     while end > start and text[end - 1 : end] in (" ", "\n"):
                         end -= 1
                     if end > start:
@@ -408,11 +420,39 @@ class PacerExercise(BaseExercise):
             pos = end + 1 if end < len(text) else end
         return lines or [(0, len(text))]
 
+    def _chunk_line(
+        self,
+        text: str,
+        line_start: int,
+        line_end: int,
+        chunk_words: int,
+        group_start: int | None = None,
+        group_end: int | None = None,
+    ) -> list[tuple[int, int, int, int]]:
+        """Split a text range into chunk-sized word groups.
+        group_start/group_end define the vertical extent for the overlay."""
+        gs = group_start if group_start is not None else line_start
+        ge = group_end if group_end is not None else line_end
+        segment = text[line_start:line_end]
+        words_in_line = segment.split()
+        if not words_in_line:
+            return [(line_start, line_end, gs, ge)]
+        chunks: list[tuple[int, int, int, int]] = []
+        pos = line_start
+        for i in range(0, len(words_in_line), chunk_words):
+            group = " ".join(words_in_line[i : i + chunk_words])
+            idx = text.find(group, pos)
+            if idx == -1:
+                idx = pos
+            chunks.append((idx, idx + len(group), gs, ge))
+            pos = idx + len(group)
+        return chunks
+
     # ── Step building ──
 
     def _build_steps(
-        self, text: str, words: list[str], mode: str
-    ) -> list[tuple[int, int]]:
+        self, text: str, words: list[str], mode: str,
+    ) -> list[tuple[int, int, int, int]]:
         if mode == "word":
             return self._steps_word(text, words)
         elif mode == "chunk":
@@ -423,68 +463,125 @@ class PacerExercise(BaseExercise):
             return self._steps_multi(text)
         elif mode == "zpattern":
             return self._steps_zpattern(text)
-        return [(0, len(text))]
+        return [(0, len(text), 0, len(text))]
 
-    def _steps_word(self, text: str, words: list[str]) -> list[tuple[int, int]]:
-        steps = []
+    def _steps_word(
+        self, text: str, words: list[str],
+    ) -> list[tuple[int, int, int, int]]:
+        steps: list[tuple[int, int, int, int]] = []
         pos = 0
         for w in words:
             idx = text.find(w, pos)
             if idx == -1:
                 idx = pos
-            steps.append((idx, idx + len(w)))
+            steps.append((idx, idx + len(w), idx, idx + len(w)))
             pos = idx + len(w)
-        return steps or [(0, len(text))]
+        return steps or [(0, len(text), 0, len(text))]
 
-    def _steps_chunk(self, text: str, words: list[str]) -> list[tuple[int, int]]:
+    def _steps_chunk(
+        self, text: str, words: list[str],
+    ) -> list[tuple[int, int, int, int]]:
         chunk_size = 3
-        steps = []
+        steps: list[tuple[int, int, int, int]] = []
         pos = 0
         for i in range(0, len(words), chunk_size):
             chunk = " ".join(words[i : i + chunk_size])
             idx = text.find(chunk, pos)
             if idx == -1:
                 idx = pos
-            steps.append((idx, idx + len(chunk)))
-            pos = idx + len(chunk)
-        return steps or [(0, len(text))]
+            end = idx + len(chunk)
+            steps.append((idx, end, idx, end))
+            pos = end
+        return steps or [(0, len(text), 0, len(text))]
 
-    def _steps_line(self, text: str) -> list[tuple[int, int]]:
-        return self._get_display_lines(text)
+    def _steps_line(
+        self, text: str,
+    ) -> list[tuple[int, int, int, int]]:
+        """Chunk-width highlight sweeping across each display line."""
+        lines = self._get_display_lines(text)
+        steps: list[tuple[int, int, int, int]] = []
+        for ls, le in lines:
+            steps.extend(self._chunk_line(text, ls, le, 3))
+        return steps or [(0, len(text), 0, len(text))]
 
-    def _steps_multi(self, text: str) -> list[tuple[int, int]]:
-        """Sliding window: highlight n_lines, advance 1 line at a time."""
+    def _steps_multi(
+        self, text: str,
+    ) -> list[tuple[int, int, int, int]]:
+        """Chunk-width highlight sweeping across n_lines groups.
+        The overlay height spans the full group while the width
+        covers only the current chunk."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
-            return [(0, len(text))]
-        steps = []
-        for i in range(len(lines)):
-            group = lines[i : i + n]
-            steps.append((group[0][0], group[-1][1]))
-        return steps or [(0, len(text))]
-
-    def _steps_zpattern(self, text: str) -> list[tuple[int, int]]:
-        """Z-pattern: sliding window of n_lines, each window split into 3
-        horizontal segments to simulate the Z-shaped eye movement."""
-        lines = self._get_display_lines(text)
-        n = self._n_lines
-        if not lines:
-            return [(0, len(text))]
-        steps = []
+            return [(0, len(text), 0, len(text))]
+        steps: list[tuple[int, int, int, int]] = []
         for i in range(0, len(lines), n):
             group = lines[i : i + n]
-            block_start = group[0][0]
-            block_end = group[-1][1]
-            block_len = block_end - block_start
+            gs = group[0][0]
+            ge = group[-1][1]
+            steps.extend(self._chunk_line(text, gs, ge, 3, gs, ge))
+        return steps or [(0, len(text), 0, len(text))]
+
+    def _steps_zpattern(
+        self, text: str,
+    ) -> list[tuple[int, int, int, int]]:
+        """Z-pattern: each n_lines group split into 3 sweeps.
+        Overlay height spans the full group."""
+        lines = self._get_display_lines(text)
+        n = self._n_lines
+        if not lines:
+            return [(0, len(text), 0, len(text))]
+        steps: list[tuple[int, int, int, int]] = []
+        for i in range(0, len(lines), n):
+            group = lines[i : i + n]
+            gs = group[0][0]
+            ge = group[-1][1]
+            block_len = ge - gs
             if block_len <= 0:
-                steps.append((block_start, block_end))
+                steps.append((gs, ge, gs, ge))
                 continue
             seg = block_len // 3
-            steps.append((block_start, block_start + seg))
-            steps.append((block_start + seg, block_start + 2 * seg))
-            steps.append((block_start + 2 * seg, block_end))
-        return steps or [(0, len(text))]
+            steps.append((gs, gs + seg, gs, ge))
+            steps.append((gs + seg, gs + 2 * seg, gs, ge))
+            steps.append((gs + 2 * seg, ge, gs, ge))
+        return steps or [(0, len(text), 0, len(text))]
+
+    # ── Overlay positioning ──
+
+    def _overlay_rect(
+        self, start: int, end: int, group_start: int, group_end: int,
+    ) -> tuple[int, int, int, int]:
+        """Compute pixel rect for the highlight overlay.
+        Width comes from (start, end), height from (group_start, group_end).
+        This lets multi-line modes show a chunk-width overlay spanning
+        the full n_lines group height."""
+        cursor = self._reader.textCursor()
+        vp = self._reader.viewport()
+        vp_offset = vp.mapTo(self._reader.parent(), vp.pos())
+
+        # Horizontal extent from the chunk characters
+        cursor.setPosition(start)
+        r1 = self._reader.cursorRect(cursor)
+        cursor.setPosition(end)
+        r2 = self._reader.cursorRect(cursor)
+
+        x = r1.left()
+        if r2.top() > r1.top():
+            # Chunk wraps lines — use full viewport width
+            w = vp.width() - x
+        else:
+            w = max(r2.right() - r1.left(), 10)
+
+        # Vertical extent from the group boundaries
+        cursor.setPosition(group_start)
+        rg1 = self._reader.cursorRect(cursor)
+        cursor.setPosition(group_end)
+        rg2 = self._reader.cursorRect(cursor)
+
+        y = rg1.top()
+        h = max(rg2.bottom() - rg1.top(), r1.height())
+
+        return x + vp_offset.x(), y + vp_offset.y(), w, h
 
     # ── Pacer step ──
 
@@ -492,25 +589,20 @@ class PacerExercise(BaseExercise):
         if not self._running:
             return
         if self._step_idx >= len(self._steps):
+            self._overlay.hide()
             self._quiz_phase()
             return
 
-        start, end = self._steps[self._step_idx]
-        full_len = len(" ".join(self._words))
+        start, end, gs, ge = self._steps[self._step_idx]
 
+        # Position the overlay highlight
+        ox, oy, ow, oh = self._overlay_rect(start, end, gs, ge)
+        self._overlay.setGeometry(ox, oy, ow, oh)
+        self._overlay.show()
+
+        # Scroll so the highlighted area is visible
         cursor = self._reader.textCursor()
-
-        # Dim entire document first (peripheral dimming)
-        cursor.setPosition(0)
-        cursor.setPosition(full_len, QTextCursor.MoveMode.KeepAnchor)
-        cursor.setCharFormat(self._dim_fmt)
-
-        # Highlight active segment
         cursor.setPosition(start)
-        cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
-        cursor.setCharFormat(self._hl_fmt)
-
-        # Scroll to active segment
         self._reader.setTextCursor(cursor)
         self._reader.ensureCursorVisible()
 
@@ -519,9 +611,8 @@ class PacerExercise(BaseExercise):
         self._progress_bar.setValue(pct)
 
         # Update live WPM
-        self._words_shown += len(
-            " ".join(self._words)[start:end].split()
-        )
+        joined = " ".join(self._words)
+        self._words_shown += len(joined[start:end].split())
         elapsed = time.monotonic() - self._start_time
         if elapsed > 0.5:
             live_wpm = int(self._words_shown / (elapsed / 60))
