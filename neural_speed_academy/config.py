@@ -230,6 +230,20 @@ USER_DATA_CONFIG = {
 # Each step: (exercise_type, label, params_dict)
 # exercise_type maps to a launcher in the path execution screen.
 TRAINING_PATHS = {
+    # Daily Warmup first — most frequently used
+    "daily_warmup": {
+        "name": "Daily Warmup",
+        "description": "Quick 5-minute session to keep skills sharp",
+        "adaptive": True,
+        "steps": [
+            ("priming", "Eye Priming: Mixed Saccades", {"mode": "saccade_diag", "delay": 500}),
+            ("flash", "Flash: Adaptive Digits", {"low": 2, "high": 4, "rounds": 10}),
+            ("eyespan", "Eye-Span: Adaptive", {"mode": "h", "width": 30, "low": 2, "high": 2, "rounds": 8}),
+            ("schulte", "Schulte Grid", {}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
+        ],
+    },
+    # Paths ordered by difficulty
     "foundation": {
         "name": "Foundation",
         "description": "Build baseline perception and focus skills (2 weeks)",
@@ -272,16 +286,25 @@ TRAINING_PATHS = {
         "name": "Path to 400 WPM",
         "description": "Develop speed reading fundamentals for comfortable fast reading",
         "steps": [
+            # Warmup
             ("priming", "Eye Priming: Expanding Saccades", {"mode": "saccade_expand", "delay": 500}),
-            ("flash", "Flash: 4-5 Digits", {"low": 4, "high": 5, "rounds": 12}),
+            # Phase 1: Build perception at 300-350 WPM
+            ("flash", "Flash: 4 Digits Fixed", {"digits": 4, "rounds": 12}),
             ("eyespan", "Eye-Span: Narrow 30%", {"mode": "h", "width": 30, "low": 2, "high": 2, "rounds": 10}),
+            ("rsvp", "RSVP: 300 WPM", {"wpm": 300}),
+            ("chunking", "Chunking: 3-Word Phrases", {"chunk_size": 3, "wpm": 280}),
+            # Phase 2: Push to 350 WPM
+            ("flash", "Flash: 4-5 Digits", {"low": 4, "high": 5, "rounds": 12}),
+            ("eyespan", "Eye-Span: Horizontal 40%", {"mode": "h", "width": 40, "low": 2, "high": 2, "rounds": 10}),
             ("rsvp", "RSVP: 350 WPM", {"wpm": 350}),
-            ("chunking", "Chunking: 3-Word Phrases", {"chunk_size": 3, "wpm": 300}),
+            ("chunking", "Chunking: 3-Word Phrases", {"chunk_size": 3, "wpm": 320}),
+            ("schulte", "Schulte Grid", {}),
+            # Phase 3: Consolidate at 400 WPM
+            ("priming", "Eye Priming: Vertical Saccades", {"mode": "saccade_v", "delay": 500}),
             ("flash", "Flash: 5-6 Digits", {"low": 5, "high": 6, "rounds": 12}),
-            ("eyespan", "Eye-Span: Horizontal 40%", {"mode": "h", "width": 40, "low": 2, "high": 3, "rounds": 10}),
+            ("eyespan", "Eye-Span: Horizontal 50%", {"mode": "h", "width": 50, "low": 2, "high": 3, "rounds": 10}),
             ("rsvp", "RSVP: 400 WPM", {"wpm": 400}),
             ("chunking", "Chunking: 4-Word Phrases", {"chunk_size": 4, "wpm": 350}),
-            ("schulte", "Schulte Grid", {}),
             ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
@@ -289,16 +312,30 @@ TRAINING_PATHS = {
         "name": "Path to 600 WPM",
         "description": "Advanced training for high-speed reading with comprehension",
         "steps": [
+            # Warmup
             ("priming", "Eye Priming: Figure-8 Pursuit", {"mode": "pursuit_figure8", "cycles": 12}),
-            ("flash", "Flash: 5-7 Digits", {"low": 5, "high": 7, "rounds": 15}),
+            # Phase 1: Sharpen perception, read at 400-450 WPM
+            ("flash", "Flash: 5 Digits Fixed", {"digits": 5, "rounds": 12}),
             ("eyespan", "Eye-Span: Horizontal 40%", {"mode": "h", "width": 40, "low": 2, "high": 3, "rounds": 10}),
-            ("rsvp", "RSVP: 500 WPM", {"wpm": 500}),
-            ("chunking", "Chunking: 4-Word Phrases", {"chunk_size": 4, "wpm": 400}),
-            ("flash", "Flash: 6-8 Digits", {"low": 6, "high": 8, "rounds": 15}),
+            ("rsvp", "RSVP: 400 WPM", {"wpm": 400}),
+            ("chunking", "Chunking: 4-Word Phrases", {"chunk_size": 4, "wpm": 380}),
+            # Phase 2: Widen span, push to 500 WPM
+            ("flash", "Flash: 5-7 Digits", {"low": 5, "high": 7, "rounds": 15}),
             ("eyespan", "Eye-Span: Horizontal 50%", {"mode": "h", "width": 50, "low": 2, "high": 3, "rounds": 12}),
-            ("rsvp", "RSVP: 600 WPM", {"wpm": 600}),
-            ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 500}),
+            ("rsvp", "RSVP: 500 WPM", {"wpm": 500}),
+            ("chunking", "Chunking: 4-Word Phrases", {"chunk_size": 4, "wpm": 450}),
             ("schulte", "Schulte Grid", {}),
+            # Phase 3: Add vertical/mixed span, push to 550 WPM
+            ("priming", "Eye Priming: Fast Expanding Saccades", {"mode": "saccade_expand", "delay": 400}),
+            ("flash", "Flash: 6-7 Digits", {"low": 6, "high": 7, "rounds": 15}),
+            ("eyespan", "Eye-Span: Vertical 50%", {"mode": "v", "width": 50, "low": 2, "high": 3, "rounds": 12}),
+            ("rsvp", "RSVP: 550 WPM", {"wpm": 550}),
+            ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 480}),
+            # Phase 4: Consolidate at 600 WPM
+            ("flash", "Flash: 6-8 Digits", {"low": 6, "high": 8, "rounds": 15}),
+            ("eyespan", "Eye-Span: Mixed 50%", {"mode": "m", "width": 50, "low": 3, "high": 3, "rounds": 12}),
+            ("rsvp", "RSVP: 600 WPM", {"wpm": 600}),
+            ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 520}),
             ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
@@ -306,16 +343,35 @@ TRAINING_PATHS = {
         "name": "Path to 800 WPM",
         "description": "Elite training pushing the limits of visual processing",
         "steps": [
+            # Warmup
             ("priming", "Eye Priming: Fast Diagonal Saccades", {"mode": "saccade_diag", "delay": 350}),
-            ("flash", "Flash: 6-8 Digits", {"low": 6, "high": 8, "rounds": 15}),
+            # Phase 1: Baseline at 550-600 WPM
+            ("flash", "Flash: 6 Digits Fixed", {"digits": 6, "rounds": 15}),
             ("eyespan", "Eye-Span: Horizontal 50%", {"mode": "h", "width": 50, "low": 2, "high": 3, "rounds": 12}),
-            ("rsvp", "RSVP: 700 WPM", {"wpm": 700}),
-            ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 600}),
-            ("flash", "Flash: 7-9 Digits", {"low": 7, "high": 9, "rounds": 15}),
-            ("eyespan", "Eye-Span: Mixed 60%", {"mode": "m", "width": 60, "low": 3, "high": 4, "rounds": 12}),
-            ("rsvp", "RSVP: 800 WPM", {"wpm": 800}),
-            ("chunking", "Chunking: 6-Word Phrases", {"chunk_size": 6, "wpm": 700}),
+            ("rsvp", "RSVP: 550 WPM", {"wpm": 550}),
+            ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 500}),
+            # Phase 2: Push perception, read at 650 WPM
+            ("flash", "Flash: 6-7 Digits", {"low": 6, "high": 7, "rounds": 15}),
+            ("eyespan", "Eye-Span: Horizontal 60%", {"mode": "h", "width": 60, "low": 3, "high": 3, "rounds": 12}),
+            ("rsvp", "RSVP: 650 WPM", {"wpm": 650}),
+            ("chunking", "Chunking: 5-Word Phrases", {"chunk_size": 5, "wpm": 580}),
             ("schulte", "Schulte Grid", {}),
+            # Phase 3: Mixed directions, push to 700 WPM
+            ("priming", "Eye Priming: Fast Figure-8 Pursuit", {"mode": "pursuit_figure8", "cycles": 15}),
+            ("flash", "Flash: 7-8 Digits", {"low": 7, "high": 8, "rounds": 15}),
+            ("eyespan", "Eye-Span: Vertical 60%", {"mode": "v", "width": 60, "low": 3, "high": 4, "rounds": 12}),
+            ("rsvp", "RSVP: 700 WPM", {"wpm": 700}),
+            ("chunking", "Chunking: 6-Word Phrases", {"chunk_size": 6, "wpm": 620}),
+            # Phase 4: Wide span, push to 750 WPM
+            ("flash", "Flash: 7-9 Digits", {"low": 7, "high": 9, "rounds": 15}),
+            ("eyespan", "Eye-Span: Mixed 70%", {"mode": "m", "width": 70, "low": 3, "high": 4, "rounds": 15}),
+            ("rsvp", "RSVP: 750 WPM", {"wpm": 750}),
+            ("chunking", "Chunking: 6-Word Phrases", {"chunk_size": 6, "wpm": 680}),
+            # Phase 5: Consolidate at 800 WPM
+            ("flash", "Flash: 8-10 Digits", {"low": 8, "high": 10, "rounds": 15}),
+            ("eyespan", "Eye-Span: Mixed 80%", {"mode": "m", "width": 80, "low": 3, "high": 5, "rounds": 15}),
+            ("rsvp", "RSVP: 800 WPM", {"wpm": 800}),
+            ("chunking", "Chunking: 7-Word Phrases", {"chunk_size": 7, "wpm": 720}),
             ("pacer", "Pacer & Quiz: Comprehension Check", {}),
         ],
     },
@@ -324,26 +380,22 @@ TRAINING_PATHS = {
         "description": "Intensive flash and eye-span training for maximum visual processing",
         "steps": [
             ("priming", "Eye Priming: Fast Horizontal Saccades", {"mode": "saccade_h", "delay": 400}),
+            # Phase 1: Build digit span
             ("flash", "Flash: 4 Digits Fixed", {"digits": 4, "rounds": 12}),
-            ("flash", "Flash: 5-6 Digits", {"low": 5, "high": 6, "rounds": 12}),
             ("eyespan", "Eye-Span: Narrow 30%", {"mode": "h", "width": 30, "low": 2, "high": 2, "rounds": 10}),
+            ("flash", "Flash: 5 Digits Fixed", {"digits": 5, "rounds": 12}),
             ("eyespan", "Eye-Span: Horizontal 40%", {"mode": "h", "width": 40, "low": 2, "high": 3, "rounds": 10}),
+            # Phase 2: Increase span width and digit count
+            ("flash", "Flash: 5-6 Digits", {"low": 5, "high": 6, "rounds": 12}),
+            ("eyespan", "Eye-Span: Vertical 40%", {"mode": "v", "width": 40, "low": 2, "high": 3, "rounds": 10}),
             ("flash", "Flash: 6-7 Digits", {"low": 6, "high": 7, "rounds": 15}),
             ("eyespan", "Eye-Span: Mixed 50%", {"mode": "m", "width": 50, "low": 2, "high": 3, "rounds": 12}),
+            ("schulte", "Schulte Grid", {}),
+            # Phase 3: Elite perception
+            ("priming", "Eye Priming: Fast Expanding Saccades", {"mode": "saccade_expand", "delay": 350}),
             ("flash", "Flash: 7-8 Digits", {"low": 7, "high": 8, "rounds": 15}),
             ("eyespan", "Eye-Span: Horizontal 60%", {"mode": "h", "width": 60, "low": 3, "high": 4, "rounds": 12}),
-            ("schulte", "Schulte Grid", {}),
-        ],
-    },
-    "daily_warmup": {
-        "name": "Daily Warmup",
-        "description": "Quick 5-minute session to keep skills sharp (adapts to your level)",
-        "adaptive": True,
-        "steps": [
-            ("priming", "Eye Priming: Mixed Saccades", {"mode": "saccade_diag", "delay": 500}),
-            ("flash", "Flash: Adaptive Digits", {"low": 2, "high": 3, "rounds": 10}),
-            ("eyespan", "Eye-Span: Adaptive", {"mode": "h", "width": 30, "low": 2, "high": 2, "rounds": 8}),
-            ("schulte", "Schulte Grid", {}),
+            ("eyespan", "Eye-Span: Mixed 70%", {"mode": "m", "width": 70, "low": 3, "high": 4, "rounds": 15}),
         ],
     },
 }
