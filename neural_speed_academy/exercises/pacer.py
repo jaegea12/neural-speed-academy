@@ -504,9 +504,9 @@ class PacerExercise(BaseExercise):
     def _steps_multi(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
-        """Chunk-width highlight sweeping across n_lines groups.
-        The overlay height spans the full group while the width
-        covers only the current chunk."""
+        """Chunk-width highlight sweeping line-by-line within n_lines groups.
+        Each display line is chunked individually; the overlay height spans
+        the full group so the reader sees which lines are active."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
@@ -516,13 +516,14 @@ class PacerExercise(BaseExercise):
             group = lines[i : i + n]
             gs = group[0][0]
             ge = group[-1][1]
-            steps.extend(self._chunk_line(text, gs, ge, 3, gs, ge))
+            for ls, le in group:
+                steps.extend(self._chunk_line(text, ls, le, 3, gs, ge))
         return steps or [(0, len(text), 0, len(text))]
 
     def _steps_zpattern(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
-        """Z-pattern: each n_lines group split into 3 sweeps.
+        """Z-pattern: each n_lines group is swept line-by-line.
         Overlay height spans the full group."""
         lines = self._get_display_lines(text)
         n = self._n_lines
@@ -533,14 +534,8 @@ class PacerExercise(BaseExercise):
             group = lines[i : i + n]
             gs = group[0][0]
             ge = group[-1][1]
-            block_len = ge - gs
-            if block_len <= 0:
-                steps.append((gs, ge, gs, ge))
-                continue
-            seg = block_len // 3
-            steps.append((gs, gs + seg, gs, ge))
-            steps.append((gs + seg, gs + 2 * seg, gs, ge))
-            steps.append((gs + 2 * seg, ge, gs, ge))
+            for ls, le in group:
+                steps.extend(self._chunk_line(text, ls, le, 3, gs, ge))
         return steps or [(0, len(text), 0, len(text))]
 
     # ── Overlay positioning ──
