@@ -128,7 +128,7 @@ class PathSelectionScreen(BaseScreen):
         user = self.navigator.get_user()
         if not user:
             messagebox.showinfo("Login Required", "Please log in first.")
-            self.navigator.navigate_to("login")
+            self.navigator.require_login("paths")
             return
 
         pp = user.path_progress.get(path_id)

@@ -78,7 +78,6 @@ class LoginScreen(BaseScreen):
         """Handle login action."""
         name = self.entry.get().strip()
         if name and name != "Type your name":
-            # Load or create user via repository
             user = self.navigator.user_repo.get_or_create(name)
             self.navigator.set_user(user)
-            self.navigator.to_dashboard()
+            self.navigator.complete_login()

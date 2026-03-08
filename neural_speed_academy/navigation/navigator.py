@@ -49,6 +49,7 @@ class Navigator:
         self._current_name: str = ""
         self._app = None  # Set by NeuralSpeedAcademy after init
         self._path_step_pending: tuple[str, int] | None = None
+        self._post_login_redirect: str | None = None
 
     def register_screen(self, name: str, factory: Callable[[], "BaseScreen"]) -> None:
         """Register a screen factory by name."""
@@ -92,6 +93,8 @@ class Navigator:
     def logout(self) -> None:
         """Clear the current user and navigate to main menu."""
         self.current_user = None
+        self._post_login_redirect = None
+        self._path_step_pending = None
         self.navigate_to("main_menu")
 
     def to_login(self) -> None:
@@ -101,6 +104,20 @@ class Navigator:
     def to_dashboard(self) -> None:
         """Navigate to dashboard/main menu."""
         self.navigate_to("dashboard")
+
+    def require_login(self, redirect_to: str) -> None:
+        """Navigate to login, then redirect to the given screen after."""
+        self._post_login_redirect = redirect_to
+        self.navigate_to("login")
+
+    def complete_login(self) -> None:
+        """Called after successful login. Navigates to redirect target or dashboard."""
+        target = self._post_login_redirect
+        self._post_login_redirect = None
+        if target:
+            self.navigate_to(target)
+        else:
+            self.to_dashboard()
 
     def finish_exercise(self) -> None:
         """Navigate after an exercise ends.
