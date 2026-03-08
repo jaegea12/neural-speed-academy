@@ -3,9 +3,13 @@ Stats/Analytics screen showing user performance data.
 """
 from __future__ import annotations
 
+import csv
+import json
+import os
 from collections import Counter
+from datetime import datetime
 import tkinter as tk
-from tkinter import ttk
+from tkinter import filedialog, messagebox, ttk
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, FONTS
@@ -55,6 +59,9 @@ class StatsScreen(BaseScreen):
 
         # History section
         self._build_history_section(container, user)
+
+        # Export buttons
+        self._build_export_section(container, user)
 
         # Update scroll region after layout
         container.update_idletasks()
@@ -247,3 +254,105 @@ class StatsScreen(BaseScreen):
 
         for entry in user.history:
             tree.insert("", "end", values=(entry.timestamp, entry.exercise, entry.result))
+
+    def _build_export_section(self, parent: tk.Frame, user) -> None:
+        """Export buttons for CSV and JSON."""
+        frame = tk.Frame(parent, bg=COLORS["bg"])
+        frame.pack(fill="x", padx=50, pady=(0, 30))
+
+        tk.Label(
+            frame, text="EXPORT DATA",
+            font=FONTS["section_header"], fg=COLORS["fg"], bg=COLORS["bg"],
+        ).pack(anchor="w", pady=(0, 8))
+
+        btn_row = tk.Frame(frame, bg=COLORS["bg"])
+        btn_row.pack(anchor="w")
+
+        tk.Button(
+            btn_row, text="EXPORT CSV",
+            font=FONTS["btn_bold"],
+            bg=COLORS["action"], fg=COLORS["btn_text"],
+            relief="flat", width=16, pady=6, cursor="hand2",
+            command=lambda: self._export_csv(user),
+        ).pack(side="left", padx=(0, 8))
+
+        tk.Button(
+            btn_row, text="EXPORT JSON",
+            font=FONTS["btn_bold"],
+            bg=COLORS["action"], fg=COLORS["btn_text"],
+            relief="flat", width=16, pady=6, cursor="hand2",
+            command=lambda: self._export_json(user),
+        ).pack(side="left")
+
+    def _export_csv(self, user) -> None:
+        """Export session history as CSV."""
+        if not user.history:
+            messagebox.showinfo("No Data", "No session history to export.")
+            return
+
+        default_name = f"nsa_{user.name}_{datetime.now():%Y%m%d}.csv"
+        path = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+            initialfile=default_name,
+        )
+        if not path:
+            return
+
+        try:
+            with open(path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["Timestamp", "Exercise", "Result"])
+                for entry in user.history:
+                    writer.writerow([entry.timestamp, entry.exercise, entry.result])
+
+                # Personal bests section
+                if user.personal_bests:
+                    writer.writerow([])
+                    writer.writerow(["Personal Bests"])
+                    writer.writerow(["Exercise", "Score", "Total", "Percentage", "Date"])
+                    for exercise, data in user.personal_bests.items():
+                        writer.writerow([
+                            exercise, data["score"], data["total"],
+                            f"{data['pct']}%", data.get("date", ""),
+                        ])
+
+            messagebox.showinfo("Exported", f"Data saved to:\n{os.path.basename(path)}")
+        except OSError as e:
+            messagebox.showerror("Export Error", f"Could not save file:\n{e}")
+
+    def _export_json(self, user) -> None:
+        """Export full user profile as JSON."""
+        default_name = f"nsa_{user.name}_{datetime.now():%Y%m%d}.json"
+        path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")],
+            initialfile=default_name,
+        )
+        if not path:
+            return
+
+        try:
+            data = {
+                "name": user.name,
+                "xp": user.xp,
+                "level": user.xp // 1000 + 1,
+                "streak": user.streak,
+                "sessions": len(user.history),
+                "personal_bests": user.personal_bests,
+                "history": [
+                    {
+                        "timestamp": e.timestamp,
+                        "exercise": e.exercise,
+                        "result": e.result,
+                    }
+                    for e in user.history
+                ],
+                "exported_at": datetime.now().isoformat(),
+            }
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+
+            messagebox.showinfo("Exported", f"Data saved to:\n{os.path.basename(path)}")
+        except OSError as e:
+            messagebox.showerror("Export Error", f"Could not save file:\n{e}")
