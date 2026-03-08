@@ -180,7 +180,7 @@ class BaseExercise(ABC):
         """Handle exercise errors gracefully."""
         logger.error(f"{self.name} error: {error}")
         messagebox.showerror("Error", f"{message}\n\nDetails: {str(error)}")
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()
 
     @abstractmethod
     def start(self, **config) -> None:

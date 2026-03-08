@@ -137,4 +137,4 @@ class SchulteExercise(BaseExercise):
             "Done",
             f"Grid Cleared!\nFinal Score: {self.score}\nXP Gained: {self.score}"
         )
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()

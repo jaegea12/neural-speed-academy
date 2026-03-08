@@ -127,7 +127,7 @@ class PacerExercise(BaseExercise):
             font=FONTS["exit_btn"],
             bg=COLORS["alert"],
             fg=COLORS["text_on_card"],
-            command=self.navigator.to_dashboard,
+            command=self.navigator.finish_exercise,
             bd=0
         )
         exit_btn.place(relx=0.95, rely=0.05, anchor="center")
@@ -232,7 +232,7 @@ class PacerExercise(BaseExercise):
         tk.Button(
             self.root,
             text="Done",
-            command=self.navigator.to_dashboard,
+            command=self.navigator.finish_exercise,
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             font=FONTS["btn_bold"],

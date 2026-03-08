@@ -235,7 +235,7 @@ class ChunkingExercise(BaseExercise):
     def _stop(self) -> None:
         """Stop and return to dashboard."""
         self._running = False
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()
 
     def _complete_exercise(self) -> None:
         """Handle exercise completion."""
@@ -254,4 +254,4 @@ class ChunkingExercise(BaseExercise):
             f"Read {total_words} words in {len(self.chunks)} chunks "
             f"at {self.wpm} WPM\nXP: +{xp}"
         )
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()

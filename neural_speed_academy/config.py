@@ -316,7 +316,7 @@ TRAINING_PATHS = {
         "adaptive": True,
         "steps": [
             ("priming", "Eye Priming: Mixed Saccades", {"mode": "saccade_diag", "delay": 500}),
-            ("flash", "Flash: Adaptive Digits", {"low": 4, "high": 6, "rounds": 10}),
+            ("flash", "Flash: Adaptive Digits", {"low": 2, "high": 3, "rounds": 10}),
             ("eyespan", "Eye-Span: Adaptive", {"mode": "m", "width": 50, "low": 3, "high": 4, "rounds": 10}),
             ("schulte", "Schulte Grid", {}),
         ],

@@ -272,11 +272,13 @@ class PathSessionScreen(BaseScreen):
     def _launch_step(self, ex_type: str, params: dict, path_id: str,
                      step_idx: int) -> None:
         """Launch the exercise for the current step."""
-        # Store pending advancement so we can advance after the exercise
         user = self.navigator.get_user()
         if user:
             user.active_path = path_id
             self.navigator.user_repo.save(user)
+
+        # Tell the navigator to advance this path step when the exercise ends
+        self.navigator._path_step_pending = (path_id, step_idx)
 
         # Launch the appropriate exercise
         app = self.navigator._app
@@ -287,18 +289,19 @@ class PathSessionScreen(BaseScreen):
             low = params.get("low", digits or 3)
             high = params.get("high", digits or 3)
             rounds = params.get("rounds", 10)
+            _low, _high = low, high
             app.flash_exercise.start(
-                mode="numbers",
+                mode="flash_num",
                 rounds=rounds,
-                level_func=lambda _: random.randint(low, high),
+                level_func=lambda _, lo=_low, hi=_high: random.randint(lo, hi),
             )
         elif ex_type == "eyespan":
+            _low = params.get("low", 2)
+            _high = params.get("high", 3)
             app.flash_exercise.start(
                 mode="eyespan",
                 rounds=params.get("rounds", 10),
-                level_func=lambda _: random.randint(
-                    params.get("low", 2), params.get("high", 3)
-                ),
+                level_func=lambda _, lo=_low, hi=_high: random.randint(lo, hi),
                 span_config={
                     "mode": params.get("mode", "h"),
                     "width": params.get("width", 50),
@@ -311,11 +314,8 @@ class PathSessionScreen(BaseScreen):
         elif ex_type == "chunking":
             app.chunking_exercise.start()
 
-        # Advance step after exercise launches
-        self._advance_step(path_id, step_idx)
-
     def _advance_step(self, path_id: str, step_idx: int) -> None:
-        """Advance to the next step in the path."""
+        """Advance to the next step and refresh the path session screen."""
         user = self.navigator.get_user()
         if not user:
             return
@@ -327,3 +327,4 @@ class PathSessionScreen(BaseScreen):
                 pp.completed = True
                 user.active_path = None
             self.navigator.user_repo.save(user)
+        self.navigator.navigate_to("path_session")

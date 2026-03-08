@@ -225,4 +225,4 @@ class PrimingExercise(BaseExercise):
         """Handle exercise completion."""
         self._running = False
         messagebox.showinfo("Warmup", "Eyes Primed!")
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()

@@ -209,7 +209,7 @@ class RsvpExercise(BaseExercise):
     def _stop(self) -> None:
         """Stop the exercise and return to dashboard."""
         self._running = False
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()
 
     def _complete_exercise(self) -> None:
         """Handle exercise completion."""
@@ -227,4 +227,4 @@ class RsvpExercise(BaseExercise):
             "Done",
             f"Read {word_count} words at {self.wpm} WPM\nXP: +{xp}"
         )
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()

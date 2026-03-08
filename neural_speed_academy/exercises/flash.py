@@ -294,4 +294,4 @@ class FlashExercise(BaseExercise):
         self.complete(result)
         messagebox.showinfo("Done", f"Score: {self.correct_count}/{self.rounds_total}")
         self._clear_flash_widgets()
-        self.navigator.to_dashboard()
+        self.navigator.finish_exercise()

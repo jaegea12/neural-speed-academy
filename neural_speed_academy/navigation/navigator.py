@@ -48,6 +48,7 @@ class Navigator:
         self._history: list[str] = []
         self._current_name: str = ""
         self._app = None  # Set by NeuralSpeedAcademy after init
+        self._path_step_pending: tuple[str, int] | None = None
 
     def register_screen(self, name: str, factory: Callable[[], "BaseScreen"]) -> None:
         """Register a screen factory by name."""
@@ -100,6 +101,32 @@ class Navigator:
     def to_dashboard(self) -> None:
         """Navigate to dashboard/main menu."""
         self.navigate_to("dashboard")
+
+    def finish_exercise(self) -> None:
+        """Navigate after an exercise ends.
+
+        If the exercise was launched from a training path, advance the
+        path step and return to the path session screen.  Otherwise
+        fall back to the dashboard.
+        """
+        pending = self._path_step_pending
+        if pending:
+            path_id, step_idx = pending
+            self._path_step_pending = None
+            user = self.current_user
+            if user:
+                pp = user.path_progress.get(path_id)
+                if pp and pp.current_step == step_idx:
+                    pp.current_step += 1
+                    from neural_speed_academy.config import TRAINING_PATHS
+                    path_data = TRAINING_PATHS.get(path_id, {})
+                    if pp.current_step >= len(path_data.get("steps", [])):
+                        pp.completed = True
+                        user.active_path = None
+                    self.user_repo.save(user)
+            self.navigate_to("path_session")
+        else:
+            self.to_dashboard()
 
     def to_stats(self) -> None:
         """Navigate to stats screen."""
