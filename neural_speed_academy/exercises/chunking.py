@@ -4,7 +4,8 @@ Chunking exercise: flash multi-word phrases to train block reading.
 from __future__ import annotations
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QSlider, QMessageBox,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
+    QSlider, QMessageBox,
 )
 from PyQt6.QtCore import Qt
 
@@ -34,13 +35,23 @@ class ChunkingExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
+        slider_groove = (
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setContentsMargins(40, 10, 40, 10)
-        cl.setSpacing(6)
+        cl.setContentsMargins(40, 5, 40, 5)
+        cl.setSpacing(2)
 
+        # Guide button
+        top = QHBoxLayout()
+        top.setContentsMargins(0, 0, 0, 0)
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
@@ -49,85 +60,101 @@ class ChunkingExercise(BaseExercise):
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("chunking"))
-        cl.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        top.addWidget(guide_btn)
+        top.addStretch()
+        cl.addLayout(top)
 
         title = QLabel("CHUNKING CONFIGURATION")
-        title.setFont(make_qfont("header"))
+        title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input
+        # Text input — 60% width, taller
         self._text_input = QTextEdit()
         self._text_input.setFont(make_qfont("pacer_text"))
         self._text_input.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"QTextEdit {{ background-color: {c['card']}; "
+            f"color: {c['text_on_card']}; "
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        self._text_input.setFixedHeight(120)
-        self._text_input.setMinimumWidth(700)
+        self._text_input.setMinimumHeight(180)
+        self._text_input.setMaximumWidth(960)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input)
+        cl.addWidget(self._text_input, 1, Qt.AlignmentFlag.AlignCenter)
 
-        # Chunk size slider
-        chunk_lbl = QLabel("Words Per Chunk:")
+        # Chunk size: label + slider + value in one row
+        init_chunk = kwargs.get(
+            "chunk_size", CHUNKING_CONFIG["default_chunk_size"]
+        )
+        chunk_row = QHBoxLayout()
+        chunk_row.setContentsMargins(0, 0, 0, 0)
+        chunk_row.setSpacing(8)
+        chunk_row.addStretch()
+        chunk_lbl = QLabel("Words/chunk:")
         chunk_lbl.setFont(make_qfont("slider_label"))
         chunk_lbl.setStyleSheet(f"color: {c['fg']};")
-        cl.addWidget(chunk_lbl)
-
-        init_chunk = kwargs.get("chunk_size", CHUNKING_CONFIG["default_chunk_size"])
-        self._chunk_display = QLabel(str(init_chunk))
-        self._chunk_display.setFont(make_qfont("counter"))
-        self._chunk_display.setStyleSheet(f"color: {c['accent']};")
-        self._chunk_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        chunk_row.addWidget(chunk_lbl)
 
         self._chunk_slider = QSlider(Qt.Orientation.Horizontal)
         self._chunk_slider.setRange(
-            CHUNKING_CONFIG["min_chunk_size"], CHUNKING_CONFIG["max_chunk_size"]
+            CHUNKING_CONFIG["min_chunk_size"],
+            CHUNKING_CONFIG["max_chunk_size"],
         )
         self._chunk_slider.setValue(init_chunk)
-        self._chunk_slider.setFixedWidth(300)
-        self._chunk_slider.setStyleSheet(
-            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
+        self._chunk_slider.setFixedWidth(200)
+        self._chunk_slider.setStyleSheet(slider_groove)
+
+        self._chunk_display = QLabel(str(init_chunk))
+        self._chunk_display.setFont(make_qfont("counter"))
+        self._chunk_display.setStyleSheet(f"color: {c['accent']};")
+        self._chunk_display.setFixedWidth(30)
         self._chunk_slider.valueChanged.connect(
             lambda v: self._chunk_display.setText(str(v))
         )
-        cl.addWidget(self._chunk_slider, alignment=Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(self._chunk_display)
+        chunk_row.addWidget(self._chunk_slider)
+        chunk_row.addWidget(self._chunk_display)
+        chunk_row.addStretch()
+        cl.addLayout(chunk_row)
 
-        # WPM slider
-        wpm_lbl = QLabel("Display Speed (WPM equivalent):")
+        # WPM: label + slider + value in one row
+        init_wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+        wpm_row = QHBoxLayout()
+        wpm_row.setContentsMargins(0, 0, 0, 0)
+        wpm_row.setSpacing(8)
+        wpm_row.addStretch()
+        wpm_lbl = QLabel("Target WPM:")
         wpm_lbl.setFont(make_qfont("slider_label"))
         wpm_lbl.setStyleSheet(f"color: {c['fg']};")
-        cl.addWidget(wpm_lbl)
+        wpm_row.addWidget(wpm_lbl)
 
-        init_wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
+        self._wpm_slider.setRange(
+            CHUNKING_CONFIG["min_wpm"], CHUNKING_CONFIG["max_wpm"]
+        )
+        self._wpm_slider.setValue(init_wpm)
+        self._wpm_slider.setFixedWidth(300)
+        self._wpm_slider.setStyleSheet(slider_groove)
+
         self._wpm_display = QLabel(str(init_wpm))
         self._wpm_display.setFont(make_qfont("counter"))
         self._wpm_display.setStyleSheet(f"color: {c['accent']};")
-        self._wpm_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
-        self._wpm_slider.setRange(CHUNKING_CONFIG["min_wpm"], CHUNKING_CONFIG["max_wpm"])
-        self._wpm_slider.setValue(init_wpm)
-        self._wpm_slider.setFixedWidth(400)
-        self._wpm_slider.setStyleSheet(
-            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
+        self._wpm_display.setFixedWidth(50)
         self._wpm_slider.valueChanged.connect(
             lambda v: self._wpm_display.setText(str(v))
         )
-        cl.addWidget(self._wpm_slider, alignment=Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(self._wpm_display)
+        wpm_row.addWidget(self._wpm_slider)
+        wpm_row.addWidget(self._wpm_display)
+        wpm_row.addStretch()
+        cl.addLayout(wpm_row)
 
         # Start button
+        cl.addSpacing(4)
         start_btn = QPushButton("START CHUNKING")
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
+            f"QPushButton {{ background-color: {c['success']}; "
+            f"color: {c['btn_text']}; "
             f"border: none; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)

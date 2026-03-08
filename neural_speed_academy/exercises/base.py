@@ -138,21 +138,22 @@ class BaseExercise(QWidget):
         return bar
 
     def show_guide(self, topic: str) -> None:
+        from PyQt6.QtGui import QFont
         from neural_speed_academy.config import EXERCISE_GUIDES
         c = COLORS
         guide_title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
 
         dlg = QDialog(self)
         dlg.setWindowTitle(guide_title)
-        dlg.setMinimumSize(600, 400)
+        dlg.setMinimumSize(720, 500)
         dlg.setStyleSheet(f"background-color: {c['card']};")
 
         layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(20, 15, 20, 15)
-        layout.setSpacing(10)
+        layout.setContentsMargins(30, 25, 30, 20)
+        layout.setSpacing(12)
 
         heading = QLabel(guide_title)
-        heading.setFont(make_qfont("section_header"))
+        heading.setFont(make_qfont("header"))
         heading.setStyleSheet(f"color: {c['accent']};")
         heading.setWordWrap(True)
         layout.addWidget(heading)
@@ -161,14 +162,22 @@ class BaseExercise(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setStyleSheet(
             f"QScrollArea {{ border: none; background: transparent; }}"
+            f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
+            f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
+            f"border-radius: 4px; min-height: 30px; }}"
+            f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
+            f"{{ height: 0; }}"
         )
         body_widget = QWidget()
         body_layout = QVBoxLayout(body_widget)
-        body_layout.setContentsMargins(0, 0, 0, 0)
+        body_layout.setContentsMargins(5, 5, 5, 5)
 
         body = QLabel(text)
-        body.setFont(make_qfont("body"))
-        body.setStyleSheet(f"color: {c['text_on_card']};")
+        body_font = QFont("Segoe UI", 13)
+        body.setFont(body_font)
+        body.setStyleSheet(
+            f"color: {c['text_on_card']}; line-height: 1.5;"
+        )
         body.setWordWrap(True)
         body_layout.addWidget(body)
         body_layout.addStretch()
@@ -180,7 +189,7 @@ class BaseExercise(QWidget):
         close_btn.setFont(make_qfont("btn_bold"))
         close_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 3px;"
+            f"border: none; padding: 8px 30px; border-radius: 4px;"
         )
         close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         close_btn.clicked.connect(dlg.accept)

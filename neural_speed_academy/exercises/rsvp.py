@@ -35,14 +35,23 @@ class RsvpExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
+        slider_groove = (
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setContentsMargins(40, 10, 40, 10)
-        cl.setSpacing(6)
+        cl.setContentsMargins(40, 5, 40, 5)
+        cl.setSpacing(2)
 
-        # Guide
+        # Guide button
+        top = QHBoxLayout()
+        top.setContentsMargins(0, 0, 0, 0)
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
@@ -51,57 +60,67 @@ class RsvpExercise(BaseExercise):
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("rsvp"))
-        cl.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        top.addWidget(guide_btn)
+        top.addStretch()
+        cl.addLayout(top)
 
         title = QLabel("RSVP CONFIGURATION")
-        title.setFont(make_qfont("header"))
+        title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input
+        # Text input — 60% width, taller
         self._text_input = QTextEdit()
         self._text_input.setFont(make_qfont("pacer_text"))
         self._text_input.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
+            f"QTextEdit {{ background-color: {c['card']}; "
+            f"color: {c['text_on_card']}; "
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        self._text_input.setFixedHeight(120)
-        self._text_input.setMinimumWidth(700)
+        self._text_input.setMinimumHeight(180)
+        self._text_input.setMaximumWidth(960)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input)
+        cl.addWidget(self._text_input, 1, Qt.AlignmentFlag.AlignCenter)
 
-        # WPM slider
-        wpm_label = QLabel("Words Per Minute:")
-        wpm_label.setFont(make_qfont("slider_label"))
-        wpm_label.setStyleSheet(f"color: {c['fg']};")
-        cl.addWidget(wpm_label)
-
+        # WPM: label + slider + value in one row
         initial_wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
+        wpm_row = QHBoxLayout()
+        wpm_row.setContentsMargins(0, 0, 0, 0)
+        wpm_row.setSpacing(8)
+        wpm_row.addStretch()
+        wpm_lbl = QLabel("Target WPM:")
+        wpm_lbl.setFont(make_qfont("slider_label"))
+        wpm_lbl.setStyleSheet(f"color: {c['fg']};")
+        wpm_row.addWidget(wpm_lbl)
+
+        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
+        self._wpm_slider.setRange(
+            RSVP_CONFIG["min_wpm"], RSVP_CONFIG["max_wpm"]
+        )
+        self._wpm_slider.setValue(initial_wpm)
+        self._wpm_slider.setFixedWidth(300)
+        self._wpm_slider.setStyleSheet(slider_groove)
+
         self._wpm_display = QLabel(str(initial_wpm))
         self._wpm_display.setFont(make_qfont("counter"))
         self._wpm_display.setStyleSheet(f"color: {c['accent']};")
-        self._wpm_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
-        self._wpm_slider.setRange(RSVP_CONFIG["min_wpm"], RSVP_CONFIG["max_wpm"])
-        self._wpm_slider.setValue(initial_wpm)
-        self._wpm_slider.setFixedWidth(400)
-        self._wpm_slider.setStyleSheet(
-            f"QSlider::groove:horizontal {{ background: {c['card']}; height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
+        self._wpm_display.setFixedWidth(50)
         self._wpm_slider.valueChanged.connect(
             lambda v: self._wpm_display.setText(str(v))
         )
-        cl.addWidget(self._wpm_slider, alignment=Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(self._wpm_display)
+        wpm_row.addWidget(self._wpm_slider)
+        wpm_row.addWidget(self._wpm_display)
+        wpm_row.addStretch()
+        cl.addLayout(wpm_row)
 
         # Start button
+        cl.addSpacing(4)
         start_btn = QPushButton("START RSVP")
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
+            f"QPushButton {{ background-color: {c['success']}; "
+            f"color: {c['btn_text']}; "
             f"border: none; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -111,8 +130,7 @@ class RsvpExercise(BaseExercise):
         hint = QLabel("Ctrl+Enter to start")
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
-        hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(hint)
+        cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self._layout.addWidget(container, 1)
 
