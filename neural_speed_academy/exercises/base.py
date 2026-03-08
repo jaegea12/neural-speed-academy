@@ -4,7 +4,7 @@ Base exercise class implementing the Template Method pattern for PyQt6.
 from __future__ import annotations
 
 import logging
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -42,7 +42,7 @@ class ExerciseResult:
         return f"{self.score}/{self.total}"
 
 
-class BaseExercise(QWidget, ABC):
+class BaseExercise(QWidget):
     """Abstract base for all exercises. Renders into the navigator's stack."""
 
     def __init__(self, navigator: "Navigator", parent: QWidget | None = None):

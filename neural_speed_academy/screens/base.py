@@ -4,7 +4,7 @@ All screens inherit from QWidget and are managed by a QStackedWidget navigator.
 """
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from PyQt6.QtWidgets import (
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from neural_speed_academy.navigation.navigator import Navigator
 
 
-class BaseScreen(QWidget, ABC):
+class BaseScreen(QWidget):
     """Abstract base for all screens. Subclasses implement build()."""
 
     def __init__(self, navigator: "Navigator", parent: QWidget | None = None):
