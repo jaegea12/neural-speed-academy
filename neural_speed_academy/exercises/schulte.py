@@ -113,6 +113,7 @@ class SchulteExercise(BaseExercise):
 
             if self.target > self.max_num:
                 self._complete_exercise()
+                return
             else:
                 self.lbl_target.config(text=f"FIND: {self.target}")
         else:
