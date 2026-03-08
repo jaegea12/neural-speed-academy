@@ -50,6 +50,7 @@ class PacerExercise(BaseExercise):
         "chunk": "Chunk (2-3 words)",
         "line": "Full Line",
         "multi_line": "Multi-Line (2-3)",
+        "z_pattern": "Z-Pattern",
     }
 
     def __init__(self, root: tk.Tk, navigator):
@@ -238,15 +239,17 @@ class PacerExercise(BaseExercise):
         self, widget: tk.Text, words: list[str], mode: str,
     ) -> list[tuple[str, str]]:
         """Build (start_index, end_index) pairs for each highlight step."""
-        full_text = " ".join(words)
         if mode == "word":
             return self._steps_by_word(words)
         elif mode == "chunk":
             return self._steps_by_chunk(words, chunk_size=3)
         elif mode == "line":
-            return self._steps_by_line(widget)
+            display_lines = self._get_display_lines(widget)
+            return display_lines if display_lines else [("1.0", "end")]
         elif mode == "multi_line":
             return self._steps_by_multi_line(widget, n_lines=2)
+        elif mode == "z_pattern":
+            return self._steps_z_pattern(widget, words)
         return self._steps_by_word(words)
 
     @staticmethod
@@ -278,45 +281,70 @@ class PacerExercise(BaseExercise):
         return steps
 
     @staticmethod
-    def _steps_by_line(widget: tk.Text) -> list[tuple[str, str]]:
-        """One step per display line (as wrapped by the widget)."""
+    def _get_display_lines(widget: tk.Text) -> list[tuple[str, str]]:
+        """Get display line boundaries using Tk display line indices.
+
+        Uses 'display linestart' and 'display lineend' to handle
+        word-wrapped text correctly.
+        """
         widget.update_idletasks()
-        steps = []
+        lines = []
         idx = "1.0"
-        while True:
-            line_end = widget.index(f"{idx} lineend")
-            if widget.compare(idx, ">=", "end - 1c"):
-                break
-            steps.append((idx, line_end))
-            next_idx = widget.index(f"{line_end} + 1c")
+        end_idx = widget.index("end - 1c")
+        while widget.compare(idx, "<=", end_idx):
+            dl_start = widget.index(f"{idx} display linestart")
+            dl_end = widget.index(f"{idx} display lineend")
+            if not lines or widget.compare(dl_start, ">", lines[-1][0]):
+                lines.append((dl_start, dl_end))
+            # Move to next display line
+            next_idx = widget.index(f"{dl_end} + 1 display char")
             if widget.compare(next_idx, "<=", idx):
                 break
             idx = next_idx
-        return steps if steps else [("1.0", "end")]
+        return lines
 
     @staticmethod
     def _steps_by_multi_line(
         widget: tk.Text, n_lines: int = 2,
     ) -> list[tuple[str, str]]:
         """One step per N display lines."""
-        widget.update_idletasks()
-        lines: list[tuple[str, str]] = []
-        idx = "1.0"
-        while True:
-            line_end = widget.index(f"{idx} lineend")
-            if widget.compare(idx, ">=", "end - 1c"):
-                break
-            lines.append((idx, line_end))
-            next_idx = widget.index(f"{line_end} + 1c")
-            if widget.compare(next_idx, "<=", idx):
-                break
-            idx = next_idx
-
+        lines = PacerExercise._get_display_lines(widget)
         steps = []
         for i in range(0, len(lines), n_lines):
             group = lines[i:i + n_lines]
             steps.append((group[0][0], group[-1][1]))
         return steps if steps else [("1.0", "end")]
+
+    @staticmethod
+    def _steps_z_pattern(
+        widget: tk.Text, words: list[str],
+    ) -> list[tuple[str, str]]:
+        """Z-pattern: sweep across each line in thirds, then jump diagonally.
+
+        For each display line the highlight moves through three
+        horizontal segments (left → center → right), simulating the
+        Z-shaped eye movement used in advanced speed reading.
+        """
+        lines = PacerExercise._get_display_lines(widget)
+        if not lines:
+            return [("1.0", "end")]
+
+        steps = []
+        for dl_start, dl_end in lines:
+            start_int = int(widget.index(dl_start).split(".")[1])
+            end_int = int(widget.index(dl_end).split(".")[1])
+            line_row = widget.index(dl_start).split(".")[0]
+            span = end_int - start_int
+            if span <= 0:
+                steps.append((dl_start, dl_end))
+                continue
+            # Split line into 3 segments
+            seg = max(span // 3, 1)
+            for s in range(3):
+                s_start = start_int + s * seg
+                s_end = start_int + (s + 1) * seg if s < 2 else end_int
+                steps.append((f"{line_row}.{s_start}", f"{line_row}.{s_end}"))
+        return steps
 
     def _pacer_step(self) -> None:
         """Advance to next highlight step."""
