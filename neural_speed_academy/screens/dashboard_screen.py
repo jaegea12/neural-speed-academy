@@ -29,14 +29,10 @@ class DashboardScreen(BaseScreen):
         """Build the dashboard UI."""
         self.root.configure(bg=COLORS["bg"])
 
-        # Main scrollable area
-        main = tk.Frame(self.root, bg=COLORS["bg"])
-        main.pack(fill="both", expand=True)
-        self.add_widget(main)
-
         # Header
-        header = tk.Frame(main, bg=COLORS["card"], pady=15)
+        header = tk.Frame(self.root, bg=COLORS["card"], pady=15)
         header.pack(fill="x")
+        self.add_widget(header)
         tk.Label(
             header,
             text="TRAINING DASHBOARD",
@@ -45,12 +41,21 @@ class DashboardScreen(BaseScreen):
             bg=COLORS["card"],
         ).pack()
 
-        # User summary card
-        self._build_user_card(main)
+        # User summary card (guarded so a data error doesn't block the dashboard)
+        try:
+            self._build_user_card(self.root)
+        except Exception:
+            pass
 
         # Exercise grid container
-        grid = tk.Frame(main, bg=COLORS["bg"])
-        grid.pack(pady=20)
+        grid = tk.Frame(self.root, bg=COLORS["bg"])
+        grid.pack(fill="both", expand=True, pady=20)
+        self.add_widget(grid)
+
+        # Configure grid columns to center content
+        grid.columnconfigure(0, weight=1)
+        grid.columnconfigure(1, weight=1)
+        grid.columnconfigure(2, weight=1)
 
         # Create sections
         self._create_section(grid, "PERCEPTION", 0, [
@@ -73,15 +78,17 @@ class DashboardScreen(BaseScreen):
         ])
 
         # Logout button
-        tk.Button(
-            main,
+        logout_btn = tk.Button(
+            self.root,
             text="LOGOUT",
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
             command=self.navigator.logout,
-        ).pack(pady=(10, 20))
+        )
+        logout_btn.pack(pady=(0, 15))
+        self.add_widget(logout_btn)
 
-    def _build_user_card(self, parent: tk.Frame) -> None:
+    def _build_user_card(self, parent) -> None:
         """Build a compact user summary card below the header."""
         user = self.navigator.get_user()
         if not user:
@@ -89,6 +96,7 @@ class DashboardScreen(BaseScreen):
 
         card = tk.Frame(parent, bg=COLORS["card"], pady=8, padx=20)
         card.pack(fill="x", padx=40, pady=(10, 0))
+        self.add_widget(card)
 
         # Left: name + level
         level = int(user.xp / 1000) + 1
@@ -104,7 +112,7 @@ class DashboardScreen(BaseScreen):
         last_text = "No sessions yet"
         if user.history:
             last = user.history[-1]
-            last_text = f"Last: {last.exercise} — {last.result} ({last.date})"
+            last_text = f"Last: {last.exercise} — {last.result} ({last.timestamp})"
         tk.Label(
             card,
             text=last_text,
@@ -117,6 +125,7 @@ class DashboardScreen(BaseScreen):
         xp_in_level = user.xp % 1000
         bar_frame = tk.Frame(parent, bg=COLORS["bg"])
         bar_frame.pack(fill="x", padx=40, pady=(2, 0))
+        self.add_widget(bar_frame)
 
         bar_width = 400
         bar_height = 8
