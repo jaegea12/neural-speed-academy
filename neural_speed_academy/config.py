@@ -5,23 +5,37 @@ from __future__ import annotations
 
 # Word pairs for ambiguous word recognition exercises
 WORD_PAIRS = [
+    # Letter-swap / anagram confusables
     ("TRAIL", "TRIAL"), ("QUIET", "QUITE"), ("FROM", "FORM"), ("BOARD", "BROAD"),
-    ("ANGEL", "ANGLE"), ("DAIRY", "DIARY"), ("ADAPT", "ADOPT"), ("AFFECT", "EFFECT"),
-    ("LOOSE", "LOSE"), ("PEACE", "PIECE"), ("PRINCIPAL", "PRINCIPLE"), ("STATIONARY", "STATIONERY"),
-    ("COMPLEMENT", "COMPLIMENT"), ("ADVICE", "ADVISE"), ("DEVICE", "DEVISE"), ("MORAL", "MORALE"),
-    ("PERSONAL", "PERSONNEL"), ("PROCEED", "PRECEDE"), ("THAN", "THEN"), ("WEATHER", "WHETHER"),
-    ("ACCEPT", "EXCEPT"), ("ACCESS", "EXCESS"), ("ADDITION", "EDITION"), ("BARE", "BEAR"),
-    ("BRAKE", "BREAK"), ("CEILING", "SEALING"), ("CELLAR", "SELLER"), ("CENT", "SCENT"),
-    ("CEREAL", "SERIAL"), ("CITE", "SIGHT"), ("COARSE", "COURSE"), ("DESERT", "DESSERT"),
-    ("ELICIT", "ILLICIT"), ("EMINENT", "IMMINENT"), ("FAIR", "FARE"), ("FORMALLY", "FORMERLY"),
-    ("FORTH", "FOURTH"), ("GORILLA", "GUERRILLA"), ("HEAR", "HERE"), ("HOLE", "WHOLE"),
-    ("INCIDENCE", "INCIDENTS"), ("INSTANCE", "INSTANTS"), ("ISLE", "AISLE"), ("LATER", "LATTER"),
-    ("LEAD", "LED"), ("LESSEN", "LESSON"), ("LIGHTNING", "LIGHTENING"), ("MEAT", "MEET"),
-    ("MINER", "MINOR"), ("PASSED", "PAST"), ("PATIENCE", "PATIENTS"), ("PLAIN", "PLANE"),
-    ("PRESENCE", "PRESENTS"), ("RAIN", "REIGN"), ("RIGHT", "WRITE"), ("SCENE", "SEEN"),
-    ("SIGHT", "SITE"), ("SOLE", "SOUL"), ("STAIR", "STARE"), ("STAKE", "STEAK"),
-    ("SWEET", "SUITE"), ("TAIL", "TALE"), ("THEIR", "THERE"), ("TO", "TOO"),
-    ("TRACK", "TRACT"), ("VAIN", "VEIN"), ("WAIST", "WASTE"), ("WAIT", "WEIGHT"),
+    ("ANGEL", "ANGLE"), ("DAIRY", "DIARY"), ("ADAPT", "ADOPT"), ("SACRED", "SCARED"),
+    ("UNITED", "UNTIED"), ("CAUSAL", "CASUAL"), ("MARITAL", "MARTIAL"), ("CLAM", "CALM"),
+    ("NUCLEAR", "UNCLEAR"), ("CONSERVATION", "CONVERSATION"),
+    # Homophones and near-homophones
+    ("AFFECT", "EFFECT"), ("LOOSE", "LOSE"), ("PEACE", "PIECE"), ("ADVICE", "ADVISE"),
+    ("DEVICE", "DEVISE"), ("MORAL", "MORALE"), ("THAN", "THEN"), ("WEATHER", "WHETHER"),
+    ("ACCEPT", "EXCEPT"), ("ACCESS", "EXCESS"), ("BARE", "BEAR"), ("BRAKE", "BREAK"),
+    ("CEILING", "SEALING"), ("CELLAR", "SELLER"), ("CENT", "SCENT"), ("CEREAL", "SERIAL"),
+    ("CITE", "SIGHT"), ("COARSE", "COURSE"), ("DESERT", "DESSERT"), ("FAIR", "FARE"),
+    ("FORTH", "FOURTH"), ("HEAR", "HERE"), ("HOLE", "WHOLE"), ("ISLE", "AISLE"),
+    ("LEAD", "LED"), ("LESSEN", "LESSON"), ("MEAT", "MEET"), ("MINER", "MINOR"),
+    ("PASSED", "PAST"), ("PATIENCE", "PATIENTS"), ("PLAIN", "PLANE"), ("RAIN", "REIGN"),
+    ("RIGHT", "WRITE"), ("SCENE", "SEEN"), ("SIGHT", "SITE"), ("SOLE", "SOUL"),
+    ("STAIR", "STARE"), ("STAKE", "STEAK"), ("SWEET", "SUITE"), ("TAIL", "TALE"),
+    ("THEIR", "THERE"), ("TO", "TOO"), ("VAIN", "VEIN"), ("WAIST", "WASTE"),
+    ("WAIT", "WEIGHT"), ("ALTAR", "ALTER"), ("CANVAS", "CANVASS"), ("DUAL", "DUEL"),
+    ("FLAIR", "FLARE"), ("FLOUR", "FLOWER"), ("MEDAL", "MEDDLE"), ("PEDAL", "PEDDLE"),
+    ("POUR", "PORE"), ("PRAY", "PREY"), ("PROFIT", "PROPHET"), ("ROLE", "ROLL"),
+    ("SEAM", "SEEM"), ("SOAR", "SORE"), ("WARY", "WEARY"), ("ALOUD", "ALLOWED"),
+    ("BORN", "BORNE"), ("COUNCIL", "COUNSEL"), ("CURRANT", "CURRENT"), ("DRAFT", "DRAUGHT"),
+    # Visually similar (same length, differ by 1-2 letters)
+    ("PRINCIPAL", "PRINCIPLE"), ("STATIONARY", "STATIONERY"), ("COMPLEMENT", "COMPLIMENT"),
+    ("PERSONAL", "PERSONNEL"), ("PROCEED", "PRECEDE"), ("ADDITION", "EDITION"),
+    ("ELICIT", "ILLICIT"), ("EMINENT", "IMMINENT"), ("FORMALLY", "FORMERLY"),
+    ("GORILLA", "GUERRILLA"), ("INCIDENCE", "INCIDENTS"), ("INSTANCE", "INSTANTS"),
+    ("LATER", "LATTER"), ("LIGHTNING", "LIGHTENING"), ("PRESENCE", "PRESENTS"),
+    ("TRACK", "TRACT"), ("PRESCRIBE", "PROSCRIBE"), ("EMIGRATE", "IMMIGRATE"),
+    ("ALLUSION", "ILLUSION"), ("ASSENT", "ASCENT"), ("DESCENT", "DISSENT"),
+    ("DISCRETE", "DISCREET"), ("ENSURE", "INSURE"),
 ]
 
 # Exercise guide texts

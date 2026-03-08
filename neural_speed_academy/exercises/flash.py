@@ -41,16 +41,18 @@ class FlashExercise(BaseExercise):
 
     def _create_flash_widgets(self) -> None:
         """Create flash display widgets."""
+        # Word mode uses proportional RSVP font; numbers use monospace flash font
+        font = FONTS["rsvp"] if self.mode == "flash_word" else FONTS["flash"]
         self.lbl_flash_center = tk.Label(
-            self.root, text="", font=FONTS["flash"],
+            self.root, text="", font=font,
             fg=COLORS["fg"], bg=COLORS["bg"]
         )
         self.lbl_flash_left = tk.Label(
-            self.root, text="", font=FONTS["flash"],
+            self.root, text="", font=font,
             fg=COLORS["fg"], bg=COLORS["bg"]
         )
         self.lbl_flash_right = tk.Label(
-            self.root, text="", font=FONTS["flash"],
+            self.root, text="", font=font,
             fg=COLORS["fg"], bg=COLORS["bg"]
         )
         self.lbl_cross = tk.Label(
@@ -252,7 +254,9 @@ class FlashExercise(BaseExercise):
             command=lambda: self._verify(entry.get()),
             bg=COLORS["accent"],
             fg=COLORS["btn_text"],
-            font=FONTS["btn_bold"]
+            font=FONTS["btn_bold"],
+            cursor="hand2",
+            relief="flat",
         ).pack()
 
     def _verify(self, user_input: str) -> None:
