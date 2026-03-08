@@ -503,9 +503,9 @@ class PacerExercise(BaseExercise):
     def _steps_multi(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
-        """Chunk-width highlight sweeping line-by-line within n_lines groups.
-        Each display line is chunked individually; the overlay height spans
-        the full group so the reader sees which lines are active."""
+        """Chunk-width highlight sweeping line-by-line through n_lines groups.
+        The overlay height matches the current line; n_lines controls how
+        many lines are processed before jumping to the next block."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
@@ -513,17 +513,15 @@ class PacerExercise(BaseExercise):
         steps: list[tuple[int, int, int, int]] = []
         for i in range(0, len(lines), n):
             group = lines[i : i + n]
-            gs = group[0][0]
-            ge = group[-1][1]
             for ls, le in group:
-                steps.extend(self._chunk_line(text, ls, le, 3, gs, ge))
+                steps.extend(self._chunk_line(text, ls, le, 3, ls, le))
         return steps or [(0, len(text), 0, len(text))]
 
     def _steps_zpattern(
         self, text: str,
     ) -> list[tuple[int, int, int, int]]:
         """Z-pattern: each n_lines group is swept line-by-line.
-        Overlay height spans the full group."""
+        Overlay height matches the current line."""
         lines = self._get_display_lines(text)
         n = self._n_lines
         if not lines:
@@ -531,10 +529,8 @@ class PacerExercise(BaseExercise):
         steps: list[tuple[int, int, int, int]] = []
         for i in range(0, len(lines), n):
             group = lines[i : i + n]
-            gs = group[0][0]
-            ge = group[-1][1]
             for ls, le in group:
-                steps.extend(self._chunk_line(text, ls, le, 3, gs, ge))
+                steps.extend(self._chunk_line(text, ls, le, 3, ls, le))
         return steps or [(0, len(text), 0, len(text))]
 
     # ── Overlay positioning ──
