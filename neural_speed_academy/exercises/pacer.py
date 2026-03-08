@@ -315,13 +315,7 @@ class PacerExercise(BaseExercise):
         page_h = int(page_w * 1.414)  # A4 ratio
         font_size = fov["font_size"]
 
-        # Container holds the QTextEdit + overlay
-        page_container = QWidget()
-        page_container.setFixedSize(page_w, page_h)
-        page_container.setStyleSheet("background: transparent;")
-
-        self._reader = QTextEdit(page_container)
-        self._reader.setGeometry(0, 0, page_w, page_h)
+        self._reader = QTextEdit()
         reader_font = QFont("Georgia", font_size)
         self._reader.setFont(reader_font)
         px, py = fov["pad_x"], fov["pad_y"]
@@ -331,6 +325,7 @@ class PacerExercise(BaseExercise):
             f"border: 1px solid {c['muted']}; "
             f"padding: {py}px {px}px; }}"
         )
+        self._reader.setFixedSize(page_w, page_h)
         self._reader.setReadOnly(True)
         self._reader.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
@@ -342,22 +337,24 @@ class PacerExercise(BaseExercise):
         joined = " ".join(words)
         self._reader.setPlainText(joined)
 
-        # Highlight overlay — sits on top of text, semi-transparent
-        self._overlay = QWidget(page_container)
+        # Highlight overlay — child of viewport so cursorRect coords
+        # map directly without offset translation
+        vp = self._reader.viewport()
+        self._overlay = QWidget(vp)
         hl_color = QColor(c["highlight"])
-        hl_color.setAlpha(90)
-        self._hl_rgba = (
-            f"rgba({hl_color.red()},{hl_color.green()},"
-            f"{hl_color.blue()},{hl_color.alpha()})"
-        )
+        hl_color.setAlpha(80)
         self._overlay.setStyleSheet(
-            f"background-color: {self._hl_rgba}; border-radius: 3px;"
+            f"background-color: rgba({hl_color.red()},{hl_color.green()},"
+            f"{hl_color.blue()},{hl_color.alpha()}); border-radius: 3px;"
+        )
+        self._overlay.setAttribute(
+            Qt.WidgetAttribute.WA_TransparentForMouseEvents
         )
         self._overlay.setGeometry(0, 0, 0, 0)
-        self._overlay.raise_()
+        self._overlay.show()
 
         self._layout.addWidget(
-            page_container, 1, Qt.AlignmentFlag.AlignCenter
+            self._reader, 1, Qt.AlignmentFlag.AlignCenter
         )
 
         # Defer step building until layout is done
@@ -552,12 +549,9 @@ class PacerExercise(BaseExercise):
         self, start: int, end: int, group_start: int, group_end: int,
     ) -> tuple[int, int, int, int]:
         """Compute pixel rect for the highlight overlay.
-        Width comes from (start, end), height from (group_start, group_end).
-        This lets multi-line modes show a chunk-width overlay spanning
-        the full n_lines group height."""
+        Width from (start, end), height from (group_start, group_end).
+        Coordinates are in viewport space (overlay is a viewport child)."""
         cursor = self._reader.textCursor()
-        vp = self._reader.viewport()
-        vp_offset = vp.mapTo(self._reader.parent(), vp.pos())
 
         # Horizontal extent from the chunk characters
         cursor.setPosition(start)
@@ -567,8 +561,7 @@ class PacerExercise(BaseExercise):
 
         x = r1.left()
         if r2.top() > r1.top():
-            # Chunk wraps lines — use full viewport width
-            w = vp.width() - x
+            w = self._reader.viewport().width() - x
         else:
             w = max(r2.right() - r1.left(), 10)
 
@@ -581,7 +574,7 @@ class PacerExercise(BaseExercise):
         y = rg1.top()
         h = max(rg2.bottom() - rg1.top(), r1.height())
 
-        return x + vp_offset.x(), y + vp_offset.y(), w, h
+        return x, y, w, h
 
     # ── Pacer step ──
 

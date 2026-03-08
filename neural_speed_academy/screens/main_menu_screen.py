@@ -115,10 +115,20 @@ class MainMenuScreen(BaseScreen):
         dialog.exec()
 
     def _quit(self) -> None:
-        reply = QMessageBox.question(
-            self, "Quit", "Are you sure you want to quit?",
+        c = COLORS
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Quit")
+        msg.setText("Are you sure you want to quit?")
+        msg.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
-        if reply == QMessageBox.StandardButton.Yes:
+        msg.setStyleSheet(
+            f"QMessageBox {{ background-color: {c['card']}; }}"
+            f"QMessageBox QLabel {{ color: {c['text_on_card']}; }}"
+            f"QPushButton {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; border: none; "
+            f"padding: 6px 20px; border-radius: 3px; }}"
+        )
+        if msg.exec() == QMessageBox.StandardButton.Yes:
             from PyQt6.QtWidgets import QApplication
             QApplication.quit()
