@@ -307,12 +307,47 @@ class PacerExercise(BaseExercise):
     def _steps_by_multi_line(
         widget: tk.Text, n_lines: int = 2,
     ) -> list[tuple[str, str]]:
-        """One step per N display lines."""
+        """Chunk-sweep across groups of N display lines.
+
+        Groups display lines into sets of n_lines, then splits each
+        group into horizontal segments so the highlight sweeps across
+        the multi-line block like the chunk mode does for single words.
+        """
         lines = PacerExercise._get_display_lines(widget)
+        if not lines:
+            return [("1.0", "end")]
+
         steps = []
         for i in range(0, len(lines), n_lines):
             group = lines[i:i + n_lines]
-            steps.append((group[0][0], group[-1][1]))
+            group_start = group[0][0]
+            group_end = group[-1][1]
+
+            # Get the text content of this line group
+            content = widget.get(group_start, group_end)
+            group_words = content.split()
+            if not group_words:
+                steps.append((group_start, group_end))
+                continue
+
+            # Chunk the words within this line group (3 words per chunk)
+            chunk_size = 3
+            char_offset = 0
+            base_row = widget.index(group_start).split(".")[0]
+            base_col = int(widget.index(group_start).split(".")[1])
+
+            for ci in range(0, len(group_words), chunk_size):
+                chunk = group_words[ci:ci + chunk_size]
+                chunk_text = " ".join(chunk)
+                # Find chunk position within the group content
+                pos = content.find(chunk_text, char_offset)
+                if pos < 0:
+                    continue
+                c_start = f"{group_start} + {pos}c"
+                c_end = f"{group_start} + {pos + len(chunk_text)}c"
+                steps.append((c_start, c_end))
+                char_offset = pos + len(chunk_text)
+
         return steps if steps else [("1.0", "end")]
 
     @staticmethod
