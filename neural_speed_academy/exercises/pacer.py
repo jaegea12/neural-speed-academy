@@ -58,11 +58,15 @@ def _radio_style(c: dict) -> str:
     )
 
 
-def _dim_color(hex_color: str, alpha: float = 0.30) -> QColor:
-    """Return a QColor with reduced alpha for peripheral dimming."""
-    qc = QColor(hex_color)
-    qc.setAlphaF(alpha)
-    return qc
+def _blend_toward_bg(fg_hex: str, bg_hex: str, fg_weight: float = 0.30) -> QColor:
+    """Blend fg toward bg to simulate dimming. QTextEdit ignores alpha on
+    foreground colors, so we produce a solid blended color instead."""
+    fg = QColor(fg_hex)
+    bg = QColor(bg_hex)
+    r = int(fg.red() * fg_weight + bg.red() * (1 - fg_weight))
+    g = int(fg.green() * fg_weight + bg.green() * (1 - fg_weight))
+    b = int(fg.blue() * fg_weight + bg.blue() * (1 - fg_weight))
+    return QColor(r, g, b)
 
 
 class PacerExercise(BaseExercise):
@@ -338,15 +342,15 @@ class PacerExercise(BaseExercise):
         self._hl_fmt.setForeground(QColor(c["reader_fg"]))
 
         self._dim_fmt = QTextCharFormat()
-        self._dim_fmt.setForeground(_dim_color(c["reader_fg"], 0.30))
+        self._dim_fmt.setForeground(_blend_toward_bg(c["reader_fg"], c["reader_bg"], 0.30))
         self._dim_fmt.setBackground(QColor(c["reader_bg"]))
 
         self._normal_fmt = QTextCharFormat()
         self._normal_fmt.setBackground(QColor(c["reader_bg"]))
         self._normal_fmt.setForeground(QColor(c["reader_fg"]))
 
-        # Defer step building so QTextEdit has laid out the text
-        QTimer.singleShot(100, self._build_and_start)
+        # Defer step building so QTextEdit has completed text layout
+        QTimer.singleShot(200, self._build_and_start)
 
     def _build_and_start(self) -> None:
         joined = " ".join(self._words)
@@ -363,26 +367,46 @@ class PacerExercise(BaseExercise):
     # ── Display-line detection ──
 
     def _get_display_lines(self, text: str) -> list[tuple[int, int]]:
-        """Use QTextEdit layout to find actual wrapped line boundaries."""
+        """Use QTextEdit layout to find actual wrapped line boundaries.
+        Falls back to font-metrics estimation if layout isn't ready."""
         doc = self._reader.document()
         lines: list[tuple[int, int]] = []
         block = doc.begin()
         while block.isValid():
             layout = block.layout()
-            if layout:
+            if layout and layout.lineCount() > 0:
                 block_start = block.position()
                 for i in range(layout.lineCount()):
                     line = layout.lineAt(i)
                     start = block_start + line.textStart()
                     length = line.textLength()
-                    # Trim trailing whitespace/newline from length
                     end = start + length
-                    while end > start and text[end - 1:end] in (" ", "\n"):
+                    # Trim trailing whitespace
+                    while end > start and text[end - 1 : end] in (" ", "\n"):
                         end -= 1
                     if end > start:
                         lines.append((start, end))
             block = block.next()
-        return lines if lines else [(0, len(text))]
+
+        if lines:
+            return lines
+
+        # Fallback: estimate using font metrics and widget width
+        fm = self._reader.fontMetrics()
+        avg_char_w = fm.averageCharWidth()
+        fov = theme_manager.fov_config
+        usable_w = fov["page_width"] - 2 * fov["pad_x"] - 20
+        chars_per_line = max(20, usable_w // max(avg_char_w, 1))
+        pos = 0
+        while pos < len(text):
+            end = min(pos + chars_per_line, len(text))
+            if end < len(text):
+                space = text.rfind(" ", pos, end)
+                if space > pos:
+                    end = space
+            lines.append((pos, end))
+            pos = end + 1 if end < len(text) else end
+        return lines or [(0, len(text))]
 
     # ── Step building ──
 
@@ -429,26 +453,27 @@ class PacerExercise(BaseExercise):
         return self._get_display_lines(text)
 
     def _steps_multi(self, text: str) -> list[tuple[int, int]]:
+        """Sliding window: highlight n_lines, advance 1 line at a time."""
         lines = self._get_display_lines(text)
         n = self._n_lines
+        if not lines:
+            return [(0, len(text))]
         steps = []
-        for i in range(0, len(lines), n):
+        for i in range(len(lines)):
             group = lines[i : i + n]
             steps.append((group[0][0], group[-1][1]))
         return steps or [(0, len(text))]
 
     def _steps_zpattern(self, text: str) -> list[tuple[int, int]]:
-        """Z-pattern: sweep n_lines as 3 segments (left→right, right→left, left→right).
-
-        Each group of n_lines is split into 3 horizontal segments to simulate
-        the Z-shaped eye movement pattern used in speed reading.
-        """
+        """Z-pattern: sliding window of n_lines, each window split into 3
+        horizontal segments to simulate the Z-shaped eye movement."""
         lines = self._get_display_lines(text)
         n = self._n_lines
+        if not lines:
+            return [(0, len(text))]
         steps = []
         for i in range(0, len(lines), n):
             group = lines[i : i + n]
-            # Treat the whole group as one block, split into 3 segments
             block_start = group[0][0]
             block_end = group[-1][1]
             block_len = block_end - block_start
@@ -456,12 +481,9 @@ class PacerExercise(BaseExercise):
                 steps.append((block_start, block_end))
                 continue
             seg = block_len // 3
-            s1 = block_start
-            s2 = block_start + seg
-            s3 = block_start + 2 * seg
-            steps.append((s1, s2))
-            steps.append((s2, s3))
-            steps.append((s3, block_end))
+            steps.append((block_start, block_start + seg))
+            steps.append((block_start + seg, block_start + 2 * seg))
+            steps.append((block_start + 2 * seg, block_end))
         return steps or [(0, len(text))]
 
     # ── Pacer step ──
