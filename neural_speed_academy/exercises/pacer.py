@@ -122,9 +122,8 @@ class PacerExercise(BaseExercise):
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
-        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setContentsMargins(40, 5, 40, 5)
-        cl.setSpacing(2)
+        cl.setContentsMargins(40, 10, 40, 10)
+        cl.setSpacing(6)
 
         slider_groove = (
             f"QSlider::groove:horizontal {{ background: {c['card']}; "
@@ -154,7 +153,7 @@ class PacerExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input — 60% width, taller
+        # Text input — 60% screen width, 15 lines visible
         self._text_input = QTextEdit()
         self._text_input.setFont(make_qfont("pacer_text"))
         self._text_input.setStyleSheet(
@@ -162,10 +161,12 @@ class PacerExercise(BaseExercise):
             f"color: {c['text_on_card']}; "
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
-        self._text_input.setMinimumHeight(180)
-        self._text_input.setMaximumWidth(960)
+        fm = self._text_input.fontMetrics()
+        line_h = fm.lineSpacing()
+        self._text_input.setFixedHeight(line_h * 15 + 20)
+        self._text_input.setFixedWidth(1100)
         self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, 1, Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
 
         # WPM: label + slider + value in one compact row
         wpm_row = QHBoxLayout()
