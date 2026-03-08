@@ -80,6 +80,7 @@ class UserProfile:
     active_path: Optional[str] = None
     path_progress: dict = field(default_factory=dict)
     personal_bests: dict = field(default_factory=dict)
+    custom_paths: dict = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.last_login:
@@ -149,6 +150,7 @@ class UserProfile:
             "active_path": self.active_path,
             "path_progress": pp,
             "personal_bests": self.personal_bests,
+            "custom_paths": self.custom_paths,
         }
 
     @classmethod
@@ -181,6 +183,7 @@ class UserProfile:
             active_path=data.get("active_path"),
             path_progress=pp,
             personal_bests=data.get("personal_bests", {}),
+            custom_paths=data.get("custom_paths", {}),
         )
 
 

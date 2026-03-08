@@ -19,7 +19,7 @@ from neural_speed_academy.screens.menu_screens import (
     PrimingMenuScreen,
 )
 from neural_speed_academy.screens.settings_screen import SettingsScreen
-from neural_speed_academy.screens.paths_screen import PathSelectionScreen, PathSessionScreen
+from neural_speed_academy.screens.paths_screen import PathSelectionScreen, PathSessionScreen, PathBuilderScreen
 from neural_speed_academy.exercises.flash import FlashExercise
 from neural_speed_academy.exercises.schulte import SchulteExercise
 from neural_speed_academy.exercises.priming import PrimingExercise
@@ -124,6 +124,10 @@ class SpeedReadingApp:
         self.navigator.register_screen(
             "path_session",
             lambda: PathSessionScreen(self.root, self.navigator)
+        )
+        self.navigator.register_screen(
+            "path_builder",
+            lambda: PathBuilderScreen(self.root, self.navigator)
         )
 
 
