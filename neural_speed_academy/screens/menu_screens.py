@@ -18,6 +18,103 @@ if TYPE_CHECKING:
 class BaseMenuScreen(BaseScreen):
     """Base class for exercise menu screens."""
 
+    @staticmethod
+    def _difficulty_color(index: int, total: int) -> str:
+        """Return a difficulty tier color key based on position in list."""
+        if total <= 1:
+            return "diff_beginner"
+        frac = index / (total - 1)
+        if frac < 0.33:
+            return "diff_beginner"
+        elif frac < 0.66:
+            return "diff_intermediate"
+        elif frac < 0.9:
+            return "diff_advanced"
+        return "diff_elite"
+
+    def _create_column_menu(
+        self,
+        title: str,
+        guide_key: str,
+        columns: list[tuple[str, list[tuple[str, Callable]]]],
+        btn_width: int = 28,
+    ) -> None:
+        """Create an N-column grid menu from labeled column lists."""
+        self.root.configure(bg=COLORS["bg"])
+        self.add_nav_bar()
+
+        container = tk.Frame(self.root, bg=COLORS["bg"])
+        container.pack(expand=True, fill="both")
+        self.add_widget(container)
+
+        tk.Label(
+            container, text=title, font=FONTS["header"],
+            fg=COLORS["fg"], bg=COLORS["bg"]
+        ).pack(pady=10)
+
+        tk.Button(
+            container, text="📘 READ GUIDE",
+            bg=COLORS["accent"], fg=COLORS["btn_text"],
+            command=lambda: self.show_guide(guide_key)
+        ).pack(pady=5)
+
+        grid = tk.Frame(container, bg=COLORS["bg"])
+        grid.pack(pady=20)
+
+        # Headers
+        for idx, (header, _items) in enumerate(columns):
+            tk.Label(
+                grid, text=header, font=FONTS["btn_bold"],
+                fg=COLORS["accent"], bg=COLORS["bg"]
+            ).grid(row=0, column=idx, padx=10, pady=10)
+
+        # Determine cutoff for progressive disclosure (~60% shown by default)
+        max_len = max(len(items) for _, items in columns)
+        cutoff = max(int(max_len * 0.6), 3)
+        advanced_widgets = []
+
+        # Buttons with difficulty color coding
+        max_rows = max(len(items) for _, items in columns)
+        for i in range(max_rows):
+            for col_idx, (_header, items) in enumerate(columns):
+                if i < len(items):
+                    name, cmd = items[i]
+                    color_key = self._difficulty_color(i, len(items))
+                    btn = tk.Button(
+                        grid, text=name, command=cmd,
+                        bg=COLORS[color_key], fg=COLORS["btn_text"],
+                        font=FONTS["menu_btn"], width=btn_width,
+                        pady=6, relief="flat"
+                    )
+                    btn.grid(row=i + 1, column=col_idx, padx=10, pady=4)
+                    if i >= cutoff:
+                        advanced_widgets.append(btn)
+                        btn.grid_remove()
+
+        # Toggle button for advanced options
+        if advanced_widgets:
+            self._advanced_visible = False
+
+            def toggle_advanced():
+                self._advanced_visible = not self._advanced_visible
+                for w in advanced_widgets:
+                    if self._advanced_visible:
+                        w.grid()
+                    else:
+                        w.grid_remove()
+                toggle_btn.config(
+                    text="▲ HIDE ADVANCED" if self._advanced_visible
+                    else "▼ SHOW ADVANCED"
+                )
+
+            toggle_btn = tk.Button(
+                container, text="▼ SHOW ADVANCED",
+                bg=COLORS["card"], fg=COLORS["fg"],
+                font=FONTS["btn_sm"], relief="flat",
+                command=toggle_advanced
+            )
+            toggle_btn.pack(pady=5)
+
     def _create_grid_menu(
         self,
         title: str,
@@ -78,35 +175,76 @@ class BaseMenuScreen(BaseScreen):
             bg=COLORS["bg"]
         ).grid(row=0, column=1, pady=10)
 
-        # Buttons
+        # Determine cutoff for progressive disclosure
+        cutoff = max(int(len(sets) * 0.6 / 2), 3)
+        advanced_widgets = []
+
+        # Buttons with difficulty color coding
         for i in range(max(len(col1_items), len(col2_items))):
             if i < len(col1_items):
                 name, cmd = col1_items[i]
-                tk.Button(
+                # Use global index for difficulty color
+                global_idx = i
+                color_key = self._difficulty_color(global_idx, len(col1_items))
+                btn = tk.Button(
                     grid,
                     text=name,
                     command=cmd,
-                    bg=COLORS["accent"],
+                    bg=COLORS[color_key],
                     fg=COLORS["btn_text"],
                     font=FONTS["btn"],
                     width=35,
                     pady=8,
                     relief="flat"
-                ).grid(row=i + 1, column=0, padx=15, pady=5)
+                )
+                btn.grid(row=i + 1, column=0, padx=15, pady=5)
+                if i >= cutoff:
+                    advanced_widgets.append(btn)
+                    btn.grid_remove()
 
             if i < len(col2_items):
                 name, cmd = col2_items[i]
-                tk.Button(
+                global_idx = i
+                color_key = self._difficulty_color(global_idx, len(col2_items))
+                btn = tk.Button(
                     grid,
                     text=name,
                     command=cmd,
-                    bg=COLORS["accent"],
+                    bg=COLORS[color_key],
                     fg=COLORS["btn_text"],
                     font=FONTS["btn"],
                     width=35,
                     pady=8,
                     relief="flat"
-                ).grid(row=i + 1, column=1, padx=15, pady=5)
+                )
+                btn.grid(row=i + 1, column=1, padx=15, pady=5)
+                if i >= cutoff:
+                    advanced_widgets.append(btn)
+                    btn.grid_remove()
+
+        # Toggle button for advanced options
+        if advanced_widgets:
+            self._advanced_visible = False
+
+            def toggle_advanced():
+                self._advanced_visible = not self._advanced_visible
+                for w in advanced_widgets:
+                    if self._advanced_visible:
+                        w.grid()
+                    else:
+                        w.grid_remove()
+                toggle_btn.config(
+                    text="▲ HIDE ADVANCED" if self._advanced_visible
+                    else "▼ SHOW ADVANCED"
+                )
+
+            toggle_btn = tk.Button(
+                container, text="▼ SHOW ADVANCED",
+                bg=COLORS["card"], fg=COLORS["fg"],
+                font=FONTS["btn_sm"], relief="flat",
+                command=toggle_advanced
+            )
+            toggle_btn.pack(pady=5)
 
 
 class FlashMenuScreen(BaseMenuScreen):
@@ -180,31 +318,6 @@ class EyespanMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         """Build the eye-span menu UI."""
-        self.root.configure(bg=COLORS["bg"])
-        self.add_nav_bar()
-
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True, fill="both")
-        self.add_widget(container)
-
-        # Title
-        tk.Label(
-            container,
-            text="EYE-SPAN TRAINING",
-            font=FONTS["header"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        ).pack(pady=10)
-
-        # Guide button
-        tk.Button(
-            container,
-            text="📘 READ GUIDE",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            command=lambda: self.show_guide("eyespan")
-        ).pack(pady=5)
-
         def run(mode: str, width: int, low: int, high: int, rounds: int) -> Callable:
             return lambda: self.flash_exercise.start(
                 mode="eyespan",
@@ -213,82 +326,52 @@ class EyespanMenuScreen(BaseMenuScreen):
                 span_config={"mode": mode, "width": width}
             )
 
-        col1_h = [
-            ("1 Digit (Narrow 30%)", run("h", 30, 1, 1, 10)),
-            ("1 Digit (Medium 50%)", run("h", 50, 1, 1, 10)),
-            ("1 Digit (Wide 70%)", run("h", 70, 1, 1, 10)),
-            ("2 Digits (Narrow 30%)", run("h", 30, 2, 2, 10)),
-            ("2 Digits (Medium 50%)", run("h", 50, 2, 2, 10)),
-            ("2 Digits (Wide 70%)", run("h", 70, 2, 2, 10)),
-            ("3 Digits (Narrow 30%)", run("h", 30, 3, 3, 10)),
-            ("3 Digits (Medium 50%)", run("h", 50, 3, 3, 12)),
-            ("3 Digits (Wide 70%)", run("h", 70, 3, 3, 12)),
-            ("4 Digits (Medium 50%)", run("h", 50, 4, 4, 12)),
-            ("4 Digits (Wide 70%)", run("h", 70, 4, 4, 15)),
-            ("Elite 4 Digits (Max 90%)", run("h", 90, 4, 4, 15)),
-        ]
-
-        col2_v = [
-            ("1 Digit (Narrow 30%)", run("v", 30, 1, 1, 10)),
-            ("1 Digit (Medium 50%)", run("v", 50, 1, 1, 10)),
-            ("1 Digit (Wide 70%)", run("v", 70, 1, 1, 10)),
-            ("2 Digits (Narrow 30%)", run("v", 30, 2, 2, 10)),
-            ("2 Digits (Medium 50%)", run("v", 50, 2, 2, 10)),
-            ("2 Digits (Wide 70%)", run("v", 70, 2, 2, 10)),
-            ("3 Digits (Narrow 30%)", run("v", 30, 3, 3, 10)),
-            ("3 Digits (Medium 50%)", run("v", 50, 3, 3, 12)),
-            ("3 Digits (Wide 70%)", run("v", 70, 3, 3, 12)),
-            ("4 Digits (Medium 50%)", run("v", 50, 4, 4, 12)),
-            ("Overlap 2-4 (Wide 80%)", run("v", 80, 2, 4, 15)),
-            ("Elite 4-6 Digits (Max 90%)", run("v", 90, 4, 6, 20)),
-        ]
-
-        col3_m = [
-            ("1 Digit (Narrow 30%)", run("m", 30, 1, 1, 10)),
-            ("1 Digit (Medium 50%)", run("m", 50, 1, 1, 10)),
-            ("2 Digits (Medium 50%)", run("m", 50, 2, 2, 12)),
-            ("2 Digits (Wide 70%)", run("m", 70, 2, 2, 12)),
-            ("3 Digits (Medium 50%)", run("m", 50, 3, 3, 12)),
-            ("3 Digits (Wide 70%)", run("m", 70, 3, 3, 12)),
-            ("Overlap 2-3 (Medium 50%)", run("m", 50, 2, 3, 12)),
-            ("Overlap 2-3 (Wide 60%)", run("m", 60, 2, 3, 12)),
-            ("Overlap 3-5 (Wide 70%)", run("m", 70, 3, 5, 15)),
-            ("Wide Range 2-6 (80%)", run("m", 80, 2, 6, 15)),
-            ("Master Chaos 2-8 (90%)", run("m", 90, 2, 8, 20)),
-        ]
-
-        # Three-column grid
-        grid = tk.Frame(container, bg=COLORS["bg"])
-        grid.pack(pady=20)
-
-        headers = ["HORIZONTAL SCAN", "VERTICAL JUMP", "DYNAMIC MIX"]
-        for idx, title in enumerate(headers):
-            tk.Label(
-                grid,
-                text=title,
-                font=FONTS["btn_bold"],
-                fg=COLORS["accent"],
-                bg=COLORS["bg"]
-            ).grid(row=0, column=idx, padx=10, pady=10)
-
-        max_rows = max(len(col1_h), len(col2_v), len(col3_m))
-        columns = [col1_h, col2_v, col3_m]
-
-        for i in range(max_rows):
-            for col_idx, col_items in enumerate(columns):
-                if i < len(col_items):
-                    name, cmd = col_items[i]
-                    tk.Button(
-                        grid,
-                        text=name,
-                        command=cmd,
-                        bg=COLORS["accent"],
-                        fg=COLORS["btn_text"],
-                        font=FONTS["menu_btn"],
-                        width=28,
-                        pady=6,
-                        relief="flat"
-                    ).grid(row=i + 1, column=col_idx, padx=10, pady=4)
+        self._create_column_menu(
+            "EYE-SPAN TRAINING", "eyespan",
+            columns=[
+                ("HORIZONTAL SCAN", [
+                    ("1 Digit (Narrow 30%)", run("h", 30, 1, 1, 10)),
+                    ("1 Digit (Medium 50%)", run("h", 50, 1, 1, 10)),
+                    ("1 Digit (Wide 70%)", run("h", 70, 1, 1, 10)),
+                    ("2 Digits (Narrow 30%)", run("h", 30, 2, 2, 10)),
+                    ("2 Digits (Medium 50%)", run("h", 50, 2, 2, 10)),
+                    ("2 Digits (Wide 70%)", run("h", 70, 2, 2, 10)),
+                    ("3 Digits (Narrow 30%)", run("h", 30, 3, 3, 10)),
+                    ("3 Digits (Medium 50%)", run("h", 50, 3, 3, 12)),
+                    ("3 Digits (Wide 70%)", run("h", 70, 3, 3, 12)),
+                    ("4 Digits (Medium 50%)", run("h", 50, 4, 4, 12)),
+                    ("4 Digits (Wide 70%)", run("h", 70, 4, 4, 15)),
+                    ("Elite 4 Digits (Max 90%)", run("h", 90, 4, 4, 15)),
+                ]),
+                ("VERTICAL JUMP", [
+                    ("1 Digit (Narrow 30%)", run("v", 30, 1, 1, 10)),
+                    ("1 Digit (Medium 50%)", run("v", 50, 1, 1, 10)),
+                    ("1 Digit (Wide 70%)", run("v", 70, 1, 1, 10)),
+                    ("2 Digits (Narrow 30%)", run("v", 30, 2, 2, 10)),
+                    ("2 Digits (Medium 50%)", run("v", 50, 2, 2, 10)),
+                    ("2 Digits (Wide 70%)", run("v", 70, 2, 2, 10)),
+                    ("3 Digits (Narrow 30%)", run("v", 30, 3, 3, 10)),
+                    ("3 Digits (Medium 50%)", run("v", 50, 3, 3, 12)),
+                    ("3 Digits (Wide 70%)", run("v", 70, 3, 3, 12)),
+                    ("4 Digits (Medium 50%)", run("v", 50, 4, 4, 12)),
+                    ("Overlap 2-4 (Wide 80%)", run("v", 80, 2, 4, 15)),
+                    ("Elite 4-6 Digits (Max 90%)", run("v", 90, 4, 6, 20)),
+                ]),
+                ("DYNAMIC MIX", [
+                    ("1 Digit (Narrow 30%)", run("m", 30, 1, 1, 10)),
+                    ("1 Digit (Medium 50%)", run("m", 50, 1, 1, 10)),
+                    ("2 Digits (Medium 50%)", run("m", 50, 2, 2, 12)),
+                    ("2 Digits (Wide 70%)", run("m", 70, 2, 2, 12)),
+                    ("3 Digits (Medium 50%)", run("m", 50, 3, 3, 12)),
+                    ("3 Digits (Wide 70%)", run("m", 70, 3, 3, 12)),
+                    ("Overlap 2-3 (Medium 50%)", run("m", 50, 2, 3, 12)),
+                    ("Overlap 2-3 (Wide 60%)", run("m", 60, 2, 3, 12)),
+                    ("Overlap 3-5 (Wide 70%)", run("m", 70, 3, 5, 15)),
+                    ("Wide Range 2-6 (80%)", run("m", 80, 2, 6, 15)),
+                    ("Master Chaos 2-8 (90%)", run("m", 90, 2, 8, 20)),
+                ]),
+            ],
+        )
 
 
 class PrimingMenuScreen(BaseMenuScreen):

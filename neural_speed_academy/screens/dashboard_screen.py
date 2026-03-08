@@ -41,9 +41,12 @@ class DashboardScreen(BaseScreen):
             bg=COLORS["card"],
         ).pack()
 
+        # User summary card
+        self._build_user_card()
+
         # Centered grid container
         grid = tk.Frame(self.root, bg=COLORS["bg"])
-        grid.place(relx=0.5, rely=0.5, anchor="center")
+        grid.place(relx=0.5, rely=0.55, anchor="center")
         self.add_widget(grid)
 
         # Create sections
@@ -76,6 +79,63 @@ class DashboardScreen(BaseScreen):
         )
         logout_btn.place(relx=0.95, rely=0.95, anchor="e")
         self.add_widget(logout_btn)
+
+    def _build_user_card(self) -> None:
+        """Build a compact user summary card below the header."""
+        user = self.navigator.get_user()
+        if not user:
+            return
+
+        card = tk.Frame(self.root, bg=COLORS["card"], pady=8, padx=20)
+        card.pack(fill="x", padx=40, pady=(10, 0))
+        self.add_widget(card)
+
+        # Left: name + level
+        level = int(user.xp / 1000) + 1
+        tk.Label(
+            card,
+            text=f"👤 {user.name.upper()}  |  LEVEL {level}  |  STREAK: {user.streak} Days",
+            font=FONTS["btn_sm"],
+            fg=COLORS["text_on_card"],
+            bg=COLORS["card"],
+        ).pack(side="left")
+
+        # Right: last played
+        last_text = "No sessions yet"
+        if user.history:
+            last = user.history[-1]
+            last_text = f"Last: {last.exercise} — {last.result} ({last.date})"
+        tk.Label(
+            card,
+            text=last_text,
+            font=FONTS["btn_sm"],
+            fg=COLORS["muted"],
+            bg=COLORS["card"],
+        ).pack(side="right")
+
+        # XP progress bar (canvas)
+        xp_in_level = user.xp % 1000
+        bar_frame = tk.Frame(self.root, bg=COLORS["bg"])
+        bar_frame.pack(fill="x", padx=40, pady=(2, 0))
+        self.add_widget(bar_frame)
+
+        bar_width = 400
+        bar_height = 8
+        canvas = tk.Canvas(
+            bar_frame, width=bar_width, height=bar_height,
+            bg=COLORS["card"], highlightthickness=0
+        )
+        canvas.pack(side="left", padx=(0, 10))
+        fill_width = int(bar_width * xp_in_level / 1000)
+        canvas.create_rectangle(0, 0, fill_width, bar_height, fill=COLORS["accent"], width=0)
+
+        tk.Label(
+            bar_frame,
+            text=f"{xp_in_level}/1000 XP to Level {level + 1}",
+            font=FONTS["btn_sm"],
+            fg=COLORS["muted"],
+            bg=COLORS["bg"],
+        ).pack(side="left")
 
     def _get_callback(self, name: str) -> Callable:
         """Get a callback by name, or return a no-op if not found."""

@@ -61,22 +61,39 @@ class BaseScreen(ABC):
         return widget
 
     def add_nav_bar(self) -> tk.Frame:
-        """Add the standard navigation bar with user info."""
+        """Add a navigation bar with breadcrumbs and user stats."""
         user = self.navigator.get_user()
-        
+
         bar = tk.Frame(self.root, bg=COLORS["card"], height=50)
         bar.pack(fill="x", side="top")
         self.add_widget(bar)
 
-        tk.Button(
-            bar,
-            text="🏠 HUB",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            font=FONTS["btn_sm"],
-            relief="flat",
-            command=self.navigator.to_dashboard,
-        ).pack(side="left", padx=20, pady=10)
+        # Breadcrumb navigation
+        crumb_frame = tk.Frame(bar, bg=COLORS["card"])
+        crumb_frame.pack(side="left", padx=10, pady=10)
+
+        crumbs = self.navigator.get_breadcrumbs()
+        for i, (label, screen_name) in enumerate(crumbs):
+            is_last = (i == len(crumbs) - 1)
+            if not is_last:
+                btn = tk.Button(
+                    crumb_frame, text=label,
+                    bg=COLORS["accent"], fg=COLORS["btn_text"],
+                    font=FONTS["btn_sm"], relief="flat", bd=0,
+                    command=lambda sn=screen_name: self.navigator.navigate_to(sn),
+                )
+                btn.pack(side="left", padx=(0, 2))
+                tk.Label(
+                    crumb_frame, text="›",
+                    fg=COLORS["muted"], bg=COLORS["card"],
+                    font=FONTS["btn_sm"],
+                ).pack(side="left", padx=2)
+            else:
+                tk.Label(
+                    crumb_frame, text=label,
+                    fg=COLORS["fg"], bg=COLORS["card"],
+                    font=FONTS["btn_sm"],
+                ).pack(side="left", padx=(0, 2))
 
         if user:
             stats = f"👤 {user.name.upper()} | XP: {user.xp}"

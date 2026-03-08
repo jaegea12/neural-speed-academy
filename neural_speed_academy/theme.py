@@ -26,6 +26,11 @@ DARK_COLORS = {
     "muted": "#94a3b8",
     "reader_bg": "#e2e8f0",
     "reader_fg": "#0f172a",
+    # Difficulty tiers (beginner → advanced → elite)
+    "diff_beginner": "#22c55e",
+    "diff_intermediate": "#60a5fa",
+    "diff_advanced": "#fb923c",
+    "diff_elite": "#ef4444",
 }
 
 LIGHT_COLORS = {
@@ -47,6 +52,11 @@ LIGHT_COLORS = {
     "muted": "#64748b",
     "reader_bg": "#ffffff",
     "reader_fg": "#1e293b",
+    # Difficulty tiers
+    "diff_beginner": "#16a34a",
+    "diff_intermediate": "#2563eb",
+    "diff_advanced": "#ea580c",
+    "diff_elite": "#dc2626",
 }
 
 SOFT_LIGHT_COLORS = {
@@ -68,6 +78,11 @@ SOFT_LIGHT_COLORS = {
     "muted": "#8a8475",
     "reader_bg": "#f5f0e8",
     "reader_fg": "#3d3929",
+    # Difficulty tiers
+    "diff_beginner": "#5a8a5e",
+    "diff_intermediate": "#5b7fa5",
+    "diff_advanced": "#c47a3a",
+    "diff_elite": "#b54a3a",
 }
 
 HIGH_CONTRAST_COLORS = {
@@ -89,6 +104,11 @@ HIGH_CONTRAST_COLORS = {
     "muted": "#bbbbbb",
     "reader_bg": "#ffffff",
     "reader_fg": "#000000",
+    # Difficulty tiers
+    "diff_beginner": "#00ff7f",
+    "diff_intermediate": "#00bfff",
+    "diff_advanced": "#ff6347",
+    "diff_elite": "#ff0000",
 }
 
 THEME_PROFILES = {

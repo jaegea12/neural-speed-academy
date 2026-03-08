@@ -19,6 +19,18 @@ class Navigator:
     Screens request navigation through this class instead of calling each other directly.
     """
 
+    # Human-readable labels for screen names
+    SCREEN_LABELS = {
+        "login": "Login",
+        "dashboard": "HUB",
+        "flash_menu": "Flash Numbers",
+        "words_menu": "Word Drills",
+        "eyespan_menu": "Eye-Span",
+        "priming_menu": "Eye Priming",
+        "stats": "Stats",
+        "settings": "Settings",
+    }
+
     def __init__(
         self,
         root: tk.Tk,
@@ -29,6 +41,8 @@ class Navigator:
         self.current_user: Optional["UserProfile"] = None
         self.current_screen: Optional["BaseScreen"] = None
         self._screen_registry: dict[str, Callable[[], "BaseScreen"]] = {}
+        self._history: list[str] = []
+        self._current_name: str = ""
 
     def register_screen(self, name: str, factory: Callable[[], "BaseScreen"]) -> None:
         """Register a screen factory by name."""
@@ -38,7 +52,14 @@ class Navigator:
         """Navigate to a registered screen by name."""
         if screen_name not in self._screen_registry:
             raise ValueError(f"Unknown screen: {screen_name}")
-        
+
+        # Track history (dashboard resets the stack)
+        if screen_name == "dashboard":
+            self._history = []
+        elif self._current_name and self._current_name != "login":
+            self._history.append(self._current_name)
+        self._current_name = screen_name
+
         screen = self._screen_registry[screen_name]()
         self._show_screen(screen, **kwargs)
 
@@ -82,3 +103,25 @@ class Navigator:
     def to_exercise(self, exercise_type: str, **config) -> None:
         """Navigate to an exercise screen with configuration."""
         self.navigate_to(exercise_type, **config)
+
+    def get_breadcrumbs(self) -> list[tuple[str, str]]:
+        """Return list of (label, screen_name) pairs for the current path."""
+        crumbs = [("HUB", "dashboard")]
+        for name in self._history:
+            label = self.SCREEN_LABELS.get(name, name)
+            crumbs.append((label, name))
+        if self._current_name and self._current_name != "dashboard":
+            label = self.SCREEN_LABELS.get(self._current_name, self._current_name)
+            crumbs.append((label, self._current_name))
+        return crumbs
+
+    def go_back(self) -> None:
+        """Navigate to the previous screen in history."""
+        if self._history:
+            target = self._history[-1]
+            # Pop so navigate_to doesn't re-push
+            self._history.pop()
+            self._current_name = ""
+            self.navigate_to(target)
+        else:
+            self.to_dashboard()
