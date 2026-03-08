@@ -309,10 +309,9 @@ class PacerExercise(BaseExercise):
         )
         self._layout.addWidget(self._progress_bar)
 
-        # Reader page — A4-proportioned, sized from FOV
+        # Reader page — width from FOV, height fills available space
         fov = theme_manager.fov_config
         page_w = fov["page_width"]
-        page_h = int(page_w * 1.414)  # A4 ratio
         font_size = fov["font_size"]
 
         self._reader = QTextEdit()
@@ -325,7 +324,7 @@ class PacerExercise(BaseExercise):
             f"border: 1px solid {c['muted']}; "
             f"padding: {py}px {px}px; }}"
         )
-        self._reader.setFixedSize(page_w, page_h)
+        self._reader.setFixedWidth(page_w)
         self._reader.setReadOnly(True)
         self._reader.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
