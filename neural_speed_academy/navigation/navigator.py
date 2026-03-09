@@ -51,7 +51,7 @@ class Navigator:
 
         if screen_name in ("dashboard", "main_menu"):
             self._history = []
-        elif self._current_name and self._current_name != "login":
+        elif self._current_name and self._current_name not in ("login", "exercise"):
             self._history.append(self._current_name)
         self._current_name = screen_name
 
@@ -143,6 +143,10 @@ class Navigator:
         ex.start(**kwargs)
 
     def go_back(self) -> None:
+        # Skip non-navigable entries (e.g. "exercise") in history
+        while self._history and self._history[-1] not in self._screen_registry:
+            self._history.pop()
+
         if self._history:
             target = self._history.pop()
             self._current_name = ""
