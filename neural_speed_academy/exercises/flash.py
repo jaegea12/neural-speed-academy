@@ -127,7 +127,8 @@ class FlashExercise(BaseExercise):
             self._last_span_mode = span_mode
 
             width_pct = self.span_config.get("width", 50)
-            spacing = int(width_pct * 4)
+            h_spacing = int(width_pct * 4)
+            v_spacing = int(width_pct * 3)
 
             self._lbl_left = QLabel(self._eyespan_left)
             self._lbl_left.setFont(make_qfont(font_key))
@@ -140,20 +141,20 @@ class FlashExercise(BaseExercise):
             self._lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             if span_mode == "h":
-                row.addSpacing(spacing)
+                row.addSpacing(h_spacing)
                 row.addWidget(self._lbl_left)
-                row.addSpacing(spacing * 2)
+                row.addSpacing(h_spacing * 2)
                 row.addWidget(self._lbl_right)
-                row.addSpacing(spacing)
+                row.addSpacing(h_spacing)
                 self._flash_layout.addLayout(row)
             else:
                 col = QVBoxLayout()
                 col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(spacing // 2)
+                col.addSpacing(v_spacing)
                 col.addWidget(self._lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(spacing)
+                col.addSpacing(v_spacing * 2)
                 col.addWidget(self._lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(spacing // 2)
+                col.addSpacing(v_spacing)
                 self._flash_layout.addLayout(col)
         else:
             self._lbl_center = QLabel(self.target_val)
@@ -201,7 +202,8 @@ class FlashExercise(BaseExercise):
             if span_mode == "m":
                 span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
-            spacing = int(width_pct * 4)
+            h_spacing = int(width_pct * 4)
+            v_spacing = int(width_pct * 3)
             field_w = screen_metrics.sw(200)
 
             self._entry_left = QLineEdit()
@@ -220,20 +222,20 @@ class FlashExercise(BaseExercise):
             if span_mode == "h":
                 row = QHBoxLayout()
                 row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                row.addSpacing(spacing)
+                row.addSpacing(h_spacing)
                 row.addWidget(self._entry_left)
-                row.addSpacing(spacing * 2)
+                row.addSpacing(h_spacing * 2)
                 row.addWidget(self._entry_right)
-                row.addSpacing(spacing)
+                row.addSpacing(h_spacing)
                 input_layout.addLayout(row)
             else:
                 col = QVBoxLayout()
                 col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(spacing // 2)
+                col.addSpacing(v_spacing)
                 col.addWidget(self._entry_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(spacing)
+                col.addSpacing(v_spacing * 2)
                 col.addWidget(self._entry_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(spacing // 2)
+                col.addSpacing(v_spacing)
                 input_layout.addLayout(col)
 
             check_btn = QPushButton("CHECK")
@@ -300,11 +302,47 @@ class FlashExercise(BaseExercise):
                 w.deleteLater()
 
         font_key = "rsvp" if self.mode == "flash_word" else "flash"
-        correction = QLabel(self.target_val)
-        correction.setFont(make_qfont(font_key))
-        correction.setStyleSheet(f"color: {c['alert']};")
-        correction.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._flash_layout.addWidget(correction)
+
+        if self.mode == "eyespan":
+            span_mode = getattr(self, "_last_span_mode", "h")
+            width_pct = self.span_config.get("width", 50)
+
+            lbl_left = QLabel(self._eyespan_left)
+            lbl_left.setFont(make_qfont(font_key))
+            lbl_left.setStyleSheet(f"color: {c['alert']};")
+            lbl_left.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            lbl_right = QLabel(self._eyespan_right)
+            lbl_right.setFont(make_qfont(font_key))
+            lbl_right.setStyleSheet(f"color: {c['alert']};")
+            lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            if span_mode == "h":
+                h_spacing = int(width_pct * 4)
+                row = QHBoxLayout()
+                row.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                row.addSpacing(h_spacing)
+                row.addWidget(lbl_left)
+                row.addSpacing(h_spacing * 2)
+                row.addWidget(lbl_right)
+                row.addSpacing(h_spacing)
+                self._flash_layout.addLayout(row)
+            else:
+                v_spacing = int(width_pct * 3)
+                col = QVBoxLayout()
+                col.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(v_spacing)
+                col.addWidget(lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(v_spacing * 2)
+                col.addWidget(lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(v_spacing)
+                self._flash_layout.addLayout(col)
+        else:
+            correction = QLabel(self.target_val)
+            correction.setFont(make_qfont(font_key))
+            correction.setStyleSheet(f"color: {c['alert']};")
+            correction.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self._flash_layout.addWidget(correction)
 
         self._after(FLASH_TIMING["correction_display"], self._next_round)
 

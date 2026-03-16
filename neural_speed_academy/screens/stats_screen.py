@@ -6,16 +6,116 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 from datetime import datetime
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
     QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QMessageBox,
+    QSizePolicy,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QRectF, QPointF
+from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
+
+
+class _ProgressChart(QWidget):
+    """Simple line chart drawn with QPainter showing score % over time."""
+
+    def __init__(
+        self, title: str, data: list[tuple[str, float]],
+        parent: QWidget | None = None,
+    ):
+        super().__init__(parent)
+        self._title = title
+        self._data = data  # [(timestamp, pct), ...]
+        self.setFixedHeight(220)
+        self.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+
+    def paintEvent(self, event) -> None:
+        c = COLORS
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        w, h = self.width(), self.height()
+        margin_l, margin_r, margin_t, margin_b = 50, 20, 30, 35
+        chart_w = w - margin_l - margin_r
+        chart_h = h - margin_t - margin_b
+
+        # Background
+        painter.fillRect(0, 0, w, h, QColor(c["card"]))
+
+        # Title
+        painter.setPen(QColor(c["text_on_card"]))
+        painter.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        painter.drawText(margin_l, 20, self._title)
+
+        if len(self._data) < 2:
+            painter.setPen(QColor(c["muted"]))
+            painter.setFont(QFont("Segoe UI", 10))
+            painter.drawText(
+                QRectF(0, 0, w, h), Qt.AlignmentFlag.AlignCenter,
+                "Need at least 2 sessions to show progress"
+            )
+            painter.end()
+            return
+
+        # Axes
+        axis_pen = QPen(QColor(c["muted"]), 1)
+        painter.setPen(axis_pen)
+        # Y axis
+        painter.drawLine(margin_l, margin_t, margin_l, h - margin_b)
+        # X axis
+        painter.drawLine(margin_l, h - margin_b, w - margin_r, h - margin_b)
+
+        # Y labels (0%, 50%, 100%)
+        painter.setFont(QFont("Segoe UI", 8))
+        for pct in [0, 50, 100]:
+            y = margin_t + chart_h * (1 - pct / 100)
+            painter.setPen(QColor(c["muted"]))
+            painter.drawText(5, int(y) + 4, f"{pct}%")
+            # Grid line
+            grid_pen = QPen(QColor(c["muted"]), 1, Qt.PenStyle.DotLine)
+            painter.setPen(grid_pen)
+            painter.drawLine(margin_l, int(y), w - margin_r, int(y))
+
+        # Data points
+        n = len(self._data)
+        points: list[QPointF] = []
+        for i, (ts, pct) in enumerate(self._data):
+            x = margin_l + (i / max(n - 1, 1)) * chart_w
+            y = margin_t + chart_h * (1 - pct / 100)
+            points.append(QPointF(x, y))
+
+        # Line
+        line_pen = QPen(QColor(c["accent"]), 2)
+        painter.setPen(line_pen)
+        path = QPainterPath()
+        path.moveTo(points[0])
+        for p in points[1:]:
+            path.lineTo(p)
+        painter.drawPath(path)
+
+        # Dots
+        painter.setBrush(QColor(c["accent"]))
+        painter.setPen(Qt.PenStyle.NoPen)
+        for p in points:
+            painter.drawEllipse(p, 4, 4)
+
+        # X labels (first and last timestamp)
+        painter.setPen(QColor(c["muted"]))
+        painter.setFont(QFont("Segoe UI", 8))
+        painter.drawText(margin_l, h - 5, self._data[0][0])
+        last_ts = self._data[-1][0]
+        fm = painter.fontMetrics()
+        tw = fm.horizontalAdvance(last_ts)
+        painter.drawText(w - margin_r - tw, h - 5, last_ts)
+
+        painter.end()
 
 
 class StatsScreen(BaseScreen):
@@ -46,6 +146,7 @@ class StatsScreen(BaseScreen):
 
         self._build_summary(cl, user)
         self._build_personal_bests(cl, user)
+        self._build_progress_charts(cl, user)
         self._build_history(cl, user)
         self._build_export(cl, user)
 
@@ -119,6 +220,77 @@ class StatsScreen(BaseScreen):
         layout.addLayout(row)
         layout.addSpacing(15)
 
+    # ── Progress charts ──
+
+    def _build_progress_charts(self, layout: QVBoxLayout, user) -> None:
+        if not user.history:
+            return
+        c = COLORS
+
+        header = QLabel("PROGRESS")
+        header.setFont(make_qfont("section_header"))
+        header.setStyleSheet(f"color: {c['fg']};")
+        layout.addWidget(header)
+
+        # Group history by exercise, preserving chronological order (oldest first)
+        exercises: dict[str, list[tuple[str, float]]] = {}
+        for entry in reversed(user.history):
+            m = re.match(r"(\d+)/(\d+)", entry.result)
+            if not m:
+                continue
+            score, total = int(m.group(1)), int(m.group(2))
+            pct = (score / total * 100) if total > 0 else 0
+            exercises.setdefault(entry.exercise, []).append(
+                (entry.timestamp, pct)
+            )
+
+        if not exercises:
+            return
+
+        # Exercise selector buttons
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(6)
+        self._chart_container = QVBoxLayout()
+        self._chart_data = exercises
+
+        first_key = None
+        for ex_name in exercises:
+            if first_key is None:
+                first_key = ex_name
+            btn = QPushButton(ex_name)
+            btn.setStyleSheet(
+                btn_css(c["card"], c["text_on_card"],
+                        padding="6px 14px", font_key="btn_sm")
+            )
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(
+                lambda checked, name=ex_name: self._show_chart(name)
+            )
+            btn_row.addWidget(btn)
+        btn_row.addStretch()
+        layout.addLayout(btn_row)
+        layout.addLayout(self._chart_container)
+        layout.addSpacing(15)
+
+        # Show first exercise chart by default
+        if first_key:
+            self._show_chart(first_key)
+
+    def _show_chart(self, exercise_name: str) -> None:
+        # Clear previous chart
+        while self._chart_container.count():
+            item = self._chart_container.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
+
+        data = self._chart_data.get(exercise_name, [])
+        if not data:
+            return
+
+        chart = _ProgressChart(exercise_name, data)
+        self._chart_container.addWidget(chart)
+
     # ── History table ──
 
     def _build_history(self, layout: QVBoxLayout, user) -> None:
@@ -176,11 +348,8 @@ class StatsScreen(BaseScreen):
             ("EXPORT JSON", lambda: self._export_json(user)),
         ]:
             btn = QPushButton(text)
-            btn.setFont(make_qfont("btn_bold"))
             btn.setStyleSheet(
-                f"QPushButton {{ background-color: {c['action']}; "
-                f"color: {c['btn_text']}; border: none; "
-                f"padding: 6px 20px; border-radius: 4px; }}"
+                btn_css(c["action"], c["btn_text"], padding="6px 20px")
             )
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(cb)
