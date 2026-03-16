@@ -18,7 +18,7 @@ from PyQt6.QtGui import (
 )
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, input_css, theme_manager, screen_metrics
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
 # ── Keyword extraction ──
@@ -156,11 +156,7 @@ class PacerExercise(BaseExercise):
         # Text input — 60% screen width, 15 lines visible
         self._text_input = QTextEdit()
         self._text_input.setFont(make_qfont("pacer_text"))
-        self._text_input.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 8px; border-radius: 4px; }}"
-        )
+        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
         fm = self._text_input.fontMetrics()
         line_h = fm.lineSpacing()
         self._text_input.setFixedHeight(line_h * 15 + 20)
@@ -676,10 +672,7 @@ class PacerExercise(BaseExercise):
 
         self._quiz_input = QTextEdit()
         self._quiz_input.setFont(make_qfont("pacer_text"))
-        self._quiz_input.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
-            f"border: none; padding: 8px; border-radius: 4px; }}"
-        )
+        self._quiz_input.setStyleSheet(input_css(widget="QTextEdit"))
         self._quiz_input.setFixedHeight(150)
         self._quiz_input.setFixedWidth(screen_metrics.text_input_w)
         cl.addWidget(self._quiz_input, alignment=Qt.AlignmentFlag.AlignCenter)

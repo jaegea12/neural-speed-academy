@@ -87,6 +87,7 @@ class SettingsScreen(BaseScreen):
                 rb.setChecked(True)
             self._profile_group.addButton(rb)
             pbl.addWidget(rb)
+        self._profile_group.buttonClicked.connect(self._on_profile_changed)
         il.addWidget(profile_box, alignment=Qt.AlignmentFlag.AlignCenter)
 
         il.addSpacing(15)
@@ -120,6 +121,7 @@ class SettingsScreen(BaseScreen):
                 rb.setChecked(True)
             self._fov_group.addButton(rb)
             fbl.addWidget(rb)
+        self._fov_group.buttonClicked.connect(self._on_fov_changed)
         il.addWidget(fov_box, alignment=Qt.AlignmentFlag.AlignCenter)
 
         il.addSpacing(15)
@@ -163,13 +165,10 @@ class SettingsScreen(BaseScreen):
         lib_row.addWidget(self._lib_combo)
         il.addLayout(lib_row)
 
+        from neural_speed_academy.theme import input_css
         self._text_edit = QTextEdit()
         self._text_edit.setFont(make_qfont("body"))
-        self._text_edit.setStyleSheet(
-            f"QTextEdit {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; border: none; "
-            f"padding: 8px; border-radius: 4px; }}"
-        )
+        self._text_edit.setStyleSheet(input_css(widget="QTextEdit"))
         self._text_edit.setFixedHeight(180)
         self._text_edit.setPlainText(theme_manager.training_text)
         il.addWidget(self._text_edit)
@@ -180,16 +179,16 @@ class SettingsScreen(BaseScreen):
         btn_row = QHBoxLayout()
         btn_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        apply_btn = QPushButton("APPLY & SAVE")
-        apply_btn.setFont(make_qfont("btn_bold"))
-        apply_btn.setStyleSheet(
+        save_btn = QPushButton("SAVE")
+        save_btn.setFont(make_qfont("btn_bold"))
+        save_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
             f"color: {c['btn_text']}; border: none; "
             f"padding: 8px 30px; border-radius: 4px; }}"
         )
-        apply_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        apply_btn.clicked.connect(self._apply_and_save)
-        btn_row.addWidget(apply_btn)
+        save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        save_btn.clicked.connect(self._save)
+        btn_row.addWidget(save_btn)
 
         reset_btn = QPushButton("DEFAULT SETTINGS")
         reset_btn.setFont(make_qfont("btn_bold"))
@@ -211,18 +210,17 @@ class SettingsScreen(BaseScreen):
             _difficulty, text = entry
             self._text_edit.setPlainText(text)
 
-    def _apply_and_save(self) -> None:
-        for btn in self._profile_group.buttons():
-            if btn.isChecked():
-                theme_manager.set_profile(btn.property("profile_key"))
-                break
-        for btn in self._fov_group.buttons():
-            if btn.isChecked():
-                theme_manager.fov = btn.property("fov_key")
-                break
+    def _on_profile_changed(self, btn) -> None:
+        theme_manager.set_profile(btn.property("profile_key"))
+        # Rebuild to reflect new colors
+        self.navigator.navigate_to("settings")
+
+    def _on_fov_changed(self, btn) -> None:
+        theme_manager.fov = btn.property("fov_key")
+
+    def _save(self) -> None:
         theme_manager.training_text = self._text_edit.toPlainText()
         theme_manager.save()
-        self.navigator.navigate_to("main_menu")
 
     def _reset_defaults(self) -> None:
         theme_manager.reset_defaults()

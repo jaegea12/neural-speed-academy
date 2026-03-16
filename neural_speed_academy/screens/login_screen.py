@@ -74,15 +74,13 @@ class LoginScreen(BaseScreen):
             cl.addWidget(new_label)
 
         # Name entry
+        from neural_speed_academy.theme import input_css
         self._entry = QLineEdit()
         self._entry.setPlaceholderText("Type your name")
         self._entry.setFont(make_qfont("sub"))
         self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._entry.setStyleSheet(
-            f"QLineEdit {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; border: none; "
-            f"padding: 8px 16px; border-radius: 4px; min-width: 250px; }}"
-        )
+        self._entry.setFixedWidth(300)
+        self._entry.setStyleSheet(input_css())
         self._entry.returnPressed.connect(self._do_login)
         cl.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
         cl.addSpacing(10)

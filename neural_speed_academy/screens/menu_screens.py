@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, screen_metrics
 
 
 class BaseMenuScreen(BaseScreen):
@@ -94,12 +94,10 @@ class BaseMenuScreen(BaseScreen):
                     name, cmd = items[i]
                     color_key = self._difficulty_color(i, len(items))
                     btn = QPushButton(name)
-                    btn.setFont(make_qfont("menu_btn"))
                     btn.setFixedWidth(btn_width)
                     btn.setStyleSheet(
-                        f"QPushButton {{ background-color: {c[color_key]}; "
-                        f"color: {c['btn_text']}; border: none; "
-                        f"padding: 10px; border-radius: 4px; }}"
+                        btn_css(c[color_key], c["btn_text"],
+                                padding="10px", font_key="menu_btn")
                     )
                     btn.setCursor(Qt.CursorShape.PointingHandCursor)
                     btn.clicked.connect(cmd)
@@ -117,11 +115,9 @@ class BaseMenuScreen(BaseScreen):
             cl.addSpacing(6)
             self._adv_visible = False
             toggle = QPushButton("\u25bc SHOW ADVANCED")
-            toggle.setFont(make_qfont("btn_sm"))
             toggle.setStyleSheet(
-                f"QPushButton {{ background-color: {c['card']}; "
-                f"color: {c['fg']}; border: none; "
-                f"padding: 6px 16px; border-radius: 4px; }}"
+                btn_css(c["card"], c["fg"], padding="6px 16px",
+                        font_key="btn_sm")
             )
             toggle.setCursor(Qt.CursorShape.PointingHandCursor)
 

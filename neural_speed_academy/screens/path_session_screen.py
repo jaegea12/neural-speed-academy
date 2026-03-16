@@ -377,12 +377,10 @@ class PathBuilderScreen(BaseScreen):
         name_lbl.setStyleSheet(f"color: {c['fg']};")
         name_row.addWidget(name_lbl)
 
+        from neural_speed_academy.theme import input_css
         self._name_entry = QLineEdit()
         self._name_entry.setFont(make_qfont("body"))
-        self._name_entry.setStyleSheet(
-            f"QLineEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
-            f"border: none; padding: 6px 12px; border-radius: 4px; }}"
-        )
+        self._name_entry.setStyleSheet(input_css())
         self._name_entry.setFixedWidth(300)
         name_row.addWidget(self._name_entry)
         name_row.addStretch()

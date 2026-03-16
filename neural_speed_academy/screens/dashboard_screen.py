@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, screen_metrics
 
 
 class DashboardScreen(BaseScreen):
@@ -189,17 +189,8 @@ class DashboardScreen(BaseScreen):
         bar = QHBoxLayout()
         bar.setSpacing(8)
 
-        action_style = (
-            f"QPushButton {{ background-color: {c['action']}; "
-            f"color: {c['btn_text']}; border: none; "
-            f"padding: 8px 24px; border-radius: 4px; }}"
-        )
-        exit_style = (
-            f"QPushButton {{ background-color: {c['card']}; "
-            f"color: {c['fg']}; border: none; "
-            f"padding: 8px 24px; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {c['muted']}; }}"
-        )
+        action_style = btn_css(c["action"], c["btn_text"], padding="8px 24px")
+        exit_style = btn_css(c["card"], c["fg"], padding="8px 24px")
 
         # Left: forward navigation
         for label, cb_name in [
@@ -207,7 +198,6 @@ class DashboardScreen(BaseScreen):
             ("Stats & History", "show_stats"),
         ]:
             btn = QPushButton(label)
-            btn.setFont(make_qfont("btn_bold"))
             btn.setStyleSheet(action_style)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(self._cb(cb_name))
@@ -217,7 +207,6 @@ class DashboardScreen(BaseScreen):
 
         # Right: exit actions
         menu_btn = QPushButton("Main Menu")
-        menu_btn.setFont(make_qfont("btn_bold"))
         menu_btn.setStyleSheet(exit_style)
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         menu_btn.clicked.connect(
@@ -226,7 +215,6 @@ class DashboardScreen(BaseScreen):
         bar.addWidget(menu_btn)
 
         logout_btn = QPushButton("Logout")
-        logout_btn.setFont(make_qfont("btn_bold"))
         logout_btn.setStyleSheet(exit_style)
         logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         logout_btn.clicked.connect(self.navigator.logout)
@@ -312,14 +300,8 @@ class DashboardScreen(BaseScreen):
 
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
-            btn.setFont(make_qfont("btn_bold"))
             btn.setFixedWidth(self.BTN_WIDTH)
-            btn.setStyleSheet(
-                f"QPushButton {{ background-color: {c['accent']}; "
-                f"color: {c['btn_text']}; border: none; "
-                f"padding: 12px; border-radius: 4px; }}"
-                f"QPushButton:hover {{ background-color: {c['action']}; }}"
-            )
+            btn.setStyleSheet(btn_css(c["accent"], c["btn_text"]))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
             grid.addWidget(

@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
 
 
 class MainMenuScreen(BaseScreen):
@@ -38,14 +38,34 @@ class MainMenuScreen(BaseScreen):
         cl.addWidget(slogan)
         cl.addSpacing(20)
 
-        btn_style = (
-            f"QPushButton {{ {font_css('btn_bold')} border: none; padding: 12px; "
-            f"min-width: 300px; border-radius: 4px; }}"
-        )
+        logged_in = self.navigator.current_user is not None
+        user = self.navigator.current_user
 
-        buttons = [
-            ("START TRAINING", c["accent"], c["btn_text"],
-             lambda: self.navigator.navigate_to("login")),
+        buttons: list[tuple[str, str, str, object]] = []
+
+        if logged_in:
+            welcome = QLabel(f"Welcome back, {user.name}")
+            welcome.setFont(make_qfont("section_header"))
+            welcome.setStyleSheet(f"color: {c['fg']};")
+            welcome.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(welcome)
+            cl.addSpacing(8)
+
+            buttons.append(
+                ("CONTINUE TRAINING", c["accent"], c["btn_text"],
+                 lambda: self.navigator.to_dashboard()),
+            )
+            buttons.append(
+                ("SWITCH PROFILE", c["action"], c["btn_text"],
+                 lambda: self.navigator.navigate_to("login")),
+            )
+        else:
+            buttons.append(
+                ("LOGIN", c["accent"], c["btn_text"],
+                 lambda: self.navigator.navigate_to("login")),
+            )
+
+        buttons += [
             ("INTRODUCTION", c["action"], c["btn_text"],
              lambda: self.navigator.navigate_to("introduction")),
             ("TRAINING PATHS", c["action"], c["btn_text"],
@@ -58,10 +78,7 @@ class MainMenuScreen(BaseScreen):
 
         for text, bg, fg, callback in buttons:
             btn = QPushButton(text)
-            btn.setStyleSheet(
-                btn_style
-                + f"QPushButton {{ background-color: {bg}; color: {fg}; }}"
-            )
+            btn.setStyleSheet(btn_css(bg, fg, min_width=300))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(callback)
             cl.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)

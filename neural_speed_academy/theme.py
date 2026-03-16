@@ -493,3 +493,39 @@ def make_qfont(key: str):
     if len(spec) > 2 and spec[2] == "bold":
         font.setBold(True)
     return font
+
+
+def _color_shift(hex_color: str, amount: int) -> str:
+    """Lighten (positive) or darken (negative) a hex color."""
+    r = max(0, min(255, int(hex_color[1:3], 16) + amount))
+    g = max(0, min(255, int(hex_color[3:5], 16) + amount))
+    b = max(0, min(255, int(hex_color[5:7], 16) + amount))
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def input_css(*, widget: str = "QLineEdit") -> str:
+    """Generate QSS for text input fields with a subtle border."""
+    c = COLORS
+    return (
+        f"{widget} {{ background-color: {c['card']}; "
+        f"color: {c['text_on_card']}; "
+        f"border: 1px solid {c['muted']}; "
+        f"padding: 8px; border-radius: 4px; }}"
+        f"{widget}:focus {{ border: 1px solid {c['accent']}; }}"
+    )
+
+
+def btn_css(bg: str, fg: str, *, padding: str = "12px",
+            radius: int = 4, min_width: int = 0,
+            font_key: str = "btn_bold") -> str:
+    """Generate QPushButton QSS with hover and pressed states."""
+    hover_bg = _color_shift(bg, 25)
+    press_bg = _color_shift(bg, -20)
+    mw = f"min-width: {min_width}px; " if min_width else ""
+    return (
+        f"QPushButton {{ {font_css(font_key)} background-color: {bg}; "
+        f"color: {fg}; border: none; padding: {padding}; "
+        f"border-radius: {radius}px; {mw}}}"
+        f"QPushButton:hover {{ background-color: {hover_bg}; }}"
+        f"QPushButton:pressed {{ background-color: {press_bg}; }}"
+    )
