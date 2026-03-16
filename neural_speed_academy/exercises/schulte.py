@@ -13,7 +13,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics, theme_manager
 from neural_speed_academy.config import SCHULTE_CONFIG
 
 
@@ -85,13 +85,16 @@ class SchulteExercise(BaseExercise):
         size_lbl.setStyleSheet(f"color: {c['fg']};")
         size_row.addWidget(size_lbl)
 
+        default_grid = theme_manager.schulte_grid_size
+        default_cell = theme_manager.schulte_cell_idx
+
         self._size_slider = QSlider(Qt.Orientation.Horizontal)
         self._size_slider.setRange(3, 7)
-        self._size_slider.setValue(SCHULTE_CONFIG["grid_size"])
+        self._size_slider.setValue(default_grid)
         self._size_slider.setFixedWidth(200)
         self._size_slider.setStyleSheet(slider_groove)
 
-        self._size_display = QLabel(self._grid_label(SCHULTE_CONFIG["grid_size"]))
+        self._size_display = QLabel(self._grid_label(default_grid))
         self._size_display.setFont(make_qfont("counter"))
         self._size_display.setStyleSheet(f"color: {c['accent']};")
         self._size_display.setFixedWidth(50)
@@ -111,7 +114,7 @@ class SchulteExercise(BaseExercise):
         cl.addWidget(desc)
 
         # Cell count preview
-        self._count_lbl = QLabel(self._count_text(SCHULTE_CONFIG["grid_size"]))
+        self._count_lbl = QLabel(self._count_text(default_grid))
         self._count_lbl.setFont(make_qfont("body"))
         self._count_lbl.setStyleSheet(f"color: {c['muted']};")
         self._count_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -134,11 +137,11 @@ class SchulteExercise(BaseExercise):
 
         self._cell_slider = QSlider(Qt.Orientation.Horizontal)
         self._cell_slider.setRange(0, 3)
-        self._cell_slider.setValue(1)  # default: Medium
+        self._cell_slider.setValue(default_cell)
         self._cell_slider.setFixedWidth(200)
         self._cell_slider.setStyleSheet(slider_groove)
 
-        self._cell_display = QLabel(self._cell_label(1))
+        self._cell_display = QLabel(self._cell_label(default_cell))
         self._cell_display.setFont(make_qfont("counter"))
         self._cell_display.setStyleSheet(f"color: {c['accent']};")
         self._cell_display.setFixedWidth(70)
@@ -209,6 +212,12 @@ class SchulteExercise(BaseExercise):
     def _start_grid(self) -> None:
         grid_size = self._size_slider.value()
         cell_idx = self._cell_slider.value()
+
+        # Silently save as new defaults
+        theme_manager.schulte_grid_size = grid_size
+        theme_manager.schulte_cell_idx = cell_idx
+        theme_manager.save()
+
         self._clear()
         self._running = True
         self.add_nav_bar()

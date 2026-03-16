@@ -257,10 +257,15 @@ class ThemeManager:
     Settings are stored in a JSON file independent of user profiles.
     """
 
+    # Map FOV keys to default Schulte cell size indices
+    _FOV_TO_CELL = {"narrow": 0, "standard": 1, "wide": 2, "full": 3}
+
     def __init__(self, profile: str = DEFAULT_PROFILE):
         self._profile = profile
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
+        self._schulte_grid_size: int | None = None  # None = use config default
+        self._schulte_cell_idx: int | None = None   # None = derive from FOV
         self._listeners: list = []
 
     @property
@@ -283,6 +288,25 @@ class ThemeManager:
     def fov(self, value: str) -> None:
         if value in FOV_PRESETS:
             self._fov = value
+
+    @property
+    def schulte_grid_size(self) -> int:
+        from neural_speed_academy.config import SCHULTE_CONFIG
+        return self._schulte_grid_size if self._schulte_grid_size is not None else SCHULTE_CONFIG["grid_size"]
+
+    @schulte_grid_size.setter
+    def schulte_grid_size(self, value: int) -> None:
+        self._schulte_grid_size = max(3, min(7, value))
+
+    @property
+    def schulte_cell_idx(self) -> int:
+        if self._schulte_cell_idx is not None:
+            return self._schulte_cell_idx
+        return self._FOV_TO_CELL.get(self._fov, 1)
+
+    @schulte_cell_idx.setter
+    def schulte_cell_idx(self, value: int) -> None:
+        self._schulte_cell_idx = max(0, min(3, value))
 
     @property
     def fov_config(self) -> dict:
@@ -312,6 +336,10 @@ class ThemeManager:
                 "training_text": self._training_text,
                 "fov": self._fov,
             }
+            if self._schulte_grid_size is not None:
+                data["schulte_grid_size"] = self._schulte_grid_size
+            if self._schulte_cell_idx is not None:
+                data["schulte_cell_idx"] = self._schulte_cell_idx
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except IOError:
@@ -333,6 +361,12 @@ class ThemeManager:
             fov = data.get("fov", DEFAULT_FOV)
             if fov in FOV_PRESETS:
                 self._fov = fov
+            sg = data.get("schulte_grid_size")
+            if sg is not None:
+                self._schulte_grid_size = int(sg)
+            sc = data.get("schulte_cell_idx")
+            if sc is not None:
+                self._schulte_cell_idx = int(sc)
         except (IOError, json.JSONDecodeError, TypeError):
             pass
 

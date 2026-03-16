@@ -293,24 +293,26 @@ class PrimingMenuScreen(BaseMenuScreen):
                 duration_s=duration_s, cycles=cycles,
             )
 
-        sets = [
-            ("Horizontal Saccades (Slow)", run("saccade_h", delay=700)),
-            ("Horizontal Saccades (Fast)", run("saccade_h", delay=400)),
-            ("Vertical Saccades (Slow)", run("saccade_v", delay=700)),
-            ("Vertical Saccades (Fast)", run("saccade_v", delay=400)),
-            ("Diagonal Saccades (Slow)", run("saccade_diag", delay=700)),
-            ("Diagonal Saccades (Fast)", run("saccade_diag", delay=400)),
-            ("Expanding Saccades (Slow)", run("saccade_expand", delay=700)),
-            ("Expanding Saccades (Fast)", run("saccade_expand", delay=400)),
-            ("Pursuit: Line (Slow)", run("pursuit_line", cycles=9)),
-            ("Pursuit: Line (Fast)", run("pursuit_line", cycles=15)),
-            ("Pursuit: Circle (Slow)", run("pursuit_circle", cycles=9)),
-            ("Pursuit: Circle (Fast)", run("pursuit_circle", cycles=15)),
-            ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", cycles=9)),
-            ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", cycles=15)),
-        ]
-        self._create_grid_menu(
-            "EYE PRIMING", "priming", sets,
-            col1_label="SACCADES (JUMPS)",
-            col2_label="SMOOTH PURSUIT (TRACKING)",
+        self._create_column_menu(
+            "EYE PRIMING", "priming",
+            columns=[
+                ("SACCADES (JUMPS)", [
+                    ("Horizontal Saccades (Slow)", run("saccade_h", delay=700)),
+                    ("Horizontal Saccades (Fast)", run("saccade_h", delay=400)),
+                    ("Vertical Saccades (Slow)", run("saccade_v", delay=700)),
+                    ("Vertical Saccades (Fast)", run("saccade_v", delay=400)),
+                    ("Diagonal Saccades (Slow)", run("saccade_diag", delay=700)),
+                    ("Diagonal Saccades (Fast)", run("saccade_diag", delay=400)),
+                    ("Expanding Saccades (Slow)", run("saccade_expand", delay=700)),
+                    ("Expanding Saccades (Fast)", run("saccade_expand", delay=400)),
+                ]),
+                ("SMOOTH PURSUIT (TRACKING)", [
+                    ("Pursuit: Line (Slow)", run("pursuit_line", cycles=9)),
+                    ("Pursuit: Line (Fast)", run("pursuit_line", cycles=15)),
+                    ("Pursuit: Circle (Slow)", run("pursuit_circle", cycles=9)),
+                    ("Pursuit: Circle (Fast)", run("pursuit_circle", cycles=15)),
+                    ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", cycles=9)),
+                    ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", cycles=15)),
+                ]),
+            ],
         )

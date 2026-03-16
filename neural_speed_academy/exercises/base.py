@@ -125,6 +125,15 @@ class BaseExercise(QWidget):
 
         bar_layout.addStretch()
 
+        stop_btn = QPushButton("\u25a0 STOP")
+        stop_btn.setStyleSheet(
+            btn_style
+            + f"QPushButton {{ background-color: {c['alert']}; color: {c['btn_text']}; }}"
+        )
+        stop_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        stop_btn.clicked.connect(self._stop_exercise)
+        bar_layout.addWidget(stop_btn)
+
         user = self.navigator.get_user()
         if user:
             stats_label = QLabel(f"{user.name.upper()} | XP: {user.xp}")
@@ -140,6 +149,14 @@ class BaseExercise(QWidget):
     def show_guide(self, topic: str) -> None:
         from neural_speed_academy.screens.base import _show_guide_dialog
         _show_guide_dialog(self, topic)
+
+    def _stop_exercise(self) -> None:
+        """Stop the current exercise and return to the dashboard."""
+        self._running = False
+        for t in self._timers:
+            t.stop()
+        self._timers.clear()
+        self.navigator.finish_exercise()
 
     def complete(self, result: ExerciseResult) -> bool:
         """Save XP, log history, track personal bests. Returns True if new PB."""

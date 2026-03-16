@@ -76,6 +76,7 @@ class UserProfile:
     xp: int = 0
     streak: int = 1
     last_login: str = ""
+    password_hash: str = ""
     history: list[HistoryEntry] = field(default_factory=list)
     active_path: Optional[str] = None
     path_progress: dict = field(default_factory=dict)
@@ -141,7 +142,7 @@ class UserProfile:
         pp = {}
         for k, v in self.path_progress.items():
             pp[k] = v.to_dict() if isinstance(v, PathProgress) else v
-        return {
+        d = {
             "name": self.name,
             "xp": self.xp,
             "streak": self.streak,
@@ -152,6 +153,9 @@ class UserProfile:
             "personal_bests": self.personal_bests,
             "custom_paths": self.custom_paths,
         }
+        if self.password_hash:
+            d["password_hash"] = self.password_hash
+        return d
 
     @classmethod
     def from_dict(cls, data: dict) -> "UserProfile":
@@ -179,6 +183,7 @@ class UserProfile:
             xp=data.get("xp", 0),
             streak=data.get("streak", 1),
             last_login=data.get("last_login", ""),
+            password_hash=data.get("password_hash", ""),
             history=history,
             active_path=data.get("active_path"),
             path_progress=pp,

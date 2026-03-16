@@ -124,6 +124,7 @@ class FlashExercise(BaseExercise):
             span_mode = self.span_config.get("mode", "h")
             if span_mode == "m":
                 span_mode = random.choice(["h", "v"])
+            self._last_span_mode = span_mode
 
             width_pct = self.span_config.get("width", 50)
             spacing = int(width_pct * 4)
@@ -186,36 +187,98 @@ class FlashExercise(BaseExercise):
         if not self._running:
             return
         c = COLORS
+        from neural_speed_academy.theme import input_css, btn_css, screen_metrics
 
         input_widget = QWidget()
         input_layout = QVBoxLayout(input_widget)
         input_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        from neural_speed_academy.theme import input_css, screen_metrics
-        self._entry = QLineEdit()
-        self._entry.setFont(make_qfont("input"))
-        self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._entry.setFixedWidth(screen_metrics.sw(400))
-        self._entry.setStyleSheet(input_css())
-        self._entry.returnPressed.connect(
-            lambda: self._verify(self._entry.text())
-        )
-        input_layout.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Small downward offset so the field sits just below where content appeared
+        input_layout.addSpacing(20)
 
-        check_btn = QPushButton("CHECK")
-        check_btn.setFont(make_qfont("btn_bold"))
-        check_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 3px; }}"
-        )
-        check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        check_btn.clicked.connect(
-            lambda: self._verify(self._entry.text())
-        )
-        input_layout.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        if self.mode == "eyespan":
+            span_mode = self.span_config.get("mode", "h")
+            if span_mode == "m":
+                span_mode = getattr(self, "_last_span_mode", "h")
+            width_pct = self.span_config.get("width", 50)
+            spacing = int(width_pct * 4)
+            field_w = screen_metrics.sw(200)
 
-        self._flash_layout.addWidget(input_widget)
-        self._entry.setFocus()
+            self._entry_left = QLineEdit()
+            self._entry_left.setFont(make_qfont("input"))
+            self._entry_left.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self._entry_left.setFixedWidth(field_w)
+            self._entry_left.setStyleSheet(input_css())
+
+            self._entry_right = QLineEdit()
+            self._entry_right.setFont(make_qfont("input"))
+            self._entry_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self._entry_right.setFixedWidth(field_w)
+            self._entry_right.setStyleSheet(input_css())
+            self._entry_right.returnPressed.connect(self._verify_eyespan)
+
+            if span_mode == "h":
+                row = QHBoxLayout()
+                row.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                row.addSpacing(spacing)
+                row.addWidget(self._entry_left)
+                row.addSpacing(spacing * 2)
+                row.addWidget(self._entry_right)
+                row.addSpacing(spacing)
+                input_layout.addLayout(row)
+            else:
+                col = QVBoxLayout()
+                col.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(spacing // 2)
+                col.addWidget(self._entry_left, alignment=Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(spacing)
+                col.addWidget(self._entry_right, alignment=Qt.AlignmentFlag.AlignCenter)
+                col.addSpacing(spacing // 2)
+                input_layout.addLayout(col)
+
+            check_btn = QPushButton("CHECK")
+            check_btn.setStyleSheet(
+                btn_css(c["accent"], c["btn_text"], padding="6px 20px")
+            )
+            check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            check_btn.clicked.connect(self._verify_eyespan)
+            input_layout.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+            self._flash_layout.addWidget(input_widget)
+            self._entry_left.setFocus()
+        else:
+            self._entry = QLineEdit()
+            self._entry.setFont(make_qfont("input"))
+            self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self._entry.setFixedWidth(screen_metrics.sw(400))
+            self._entry.setStyleSheet(input_css())
+            self._entry.returnPressed.connect(
+                lambda: self._verify(self._entry.text())
+            )
+            input_layout.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
+
+            check_btn = QPushButton("CHECK")
+            check_btn.setStyleSheet(
+                btn_css(c["accent"], c["btn_text"], padding="6px 20px")
+            )
+            check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            check_btn.clicked.connect(
+                lambda: self._verify(self._entry.text())
+            )
+            input_layout.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+            self._flash_layout.addWidget(input_widget)
+            self._entry.setFocus()
+
+    def _verify_eyespan(self) -> None:
+        left = self._entry_left.text().strip()
+        right = self._entry_right.text().strip()
+        combined = f"{left} {right}"
+        if combined.upper() == self.target_val:
+            self.correct_count += 1
+            self._next_round()
+        else:
+            self._show_correction()
 
     def _verify(self, user_input: str) -> None:
         if user_input.upper().strip() == self.target_val:

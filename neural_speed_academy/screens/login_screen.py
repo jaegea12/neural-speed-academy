@@ -9,7 +9,15 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, input_css
+
+from PyQt6.QtWidgets import QHBoxLayout
+
+import hashlib
+
+
+def _hash_pw(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 
 class LoginScreen(BaseScreen):
@@ -17,6 +25,19 @@ class LoginScreen(BaseScreen):
     def build(self, **kwargs) -> None:
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Back button at top-left
+        top_bar = QHBoxLayout()
+        top_bar.setContentsMargins(12, 8, 12, 0)
+        back_btn = QPushButton("\u2190 BACK")
+        back_btn.setStyleSheet(
+            btn_css(c["card"], c["fg"], padding="6px 16px", font_key="btn_sm")
+        )
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.navigator.go_back)
+        top_bar.addWidget(back_btn)
+        top_bar.addStretch()
+        self._layout.addLayout(top_bar)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -43,15 +64,16 @@ class LoginScreen(BaseScreen):
             for uname in users:
                 profile = self.navigator.user_repo.get(uname)
                 level = (profile.xp // 1000 + 1) if profile else 1
+                has_pw = bool(profile and profile.password_hash)
+                label = f"  {uname}    Lv.{level}"
+                if has_pw:
+                    label += "  \U0001f512"
 
-                row = QPushButton(f"  {uname}    Lv.{level}")
+                row = QPushButton(label)
                 row.setFont(make_qfont("btn_bold"))
                 row.setStyleSheet(
-                    f"QPushButton {{ background-color: {c['card']}; "
-                    f"color: {c['text_on_card']}; border: none; "
-                    f"padding: 8px 16px; text-align: left; "
-                    f"border-radius: 4px; min-width: 250px; }}"
-                    f"QPushButton:hover {{ background-color: {c['accent']}; }}"
+                    btn_css(c["card"], c["text_on_card"],
+                            padding="8px 16px", min_width=250)
                 )
                 row.setCursor(Qt.CursorShape.PointingHandCursor)
                 row.clicked.connect(
@@ -74,23 +96,30 @@ class LoginScreen(BaseScreen):
             cl.addWidget(new_label)
 
         # Name entry
-        from neural_speed_academy.theme import input_css
         self._entry = QLineEdit()
         self._entry.setPlaceholderText("Type your name")
         self._entry.setFont(make_qfont("sub"))
         self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._entry.setFixedWidth(300)
         self._entry.setStyleSheet(input_css())
-        self._entry.returnPressed.connect(self._do_login)
         cl.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # Password entry (optional for new profiles)
+        self._pw_entry = QLineEdit()
+        self._pw_entry.setPlaceholderText("Password (optional)")
+        self._pw_entry.setFont(make_qfont("sub"))
+        self._pw_entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._pw_entry.setFixedWidth(300)
+        self._pw_entry.setEchoMode(QLineEdit.EchoMode.Password)
+        self._pw_entry.setStyleSheet(input_css())
+        self._pw_entry.returnPressed.connect(self._do_login)
+        cl.addWidget(self._pw_entry, alignment=Qt.AlignmentFlag.AlignCenter)
+
         cl.addSpacing(10)
 
-        start_btn = QPushButton("START TRAINING")
-        start_btn.setFont(make_qfont("btn_bold"))
+        start_btn = QPushButton("CREATE & START")
         start_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
-            f"padding: 10px 30px; border-radius: 4px; }}"
+            btn_css(c["accent"], c["btn_text"], padding="10px 30px")
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._do_login)
@@ -99,9 +128,63 @@ class LoginScreen(BaseScreen):
         self._layout.addWidget(container, 1)
 
     def _login_as(self, name: str) -> None:
-        user = self.navigator.user_repo.get_or_create(name)
-        self.navigator.set_user(user)
-        self.navigator.complete_login()
+        profile = self.navigator.user_repo.get(name)
+        if not profile:
+            return
+        if profile.password_hash:
+            self._prompt_password(profile)
+        else:
+            self.navigator.set_user(profile)
+            self.navigator.complete_login()
+
+    def _prompt_password(self, profile) -> None:
+        """Show a password dialog for a protected profile."""
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout as DVBox
+        c = COLORS
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(f"Login — {profile.name}")
+        dlg.setFixedSize(350, 180)
+        dlg.setStyleSheet(f"background-color: {c['card']};")
+
+        dl = DVBox(dlg)
+        dl.setContentsMargins(25, 20, 25, 15)
+        dl.setSpacing(10)
+
+        lbl = QLabel(f"Enter password for {profile.name}")
+        lbl.setFont(make_qfont("body"))
+        lbl.setStyleSheet(f"color: {c['text_on_card']};")
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        dl.addWidget(lbl)
+
+        pw_field = QLineEdit()
+        pw_field.setEchoMode(QLineEdit.EchoMode.Password)
+        pw_field.setFont(make_qfont("sub"))
+        pw_field.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        pw_field.setStyleSheet(input_css())
+        dl.addWidget(pw_field)
+
+        def try_login():
+            if _hash_pw(pw_field.text()) == profile.password_hash:
+                dlg.accept()
+                self.navigator.set_user(profile)
+                self.navigator.complete_login()
+            else:
+                lbl.setText("Wrong password. Try again.")
+                lbl.setStyleSheet(f"color: {c['alert']};")
+                pw_field.clear()
+
+        pw_field.returnPressed.connect(try_login)
+
+        ok_btn = QPushButton("LOGIN")
+        ok_btn.setStyleSheet(
+            btn_css(c["accent"], c["btn_text"], padding="6px 20px")
+        )
+        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        ok_btn.clicked.connect(try_login)
+        dl.addWidget(ok_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        dlg.exec()
 
     def _do_login(self) -> None:
         name = self._entry.text().strip()
@@ -110,6 +193,19 @@ class LoginScreen(BaseScreen):
                 self, "Name Required", "Please enter your name to continue."
             )
             return
+        password = self._pw_entry.text()
         user = self.navigator.user_repo.get_or_create(name)
+        # Set password if creating new profile and password provided
+        if not user.password_hash and password:
+            user.password_hash = _hash_pw(password)
+            self.navigator.user_repo.save(user)
+        elif user.password_hash:
+            # Existing user with password — verify
+            if _hash_pw(password) != user.password_hash:
+                QMessageBox.warning(
+                    self, "Wrong Password",
+                    "The password does not match this profile."
+                )
+                return
         self.navigator.set_user(user)
         self.navigator.complete_login()
