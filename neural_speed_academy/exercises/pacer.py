@@ -681,7 +681,8 @@ class PacerExercise(BaseExercise):
             f"border: none; padding: 8px; border-radius: 4px; }}"
         )
         self._quiz_input.setFixedHeight(150)
-        cl.addWidget(self._quiz_input)
+        self._quiz_input.setFixedWidth(screen_metrics.text_input_w)
+        cl.addWidget(self._quiz_input, alignment=Qt.AlignmentFlag.AlignCenter)
 
         check_btn = QPushButton("CHECK")
         check_btn.setFont(make_qfont("btn_bold"))

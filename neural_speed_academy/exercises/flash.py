@@ -191,17 +191,19 @@ class FlashExercise(BaseExercise):
         input_layout = QVBoxLayout(input_widget)
         input_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        from neural_speed_academy.theme import screen_metrics
         self._entry = QLineEdit()
         self._entry.setFont(make_qfont("input"))
         self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._entry.setFixedWidth(screen_metrics.sw(400))
         self._entry.setStyleSheet(
             f"QLineEdit {{ background-color: {c['card']}; color: {c['text_on_card']}; "
-            f"border: none; padding: 8px 16px; border-radius: 4px; min-width: 200px; }}"
+            f"border: none; padding: 8px 16px; border-radius: 4px; }}"
         )
         self._entry.returnPressed.connect(
             lambda: self._verify(self._entry.text())
         )
-        input_layout.addWidget(self._entry)
+        input_layout.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         check_btn = QPushButton("CHECK")
         check_btn.setFont(make_qfont("btn_bold"))
