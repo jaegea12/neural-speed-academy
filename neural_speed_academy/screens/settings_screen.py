@@ -126,6 +126,43 @@ class SettingsScreen(BaseScreen):
 
         il.addSpacing(15)
 
+        # --- Display Mode ---
+        sec_disp = QLabel("DISPLAY MODE")
+        sec_disp.setFont(make_qfont("section_header"))
+        sec_disp.setStyleSheet(f"color: {c['accent']};")
+        sec_disp.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        il.addWidget(sec_disp)
+
+        disp_desc = QLabel("Press F11 at any time to toggle fullscreen")
+        disp_desc.setFont(make_qfont("body"))
+        disp_desc.setStyleSheet(f"color: {c['muted']};")
+        disp_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        il.addWidget(disp_desc)
+
+        self._disp_group = QButtonGroup(self)
+        disp_box = QFrame()
+        disp_box.setFixedWidth(250)
+        disp_box.setStyleSheet("background: transparent;")
+        dbl = QVBoxLayout(disp_box)
+        dbl.setContentsMargins(0, 0, 0, 0)
+        dbl.setSpacing(4)
+        for key, label in [("fullscreen", "Fullscreen"), ("windowed", "Windowed")]:
+            rb = QRadioButton(label)
+            rb.setFont(make_qfont("btn"))
+            rb.setStyleSheet(rb_style)
+            rb.setProperty("disp_key", key)
+            is_fs = theme_manager.fullscreen
+            rb.setChecked(
+                (key == "fullscreen" and is_fs) or
+                (key == "windowed" and not is_fs)
+            )
+            self._disp_group.addButton(rb)
+            dbl.addWidget(rb)
+        self._disp_group.buttonClicked.connect(self._on_display_changed)
+        il.addWidget(disp_box, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        il.addSpacing(15)
+
         # --- Training Text ---
         sec3 = QLabel("TRAINING TEXT")
         sec3.setFont(make_qfont("section_header"))
@@ -217,6 +254,17 @@ class SettingsScreen(BaseScreen):
 
     def _on_fov_changed(self, btn) -> None:
         theme_manager.fov = btn.property("fov_key")
+
+    def _on_display_changed(self, btn) -> None:
+        is_fs = btn.property("disp_key") == "fullscreen"
+        theme_manager.fullscreen = is_fs
+        theme_manager.save()
+        window = self.window()
+        if window:
+            if is_fs:
+                window.showFullScreen()
+            else:
+                window.showNormal()
 
     def _save(self) -> None:
         theme_manager.training_text = self._text_edit.toPlainText()

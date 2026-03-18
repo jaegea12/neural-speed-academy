@@ -6,6 +6,7 @@ from __future__ import annotations
 import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
@@ -123,9 +124,25 @@ class NeuralSpeedAcademy:
             "show_stats": lambda: nav.navigate_to("stats"),
         }
 
+    def _toggle_fullscreen(self) -> None:
+        if self.window.isFullScreen():
+            self.window.showNormal()
+            theme_manager.fullscreen = False
+        else:
+            self.window.showFullScreen()
+            theme_manager.fullscreen = True
+        theme_manager.save()
+
     def run(self) -> None:
+        # F11 to toggle fullscreen
+        shortcut = QShortcut(QKeySequence("F11"), self.window)
+        shortcut.activated.connect(self._toggle_fullscreen)
+
         self.navigator.navigate_to("main_menu")
-        self.window.showFullScreen()
+        if theme_manager.fullscreen:
+            self.window.showFullScreen()
+        else:
+            self.window.showNormal()
         sys.exit(self.app.exec())
 
 

@@ -116,7 +116,8 @@ class MainMenuScreen(BaseScreen):
 
         credit = QLabel(
             "Created by Adam Jaeger\n"
-            "With contributions from Orlando Pereira\n"
+            "Repository setup and GitLab integration\n"
+            "by Orlando Pereira\n"
             "\u00a9 2025"
         )
         credit.setFont(make_qfont("btn_sm"))

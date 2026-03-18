@@ -264,6 +264,7 @@ class ThemeManager:
         self._profile = profile
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
+        self._fullscreen: bool = True
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
         self._listeners: list = []
@@ -288,6 +289,14 @@ class ThemeManager:
     def fov(self, value: str) -> None:
         if value in FOV_PRESETS:
             self._fov = value
+
+    @property
+    def fullscreen(self) -> bool:
+        return self._fullscreen
+
+    @fullscreen.setter
+    def fullscreen(self, value: bool) -> None:
+        self._fullscreen = value
 
     @property
     def schulte_grid_size(self) -> int:
@@ -335,6 +344,7 @@ class ThemeManager:
                 "profile": self._profile,
                 "training_text": self._training_text,
                 "fov": self._fov,
+                "fullscreen": self._fullscreen,
             }
             if self._schulte_grid_size is not None:
                 data["schulte_grid_size"] = self._schulte_grid_size
@@ -361,6 +371,8 @@ class ThemeManager:
             fov = data.get("fov", DEFAULT_FOV)
             if fov in FOV_PRESETS:
                 self._fov = fov
+            if "fullscreen" in data:
+                self._fullscreen = bool(data["fullscreen"])
             sg = data.get("schulte_grid_size")
             if sg is not None:
                 self._schulte_grid_size = int(sg)
