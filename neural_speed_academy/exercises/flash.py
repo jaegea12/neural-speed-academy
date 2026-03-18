@@ -12,8 +12,19 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
 from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG, FLASH_TIMING
+
+
+def _span_gap(width_pct: int, vertical: bool = False) -> int:
+    """Compute the pixel gap between eyespan items.
+
+    width_pct is the perceptual spread (30/50/70). The gap is that
+    percentage of the available screen dimension.
+    """
+    if vertical:
+        return screen_metrics.sh(int(10.8 * width_pct))  # % of 1080 ref
+    return screen_metrics.sw(int(19.2 * width_pct))      # % of 1920 ref
 
 
 class FlashExercise(BaseExercise):
@@ -127,8 +138,7 @@ class FlashExercise(BaseExercise):
             self._last_span_mode = span_mode
 
             width_pct = self.span_config.get("width", 50)
-            h_spacing = int(width_pct * 4)
-            v_spacing = int(width_pct * 3)
+            gap = _span_gap(width_pct, vertical=(span_mode == "v"))
 
             self._lbl_left = QLabel(self._eyespan_left)
             self._lbl_left.setFont(make_qfont(font_key))
@@ -141,20 +151,20 @@ class FlashExercise(BaseExercise):
             self._lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             if span_mode == "h":
-                row.addSpacing(h_spacing)
+                row.addStretch()
                 row.addWidget(self._lbl_left)
-                row.addSpacing(h_spacing * 2)
+                row.addSpacing(gap)
                 row.addWidget(self._lbl_right)
-                row.addSpacing(h_spacing)
+                row.addStretch()
                 self._flash_layout.addLayout(row)
             else:
                 col = QVBoxLayout()
                 col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing)
+                col.addStretch()
                 col.addWidget(self._lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing * 2)
+                col.addSpacing(gap)
                 col.addWidget(self._lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing)
+                col.addStretch()
                 self._flash_layout.addLayout(col)
         else:
             self._lbl_center = QLabel(self.target_val)
@@ -202,8 +212,7 @@ class FlashExercise(BaseExercise):
             if span_mode == "m":
                 span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
-            h_spacing = int(width_pct * 4)
-            v_spacing = int(width_pct * 3)
+            gap = _span_gap(width_pct, vertical=(span_mode == "v"))
             field_w = screen_metrics.sw(200)
 
             self._entry_left = QLineEdit()
@@ -222,20 +231,20 @@ class FlashExercise(BaseExercise):
             if span_mode == "h":
                 row = QHBoxLayout()
                 row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                row.addSpacing(h_spacing)
+                row.addStretch()
                 row.addWidget(self._entry_left)
-                row.addSpacing(h_spacing * 2)
+                row.addSpacing(gap)
                 row.addWidget(self._entry_right)
-                row.addSpacing(h_spacing)
+                row.addStretch()
                 input_layout.addLayout(row)
             else:
                 col = QVBoxLayout()
                 col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing)
+                col.addStretch()
                 col.addWidget(self._entry_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing * 2)
+                col.addSpacing(gap)
                 col.addWidget(self._entry_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing)
+                col.addStretch()
                 input_layout.addLayout(col)
 
             check_btn = QPushButton("CHECK")
@@ -306,6 +315,7 @@ class FlashExercise(BaseExercise):
         if self.mode == "eyespan":
             span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
+            gap = _span_gap(width_pct, vertical=(span_mode == "v"))
 
             lbl_left = QLabel(self._eyespan_left)
             lbl_left.setFont(make_qfont(font_key))
@@ -318,24 +328,22 @@ class FlashExercise(BaseExercise):
             lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             if span_mode == "h":
-                h_spacing = int(width_pct * 4)
                 row = QHBoxLayout()
                 row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                row.addSpacing(h_spacing)
+                row.addStretch()
                 row.addWidget(lbl_left)
-                row.addSpacing(h_spacing * 2)
+                row.addSpacing(gap)
                 row.addWidget(lbl_right)
-                row.addSpacing(h_spacing)
+                row.addStretch()
                 self._flash_layout.addLayout(row)
             else:
-                v_spacing = int(width_pct * 3)
                 col = QVBoxLayout()
                 col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing)
+                col.addStretch()
                 col.addWidget(lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing * 2)
+                col.addSpacing(gap)
                 col.addWidget(lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(v_spacing)
+                col.addStretch()
                 self._flash_layout.addLayout(col)
         else:
             correction = QLabel(self.target_val)

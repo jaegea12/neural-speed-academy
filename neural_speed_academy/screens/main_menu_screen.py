@@ -89,16 +89,17 @@ class MainMenuScreen(BaseScreen):
         c = COLORS
         dialog = QDialog(self)
         dialog.setWindowTitle("About")
-        dialog.setFixedSize(460, 340)
+        dialog.setFixedSize(580, 380)
         dialog.setStyleSheet(f"background-color: {c['card']};")
 
         layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(30, 30, 30, 15)
+        layout.setContentsMargins(40, 30, 40, 15)
 
         title = QLabel("NEURAL SPEED ACADEMY")
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setWordWrap(True)
         layout.addWidget(title)
 
         body = QLabel(
@@ -113,17 +114,19 @@ class MainMenuScreen(BaseScreen):
         body.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(body)
 
-        credit = QLabel("Created by Adam Jaeger\n\u00a9 2025")
+        credit = QLabel(
+            "Created by Adam Jaeger\n"
+            "With contributions from Orlando Pereira\n"
+            "\u00a9 2025"
+        )
         credit.setFont(make_qfont("btn_sm"))
         credit.setStyleSheet(f"color: {c['muted']};")
         credit.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(credit)
 
         close_btn = QPushButton("CLOSE")
-        close_btn.setFont(make_qfont("btn_bold"))
         close_btn.setStyleSheet(
-            f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 3px;"
+            btn_css(c["accent"], c["btn_text"], padding="6px 20px")
         )
         close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         close_btn.clicked.connect(dialog.accept)
