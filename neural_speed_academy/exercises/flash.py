@@ -12,19 +12,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont
 from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG, FLASH_TIMING
-
-
-def _span_gap(width_pct: int, vertical: bool = False) -> int:
-    """Compute the pixel gap between eyespan items.
-
-    width_pct is the perceptual spread (30/50/70). The gap is that
-    percentage of the available screen dimension.
-    """
-    if vertical:
-        return screen_metrics.sh(int(10.8 * width_pct))  # % of 1080 ref
-    return screen_metrics.sw(int(19.2 * width_pct))      # % of 1920 ref
 
 
 class FlashExercise(BaseExercise):
@@ -43,6 +32,27 @@ class FlashExercise(BaseExercise):
     @property
     def name(self) -> str:
         return "Flash Perception"
+
+    def _span_gap(self, width_pct: int, vertical: bool = False) -> int:
+        """Pixel gap between eyespan items based on actual widget size.
+
+        Uses 93% of the widget dimension as the usable range (3.5% margin
+        each side). width_pct (0-100) maps linearly within that range.
+        At 0% the numbers sit adjacent; at 100% they span the full
+        usable area.
+        """
+        dim = self.height() if vertical else self.width()
+        if dim <= 0:
+            # Fallback if widget not yet laid out
+            from PyQt6.QtWidgets import QApplication
+            screen = QApplication.primaryScreen()
+            if screen:
+                geo = screen.availableGeometry()
+                dim = geo.height() if vertical else geo.width()
+            else:
+                dim = 1080 if vertical else 1920
+        usable = dim * 0.93
+        return int(usable * width_pct / 100)
 
     def start(self, mode: str, rounds: int, level_func: Callable,
               span_config: dict = None, **kwargs) -> None:
@@ -138,7 +148,7 @@ class FlashExercise(BaseExercise):
             self._last_span_mode = span_mode
 
             width_pct = self.span_config.get("width", 50)
-            gap = _span_gap(width_pct, vertical=(span_mode == "v"))
+            gap = self._span_gap(width_pct, vertical=(span_mode == "v"))
 
             self._lbl_left = QLabel(self._eyespan_left)
             self._lbl_left.setFont(make_qfont(font_key))
@@ -212,7 +222,7 @@ class FlashExercise(BaseExercise):
             if span_mode == "m":
                 span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
-            gap = _span_gap(width_pct, vertical=(span_mode == "v"))
+            gap = self._span_gap(width_pct, vertical=(span_mode == "v"))
             field_w = screen_metrics.sw(200)
 
             self._entry_left = QLineEdit()
@@ -315,7 +325,7 @@ class FlashExercise(BaseExercise):
         if self.mode == "eyespan":
             span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
-            gap = _span_gap(width_pct, vertical=(span_mode == "v"))
+            gap = self._span_gap(width_pct, vertical=(span_mode == "v"))
 
             lbl_left = QLabel(self._eyespan_left)
             lbl_left.setFont(make_qfont(font_key))

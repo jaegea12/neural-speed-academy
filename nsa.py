@@ -47,6 +47,7 @@ class NeuralSpeedAcademy:
         # Main window
         self.window = QMainWindow()
         self.window.setWindowTitle("Neural Speed Academy")
+        self.window.setMinimumSize(960, 600)
         self.window.resize(1280, 800)
 
         # Central stacked widget
