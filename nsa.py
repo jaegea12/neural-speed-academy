@@ -126,11 +126,12 @@ class NeuralSpeedAcademy:
     _WINDOWED_W, _WINDOWED_H = 960, 600
 
     def _set_windowed(self) -> None:
-        self.window.setFixedSize(self._WINDOWED_W, self._WINDOWED_H)
+        self.window.setMaximumSize(16777215, 16777215)
+        self.window.setMinimumSize(self._WINDOWED_W, self._WINDOWED_H)
+        self.window.resize(self._WINDOWED_W, self._WINDOWED_H)
         self.window.showNormal()
 
     def _set_fullscreen(self) -> None:
-        # Remove fixed-size constraint so fullscreen can use full resolution
         self.window.setMinimumSize(0, 0)
         self.window.setMaximumSize(16777215, 16777215)
         self.window.showFullScreen()
