@@ -47,8 +47,6 @@ class NeuralSpeedAcademy:
         # Main window
         self.window = QMainWindow()
         self.window.setWindowTitle("Neural Speed Academy")
-        self.window.setMinimumSize(960, 600)
-        self.window.resize(1280, 800)
 
         # Central stacked widget
         self.stack = QStackedWidget()
@@ -125,12 +123,24 @@ class NeuralSpeedAcademy:
             "show_stats": lambda: nav.navigate_to("stats"),
         }
 
+    _WINDOWED_W, _WINDOWED_H = 960, 600
+
+    def _set_windowed(self) -> None:
+        self.window.setFixedSize(self._WINDOWED_W, self._WINDOWED_H)
+        self.window.showNormal()
+
+    def _set_fullscreen(self) -> None:
+        # Remove fixed-size constraint so fullscreen can use full resolution
+        self.window.setMinimumSize(0, 0)
+        self.window.setMaximumSize(16777215, 16777215)
+        self.window.showFullScreen()
+
     def _toggle_fullscreen(self) -> None:
         if self.window.isFullScreen():
-            self.window.showNormal()
+            self._set_windowed()
             theme_manager.fullscreen = False
         else:
-            self.window.showFullScreen()
+            self._set_fullscreen()
             theme_manager.fullscreen = True
         theme_manager.save()
 
@@ -141,9 +151,9 @@ class NeuralSpeedAcademy:
 
         self.navigator.navigate_to("main_menu")
         if theme_manager.fullscreen:
-            self.window.showFullScreen()
+            self._set_fullscreen()
         else:
-            self.window.showNormal()
+            self._set_windowed()
         sys.exit(self.app.exec())
 
 

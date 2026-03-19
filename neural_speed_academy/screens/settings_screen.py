@@ -262,8 +262,11 @@ class SettingsScreen(BaseScreen):
         window = self.window()
         if window:
             if is_fs:
+                window.setMinimumSize(0, 0)
+                window.setMaximumSize(16777215, 16777215)
                 window.showFullScreen()
             else:
+                window.setFixedSize(960, 600)
                 window.showNormal()
 
     def _save(self) -> None:

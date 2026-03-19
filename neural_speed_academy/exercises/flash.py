@@ -33,17 +33,16 @@ class FlashExercise(BaseExercise):
     def name(self) -> str:
         return "Flash Perception"
 
-    def _span_gap(self, width_pct: int, vertical: bool = False) -> int:
-        """Pixel gap between eyespan items based on actual widget size.
+    def _span_extent(self, width_pct: int, vertical: bool = False) -> int:
+        """Total extent (center-to-edge-to-center) for eyespan layout.
 
-        Uses 93% of the widget dimension as the usable range (3.5% margin
-        each side). width_pct (0-100) maps linearly within that range.
-        At 0% the numbers sit adjacent; at 100% they span the full
-        usable area.
+        Returns the pixel size of a container that spans width_pct% of
+        the usable widget dimension. 93% of the widget is usable (3.5%
+        margin each side). Labels placed at opposite ends of this
+        container will have their centers at the correct positions.
         """
         dim = self.height() if vertical else self.width()
         if dim <= 0:
-            # Fallback if widget not yet laid out
             from PyQt6.QtWidgets import QApplication
             screen = QApplication.primaryScreen()
             if screen:
@@ -148,7 +147,8 @@ class FlashExercise(BaseExercise):
             self._last_span_mode = span_mode
 
             width_pct = self.span_config.get("width", 50)
-            gap = self._span_gap(width_pct, vertical=(span_mode == "v"))
+            is_vert = span_mode == "v"
+            extent = self._span_extent(width_pct, vertical=is_vert)
 
             self._lbl_left = QLabel(self._eyespan_left)
             self._lbl_left.setFont(make_qfont(font_key))
@@ -160,22 +160,22 @@ class FlashExercise(BaseExercise):
             self._lbl_right.setStyleSheet(f"color: {c['fg']};")
             self._lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-            if span_mode == "h":
-                row.addStretch()
-                row.addWidget(self._lbl_left)
-                row.addSpacing(gap)
-                row.addWidget(self._lbl_right)
-                row.addStretch()
-                self._flash_layout.addLayout(row)
+            container = QWidget()
+            if is_vert:
+                container.setFixedHeight(extent)
+                box = QVBoxLayout(container)
             else:
-                col = QVBoxLayout()
-                col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addStretch()
-                col.addWidget(self._lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(gap)
-                col.addWidget(self._lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addStretch()
-                self._flash_layout.addLayout(col)
+                container.setFixedWidth(extent)
+                box = QHBoxLayout(container)
+            box.setContentsMargins(0, 0, 0, 0)
+            align = Qt.AlignmentFlag.AlignCenter
+            box.addWidget(self._lbl_left, alignment=align)
+            box.addStretch()
+            box.addWidget(self._lbl_right, alignment=align)
+
+            self._flash_layout.addWidget(
+                container, 1, Qt.AlignmentFlag.AlignCenter
+            )
         else:
             self._lbl_center = QLabel(self.target_val)
             self._lbl_center.setFont(make_qfont(font_key))
@@ -222,7 +222,8 @@ class FlashExercise(BaseExercise):
             if span_mode == "m":
                 span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
-            gap = self._span_gap(width_pct, vertical=(span_mode == "v"))
+            is_vert = span_mode == "v"
+            extent = self._span_extent(width_pct, vertical=is_vert)
             field_w = screen_metrics.sw(200)
 
             self._entry_left = QLineEdit()
@@ -238,24 +239,22 @@ class FlashExercise(BaseExercise):
             self._entry_right.setStyleSheet(input_css())
             self._entry_right.returnPressed.connect(self._verify_eyespan)
 
-            if span_mode == "h":
-                row = QHBoxLayout()
-                row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                row.addStretch()
-                row.addWidget(self._entry_left)
-                row.addSpacing(gap)
-                row.addWidget(self._entry_right)
-                row.addStretch()
-                input_layout.addLayout(row)
+            container = QWidget()
+            if is_vert:
+                container.setFixedHeight(extent)
+                box = QVBoxLayout(container)
             else:
-                col = QVBoxLayout()
-                col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addStretch()
-                col.addWidget(self._entry_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(gap)
-                col.addWidget(self._entry_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addStretch()
-                input_layout.addLayout(col)
+                container.setFixedWidth(extent)
+                box = QHBoxLayout(container)
+            box.setContentsMargins(0, 0, 0, 0)
+            align = Qt.AlignmentFlag.AlignCenter
+            box.addWidget(self._entry_left, alignment=align)
+            box.addStretch()
+            box.addWidget(self._entry_right, alignment=align)
+
+            input_layout.addWidget(
+                container, 1, Qt.AlignmentFlag.AlignCenter
+            )
 
             check_btn = QPushButton("CHECK")
             check_btn.setStyleSheet(
@@ -325,7 +324,8 @@ class FlashExercise(BaseExercise):
         if self.mode == "eyespan":
             span_mode = getattr(self, "_last_span_mode", "h")
             width_pct = self.span_config.get("width", 50)
-            gap = self._span_gap(width_pct, vertical=(span_mode == "v"))
+            is_vert = span_mode == "v"
+            extent = self._span_extent(width_pct, vertical=is_vert)
 
             lbl_left = QLabel(self._eyespan_left)
             lbl_left.setFont(make_qfont(font_key))
@@ -337,24 +337,22 @@ class FlashExercise(BaseExercise):
             lbl_right.setStyleSheet(f"color: {c['alert']};")
             lbl_right.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-            if span_mode == "h":
-                row = QHBoxLayout()
-                row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                row.addStretch()
-                row.addWidget(lbl_left)
-                row.addSpacing(gap)
-                row.addWidget(lbl_right)
-                row.addStretch()
-                self._flash_layout.addLayout(row)
+            container = QWidget()
+            if is_vert:
+                container.setFixedHeight(extent)
+                box = QVBoxLayout(container)
             else:
-                col = QVBoxLayout()
-                col.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                col.addStretch()
-                col.addWidget(lbl_left, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addSpacing(gap)
-                col.addWidget(lbl_right, alignment=Qt.AlignmentFlag.AlignCenter)
-                col.addStretch()
-                self._flash_layout.addLayout(col)
+                container.setFixedWidth(extent)
+                box = QHBoxLayout(container)
+            box.setContentsMargins(0, 0, 0, 0)
+            align = Qt.AlignmentFlag.AlignCenter
+            box.addWidget(lbl_left, alignment=align)
+            box.addStretch()
+            box.addWidget(lbl_right, alignment=align)
+
+            self._flash_layout.addWidget(
+                container, 1, Qt.AlignmentFlag.AlignCenter
+            )
         else:
             correction = QLabel(self.target_val)
             correction.setFont(make_qfont(font_key))
