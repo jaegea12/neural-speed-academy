@@ -123,7 +123,7 @@ class NeuralSpeedAcademy:
             "show_stats": lambda: nav.navigate_to("stats"),
         }
 
-    _WINDOWED_W, _WINDOWED_H = 960, 600
+    _WINDOWED_W, _WINDOWED_H = 1024, 768
 
     def _set_windowed(self) -> None:
         self.window.setMaximumSize(16777215, 16777215)
