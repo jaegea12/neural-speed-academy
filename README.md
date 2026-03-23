@@ -75,6 +75,10 @@ neural_speed_academy/
     introduction_screen.py          # App introduction
 ```
 
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
+
 ## Credits
 
 Created by Adam Jaeger
