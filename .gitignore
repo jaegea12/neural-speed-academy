@@ -1,5 +1,6 @@
-# App settings (user-local)
+# App settings and user data (user-local)
 nsa_settings.json
+neural_profile.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
