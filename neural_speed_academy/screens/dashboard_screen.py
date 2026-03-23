@@ -3,217 +3,171 @@ Training hub dashboard.
 """
 from __future__ import annotations
 
-import tkinter as tk
 from typing import Callable
 
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
+    QGridLayout, QProgressBar,
+)
+from PyQt6.QtCore import Qt
+
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, screen_metrics
 
 
 class DashboardScreen(BaseScreen):
-    """Main dashboard showing available training exercises."""
+    @property
+    def BTN_WIDTH(self) -> int:
+        return screen_metrics.dashboard_btn_w
 
-    # Consistent button width for all exercise buttons
-    BTN_WIDTH = 28
-
-    def __init__(self, root: tk.Tk, navigator, exercise_callbacks: dict[str, Callable]):
-        super().__init__(root, navigator)
+    def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
+                 parent: QWidget | None = None):
+        super().__init__(navigator, parent)
         self.exercise_callbacks = exercise_callbacks
 
     def build(self, **kwargs) -> None:
-        """Build the dashboard UI."""
-        self.root.configure(bg=COLORS["bg"])
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
         # Header bar
-        header = tk.Frame(self.root, bg=COLORS["card"], pady=12)
-        header.pack(fill="x")
-        self.add_widget(header)
-        tk.Label(
-            header,
-            text="TRAINING HUB",
-            font=FONTS["header"],
-            fg=COLORS["text_on_card"],
-            bg=COLORS["card"],
-        ).pack()
+        header = QFrame()
+        header.setStyleSheet(f"background-color: {c['card']};")
+        header.setFixedHeight(60)
+        hl = QHBoxLayout(header)
+        title = QLabel("TRAINING HUB")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['text_on_card']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hl.addWidget(title)
+        self._layout.addWidget(header)
 
-        # User summary card
-        try:
-            self._build_user_card(self.root)
-        except Exception:
-            pass
+        # Main content
+        content = QWidget()
+        content.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(content)
+        cl.setContentsMargins(30, 12, 30, 12)
+        cl.setSpacing(10)
 
-        # First-time user onboarding prompt
-        try:
-            self._build_onboarding(self.root)
-        except Exception:
-            pass
+        self._build_user_card(cl)
+        self._build_onboarding(cl)
+        self._build_action_bar(cl)
+        self._build_continue_button(cl)
+        self._build_personal_bests(cl)
 
-        # Navigation bar: Training Paths | Stats | Logout
-        self._build_action_bar(self.root)
-
-        # Continue path button if active
-        try:
-            self._build_continue_button(self.root)
-        except Exception:
-            pass
-
-        # Personal bests
-        try:
-            self._build_personal_bests(self.root)
-        except Exception:
-            pass
-
-        # Exercise grid — two columns
-        grid = tk.Frame(self.root, bg=COLORS["bg"])
-        grid.pack(fill="both", expand=True, pady=(15, 10))
-        self.add_widget(grid)
-        grid.columnconfigure(0, weight=1)
-        grid.columnconfigure(1, weight=1)
+        # Exercise grid
+        grid = QGridLayout()
+        grid.setSpacing(12)
 
         self._create_section(grid, "PERCEPTION", 0, [
-            ("Flash Numbers", self._get_callback("menu_flash")),
-            ("Word Drills", self._get_callback("menu_words")),
-            ("Eye-Span", self._get_callback("menu_eyespan")),
-            ("Schulte Grid", self._get_callback("start_schulte")),
+            ("Flash Numbers", self._cb("menu_flash")),
+            ("Word Drills", self._cb("menu_words")),
+            ("Eye-Span", self._cb("menu_eyespan")),
+            ("Schulte Grid", self._cb("start_schulte")),
         ])
-
         self._create_section(grid, "READING", 1, [
-            ("Pacer & Quiz", self._get_callback("setup_pacer")),
-            ("RSVP Reader", self._get_callback("setup_rsvp")),
-            ("Chunking", self._get_callback("setup_chunking")),
-            ("Eye Priming", self._get_callback("menu_priming")),
+            ("Pacer & Quiz", self._cb("setup_pacer")),
+            ("RSVP Reader", self._cb("setup_rsvp")),
+            ("Chunking", self._cb("setup_chunking")),
+            ("Eye Priming", self._cb("menu_priming")),
         ])
+        cl.addLayout(grid)
+        cl.addStretch()
 
-        # Bottom bar: Main Menu + Logout
-        bottom = tk.Frame(self.root, bg=COLORS["bg"])
-        bottom.pack(pady=(0, 12))
-        self.add_widget(bottom)
+        self._layout.addWidget(content, 1)
 
-        btn_cfg = dict(
-            font=FONTS["btn_sm"], relief="flat",
-            width=12, pady=4, cursor="hand2",
-        )
+    # ── User card ──
 
-        tk.Button(
-            bottom, text="MAIN MENU",
-            bg=COLORS["action"], fg=COLORS["btn_text"],
-            command=lambda: self.navigator.navigate_to("main_menu"),
-            **btn_cfg,
-        ).pack(side="left", padx=4)
-
-        tk.Button(
-            bottom, text="LOGOUT",
-            bg=COLORS["card"], fg=COLORS["fg"],
-            command=self.navigator.logout,
-            **btn_cfg,
-        ).pack(side="left", padx=4)
-
-    # ── User card ──────────────────────────────────────────────
-
-    def _build_user_card(self, parent) -> None:
-        """Compact user summary with XP bar."""
+    def _build_user_card(self, layout: QVBoxLayout) -> None:
         user = self.navigator.get_user()
         if not user:
             return
+        c = COLORS
 
-        card = tk.Frame(parent, bg=COLORS["card"], pady=8, padx=20)
-        card.pack(fill="x", padx=40, pady=(10, 0))
-        self.add_widget(card)
+        card = QFrame()
+        card.setStyleSheet(
+            f"background-color: {c['card']}; border-radius: 6px; "
+            f"padding: 8px 20px;"
+        )
+        cl = QHBoxLayout(card)
 
         level = user.xp // 1000 + 1
-
-        # Level badge
-        badge_size = 32
-        badge = tk.Canvas(
-            card, width=badge_size, height=badge_size,
-            bg=COLORS["card"], highlightthickness=0,
+        info = QLabel(
+            f"{user.name.upper()}   |   Level {level}   |   "
+            f"Streak: {user.streak} day{'s' if user.streak != 1 else ''}"
         )
-        badge.pack(side="left", padx=(0, 10))
-        badge.create_oval(2, 2, badge_size - 2, badge_size - 2,
-                          fill=COLORS["accent"], width=0)
-        badge.create_text(badge_size // 2, badge_size // 2,
-                          text=str(level), font=FONTS["btn_bold"],
-                          fill=COLORS["btn_text"])
-
-        tk.Label(
-            card,
-            text=f"{user.name.upper()}   |   Level {level}   |   Streak: {user.streak} day{'s' if user.streak != 1 else ''}",
-            font=FONTS["btn_sm"],
-            fg=COLORS["text_on_card"],
-            bg=COLORS["card"],
-        ).pack(side="left")
+        info.setFont(make_qfont("btn_sm"))
+        info.setStyleSheet(f"color: {c['text_on_card']};")
+        cl.addWidget(info)
+        cl.addStretch()
 
         last_text = "No sessions yet"
         if user.history:
             last = user.history[0]
-            last_text = f"Last: {last.exercise} — {last.result} ({last.timestamp})"
-        tk.Label(
-            card,
-            text=last_text,
-            font=FONTS["btn_sm"],
-            fg=COLORS["muted"],
-            bg=COLORS["card"],
-        ).pack(side="right")
+            last_text = (
+                f"Last: {last.exercise} \u2014 {last.result} ({last.timestamp})"
+            )
+        last_lbl = QLabel(last_text)
+        last_lbl.setFont(make_qfont("btn_sm"))
+        last_lbl.setStyleSheet(f"color: {c['muted']};")
+        cl.addWidget(last_lbl)
+        layout.addWidget(card)
 
-        # XP progress bar
+        # XP bar
         xp_in_level = user.xp % 1000
-        bar_frame = tk.Frame(parent, bg=COLORS["bg"])
-        bar_frame.pack(fill="x", padx=40, pady=(2, 0))
-        self.add_widget(bar_frame)
-
-        bar_width = 400
-        bar_height = 6
-        canvas = tk.Canvas(
-            bar_frame, width=bar_width, height=bar_height,
-            bg=COLORS["card"], highlightthickness=0,
+        bar_row = QHBoxLayout()
+        progress = QProgressBar()
+        progress.setRange(0, 1000)
+        progress.setValue(xp_in_level)
+        progress.setFixedHeight(8)
+        progress.setTextVisible(False)
+        progress.setStyleSheet(
+            f"QProgressBar {{ background-color: {c['card']}; "
+            f"border: none; border-radius: 4px; }}"
+            f"QProgressBar::chunk {{ background-color: {c['accent']}; "
+            f"border-radius: 4px; }}"
         )
-        canvas.pack(side="left", padx=(0, 10))
-        fill_width = int(bar_width * xp_in_level / 1000)
-        canvas.create_rectangle(0, 0, fill_width, bar_height, fill=COLORS["accent"], width=0)
+        bar_row.addWidget(progress)
 
-        tk.Label(
-            bar_frame,
-            text=f"{xp_in_level}/1000 XP to Level {level + 1}",
-            font=FONTS["btn_sm"],
-            fg=COLORS["muted"],
-            bg=COLORS["bg"],
-        ).pack(side="left")
+        xp_label = QLabel(f"{xp_in_level}/1000 XP to Level {level + 1}")
+        xp_label.setFont(make_qfont("btn_sm"))
+        xp_label.setStyleSheet(f"color: {c['muted']};")
+        bar_row.addWidget(xp_label)
+        layout.addLayout(bar_row)
 
-    # ── Onboarding ──────────────────────────────────────────────
+    # ── Onboarding ──
 
-    def _build_onboarding(self, parent) -> None:
-        """Show a welcome banner for first-time users with no history."""
+    def _build_onboarding(self, layout: QVBoxLayout) -> None:
         user = self.navigator.get_user()
         if not user or user.history:
             return
+        c = COLORS
 
-        banner = tk.Frame(parent, bg=COLORS["accent"], pady=12, padx=20)
-        banner.pack(fill="x", padx=40, pady=(10, 0))
-        self.add_widget(banner)
+        banner = QFrame()
+        banner.setStyleSheet(
+            f"background-color: {c['accent']}; border-radius: 6px; "
+            f"padding: 12px 20px;"
+        )
+        bl = QHBoxLayout(banner)
 
-        tk.Label(
-            banner,
-            text="Welcome! New to speed reading?",
-            font=FONTS["btn_bold"],
-            fg=COLORS["btn_text"],
-            bg=COLORS["accent"],
-        ).pack(side="left")
+        welcome = QLabel("Welcome! New to speed reading?")
+        welcome.setFont(make_qfont("btn_bold"))
+        welcome.setStyleSheet(f"color: {c['btn_text']};")
+        bl.addWidget(welcome)
+        bl.addStretch()
 
-        tk.Button(
-            banner,
-            text="START FOUNDATION PATH",
-            font=FONTS["btn_bold"],
-            bg=COLORS["btn_text"],
-            fg=COLORS["accent"],
-            relief="flat",
-            pady=4,
-            padx=12,
-            cursor="hand2",
-            command=self._start_foundation,
-        ).pack(side="right")
+        start_btn = QPushButton("START FOUNDATION PATH")
+        start_btn.setFont(make_qfont("btn_bold"))
+        start_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['btn_text']}; "
+            f"color: {c['accent']}; border: none; "
+            f"padding: 4px 12px; border-radius: 3px; }}"
+        )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(self._start_foundation)
+        bl.addWidget(start_btn)
+        layout.addWidget(banner)
 
     def _start_foundation(self) -> None:
-        """Activate the foundation path and navigate to it."""
         from neural_speed_academy.config import TRAINING_PATHS
         from neural_speed_academy.state import PathProgress
 
@@ -228,36 +182,51 @@ class DashboardScreen(BaseScreen):
             self.navigator.save_user()
             self.navigator.navigate_to("path_session")
 
-    # ── Action bar (Paths / Stats) ─────────────────────────────
+    # ── Action bar ──
 
-    def _build_action_bar(self, parent) -> None:
-        """Horizontal bar with Training Paths and Stats buttons."""
-        bar = tk.Frame(parent, bg=COLORS["bg"])
-        bar.pack(fill="x", padx=40, pady=(12, 0))
-        self.add_widget(bar)
+    def _build_action_bar(self, layout: QVBoxLayout) -> None:
+        c = COLORS
+        bar = QHBoxLayout()
+        bar.setSpacing(8)
 
+        action_style = btn_css(c["action"], c["btn_text"], padding="8px 24px")
+        exit_style = btn_css(c["card"], c["fg"], padding="8px 24px")
+
+        # Left: forward navigation
         for label, cb_name in [
             ("Training Paths", "show_paths"),
             ("Stats & History", "show_stats"),
         ]:
-            tk.Button(
-                bar,
-                text=label,
-                font=FONTS["btn_bold"],
-                bg=COLORS["action"],
-                fg=COLORS["btn_text"],
-                relief="flat",
-                width=20,
-                pady=8,
-                cursor="hand2",
-                command=self._get_callback(cb_name),
-            ).pack(side="left", padx=(0, 10))
+            btn = QPushButton(label)
+            btn.setStyleSheet(action_style)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(self._cb(cb_name))
+            bar.addWidget(btn)
 
-    # ── Continue path ──────────────────────────────────────────
+        bar.addStretch()
 
-    def _build_continue_button(self, parent) -> None:
-        """Show a continue button if the user has an active training path."""
+        # Right: exit actions
+        menu_btn = QPushButton("Main Menu")
+        menu_btn.setStyleSheet(exit_style)
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(
+            lambda: self.navigator.navigate_to("main_menu")
+        )
+        bar.addWidget(menu_btn)
+
+        logout_btn = QPushButton("Logout")
+        logout_btn.setStyleSheet(exit_style)
+        logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        logout_btn.clicked.connect(self.navigator.logout)
+        bar.addWidget(logout_btn)
+
+        layout.addLayout(bar)
+
+    # ── Continue path ──
+
+    def _build_continue_button(self, layout: QVBoxLayout) -> None:
         from neural_speed_academy.config import TRAINING_PATHS
+
         user = self.navigator.get_user()
         if not user or not user.active_path:
             return
@@ -267,106 +236,78 @@ class DashboardScreen(BaseScreen):
         pp = user.path_progress.get(user.active_path)
         if not pp or pp.completed:
             return
-
         steps = path_data["steps"]
         if pp.current_step >= len(steps):
             return
 
+        c = COLORS
         _, step_label, _ = steps[pp.current_step]
+        btn = QPushButton(
+            f"CONTINUE: {path_data['name']} \u2014 {step_label}"
+        )
+        btn.setFont(make_qfont("btn_bold"))
+        btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['success']}; "
+            f"color: {c['btn_text']}; border: none; "
+            f"padding: 10px; border-radius: 4px; }}"
+        )
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.clicked.connect(
+            lambda: self.navigator.navigate_to("path_session")
+        )
+        layout.addWidget(btn)
 
-        btn_frame = tk.Frame(parent, bg=COLORS["bg"])
-        btn_frame.pack(fill="x", padx=40, pady=(10, 0))
-        self.add_widget(btn_frame)
+    # ── Personal bests ──
 
-        tk.Button(
-            btn_frame,
-            text=f"CONTINUE: {path_data['name']} — {step_label}",
-            font=FONTS["btn_bold"],
-            bg=COLORS["success"],
-            fg=COLORS["btn_text"],
-            relief="flat",
-            pady=10,
-            cursor="hand2",
-            command=lambda: self.navigator.navigate_to("path_session"),
-        ).pack(fill="x")
-
-    # ── Personal bests ─────────────────────────────────────────
-
-    def _build_personal_bests(self, parent) -> None:
-        """Compact row of personal bests."""
+    def _build_personal_bests(self, layout: QVBoxLayout) -> None:
         user = self.navigator.get_user()
         if not user or not user.personal_bests:
             return
-
-        frame = tk.Frame(parent, bg=COLORS["bg"])
-        frame.pack(fill="x", padx=40, pady=(10, 0))
-        self.add_widget(frame)
-
-        # Section divider
-        self._section_divider(frame, "PERSONAL BESTS")
-
-        row = tk.Frame(frame, bg=COLORS["bg"])
-        row.pack(fill="x", pady=(4, 0))
-
+        c = COLORS
+        row = QHBoxLayout()
         for exercise, data in user.personal_bests.items():
-            cell = tk.Frame(row, bg=COLORS["card"], padx=12, pady=6)
-            cell.pack(side="left", padx=(0, 8))
-            tk.Label(
-                cell, text=exercise,
-                font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["card"],
-            ).pack()
-            tk.Label(
-                cell,
-                text=f"{data['score']}/{data['total']}  ({data['pct']}%)",
-                font=FONTS["btn_bold"], fg=COLORS["text_on_card"], bg=COLORS["card"],
-            ).pack()
+            cell = QFrame()
+            cell.setStyleSheet(
+                f"background-color: {c['card']}; border-radius: 4px; "
+                f"padding: 6px 12px;"
+            )
+            cl = QVBoxLayout(cell)
+            cl.setSpacing(2)
+            name_lbl = QLabel(exercise)
+            name_lbl.setFont(make_qfont("btn_sm"))
+            name_lbl.setStyleSheet(f"color: {c['muted']};")
+            cl.addWidget(name_lbl)
+            score_lbl = QLabel(
+                f"{data['score']}/{data['total']}  ({data['pct']}%)"
+            )
+            score_lbl.setFont(make_qfont("btn_bold"))
+            score_lbl.setStyleSheet(f"color: {c['text_on_card']};")
+            cl.addWidget(score_lbl)
+            row.addWidget(cell)
+        row.addStretch()
+        layout.addLayout(row)
 
-    # ── Helpers ─────────────────────────────────────────────────
+    # ── Exercise grid ──
 
-    def _get_callback(self, name: str) -> Callable:
+    def _create_section(self, grid: QGridLayout, title: str, column: int,
+                        items: list[tuple[str, Callable]]) -> None:
+        c = COLORS
+        header = QLabel(title)
+        header.setFont(make_qfont("section_header"))
+        header.setStyleSheet(f"color: {c['muted']};")
+        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        grid.addWidget(header, 0, column)
+
+        for i, (text, command) in enumerate(items):
+            btn = QPushButton(text)
+            btn.setFixedWidth(self.BTN_WIDTH)
+            btn.setStyleSheet(btn_css(c["accent"], c["btn_text"]))
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(command)
+            grid.addWidget(
+                btn, i + 1, column,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
+
+    def _cb(self, name: str) -> Callable:
         return self.exercise_callbacks.get(name, lambda: None)
-
-    @staticmethod
-    def _section_divider(parent: tk.Frame, title: str) -> None:
-        """Thin line with section label — fieldset style."""
-        row = tk.Frame(parent, bg=COLORS["bg"])
-        row.pack(fill="x", pady=(0, 4))
-
-        tk.Frame(row, bg=COLORS["muted"], height=1).pack(
-            side="left", fill="x", expand=True, pady=6, padx=(0, 8),
-        )
-        tk.Label(
-            row, text=title,
-            font=FONTS["menu_header"], fg=COLORS["muted"], bg=COLORS["bg"],
-        ).pack(side="left")
-        tk.Frame(row, bg=COLORS["muted"], height=1).pack(
-            side="left", fill="x", expand=True, pady=6, padx=(8, 0),
-        )
-
-    def _create_section(
-        self,
-        parent: tk.Frame,
-        title: str,
-        column: int,
-        items: list[tuple[str, Callable]],
-    ) -> None:
-        """Create a section with divider header and uniform-width buttons."""
-        frame = tk.Frame(parent, bg=COLORS["bg"])
-        frame.grid(row=0, column=column, padx=40, sticky="n")
-
-        self._section_divider(frame, title)
-
-        for text, command in items:
-            tk.Button(
-                frame,
-                text=text,
-                command=command,
-                font=FONTS["btn"],
-                bg=COLORS["accent"],
-                fg=COLORS["btn_text"],
-                width=self.BTN_WIDTH,
-                pady=8,
-                relief="flat",
-                cursor="hand2",
-                activebackground=COLORS["action"],
-            ).pack(pady=4)

@@ -4,15 +4,15 @@ Menu screens for exercise selection.
 from __future__ import annotations
 
 import random
-import tkinter as tk
-from typing import Callable, TYPE_CHECKING
+from typing import Callable
+
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGridLayout,
+)
+from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, FONTS
-
-if TYPE_CHECKING:
-    from neural_speed_academy.exercises.flash import FlashExercise
-    from neural_speed_academy.exercises.priming import PrimingExercise
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, screen_metrics
 
 
 class BaseMenuScreen(BaseScreen):
@@ -20,7 +20,6 @@ class BaseMenuScreen(BaseScreen):
 
     @staticmethod
     def _difficulty_color(index: int, total: int) -> str:
-        """Return a difficulty tier color key based on position in list."""
         if total <= 1:
             return "diff_beginner"
         frac = index / (total - 1)
@@ -37,83 +36,105 @@ class BaseMenuScreen(BaseScreen):
         title: str,
         guide_key: str,
         columns: list[tuple[str, list[tuple[str, Callable]]]],
-        btn_width: int = 28,
+        btn_width: int | None = None,
     ) -> None:
-        """Create an N-column grid menu from labeled column lists."""
-        self.root.configure(bg=COLORS["bg"])
+        if btn_width is None:
+            btn_width = screen_metrics.menu_btn_w
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True, fill="both")
-        self.add_widget(container)
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setContentsMargins(30, 20, 30, 20)
+        cl.setSpacing(10)
 
-        tk.Label(
-            container, text=title, font=FONTS["header"],
-            fg=COLORS["fg"], bg=COLORS["bg"]
-        ).pack(pady=10)
+        # Title row with guide button
+        title_row = QHBoxLayout()
+        title_row.addStretch()
+        lbl = QLabel(title)
+        lbl.setFont(make_qfont("header"))
+        lbl.setStyleSheet(f"color: {c['fg']};")
+        title_row.addWidget(lbl)
 
-        tk.Button(
-            container, text="READ GUIDE",
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            cursor="hand2", command=lambda: self.show_guide(guide_key),
-        ).pack(pady=5)
+        guide_btn = QPushButton("GUIDE")
+        guide_btn.setFont(make_qfont("btn_sm"))
+        guide_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 6px 16px; border-radius: 4px;"
+        )
+        guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        guide_btn.clicked.connect(lambda: self.show_guide(guide_key))
+        title_row.addWidget(guide_btn)
+        title_row.addStretch()
+        cl.addLayout(title_row)
 
-        grid = tk.Frame(container, bg=COLORS["bg"])
-        grid.pack(pady=20)
+        cl.addStretch()
+
+        grid = QGridLayout()
+        grid.setSpacing(10)
+        grid.setContentsMargins(40, 0, 40, 0)
 
         # Headers
         for idx, (header, _items) in enumerate(columns):
-            tk.Label(
-                grid, text=header, font=FONTS["btn_bold"],
-                fg=COLORS["accent"], bg=COLORS["bg"]
-            ).grid(row=0, column=idx, padx=10, pady=10)
+            h = QLabel(header)
+            h.setFont(make_qfont("menu_header"))
+            h.setStyleSheet(f"color: {c['accent']};")
+            h.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(h, 0, idx)
 
-        # Determine cutoff for progressive disclosure (~60% shown by default)
         max_len = max(len(items) for _, items in columns)
         cutoff = max(int(max_len * 0.6), 3)
-        advanced_widgets = []
+        advanced_widgets: list[QPushButton] = []
 
-        # Buttons with difficulty color coding
-        max_rows = max(len(items) for _, items in columns)
-        for i in range(max_rows):
+        for i in range(max_len):
             for col_idx, (_header, items) in enumerate(columns):
                 if i < len(items):
                     name, cmd = items[i]
                     color_key = self._difficulty_color(i, len(items))
-                    btn = tk.Button(
-                        grid, text=name, command=cmd,
-                        bg=COLORS[color_key], fg=COLORS["btn_text"],
-                        font=FONTS["menu_btn"], width=btn_width,
-                        pady=6, relief="flat", cursor="hand2",
+                    btn = QPushButton(name)
+                    btn.setFixedWidth(btn_width)
+                    btn.setStyleSheet(
+                        btn_css(c[color_key], c["btn_text"],
+                                padding="10px", font_key="menu_btn")
                     )
-                    btn.grid(row=i + 1, column=col_idx, padx=10, pady=4)
+                    btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                    btn.clicked.connect(cmd)
+                    grid.addWidget(
+                        btn, i + 1, col_idx,
+                        alignment=Qt.AlignmentFlag.AlignCenter,
+                    )
                     if i >= cutoff:
                         advanced_widgets.append(btn)
-                        btn.grid_remove()
+                        btn.setVisible(False)
 
-        # Toggle button for advanced options
+        cl.addLayout(grid)
+
         if advanced_widgets:
-            self._advanced_visible = False
+            cl.addSpacing(6)
+            self._adv_visible = False
+            toggle = QPushButton("\u25bc SHOW ADVANCED")
+            toggle.setStyleSheet(
+                btn_css(c["card"], c["fg"], padding="6px 16px",
+                        font_key="btn_sm")
+            )
+            toggle.setCursor(Qt.CursorShape.PointingHandCursor)
 
-            def toggle_advanced():
-                self._advanced_visible = not self._advanced_visible
+            def _toggle():
+                self._adv_visible = not self._adv_visible
                 for w in advanced_widgets:
-                    if self._advanced_visible:
-                        w.grid()
-                    else:
-                        w.grid_remove()
-                toggle_btn.config(
-                    text="▲ HIDE ADVANCED" if self._advanced_visible
-                    else "▼ SHOW ADVANCED"
+                    w.setVisible(self._adv_visible)
+                toggle.setText(
+                    "\u25b2 HIDE ADVANCED" if self._adv_visible
+                    else "\u25bc SHOW ADVANCED"
                 )
 
-            toggle_btn = tk.Button(
-                container, text="▼ SHOW ADVANCED",
-                bg=COLORS["card"], fg=COLORS["fg"],
-                font=FONTS["btn_sm"], relief="flat",
-                cursor="hand2", command=toggle_advanced,
-            )
-            toggle_btn.pack(pady=5)
+            toggle.clicked.connect(_toggle)
+            cl.addWidget(toggle, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        cl.addStretch()
+        self._layout.addWidget(container, 1)
 
     def _create_grid_menu(
         self,
@@ -121,137 +142,31 @@ class BaseMenuScreen(BaseScreen):
         guide_key: str,
         sets: list[tuple[str, Callable]],
         col1_label: str = "FIXED / BASIC",
-        col2_label: str = "MIXED / ADVANCED"
+        col2_label: str = "MIXED / ADVANCED",
     ) -> None:
-        """Create a two-column grid menu."""
-        self.root.configure(bg=COLORS["bg"])
-        self.add_nav_bar()
-
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True, fill="both")
-        self.add_widget(container)
-
-        # Title
-        tk.Label(
-            container,
-            text=title,
-            font=FONTS["header"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        ).pack(pady=10)
-
-        # Guide button
-        tk.Button(
-            container,
-            text="READ GUIDE",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            cursor="hand2",
-            command=lambda: self.show_guide(guide_key),
-        ).pack(pady=5)
-
-        # Grid
-        grid = tk.Frame(container, bg=COLORS["bg"])
-        grid.pack(pady=20)
-
-        # Calculate split
         half = (len(sets) + 1) // 2
-        col1_items = sets[:half]
-        col2_items = sets[half:]
-
-        # Column headers
-        tk.Label(
-            grid,
-            text=col1_label,
-            font=FONTS["menu_header"],
-            fg=COLORS["muted"],
-            bg=COLORS["bg"]
-        ).grid(row=0, column=0, pady=10)
-
-        tk.Label(
-            grid,
-            text=col2_label,
-            font=FONTS["menu_header"],
-            fg=COLORS["muted"],
-            bg=COLORS["bg"]
-        ).grid(row=0, column=1, pady=10)
-
-        # Determine cutoff for progressive disclosure
-        cutoff = max(int(len(sets) * 0.6 / 2), 3)
-        advanced_widgets = []
-
-        # Buttons with difficulty color coding
-        for i in range(max(len(col1_items), len(col2_items))):
-            if i < len(col1_items):
-                name, cmd = col1_items[i]
-                # Use global index for difficulty color
-                global_idx = i
-                color_key = self._difficulty_color(global_idx, len(col1_items))
-                btn = tk.Button(
-                    grid, text=name, command=cmd,
-                    bg=COLORS[color_key], fg=COLORS["btn_text"],
-                    font=FONTS["btn"], width=35,
-                    pady=8, relief="flat", cursor="hand2",
-                )
-                btn.grid(row=i + 1, column=0, padx=15, pady=5)
-                if i >= cutoff:
-                    advanced_widgets.append(btn)
-                    btn.grid_remove()
-
-            if i < len(col2_items):
-                name, cmd = col2_items[i]
-                global_idx = i
-                color_key = self._difficulty_color(global_idx, len(col2_items))
-                btn = tk.Button(
-                    grid, text=name, command=cmd,
-                    bg=COLORS[color_key], fg=COLORS["btn_text"],
-                    font=FONTS["btn"], width=35,
-                    pady=8, relief="flat", cursor="hand2",
-                )
-                btn.grid(row=i + 1, column=1, padx=15, pady=5)
-                if i >= cutoff:
-                    advanced_widgets.append(btn)
-                    btn.grid_remove()
-
-        # Toggle button for advanced options
-        if advanced_widgets:
-            self._advanced_visible = False
-
-            def toggle_advanced():
-                self._advanced_visible = not self._advanced_visible
-                for w in advanced_widgets:
-                    if self._advanced_visible:
-                        w.grid()
-                    else:
-                        w.grid_remove()
-                toggle_btn.config(
-                    text="▲ HIDE ADVANCED" if self._advanced_visible
-                    else "▼ SHOW ADVANCED"
-                )
-
-            toggle_btn = tk.Button(
-                container, text="▼ SHOW ADVANCED",
-                bg=COLORS["card"], fg=COLORS["fg"],
-                font=FONTS["btn_sm"], relief="flat",
-                cursor="hand2", command=toggle_advanced,
-            )
-            toggle_btn.pack(pady=5)
+        self._create_column_menu(
+            title, guide_key,
+            columns=[
+                (col1_label, sets[:half]),
+                (col2_label, sets[half:]),
+            ],
+        )
 
 
 class FlashMenuScreen(BaseMenuScreen):
-    """Menu screen for flash number exercises."""
 
-    def __init__(self, root: tk.Tk, navigator, flash_exercise: "FlashExercise"):
-        super().__init__(root, navigator)
-        self.flash_exercise = flash_exercise
+    def __init__(self, navigator, flash_exercise=None,
+                 parent: QWidget | None = None):
+        super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
-        """Build the flash menu UI."""
+        from neural_speed_academy.exercises.flash import FlashExercise
+
         def run(low: int, high: int, rounds: int) -> Callable:
-            return lambda: self.flash_exercise.start(
-                mode="flash_num",
-                rounds=rounds,
-                level_func=lambda _: random.randint(low, high)
+            return lambda: self.navigator.launch_exercise(
+                FlashExercise, mode="flash_num", rounds=rounds,
+                level_func=lambda _: random.randint(low, high),
             )
 
         sets = [
@@ -272,49 +187,46 @@ class FlashMenuScreen(BaseMenuScreen):
             ("Mix: 6-8 Digits", run(6, 8, 15)),
             ("Chaos: 1-10 Digits", run(1, 10, 20)),
         ]
-
         self._create_grid_menu("FLASH NUMBER SETS", "flash", sets)
 
 
 class WordsMenuScreen(BaseMenuScreen):
-    """Menu screen for word drill exercises."""
 
-    def __init__(self, root: tk.Tk, navigator, flash_exercise: "FlashExercise"):
-        super().__init__(root, navigator)
-        self.flash_exercise = flash_exercise
+    def __init__(self, navigator, flash_exercise=None,
+                 parent: QWidget | None = None):
+        super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
-        """Build the words menu UI."""
+        from neural_speed_academy.exercises.flash import FlashExercise
+
         def run(rounds: int) -> Callable:
-            return lambda: self.flash_exercise.start(
-                mode="flash_word",
-                rounds=rounds,
-                level_func=lambda _: 0
+            return lambda: self.navigator.launch_exercise(
+                FlashExercise, mode="flash_word", rounds=rounds,
+                level_func=lambda _: 0,
             )
 
         sets = [
             ("Ambiguous Words (10 Rounds)", run(10)),
             ("Quick Recognition (20 Rounds)", run(20)),
         ]
-
         self._create_grid_menu("WORD DRILLS", "flash", sets)
 
 
 class EyespanMenuScreen(BaseMenuScreen):
-    """Menu screen for eye-span exercises."""
 
-    def __init__(self, root: tk.Tk, navigator, flash_exercise: "FlashExercise"):
-        super().__init__(root, navigator)
-        self.flash_exercise = flash_exercise
+    def __init__(self, navigator, flash_exercise=None,
+                 parent: QWidget | None = None):
+        super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
-        """Build the eye-span menu UI."""
-        def run(mode: str, width: int, low: int, high: int, rounds: int) -> Callable:
-            return lambda: self.flash_exercise.start(
-                mode="eyespan",
-                rounds=rounds,
+        from neural_speed_academy.exercises.flash import FlashExercise
+
+        def run(mode: str, width: int, low: int, high: int,
+                rounds: int) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                FlashExercise, mode="eyespan", rounds=rounds,
                 level_func=lambda _: random.randint(low, high),
-                span_config={"mode": mode, "width": width}
+                span_config={"mode": mode, "width": width},
             )
 
         self._create_column_menu(
@@ -366,49 +278,41 @@ class EyespanMenuScreen(BaseMenuScreen):
 
 
 class PrimingMenuScreen(BaseMenuScreen):
-    """Menu screen for eye priming exercise selection."""
 
-    def __init__(self, root: tk.Tk, navigator, priming_exercise: "PrimingExercise"):
-        super().__init__(root, navigator)
-        self.priming_exercise = priming_exercise
+    def __init__(self, navigator, priming_exercise=None,
+                 parent: QWidget | None = None):
+        super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
-        """Build the priming menu UI."""
-        # All exercises target ~45s duration for an effective warmup.
-        # delay = ms between saccade jumps (controls speed, not duration).
-        # cycles = number of pursuit repetitions (more cycles = faster dot).
-        # duration_s = total exercise length in seconds.
+        from neural_speed_academy.exercises.priming import PrimingExercise
+
         def run(mode: str, delay: int = 600, duration_s: float = 45.0,
                 cycles: int = 0) -> Callable:
-            return lambda: self.priming_exercise.start(
-                mode=mode, delay=delay, duration_s=duration_s, cycles=cycles
+            return lambda: self.navigator.launch_exercise(
+                PrimingExercise, mode=mode, delay=delay,
+                duration_s=duration_s, cycles=cycles,
             )
 
-        sets = [
-            # Saccades — structured jumps
-            ("Horizontal Saccades (Slow)", run("saccade_h", delay=700)),
-            ("Horizontal Saccades (Fast)", run("saccade_h", delay=400)),
-            ("Vertical Saccades (Slow)", run("saccade_v", delay=700)),
-            ("Vertical Saccades (Fast)", run("saccade_v", delay=400)),
-            ("Diagonal Saccades (Slow)", run("saccade_diag", delay=700)),
-            ("Diagonal Saccades (Fast)", run("saccade_diag", delay=400)),
-            ("Expanding Saccades (Slow)", run("saccade_expand", delay=700)),
-            ("Expanding Saccades (Fast)", run("saccade_expand", delay=400)),
-            # Smooth pursuit — slow ~5s/cycle, fast ~3s/cycle
-            ("Pursuit: Line (Slow)", run("pursuit_line", cycles=9)),
-            ("Pursuit: Line (Fast)", run("pursuit_line", cycles=15)),
-            ("Pursuit: Circle (Slow)", run("pursuit_circle", cycles=9)),
-            ("Pursuit: Circle (Fast)", run("pursuit_circle", cycles=15)),
-            ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", cycles=9)),
-            ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", cycles=15)),
-        ]
-
-        self._create_grid_menu(
-            "EYE PRIMING",
-            "priming",
-            sets,
-            col1_label="SACCADES (JUMPS)",
-            col2_label="SMOOTH PURSUIT (TRACKING)"
+        self._create_column_menu(
+            "EYE PRIMING", "priming",
+            columns=[
+                ("SACCADES (JUMPS)", [
+                    ("Horizontal Saccades (Slow)", run("saccade_h", delay=700)),
+                    ("Horizontal Saccades (Fast)", run("saccade_h", delay=400)),
+                    ("Vertical Saccades (Slow)", run("saccade_v", delay=700)),
+                    ("Vertical Saccades (Fast)", run("saccade_v", delay=400)),
+                    ("Diagonal Saccades (Slow)", run("saccade_diag", delay=700)),
+                    ("Diagonal Saccades (Fast)", run("saccade_diag", delay=400)),
+                    ("Expanding Saccades (Slow)", run("saccade_expand", delay=700)),
+                    ("Expanding Saccades (Fast)", run("saccade_expand", delay=400)),
+                ]),
+                ("SMOOTH PURSUIT (TRACKING)", [
+                    ("Pursuit: Line (Slow)", run("pursuit_line", cycles=9)),
+                    ("Pursuit: Line (Fast)", run("pursuit_line", cycles=15)),
+                    ("Pursuit: Circle (Slow)", run("pursuit_circle", cycles=9)),
+                    ("Pursuit: Circle (Fast)", run("pursuit_circle", cycles=15)),
+                    ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", cycles=9)),
+                    ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", cycles=15)),
+                ]),
+            ],
         )
-
-

@@ -1,11 +1,11 @@
 """
-Navigator for centralized screen routing.
-Decouples screens from each other by providing a single point of navigation.
+Navigator for centralized screen routing using QStackedWidget.
 """
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Callable
-import tkinter as tk
+
+from PyQt6.QtWidgets import QStackedWidget
 
 if TYPE_CHECKING:
     from neural_speed_academy.screens.base import BaseScreen
@@ -14,12 +14,8 @@ if TYPE_CHECKING:
 
 
 class Navigator:
-    """
-    Manages screen transitions and maintains navigation state.
-    Screens request navigation through this class instead of calling each other directly.
-    """
+    """Manages screen transitions via a QStackedWidget."""
 
-    # Human-readable labels for screen names
     SCREEN_LABELS = {
         "main_menu": "Menu",
         "login": "Login",
@@ -35,35 +31,27 @@ class Navigator:
         "path_session": "Path Session",
     }
 
-    def __init__(
-        self,
-        root: tk.Tk,
-        user_repo: "UserRepositoryInterface",
-    ):
-        self.root = root
+    def __init__(self, stack: QStackedWidget, user_repo: "UserRepositoryInterface"):
+        self.stack = stack
         self.user_repo = user_repo
         self.current_user: Optional["UserProfile"] = None
-        self.current_screen: Optional["BaseScreen"] = None
         self._screen_registry: dict[str, Callable[[], "BaseScreen"]] = {}
         self._history: list[str] = []
         self._current_name: str = ""
-        self._app = None  # Set by NeuralSpeedAcademy after init
+        self._app = None
         self._path_step_pending: tuple[str, int] | None = None
         self._post_login_redirect: str | None = None
 
     def register_screen(self, name: str, factory: Callable[[], "BaseScreen"]) -> None:
-        """Register a screen factory by name."""
         self._screen_registry[name] = factory
 
     def navigate_to(self, screen_name: str, **kwargs) -> None:
-        """Navigate to a registered screen by name."""
         if screen_name not in self._screen_registry:
             raise ValueError(f"Unknown screen: {screen_name}")
 
-        # Track history (dashboard and main_menu reset the stack)
         if screen_name in ("dashboard", "main_menu"):
             self._history = []
-        elif self._current_name and self._current_name != "login":
+        elif self._current_name and self._current_name not in ("login", "exercise"):
             self._history.append(self._current_name)
         self._current_name = screen_name
 
@@ -71,47 +59,43 @@ class Navigator:
         self._show_screen(screen, **kwargs)
 
     def _show_screen(self, screen: "BaseScreen", **kwargs) -> None:
-        """Display a screen, hiding the current one first."""
-        if self.current_screen:
-            self.current_screen.hide()
-        self.current_screen = screen
-        screen.show(**kwargs)
+        # Remove old widgets from stack
+        while self.stack.count() > 0:
+            old = self.stack.widget(0)
+            self.stack.removeWidget(old)
+            old.deleteLater()
+
+        self.stack.addWidget(screen)
+        self.stack.setCurrentWidget(screen)
+        screen.show_screen(**kwargs)
 
     def set_user(self, user: "UserProfile") -> None:
-        """Set the current logged-in user."""
         self.current_user = user
 
     def get_user(self) -> Optional["UserProfile"]:
-        """Get the current logged-in user."""
         return self.current_user
 
     def save_user(self) -> None:
-        """Save the current user to the repository."""
         if self.current_user:
             self.user_repo.save(self.current_user)
 
     def logout(self) -> None:
-        """Clear the current user and navigate to main menu."""
         self.current_user = None
         self._post_login_redirect = None
         self._path_step_pending = None
         self.navigate_to("main_menu")
 
     def to_login(self) -> None:
-        """Navigate to login screen."""
         self.navigate_to("login")
 
     def to_dashboard(self) -> None:
-        """Navigate to dashboard/main menu."""
         self.navigate_to("dashboard")
 
     def require_login(self, redirect_to: str) -> None:
-        """Navigate to login, then redirect to the given screen after."""
         self._post_login_redirect = redirect_to
         self.navigate_to("login")
 
     def complete_login(self) -> None:
-        """Called after successful login. Navigates to redirect target or dashboard."""
         target = self._post_login_redirect
         self._post_login_redirect = None
         if target:
@@ -120,12 +104,6 @@ class Navigator:
             self.to_dashboard()
 
     def finish_exercise(self) -> None:
-        """Navigate after an exercise ends.
-
-        If the exercise was launched from a training path, advance the
-        path step and return to the path session screen.  Otherwise
-        fall back to the dashboard.
-        """
         pending = self._path_step_pending
         if pending:
             path_id, step_idx = pending
@@ -146,30 +124,31 @@ class Navigator:
             self.to_dashboard()
 
     def to_stats(self) -> None:
-        """Navigate to stats screen."""
         self.navigate_to("stats")
 
-    def to_exercise(self, exercise_type: str, **config) -> None:
-        """Navigate to an exercise screen with configuration."""
-        self.navigate_to(exercise_type, **config)
+    def launch_exercise(self, exercise_cls, **kwargs) -> None:
+        """Create and show an exercise widget in the stack."""
+        if self._current_name:
+            self._history.append(self._current_name)
+        self._current_name = "exercise"
 
-    def get_breadcrumbs(self) -> list[tuple[str, str]]:
-        """Return list of (label, screen_name) pairs for the current path."""
-        crumbs = [("HUB", "dashboard")]
-        for name in self._history:
-            label = self.SCREEN_LABELS.get(name, name)
-            crumbs.append((label, name))
-        if self._current_name and self._current_name != "dashboard":
-            label = self.SCREEN_LABELS.get(self._current_name, self._current_name)
-            crumbs.append((label, self._current_name))
-        return crumbs
+        while self.stack.count() > 0:
+            old = self.stack.widget(0)
+            self.stack.removeWidget(old)
+            old.deleteLater()
+
+        ex = exercise_cls(self)
+        self.stack.addWidget(ex)
+        self.stack.setCurrentWidget(ex)
+        ex.start(**kwargs)
 
     def go_back(self) -> None:
-        """Navigate to the previous screen in history."""
-        if self._history:
-            target = self._history[-1]
-            # Pop so navigate_to doesn't re-push
+        # Skip non-navigable entries (e.g. "exercise") in history
+        while self._history and self._history[-1] not in self._screen_registry:
             self._history.pop()
+
+        if self._history:
+            target = self._history.pop()
             self._current_name = ""
             self.navigate_to(target)
         elif self._current_name == "dashboard":

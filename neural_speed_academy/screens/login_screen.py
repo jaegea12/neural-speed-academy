@@ -3,152 +3,209 @@ Login screen for user authentication.
 """
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import messagebox
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QFrame, QMessageBox,
+)
+from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, FONTS
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, input_css
+
+from PyQt6.QtWidgets import QHBoxLayout
+
+import hashlib
+
+
+def _hash_pw(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 
 class LoginScreen(BaseScreen):
-    """Login screen where users enter their name to start training."""
 
     def build(self, **kwargs) -> None:
-        """Build the login UI."""
-        self.root.configure(bg=COLORS["bg"])
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-        # Center container
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.place(relx=0.5, rely=0.5, anchor="center")
-        self.add_widget(container)
+        # Back button at top-left
+        top_bar = QHBoxLayout()
+        top_bar.setContentsMargins(12, 8, 12, 0)
+        back_btn = QPushButton("\u2190 BACK")
+        back_btn.setStyleSheet(
+            btn_css(c["card"], c["fg"], padding="6px 16px", font_key="btn_sm")
+        )
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.navigator.go_back)
+        top_bar.addWidget(back_btn)
+        top_bar.addStretch()
+        self._layout.addLayout(top_bar)
 
-        # Title
-        tk.Label(
-            container,
-            text="NEURAL SPEED ACADEMY",
-            font=FONTS["header"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"],
-        ).pack(pady=20)
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.setSpacing(8)
+
+        title = QLabel("NEURAL SPEED ACADEMY")
+        title.setFont(make_qfont("header"))
+        title.setStyleSheet(f"color: {c['fg']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
+        cl.addSpacing(15)
 
         # Existing users
         users = self.navigator.user_repo.list_users()
         if users:
-            tk.Label(
-                container,
-                text="SELECT PROFILE",
-                font=FONTS["section_header"],
-                fg=COLORS["accent"],
-                bg=COLORS["bg"],
-            ).pack(pady=(0, 8))
-
-            user_frame = tk.Frame(container, bg=COLORS["bg"])
-            user_frame.pack(pady=(0, 15))
+            sel_label = QLabel("SELECT PROFILE")
+            sel_label.setFont(make_qfont("section_header"))
+            sel_label.setStyleSheet(f"color: {c['accent']};")
+            sel_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(sel_label)
 
             for uname in users:
                 profile = self.navigator.user_repo.get(uname)
                 level = (profile.xp // 1000 + 1) if profile else 1
+                has_pw = bool(profile and profile.password_hash)
+                label = f"  {uname}    Lv.{level}"
+                if has_pw:
+                    label += "  \U0001f512"
 
-                row = tk.Frame(user_frame, bg=COLORS["card"], padx=12, pady=6)
-                row.pack(fill="x", pady=2)
-                row.config(cursor="hand2")
-
-                tk.Label(
-                    row, text=uname,
-                    font=FONTS["btn_bold"], fg=COLORS["text_on_card"],
-                    bg=COLORS["card"], anchor="w",
-                ).pack(side="left")
-
-                tk.Label(
-                    row, text=f"Lv.{level}",
-                    font=FONTS["btn_sm"], fg=COLORS["muted"],
-                    bg=COLORS["card"],
-                ).pack(side="right", padx=(10, 0))
-
-                # Bind click on the row and its children
-                for widget in [row] + list(row.winfo_children()):
-                    widget.bind("<Button-1>", lambda e, n=uname: self._login_as(n))
-
-                row.bind("<Enter>", lambda e, r=row: self._highlight_row(r, True))
-                row.bind("<Leave>", lambda e, r=row: self._highlight_row(r, False))
+                row = QPushButton(label)
+                row.setFont(make_qfont("btn_bold"))
+                row.setStyleSheet(
+                    btn_css(c["card"], c["text_on_card"],
+                            padding="8px 16px", min_width=250)
+                )
+                row.setCursor(Qt.CursorShape.PointingHandCursor)
+                row.clicked.connect(
+                    lambda checked, n=uname: self._login_as(n)
+                )
+                cl.addWidget(row, alignment=Qt.AlignmentFlag.AlignCenter)
 
             # Separator
-            tk.Frame(
-                container, bg=COLORS["muted"], height=1,
-            ).pack(fill="x", padx=20, pady=(10, 10))
+            sep = QFrame()
+            sep.setFrameShape(QFrame.Shape.HLine)
+            sep.setStyleSheet(f"color: {c['muted']};")
+            sep.setFixedWidth(300)
+            cl.addSpacing(10)
+            cl.addWidget(sep, alignment=Qt.AlignmentFlag.AlignCenter)
 
-            tk.Label(
-                container,
-                text="OR CREATE NEW",
-                font=FONTS["section_header"],
-                fg=COLORS["accent"],
-                bg=COLORS["bg"],
-            ).pack(pady=(0, 8))
+            new_label = QLabel("OR CREATE NEW")
+            new_label.setFont(make_qfont("section_header"))
+            new_label.setStyleSheet(f"color: {c['accent']};")
+            new_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(new_label)
 
-        # Name entry with placeholder
-        self.name_var = tk.StringVar()
-        self.entry = tk.Entry(
-            container,
-            textvariable=self.name_var,
-            font=FONTS["sub"],
-            justify="center",
-            bg=COLORS["card"],
-            fg=COLORS["muted"],
-            relief="flat",
-            insertbackground=COLORS["text_on_card"],
+        # Name entry
+        self._entry = QLineEdit()
+        self._entry.setPlaceholderText("Type your name")
+        self._entry.setFont(make_qfont("sub"))
+        self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._entry.setFixedWidth(300)
+        self._entry.setStyleSheet(input_css())
+        cl.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # Password entry (optional for new profiles)
+        self._pw_entry = QLineEdit()
+        self._pw_entry.setPlaceholderText("Password (optional)")
+        self._pw_entry.setFont(make_qfont("sub"))
+        self._pw_entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._pw_entry.setFixedWidth(300)
+        self._pw_entry.setEchoMode(QLineEdit.EchoMode.Password)
+        self._pw_entry.setStyleSheet(input_css())
+        self._pw_entry.returnPressed.connect(self._do_login)
+        cl.addWidget(self._pw_entry, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        cl.addSpacing(10)
+
+        start_btn = QPushButton("CREATE & START")
+        start_btn.setStyleSheet(
+            btn_css(c["accent"], c["btn_text"], padding="10px 30px")
         )
-        self.entry.pack(pady=(0, 15), ipadx=10, ipady=8)
-        self.entry.insert(0, "Type your name")
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(self._do_login)
+        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # Placeholder behavior
-        self.entry.bind("<FocusIn>", self._on_entry_focus)
-        self.entry.bind("<FocusOut>", self._on_entry_blur)
-        self.entry.bind("<Return>", lambda e: self._do_login())
-
-        # Start button
-        tk.Button(
-            container,
-            text="START TRAINING",
-            font=FONTS["btn_bold"],
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            relief="flat",
-            cursor="hand2",
-            command=self._do_login,
-        ).pack()
-
-    @staticmethod
-    def _highlight_row(row: tk.Frame, enter: bool) -> None:
-        """Toggle hover highlight on a user row."""
-        color = COLORS["accent"] if enter else COLORS["card"]
-        row.config(bg=color)
-        for child in row.winfo_children():
-            child.config(bg=color)
-
-    def _on_entry_focus(self, event) -> None:
-        """Clear placeholder on focus."""
-        if self.entry.get() == "Type your name":
-            self.entry.delete(0, "end")
-            self.entry.config(fg=COLORS["text_on_card"])
-
-    def _on_entry_blur(self, event) -> None:
-        """Restore placeholder if empty."""
-        if self.entry.get() == "":
-            self.entry.insert(0, "Type your name")
-            self.entry.config(fg=COLORS["muted"])
+        self._layout.addWidget(container, 1)
 
     def _login_as(self, name: str) -> None:
-        """Log in as an existing user."""
-        user = self.navigator.user_repo.get_or_create(name)
-        self.navigator.set_user(user)
-        self.navigator.complete_login()
+        profile = self.navigator.user_repo.get(name)
+        if not profile:
+            return
+        if profile.password_hash:
+            self._prompt_password(profile)
+        else:
+            self.navigator.set_user(profile)
+            self.navigator.complete_login()
+
+    def _prompt_password(self, profile) -> None:
+        """Show a password dialog for a protected profile."""
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout as DVBox
+        c = COLORS
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(f"Login — {profile.name}")
+        dlg.setFixedSize(350, 180)
+        dlg.setStyleSheet(f"background-color: {c['card']};")
+
+        dl = DVBox(dlg)
+        dl.setContentsMargins(25, 20, 25, 15)
+        dl.setSpacing(10)
+
+        lbl = QLabel(f"Enter password for {profile.name}")
+        lbl.setFont(make_qfont("body"))
+        lbl.setStyleSheet(f"color: {c['text_on_card']};")
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        dl.addWidget(lbl)
+
+        pw_field = QLineEdit()
+        pw_field.setEchoMode(QLineEdit.EchoMode.Password)
+        pw_field.setFont(make_qfont("sub"))
+        pw_field.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        pw_field.setStyleSheet(input_css())
+        dl.addWidget(pw_field)
+
+        def try_login():
+            if _hash_pw(pw_field.text()) == profile.password_hash:
+                dlg.accept()
+                self.navigator.set_user(profile)
+                self.navigator.complete_login()
+            else:
+                lbl.setText("Wrong password. Try again.")
+                lbl.setStyleSheet(f"color: {c['alert']};")
+                pw_field.clear()
+
+        pw_field.returnPressed.connect(try_login)
+
+        ok_btn = QPushButton("LOGIN")
+        ok_btn.setStyleSheet(
+            btn_css(c["accent"], c["btn_text"], padding="6px 20px")
+        )
+        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        ok_btn.clicked.connect(try_login)
+        dl.addWidget(ok_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        dlg.exec()
 
     def _do_login(self) -> None:
-        """Handle login action."""
-        name = self.entry.get().strip()
-        if not name or name == "Type your name":
-            messagebox.showinfo("Name Required", "Please enter your name to continue.")
+        name = self._entry.text().strip()
+        if not name:
+            QMessageBox.information(
+                self, "Name Required", "Please enter your name to continue."
+            )
             return
+        password = self._pw_entry.text()
         user = self.navigator.user_repo.get_or_create(name)
+        # Set password if creating new profile and password provided
+        if not user.password_hash and password:
+            user.password_hash = _hash_pw(password)
+            self.navigator.user_repo.save(user)
+        elif user.password_hash:
+            # Existing user with password — verify
+            if _hash_pw(password) != user.password_hash:
+                QMessageBox.warning(
+                    self, "Wrong Password",
+                    "The password does not match this profile."
+                )
+                return
         self.navigator.set_user(user)
         self.navigator.complete_login()

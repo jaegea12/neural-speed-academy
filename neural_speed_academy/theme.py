@@ -20,8 +20,9 @@ DARK_COLORS = {
     "alert": "#fb923c",
     "highlight": "#fde047",
     "priming": "#2dd4bf",
-    "grid_btn": "#3b82f6",
+    "grid_btn": "#334155",
     "grid_solved": "#166534",
+    "grid_text": "#e2e8f0",
     "success": "#22c55e",
     "cross": "#64748b",
     # Semantic roles
@@ -46,8 +47,9 @@ LIGHT_COLORS = {
     "alert": "#c2410c",
     "highlight": "#fbbf24",
     "priming": "#0d9488",
-    "grid_btn": "#3b82f6",
+    "grid_btn": "#cbd5e1",
     "grid_solved": "#86efac",
+    "grid_text": "#1e293b",
     "success": "#15803d",
     "cross": "#94a3b8",
     # Semantic roles
@@ -72,8 +74,9 @@ SOFT_LIGHT_COLORS = {
     "alert": "#9e5e20",
     "highlight": "#e8d48b",
     "priming": "#4a8e7e",
-    "grid_btn": "#5a8aaa",
+    "grid_btn": "#d6cfc4",
     "grid_solved": "#b5d4b8",
+    "grid_text": "#3d3929",
     "success": "#4a7a4e",
     "cross": "#a8a08e",
     # Semantic roles
@@ -98,8 +101,9 @@ HIGH_CONTRAST_COLORS = {
     "alert": "#ff6347",
     "highlight": "#ffff00",
     "priming": "#00ffff",
-    "grid_btn": "#0066cc",
+    "grid_btn": "#2a2a2a",
     "grid_solved": "#006400",
+    "grid_text": "#ffffff",
     "success": "#00ff7f",
     "cross": "#aaaaaa",
     # Semantic roles
@@ -128,8 +132,9 @@ FOCUS_COLORS = {
     "alert": "#985018",
     "highlight": "#d4b85c",
     "priming": "#3a7a6a",
-    "grid_btn": "#3a5e7a",
+    "grid_btn": "#d8cfb8",
     "grid_solved": "#a0c4a0",
+    "grid_text": "#2c2416",
     "success": "#486828",
     "cross": "#8a8070",
     # Semantic roles
@@ -157,8 +162,9 @@ TWILIGHT_COLORS = {
     "alert": "#d4884a",
     "highlight": "#d4c46a",
     "priming": "#5aaa9a",
-    "grid_btn": "#5a8ab4",
+    "grid_btn": "#46464e",
     "grid_solved": "#2a5a2a",
+    "grid_text": "#d4d0c8",
     "success": "#7ab87a",
     "cross": "#6a6a6e",
     # Semantic roles
@@ -196,10 +202,10 @@ FONTS = {
     "btn": ("Segoe UI", 11),
     "btn_bold": ("Segoe UI", 12, "bold"),
     "btn_lg": ("Segoe UI", 16, "bold"),
-    "btn_sm": ("Segoe UI", 10, "bold"),
+    "btn_sm": ("Segoe UI", 11, "bold"),
     "section_header": ("Segoe UI", 14, "bold"),
     "counter": ("Segoe UI", 12, "bold"),
-    "grid_btn": ("Segoe UI", 16, "bold"),
+    "grid_btn": ("Segoe UI", 20, "bold"),
     "input": ("Segoe UI", 24),
     "input_sm": ("Segoe UI", 12),
     "cross": ("Arial", 50),
@@ -208,8 +214,8 @@ FONTS = {
     "slider_label": ("Segoe UI", 12),
     "pacer_text": ("Georgia", 12),
     "nav_stats": ("Segoe UI", 11, "bold"),
-    "menu_header": ("Segoe UI", 10, "bold"),
-    "menu_btn": ("Segoe UI", 10),
+    "menu_header": ("Segoe UI", 13, "bold"),
+    "menu_btn": ("Segoe UI", 12),
     "treeview": ("Segoe UI", 10),
     "treeview_heading": ("Segoe UI", 10, "bold"),
 }
@@ -251,10 +257,16 @@ class ThemeManager:
     Settings are stored in a JSON file independent of user profiles.
     """
 
+    # Map FOV keys to default Schulte cell size indices
+    _FOV_TO_CELL = {"narrow": 0, "standard": 1, "wide": 2, "full": 3}
+
     def __init__(self, profile: str = DEFAULT_PROFILE):
         self._profile = profile
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
+        self._fullscreen: bool = True
+        self._schulte_grid_size: int | None = None  # None = use config default
+        self._schulte_cell_idx: int | None = None   # None = derive from FOV
         self._listeners: list = []
 
     @property
@@ -277,6 +289,33 @@ class ThemeManager:
     def fov(self, value: str) -> None:
         if value in FOV_PRESETS:
             self._fov = value
+
+    @property
+    def fullscreen(self) -> bool:
+        return self._fullscreen
+
+    @fullscreen.setter
+    def fullscreen(self, value: bool) -> None:
+        self._fullscreen = value
+
+    @property
+    def schulte_grid_size(self) -> int:
+        from neural_speed_academy.config import SCHULTE_CONFIG
+        return self._schulte_grid_size if self._schulte_grid_size is not None else SCHULTE_CONFIG["grid_size"]
+
+    @schulte_grid_size.setter
+    def schulte_grid_size(self, value: int) -> None:
+        self._schulte_grid_size = max(3, min(7, value))
+
+    @property
+    def schulte_cell_idx(self) -> int:
+        if self._schulte_cell_idx is not None:
+            return self._schulte_cell_idx
+        return self._FOV_TO_CELL.get(self._fov, 1)
+
+    @schulte_cell_idx.setter
+    def schulte_cell_idx(self, value: int) -> None:
+        self._schulte_cell_idx = max(0, min(3, value))
 
     @property
     def fov_config(self) -> dict:
@@ -305,7 +344,12 @@ class ThemeManager:
                 "profile": self._profile,
                 "training_text": self._training_text,
                 "fov": self._fov,
+                "fullscreen": self._fullscreen,
             }
+            if self._schulte_grid_size is not None:
+                data["schulte_grid_size"] = self._schulte_grid_size
+            if self._schulte_cell_idx is not None:
+                data["schulte_cell_idx"] = self._schulte_cell_idx
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except IOError:
@@ -327,6 +371,14 @@ class ThemeManager:
             fov = data.get("fov", DEFAULT_FOV)
             if fov in FOV_PRESETS:
                 self._fov = fov
+            if "fullscreen" in data:
+                self._fullscreen = bool(data["fullscreen"])
+            sg = data.get("schulte_grid_size")
+            if sg is not None:
+                self._schulte_grid_size = int(sg)
+            sc = data.get("schulte_cell_idx")
+            if sc is not None:
+                self._schulte_cell_idx = int(sc)
         except (IOError, json.JSONDecodeError, TypeError):
             pass
 
@@ -364,3 +416,162 @@ def _sync_colors(profile: str) -> None:
 
 
 theme_manager.on_change(_sync_colors)
+
+
+# --- PyQt6 helpers ---
+
+class ScreenMetrics:
+    """Computes layout dimensions scaled to the actual screen size.
+    All values are designed for 1920x1080 and scaled proportionally."""
+
+    REF_W = 1920
+    REF_H = 1080
+
+    def __init__(self) -> None:
+        self._w = self.REF_W
+        self._h = self.REF_H
+        self._sx = 1.0
+        self._sy = 1.0
+
+    def init_from_screen(self) -> None:
+        """Call after QApplication is created."""
+        from PyQt6.QtWidgets import QApplication
+        screen = QApplication.primaryScreen()
+        if screen:
+            geo = screen.availableGeometry()
+            self._w = geo.width()
+            self._h = geo.height()
+        self._sx = self._w / self.REF_W
+        self._sy = self._h / self.REF_H
+
+    @property
+    def screen_w(self) -> int:
+        return self._w
+
+    @property
+    def screen_h(self) -> int:
+        return self._h
+
+    def sw(self, ref_px: int) -> int:
+        """Scale a width value."""
+        return int(ref_px * self._sx)
+
+    def sh(self, ref_px: int) -> int:
+        """Scale a height value."""
+        return int(ref_px * self._sy)
+
+    def s(self, ref_px: int) -> int:
+        """Scale uniformly (uses the smaller factor to avoid overflow)."""
+        return int(ref_px * min(self._sx, self._sy))
+
+    # ── Pre-computed layout values ──
+
+    @property
+    def text_input_w(self) -> int:
+        """Text input width (~57% of screen)."""
+        return self.sw(1100)
+
+    @property
+    def text_input_h(self) -> int:
+        """Text input height for 15 lines (scaled)."""
+        return self.sh(290)
+
+    @property
+    def dashboard_btn_w(self) -> int:
+        return self.sw(360)
+
+    @property
+    def menu_btn_w(self) -> int:
+        return self.sw(340)
+
+    @property
+    def schulte_cell(self) -> int:
+        """Schulte grid cell size scaled to screen."""
+        fov_cells = {"narrow": 90, "standard": 110, "wide": 120, "full": 130}
+        fov = theme_manager.fov if theme_manager else "standard"
+        return self.s(fov_cells.get(fov, 110))
+
+    @property
+    def reader_w(self) -> int:
+        """Pacer reader page width from FOV, scaled."""
+        fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
+        return self.sw(fov["page_width"])
+
+    @property
+    def reader_h(self) -> int:
+        """Pacer reader page height — A4-ish, capped to screen."""
+        w = self.reader_w
+        return min(int(w * 1.35), self._h - 120)
+
+    @property
+    def nav_bar_h(self) -> int:
+        return self.sh(56)
+
+    def fov_scaled(self) -> dict:
+        """Return the active FOV preset with dimensions scaled to screen."""
+        fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
+        return {
+            "page_width": self.sw(fov["page_width"]),
+            "pad_x": self.sw(fov["pad_x"]),
+            "pad_y": self.sh(fov["pad_y"]),
+            "font_size": max(10, self.s(fov["font_size"])),
+            "label": fov.get("label", ""),
+        }
+
+
+screen_metrics = ScreenMetrics()
+
+
+def font_css(key: str) -> str:
+    """Return QSS font-family, font-size, font-weight declarations."""
+    spec = FONTS[key]
+    family = spec[0]
+    size = spec[1]
+    weight = "bold" if len(spec) > 2 and spec[2] == "bold" else "normal"
+    return f'font-family: "{family}"; font-size: {size}pt; font-weight: {weight};'
+
+
+def make_qfont(key: str):
+    """Create a QFont from a FONTS key."""
+    from PyQt6.QtGui import QFont
+    spec = FONTS[key]
+    font = QFont(spec[0], spec[1])
+    if len(spec) > 2 and spec[2] == "bold":
+        font.setBold(True)
+    return font
+
+
+def _color_shift(hex_color: str, amount: int) -> str:
+    """Lighten (positive) or darken (negative) a hex color."""
+    r = max(0, min(255, int(hex_color[1:3], 16) + amount))
+    g = max(0, min(255, int(hex_color[3:5], 16) + amount))
+    b = max(0, min(255, int(hex_color[5:7], 16) + amount))
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def input_css(*, widget: str = "QLineEdit") -> str:
+    """Generate QSS for text input fields with a subtle border."""
+    c = COLORS
+    return (
+        f"{widget} {{ background-color: {c['card']}; "
+        f"color: {c['text_on_card']}; "
+        f"border: 1px solid {c['muted']}; "
+        f"padding: 8px; border-radius: 4px; }}"
+        f"{widget}:focus {{ border: 1px solid {c['accent']}; }}"
+    )
+
+
+def btn_css(bg: str, fg: str, *, padding: str = "12px",
+            radius: int = 4, min_width: int = 0,
+            font_key: str = "btn_bold") -> str:
+    """Generate QPushButton QSS with hover and pressed states."""
+    hover_bg = _color_shift(bg, 25)
+    press_bg = _color_shift(bg, -20)
+    mw = f"min-width: {min_width}px; " if min_width else ""
+    return (
+        f"QPushButton {{ {font_css(font_key)} background-color: {bg}; "
+        f"color: {fg}; border: none; padding: {padding}; "
+        f"border-radius: {radius}px; {mw}}}"
+        f"QPushButton:hover {{ background-color: {hover_bg}; }}"
+        f"QPushButton:pressed {{ background-color: {press_bg}; }}"
+    )

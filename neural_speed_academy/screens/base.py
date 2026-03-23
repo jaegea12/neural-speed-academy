@@ -1,138 +1,206 @@
 """
-Base screen class with lifecycle methods.
-All screens inherit from this to ensure consistent behavior.
+Base screen class for PyQt6.
+All screens inherit from QWidget and are managed by a QStackedWidget navigator.
 """
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import TYPE_CHECKING
-import tkinter as tk
 
-from neural_speed_academy.theme import COLORS, FONTS
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
+    QDialog, QScrollArea,
+)
+from PyQt6.QtCore import Qt
+
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
 
 if TYPE_CHECKING:
     from neural_speed_academy.navigation.navigator import Navigator
 
 
-class BaseScreen(ABC):
-    """
-    Abstract base class for all screens.
-    Provides common functionality and enforces a consistent lifecycle.
-    """
+class BaseScreen(QWidget):
+    """Abstract base for all screens. Subclasses implement build()."""
 
-    def __init__(self, root: tk.Tk, navigator: "Navigator"):
-        self.root = root
+    def __init__(self, navigator: "Navigator", parent: QWidget | None = None):
+        super().__init__(parent)
         self.navigator = navigator
-        self.widgets: list[tk.Widget] = []
+        self._layout = QVBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
 
-    def show(self, **kwargs) -> None:
-        """Display the screen. Clears previous content and builds new UI."""
-        self.clear()
+    def show_screen(self, **kwargs) -> None:
+        """Called by the navigator when this screen becomes active."""
+        # Clear existing widgets
+        while self._layout.count():
+            item = self._layout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
         self.build(**kwargs)
-
-    def hide(self) -> None:
-        """Hide the screen by destroying all its widgets."""
-        self.clear()
-
-    def clear(self) -> None:
-        """Remove all widgets created by this screen."""
-        for widget in self.widgets:
-            try:
-                widget.destroy()
-            except tk.TclError:
-                pass  # Widget already destroyed
-        self.widgets.clear()
-        
-        # Also clear any remaining widgets from root
-        for widget in self.root.winfo_children():
-            try:
-                widget.destroy()
-            except tk.TclError:
-                pass
 
     @abstractmethod
     def build(self, **kwargs) -> None:
         """Build the screen UI. Must be implemented by subclasses."""
         pass
 
-    def add_widget(self, widget: tk.Widget) -> tk.Widget:
-        """Track a widget for cleanup. Returns the widget for chaining."""
-        self.widgets.append(widget)
-        return widget
-
-    def add_nav_bar(self) -> tk.Frame:
+    def add_nav_bar(self) -> QFrame:
         """Add a navigation bar with Back, Training Hub, and Main Menu buttons."""
-        user = self.navigator.get_user()
+        c = COLORS
+        bar = QFrame()
+        bar.setStyleSheet(f"background-color: {c['card']};")
+        bar.setFixedHeight(screen_metrics.nav_bar_h)
+        bar_layout = QHBoxLayout(bar)
+        bar_layout.setContentsMargins(12, 6, 12, 6)
+        bar_layout.setSpacing(6)
 
-        bar = tk.Frame(self.root, bg=COLORS["card"], height=50)
-        bar.pack(fill="x", side="top")
-        self.add_widget(bar)
-
-        btn_frame = tk.Frame(bar, bg=COLORS["card"])
-        btn_frame.pack(side="left", padx=10, pady=8)
-
-        btn_cfg = dict(
-            font=FONTS["btn_sm"], relief="flat", bd=0,
-            cursor="hand2", pady=2, padx=8,
+        nav_style = (
+            f"QPushButton {{ {font_css('btn_sm')} border: none; "
+            f"padding: 6px 16px; border-radius: 4px; }}"
         )
 
-        # Back button
-        tk.Button(
-            btn_frame, text="← Back",
-            bg=COLORS["card"], fg=COLORS["fg"],
-            command=self.navigator.go_back,
-            **btn_cfg,
-        ).pack(side="left", padx=(0, 6))
+        back_btn = QPushButton("\u2190 Back")
+        back_btn.setStyleSheet(
+            nav_style
+            + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
+            + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
+        )
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.navigator.go_back)
+        bar_layout.addWidget(back_btn)
 
-        # Training Hub
-        tk.Button(
-            btn_frame, text="Training Hub",
-            bg=COLORS["accent"], fg=COLORS["btn_text"],
-            command=self.navigator.to_dashboard,
-            **btn_cfg,
-        ).pack(side="left", padx=(0, 6))
+        hub_btn = QPushButton("Training Hub")
+        hub_btn.setStyleSheet(
+            nav_style
+            + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
+        )
+        hub_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        hub_btn.clicked.connect(self.navigator.to_dashboard)
+        bar_layout.addWidget(hub_btn)
 
-        # Main Menu
-        tk.Button(
-            btn_frame, text="Main Menu",
-            bg=COLORS["card"], fg=COLORS["fg"],
-            command=lambda: self.navigator.navigate_to("main_menu"),
-            **btn_cfg,
-        ).pack(side="left")
+        menu_btn = QPushButton("Main Menu")
+        menu_btn.setStyleSheet(
+            nav_style
+            + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
+            + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
+        )
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(lambda: self.navigator.navigate_to("main_menu"))
+        bar_layout.addWidget(menu_btn)
 
+        bar_layout.addStretch()
+
+        user = self.navigator.get_user()
         if user:
-            stats = f"{user.name.upper()} | XP: {user.xp}"
-            tk.Label(
-                bar,
-                text=stats,
-                bg=COLORS["card"],
-                fg=COLORS["accent"],
-                font=FONTS["nav_stats"],
-            ).pack(side="right", padx=20)
+            stats_label = QLabel(f"{user.name.upper()} | XP: {user.xp}")
+            stats_label.setFont(make_qfont("nav_stats"))
+            stats_label.setStyleSheet(
+                f"color: {c['accent']}; background: transparent;"
+            )
+            bar_layout.addWidget(stats_label)
 
+        self._layout.addWidget(bar)
         return bar
 
     def show_guide(self, topic: str) -> None:
-        """Display a guide popup for the given topic."""
-        from neural_speed_academy.config import EXERCISE_GUIDES
-        
-        title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
-        win = tk.Toplevel(self.root)
-        win.configure(bg=COLORS["card"])
-        win.geometry("700x600")
-        tk.Label(
-            win,
-            text=title,
-            font=FONTS["sub"],
-            fg=COLORS["accent"],
-            bg=COLORS["card"],
-        ).pack(pady=(20, 10))
-        tk.Label(
-            win,
-            text=text,
-            font=FONTS["body"],
-            fg=COLORS["text_on_card"],
-            bg=COLORS["card"],
-            wraplength=620,
-            justify="left",
-        ).pack(pady=10, padx=30)
+        """Display a guide popup for the given topic, sized to fit content."""
+        _show_guide_dialog(self, topic)
+
+
+def make_scroll_area(parent_layout: QVBoxLayout) -> tuple[QScrollArea, QWidget, QVBoxLayout]:
+    """Create a scrollable area. Returns (scroll_area, content_widget, content_layout)."""
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.Shape.NoFrame)
+    scroll.setStyleSheet(f"background-color: {COLORS['bg']};")
+
+    content = QWidget()
+    content_layout = QVBoxLayout(content)
+    content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+    scroll.setWidget(content)
+    parent_layout.addWidget(scroll)
+    return scroll, content, content_layout
+
+
+def _show_guide_dialog(parent: QWidget, topic: str) -> None:
+    """Show a guide dialog sized to fit its content, up to 80% screen height."""
+    from PyQt6.QtGui import QFont, QFontMetrics
+    from PyQt6.QtWidgets import QApplication
+    from neural_speed_academy.config import EXERCISE_GUIDES
+
+    c = COLORS
+    guide_title, text = EXERCISE_GUIDES.get(topic, ("INFO", "..."))
+
+    dlg = QDialog(parent)
+    dlg.setWindowTitle(guide_title)
+    dlg.setStyleSheet(f"background-color: {c['card']};")
+
+    layout = QVBoxLayout(dlg)
+    layout.setContentsMargins(30, 25, 30, 20)
+    layout.setSpacing(12)
+
+    heading = QLabel(guide_title)
+    heading.setFont(make_qfont("header"))
+    heading.setStyleSheet(f"color: {c['accent']};")
+    heading.setWordWrap(True)
+    layout.addWidget(heading)
+
+    body = QLabel(text)
+    body_font = QFont("Segoe UI", 13)
+    body.setFont(body_font)
+    body.setStyleSheet(f"color: {c['text_on_card']}; line-height: 1.5;")
+    body.setWordWrap(True)
+
+    # Compute ideal dialog width and body height for the text
+    dialog_w = 720
+    body_margin = 30 + 30 + 5 + 5  # dialog margins + body padding
+    avail_text_w = dialog_w - body_margin
+    fm = QFontMetrics(body_font)
+    body_rect = fm.boundingRect(
+        0, 0, avail_text_w, 0,
+        int(Qt.TextFlag.TextWordWrap), text,
+    )
+    heading_h = QFontMetrics(make_qfont("header")).height() + 20
+
+    # Total content height: heading + spacing + body + close button area
+    content_h = heading_h + 12 + body_rect.height() + 60 + 50
+    # Cap at 80% of screen height
+    screen = QApplication.primaryScreen()
+    max_h = int(screen.availableGeometry().height() * 0.8) if screen else 800
+
+    if content_h <= max_h:
+        # Content fits — no scroll needed
+        layout.addWidget(body)
+        dlg.setFixedSize(dialog_w, content_h)
+    else:
+        # Content too tall — use scroll area
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(
+            f"QScrollArea {{ border: none; background: transparent; }}"
+            f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
+            f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
+            f"border-radius: 4px; min-height: 30px; }}"
+            f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
+            f"{{ height: 0; }}"
+        )
+        body_widget = QWidget()
+        body_layout = QVBoxLayout(body_widget)
+        body_layout.setContentsMargins(5, 5, 5, 5)
+        body_layout.addWidget(body)
+        body_layout.addStretch()
+        scroll.setWidget(body_widget)
+        layout.addWidget(scroll, 1)
+        dlg.setFixedSize(dialog_w, max_h)
+
+    close_btn = QPushButton("CLOSE")
+    close_btn.setFont(make_qfont("btn_bold"))
+    close_btn.setStyleSheet(
+        f"background-color: {c['accent']}; color: {c['btn_text']}; "
+        f"border: none; padding: 8px 30px; border-radius: 4px;"
+    )
+    close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    close_btn.clicked.connect(dlg.accept)
+    layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+    dlg.exec()

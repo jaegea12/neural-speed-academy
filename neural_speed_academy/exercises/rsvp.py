@@ -4,204 +4,199 @@ Flashes words from a passage one at a time at configurable WPM.
 """
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import messagebox
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QTextEdit, QSlider, QMessageBox,
+)
+from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, FONTS, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, input_css, theme_manager, screen_metrics
 from neural_speed_academy.config import RSVP_CONFIG, USER_DATA_CONFIG
 
 
 class RsvpExercise(BaseExercise):
-    """
-    RSVP exercise: displays words one at a time at a target WPM.
-    Trains rapid word processing and reduces subvocalization.
-    """
 
-    def __init__(self, root: tk.Tk, navigator):
-        super().__init__(root, navigator)
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
         self.words: list = []
         self.word_idx: int = 0
         self.wpm: int = 300
-        self.lbl_word: tk.Label = None
-        self.lbl_progress: tk.Label = None
-        self._running: bool = False
 
     @property
     def name(self) -> str:
         return "RSVP"
 
     def start(self, **kwargs) -> None:
-        """Show the RSVP configuration screen."""
-        self.clear()
+        self._clear()
+        self._running = True
         self.add_nav_bar()
 
-        container = tk.Frame(self.root, bg=COLORS["bg"])
-        container.pack(expand=True, fill="both")
-        self.add_widget(container)
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
+        slider_groove = (
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setContentsMargins(40, 10, 40, 10)
+        cl.setSpacing(6)
 
         # Guide button
-        tk.Button(
-            container,
-            text="GUIDE",
-            bg=COLORS["accent"],
-            fg=COLORS["btn_text"],
-            cursor="hand2",
-            command=lambda: self.show_guide("rsvp"),
-        ).place(x=50, y=20)
-
-        content = tk.Frame(container, bg=COLORS["bg"])
-        content.pack(expand=True)
-
-        tk.Label(
-            content,
-            text="RSVP CONFIGURATION",
-            font=FONTS["header"],
-            fg=COLORS["accent"],
-            bg=COLORS["bg"]
-        ).pack(pady=(0, 10))
-
-        # Text input
-        text_frame = tk.Frame(content, bg=COLORS["card"], padx=2, pady=2)
-        text_frame.pack(pady=5)
-
-        text_input = tk.Text(
-            text_frame,
-            height=6,
-            width=60,
-            font=FONTS["pacer_text"],
-            bg=COLORS["card"],
-            fg=COLORS["text_on_card"],
-            insertbackground=COLORS["text_on_card"],
-            bd=0
+        top = QHBoxLayout()
+        top.setContentsMargins(0, 0, 0, 0)
+        guide_btn = QPushButton("GUIDE")
+        guide_btn.setFont(make_qfont("btn_sm"))
+        guide_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 4px 12px; border-radius: 3px;"
         )
-        text_input.pack()
-        text_input.insert("1.0", theme_manager.training_text)
+        guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        guide_btn.clicked.connect(lambda: self.show_guide("rsvp"))
+        top.addWidget(guide_btn)
+        top.addStretch()
+        cl.addLayout(top)
 
-        # WPM slider
-        tk.Label(
-            content,
-            text="Words Per Minute:",
-            font=FONTS["slider_label"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        ).pack(pady=(10, 0))
+        title = QLabel("RSVP CONFIGURATION")
+        title.setFont(make_qfont("section_header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
 
-        wpm_var = tk.IntVar(value=kwargs.get("wpm", RSVP_CONFIG["default_wpm"]))
-        tk.Scale(
-            content,
-            variable=wpm_var,
-            from_=RSVP_CONFIG["min_wpm"],
-            to=RSVP_CONFIG["max_wpm"],
-            orient="horizontal",
-            bg=COLORS["bg"],
-            fg=COLORS["text_on_card"],
-            length=400,
-            highlightthickness=0
-        ).pack(pady=5)
+        # Text input — 60% screen width, 15 lines visible
+        self._text_input = QTextEdit()
+        self._text_input.setFont(make_qfont("pacer_text"))
+        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
+        fm = self._text_input.fontMetrics()
+        line_h = fm.lineSpacing()
+        self._text_input.setFixedHeight(line_h * 15 + 20)
+        self._text_input.setFixedWidth(screen_metrics.text_input_w)
+        self._text_input.setPlainText(theme_manager.training_text)
+        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
+
+        # WPM: label + slider + value in one row
+        initial_wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
+        wpm_row = QHBoxLayout()
+        wpm_row.setContentsMargins(0, 0, 0, 0)
+        wpm_row.setSpacing(8)
+        wpm_row.addStretch()
+        wpm_lbl = QLabel("Target WPM:")
+        wpm_lbl.setFont(make_qfont("slider_label"))
+        wpm_lbl.setStyleSheet(f"color: {c['fg']};")
+        wpm_row.addWidget(wpm_lbl)
+
+        self._wpm_slider = QSlider(Qt.Orientation.Horizontal)
+        self._wpm_slider.setRange(
+            RSVP_CONFIG["min_wpm"], RSVP_CONFIG["max_wpm"]
+        )
+        self._wpm_slider.setValue(initial_wpm)
+        self._wpm_slider.setFixedWidth(300)
+        self._wpm_slider.setStyleSheet(slider_groove)
+
+        self._wpm_display = QLabel(str(initial_wpm))
+        self._wpm_display.setFont(make_qfont("counter"))
+        self._wpm_display.setStyleSheet(f"color: {c['accent']};")
+        self._wpm_display.setFixedWidth(50)
+        self._wpm_slider.valueChanged.connect(
+            lambda v: self._wpm_display.setText(str(v))
+        )
+        wpm_row.addWidget(self._wpm_slider)
+        wpm_row.addWidget(self._wpm_display)
+        wpm_row.addStretch()
+        cl.addLayout(wpm_row)
 
         # Start button
-        btn_frame = tk.Frame(container, bg=COLORS["bg"], pady=20)
-        btn_frame.pack(side="bottom", fill="x")
+        cl.addSpacing(4)
+        start_btn = QPushButton("START RSVP")
+        start_btn.setFont(make_qfont("btn_lg"))
+        start_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['success']}; "
+            f"color: {c['btn_text']}; "
+            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+        )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(self._start_from_ui)
+        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        def _start():
-            self._run_rsvp(text_input.get("1.0", tk.END), wpm_var.get())
+        hint = QLabel("Ctrl+Enter to start")
+        hint.setFont(make_qfont("btn_sm"))
+        hint.setStyleSheet(f"color: {c['muted']};")
+        cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        tk.Button(
-            btn_frame,
-            text="START RSVP",
-            command=_start,
-            bg=COLORS["success"],
-            fg=COLORS["btn_text"],
-            font=FONTS["btn_lg"],
-            width=30,
-            pady=10,
-            relief="flat",
-            cursor="hand2",
-        ).pack()
+        self._layout.addWidget(container, 1)
 
-        tk.Label(
-            btn_frame, text="Ctrl+Enter to start",
-            font=FONTS["btn_sm"], fg=COLORS["muted"], bg=COLORS["bg"],
-        ).pack(pady=(4, 0))
-
-        # Ctrl+Enter to start from text area
-        text_input.bind("<Control-Return>", lambda e: _start())
+    def _start_from_ui(self) -> None:
+        text = self._text_input.toPlainText()
+        wpm = self._wpm_slider.value()
+        self._run_rsvp(text, wpm)
 
     def _run_rsvp(self, text: str, wpm: int) -> None:
-        """Start the RSVP display."""
         self.words = text.split()
         if not self.words:
-            messagebox.showinfo("No Text", "Please enter some text before starting.")
+            QMessageBox.information(self, "No Text", "Please enter some text before starting.")
             return
 
         self.wpm = wpm
         self.word_idx = 0
-        delay = int(60000 / wpm)
+        self._delay = int(60000 / wpm)
 
-        self.clear()
+        self._clear()
         self._running = True
-        self.root.configure(bg=COLORS["bg"])
+
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
         # Exit button
-        exit_btn = tk.Button(
-            self.root,
-            text="✖",
-            font=FONTS["exit_btn"],
-            bg=COLORS["alert"],
-            fg=COLORS["text_on_card"],
-            command=self._stop,
-            bd=0
+        exit_btn = QPushButton("\u2716")
+        exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
+            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
         )
-        exit_btn.place(relx=0.95, rely=0.05, anchor="center")
-        self.add_widget(exit_btn)
+        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_btn.clicked.connect(self._stop)
+        self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
 
         # Progress
-        self.lbl_progress = tk.Label(
-            self.root,
-            text=f"0% | {wpm} WPM",
-            font=FONTS["counter"],
-            fg=COLORS["accent"],
-            bg=COLORS["bg"]
-        )
-        self.lbl_progress.place(relx=0.5, rely=0.1, anchor="center")
-        self.add_widget(self.lbl_progress)
+        self._lbl_progress = QLabel(f"0% | {wpm} WPM")
+        self._lbl_progress.setFont(make_qfont("counter"))
+        self._lbl_progress.setStyleSheet(f"color: {c['accent']};")
+        self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_progress)
 
         # Word display
-        self.lbl_word = tk.Label(
-            self.root,
-            text="",
-            font=FONTS["rsvp"],
-            fg=COLORS["fg"],
-            bg=COLORS["bg"]
-        )
-        self.lbl_word.place(relx=0.5, rely=0.5, anchor="center")
-        self.add_widget(self.lbl_word)
+        self._lbl_word = QLabel("")
+        self._lbl_word.setFont(make_qfont("rsvp"))
+        self._lbl_word.setStyleSheet(f"color: {c['fg']};")
+        self._lbl_word.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(self._lbl_word, 1)
 
-        self._delay = delay
-        self.root.after(500, self._flash_word)
+        self._after(500, self._flash_word)
 
     def _flash_word(self) -> None:
-        """Display the next word."""
         if not self._running:
             return
         if self.word_idx >= len(self.words):
             self._complete_exercise()
             return
 
-        self.lbl_word.config(text=self.words[self.word_idx])
+        self._lbl_word.setText(self.words[self.word_idx])
         self.word_idx += 1
         pct = int(self.word_idx / len(self.words) * 100)
-        self.lbl_progress.config(text=f"{pct}% | {self.wpm} WPM")
-        self.root.after(self._delay, self._flash_word)
+        self._lbl_progress.setText(f"{pct}% | {self.wpm} WPM")
+        self._after(self._delay, self._flash_word)
 
     def _stop(self) -> None:
-        """Stop the exercise and return to dashboard."""
         self._running = False
         self.navigator.finish_exercise()
 
     def _complete_exercise(self) -> None:
-        """Handle exercise completion."""
         self._running = False
         word_count = len(self.words)
         xp = word_count // 10
@@ -209,8 +204,10 @@ class RsvpExercise(BaseExercise):
             exercise_name="RSVP",
             score=word_count,
             total=word_count,
-            xp_gained=xp
+            xp_gained=xp,
         )
         is_pb = self.complete(result)
-        self.show_result_screen(result, is_personal_best=is_pb,
-                                details=f"Read {word_count} words at {self.wpm} WPM")
+        self.show_result_screen(
+            result, is_personal_best=is_pb,
+            details=f"Read {word_count} words at {self.wpm} WPM",
+        )
