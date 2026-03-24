@@ -75,6 +75,10 @@ neural_speed_academy/
     introduction_screen.py          # App introduction
 ```
 
+## Contributing
+
+Contributions, feedback, and ideas are welcome. Feel free to open an issue or submit a merge request. If you have suggestions for new exercises or improvements to existing ones, start a discussion via an issue.
+
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE) for details.
