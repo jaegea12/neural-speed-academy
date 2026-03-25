@@ -85,6 +85,14 @@ class MainMenuScreen(BaseScreen):
 
         self._layout.addWidget(container, 1)
 
+        # Version label in bottom-right corner
+        from neural_speed_academy import __version__
+        ver = QLabel(f"v{__version__}")
+        ver.setFont(make_qfont("btn_sm"))
+        ver.setStyleSheet(f"color: {c['muted']}; background: transparent; padding: 6px 12px;")
+        ver.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self._layout.addWidget(ver)
+
     def _show_info(self) -> None:
         c = COLORS
         dialog = QDialog(self)

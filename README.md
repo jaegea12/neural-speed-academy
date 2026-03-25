@@ -1,5 +1,7 @@
 # Neural Speed Academy
 
+**v0.9.0**
+
 A desktop application for speed reading and cognitive training built with Python and PyQt6.
 
 ## Features
@@ -85,6 +87,6 @@ GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 
 ## Credits
 
-Created by Adam Jaeger
+Created by Adam Jaeger — adam.jaeger@roche.com | admjae@proton.me
 
 Repository setup and GitLab integration by Orlando Pereira
