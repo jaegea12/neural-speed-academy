@@ -2,7 +2,7 @@
 name = "neural-speed-academy"
 version = "2.0.0"
 description = "A desktop application for speed reading and cognitive training"
-license = {text = "Apache-2.0"}
+license = {text = "GPL-3.0-only"}
 requires-python = ">=3.10"
 dependencies = [
     "PyQt6>=6.5",

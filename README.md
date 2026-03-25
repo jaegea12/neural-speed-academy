@@ -14,7 +14,7 @@ A desktop application for speed reading and cognitive training built with Python
 
 ### Additional features
 
-- 6 color themes (Dark, Twilight, Soft Light, Focus, Light, High Contrast) — all WCAG AA compliant
+- 7 color themes (Dark, Twilight, Silver, Soft Light, Focus, Light, High Contrast) — all WCAG AA compliant
 - Field of View presets affecting pacer page width and font sizing
 - Responsive layout scaling to any screen size (reference: 1920x1080)
 - Fullscreen and windowed mode (F11 to toggle)
@@ -81,7 +81,7 @@ Contributions, feedback, and ideas are welcome. Feel free to open an issue or su
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
+GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 
 ## Credits
 

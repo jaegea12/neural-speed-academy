@@ -22,6 +22,7 @@ class ChunkingExercise(BaseExercise):
         self.chunk_idx: int = 0
         self.wpm: int = 250
         self.chunk_size: int = 3
+        self._paused: bool = False
 
     @property
     def name(self) -> str:
@@ -182,6 +183,7 @@ class ChunkingExercise(BaseExercise):
         self.chunk_size = chunk_size
         self.wpm = wpm
         self.chunk_idx = 0
+        self._paused = False
         self._delay = int(60000 * chunk_size / wpm)
 
         self._clear()
@@ -189,6 +191,21 @@ class ChunkingExercise(BaseExercise):
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        top_row = QHBoxLayout()
+        top_row.setContentsMargins(8, 4, 8, 0)
+
+        self._pause_btn = QPushButton("PAUSE")
+        self._pause_btn.setFont(make_qfont("btn_sm"))
+        self._pause_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['action']}; color: {c['btn_text']}; "
+            f"border: none; padding: 4px 14px; border-radius: 3px; }}"
+        )
+        self._pause_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._pause_btn.clicked.connect(self._toggle_pause)
+        top_row.addWidget(self._pause_btn)
+
+        top_row.addStretch()
 
         exit_btn = QPushButton("\u2716")
         exit_btn.setFont(make_qfont("exit_btn"))
@@ -198,7 +215,9 @@ class ChunkingExercise(BaseExercise):
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
-        self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        top_row.addWidget(exit_btn)
+
+        self._layout.addLayout(top_row)
 
         self._lbl_progress = QLabel(f"0% | {chunk_size}-word chunks | {wpm} WPM")
         self._lbl_progress.setFont(make_qfont("counter"))
@@ -214,8 +233,28 @@ class ChunkingExercise(BaseExercise):
 
         self._after(500, self._flash_chunk)
 
+    def _toggle_pause(self) -> None:
+        c = COLORS
+        if self._paused:
+            self._paused = False
+            self._pause_btn.setText("PAUSE")
+            self._pause_btn.setStyleSheet(
+                f"QPushButton {{ background-color: {c['action']}; color: {c['btn_text']}; "
+                f"border: none; padding: 4px 14px; border-radius: 3px; }}"
+            )
+            self._flash_chunk()
+        else:
+            self._paused = True
+            self._pause_btn.setText("CONTINUE")
+            self._pause_btn.setStyleSheet(
+                f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
+                f"border: none; padding: 4px 14px; border-radius: 3px; }}"
+            )
+            status = self._lbl_progress.text()
+            self._lbl_progress.setText(f"PAUSED | {status.split('|', 1)[-1].strip()}")
+
     def _flash_chunk(self) -> None:
-        if not self._running:
+        if not self._running or self._paused:
             return
         if self.chunk_idx >= len(self.chunks):
             self._complete_exercise()

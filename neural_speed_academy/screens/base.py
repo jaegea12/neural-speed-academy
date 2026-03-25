@@ -44,8 +44,13 @@ class BaseScreen(QWidget):
         """Build the screen UI. Must be implemented by subclasses."""
         pass
 
-    def add_nav_bar(self) -> QFrame:
-        """Add a navigation bar with Back, Training Hub, and Main Menu buttons."""
+    def add_nav_bar(self, intercept_back=None) -> QFrame:
+        """Add a navigation bar with Back, Training Hub, and Main Menu buttons.
+
+        Args:
+            intercept_back: Optional callable returning bool. If provided, called
+                before navigating away. Navigation proceeds only if it returns True.
+        """
         c = COLORS
         bar = QFrame()
         bar.setStyleSheet(f"background-color: {c['card']};")
@@ -59,6 +64,12 @@ class BaseScreen(QWidget):
             f"padding: 6px 16px; border-radius: 4px; }}"
         )
 
+        def _guarded_nav(action):
+            """Wrap a navigation action with the intercept check."""
+            if intercept_back and not intercept_back():
+                return
+            action()
+
         back_btn = QPushButton("\u2190 Back")
         back_btn.setStyleSheet(
             nav_style
@@ -66,7 +77,7 @@ class BaseScreen(QWidget):
             + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
         )
         back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        back_btn.clicked.connect(self.navigator.go_back)
+        back_btn.clicked.connect(lambda: _guarded_nav(self.navigator.go_back))
         bar_layout.addWidget(back_btn)
 
         hub_btn = QPushButton("Training Hub")
@@ -75,7 +86,7 @@ class BaseScreen(QWidget):
             + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
         )
         hub_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        hub_btn.clicked.connect(self.navigator.to_dashboard)
+        hub_btn.clicked.connect(lambda: _guarded_nav(self.navigator.to_dashboard))
         bar_layout.addWidget(hub_btn)
 
         menu_btn = QPushButton("Main Menu")
@@ -85,7 +96,7 @@ class BaseScreen(QWidget):
             + f"QPushButton:hover {{ background-color: {c['bg']}; }}"
         )
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        menu_btn.clicked.connect(lambda: self.navigator.navigate_to("main_menu"))
+        menu_btn.clicked.connect(lambda: _guarded_nav(lambda: self.navigator.navigate_to("main_menu")))
         bar_layout.addWidget(menu_btn)
 
         bar_layout.addStretch()

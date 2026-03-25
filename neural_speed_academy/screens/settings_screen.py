@@ -6,6 +6,7 @@ from __future__ import annotations
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QRadioButton, QButtonGroup, QTextEdit, QComboBox, QFrame,
+    QMessageBox,
 )
 from PyQt6.QtCore import Qt
 
@@ -34,7 +35,13 @@ class SettingsScreen(BaseScreen):
     def build(self, **kwargs) -> None:
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
-        self.add_nav_bar()
+        self.add_nav_bar(intercept_back=self._check_unsaved)
+
+        # Snapshot current state to detect unsaved changes
+        self._initial_profile = theme_manager.profile
+        self._initial_fov = theme_manager.fov
+        self._initial_fullscreen = theme_manager.fullscreen
+        self._initial_text = theme_manager.training_text
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -61,34 +68,49 @@ class SettingsScreen(BaseScreen):
         sec1.setAlignment(Qt.AlignmentFlag.AlignCenter)
         il.addWidget(sec1)
 
-        profiles = {
-            "dark": "Dark",
-            "twilight": "Twilight",
-            "soft_light": "Soft Light",
-            "focus": "Focus (Low Fatigue)",
-            "light": "Light",
-            "high_contrast": "High Contrast",
-        }
+        dark_profiles = [
+            ("dark", "Dark"),
+            ("twilight", "Twilight"),
+            ("high_contrast", "High Contrast"),
+        ]
+        light_profiles = [
+            ("silver", "Silver"),
+            ("soft_light", "Soft Light"),
+            ("focus", "Focus (Low Fatigue)"),
+            ("light", "Light"),
+        ]
 
         rb_style = _radio_style(c)
         self._profile_group = QButtonGroup(self)
-        profile_box = QFrame()
-        profile_box.setFixedWidth(250)
-        profile_box.setStyleSheet("background: transparent;")
-        pbl = QVBoxLayout(profile_box)
-        pbl.setContentsMargins(0, 0, 0, 0)
-        pbl.setSpacing(4)
-        for key, label in profiles.items():
-            rb = QRadioButton(label)
-            rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(rb_style)
-            rb.setProperty("profile_key", key)
-            if key == theme_manager.profile:
-                rb.setChecked(True)
-            self._profile_group.addButton(rb)
-            pbl.addWidget(rb)
+
+        columns_box = QFrame()
+        columns_box.setFixedWidth(500)
+        columns_box.setStyleSheet("background: transparent;")
+        cols_layout = QHBoxLayout(columns_box)
+        cols_layout.setContentsMargins(0, 0, 0, 0)
+        cols_layout.setSpacing(40)
+
+        for col_label, profiles in [("DARK", dark_profiles), ("LIGHT", light_profiles)]:
+            col = QVBoxLayout()
+            col.setSpacing(4)
+            header = QLabel(col_label)
+            header.setFont(make_qfont("btn_sm"))
+            header.setStyleSheet(f"color: {c['muted']};")
+            col.addWidget(header)
+            for key, label in profiles:
+                rb = QRadioButton(label)
+                rb.setFont(make_qfont("btn"))
+                rb.setStyleSheet(rb_style)
+                rb.setProperty("profile_key", key)
+                if key == theme_manager.profile:
+                    rb.setChecked(True)
+                self._profile_group.addButton(rb)
+                col.addWidget(rb)
+            col.addStretch()
+            cols_layout.addLayout(col)
+
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
-        il.addWidget(profile_box, alignment=Qt.AlignmentFlag.AlignCenter)
+        il.addWidget(columns_box, alignment=Qt.AlignmentFlag.AlignCenter)
 
         il.addSpacing(15)
 
@@ -240,6 +262,53 @@ class SettingsScreen(BaseScreen):
 
         il.addLayout(btn_row)
         cl.addWidget(inner)
+
+    def _has_unsaved_changes(self) -> bool:
+        """Check if any settings differ from the last saved state."""
+        if theme_manager.profile != self._initial_profile:
+            return True
+        if theme_manager.fov != self._initial_fov:
+            return True
+        if theme_manager.fullscreen != self._initial_fullscreen:
+            return True
+        if hasattr(self, '_text_edit'):
+            current_text = self._text_edit.toPlainText().strip() or theme_manager.training_text
+            if current_text != self._initial_text:
+                return True
+        return False
+
+    def _check_unsaved(self) -> bool:
+        """Intercept navigation away. Returns True to allow, False to block."""
+        if not self._has_unsaved_changes():
+            return True
+
+        c = COLORS
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Unsaved Changes")
+        msg.setText("You have unsaved changes. Do you want to save before leaving?")
+        msg.setStyleSheet(
+            f"QMessageBox {{ background-color: {c['card']}; color: {c['fg']}; }}"
+            f"QLabel {{ color: {c['fg']}; }}"
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
+        )
+        save_btn = msg.addButton("Save", QMessageBox.ButtonRole.AcceptRole)
+        discard_btn = msg.addButton("Discard", QMessageBox.ButtonRole.DestructiveRole)
+        msg.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+        msg.exec()
+
+        clicked = msg.clickedButton()
+        if clicked == save_btn:
+            self._save()
+            return True
+        elif clicked == discard_btn:
+            # Revert unsaved changes
+            theme_manager.set_profile(self._initial_profile)
+            theme_manager.fov = self._initial_fov
+            theme_manager.fullscreen = self._initial_fullscreen
+            return True
+        else:
+            return False
 
     def _load_library_text(self, name: str) -> None:
         entry = TEXT_LIBRARY.get(name)

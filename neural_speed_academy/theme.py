@@ -65,6 +65,36 @@ LIGHT_COLORS = {
     "diff_elite": "#dc2626",
 }
 
+SILVER_COLORS = {
+    # Cool neutral grey — between Twilight and Soft Light.
+    # Minimal color temperature bias for distraction-free reading.
+    # All primary text pairs exceed WCAG AA 4.5:1.
+    "bg": "#e8e8ec",
+    "card": "#d4d4da",
+    "fg": "#2a2a32",
+    "accent": "#2e6a4a",
+    "action": "#3a5a8a",
+    "alert": "#a05820",
+    "highlight": "#d4c060",
+    "priming": "#2a7a6a",
+    "grid_btn": "#c0c0c8",
+    "grid_solved": "#a0cca8",
+    "grid_text": "#2a2a32",
+    "success": "#2e6a4a",
+    "cross": "#8a8a92",
+    # Semantic roles
+    "btn_text": "#f0f0f4",
+    "text_on_card": "#2a2a32",
+    "muted": "#585862",
+    "reader_bg": "#f2f2f6",
+    "reader_fg": "#2a2a32",
+    # Difficulty tiers
+    "diff_beginner": "#2e6a4a",
+    "diff_intermediate": "#3a5a8a",
+    "diff_advanced": "#a05820",
+    "diff_elite": "#a04038",
+}
+
 SOFT_LIGHT_COLORS = {
     "bg": "#faf7f2",
     "card": "#ede9e3",
@@ -183,6 +213,7 @@ TWILIGHT_COLORS = {
 THEME_PROFILES = {
     "dark": DARK_COLORS,
     "twilight": TWILIGHT_COLORS,
+    "silver": SILVER_COLORS,
     "soft_light": SOFT_LIGHT_COLORS,
     "focus": FOCUS_COLORS,
     "light": LIGHT_COLORS,
