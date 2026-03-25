@@ -37,11 +37,12 @@ class SettingsScreen(BaseScreen):
         self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar(intercept_back=self._check_unsaved)
 
-        # Snapshot current state to detect unsaved changes
-        self._initial_profile = theme_manager.profile
-        self._initial_fov = theme_manager.fov
-        self._initial_fullscreen = theme_manager.fullscreen
-        self._initial_text = theme_manager.training_text
+        # Snapshot saved state on first build only; preserve across theme rebuilds
+        if not hasattr(self, '_initial_profile'):
+            self._initial_profile = theme_manager.profile
+            self._initial_fov = theme_manager.fov
+            self._initial_fullscreen = theme_manager.fullscreen
+            self._initial_text = theme_manager.training_text
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -318,8 +319,8 @@ class SettingsScreen(BaseScreen):
 
     def _on_profile_changed(self, btn) -> None:
         theme_manager.set_profile(btn.property("profile_key"))
-        # Rebuild to reflect new colors
-        self.navigator.navigate_to("settings")
+        # Rebuild in-place to reflect new colors without polluting nav history
+        self.show_screen()
 
     def _on_fov_changed(self, btn) -> None:
         theme_manager.fov = btn.property("fov_key")
@@ -339,11 +340,29 @@ class SettingsScreen(BaseScreen):
                 window.setMinimumSize(1024, 768)
                 window.resize(1024, 768)
                 window.showNormal()
+                # Center on screen
+                from PyQt6.QtWidgets import QApplication
+                screen = QApplication.primaryScreen()
+                if screen:
+                    geo = screen.availableGeometry()
+                    x = (geo.width() - window.width()) // 2 + geo.x()
+                    y = (geo.height() - window.height()) // 2 + geo.y()
+                    window.move(x, y)
 
     def _save(self) -> None:
         theme_manager.training_text = self._text_edit.toPlainText()
         theme_manager.save()
+        # Update snapshot so back-navigation won't warn again
+        self._initial_profile = theme_manager.profile
+        self._initial_fov = theme_manager.fov
+        self._initial_fullscreen = theme_manager.fullscreen
+        self._initial_text = theme_manager.training_text
 
     def _reset_defaults(self) -> None:
         theme_manager.reset_defaults()
-        self.navigator.navigate_to("settings")
+        # Reset the snapshot since defaults were saved
+        self._initial_profile = theme_manager.profile
+        self._initial_fov = theme_manager.fov
+        self._initial_fullscreen = theme_manager.fullscreen
+        self._initial_text = theme_manager.training_text
+        self.show_screen()
