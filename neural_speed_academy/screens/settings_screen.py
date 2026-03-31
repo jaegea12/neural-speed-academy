@@ -46,28 +46,36 @@ class SettingsScreen(BaseScreen):
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        cl.setContentsMargins(40, 20, 40, 20)
+        cl.setContentsMargins(20, 20, 20, 20)
 
-        # Fixed-width inner container for centered look
+        # Use available width instead of fixed
         inner = QFrame()
-        inner.setFixedWidth(750)
         inner.setStyleSheet("background: transparent;")
         il = QVBoxLayout(inner)
         il.setSpacing(6)
+        il.setContentsMargins(20, 0, 20, 0)
 
         title = QLabel("SETTINGS")
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['fg']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         il.addWidget(title)
-        il.addSpacing(20)
+        il.addSpacing(10)
 
-        # --- Color Profile ---
+        # --- Top row: Color Profile | FOV | Display Mode side by side ---
+        top_row = QHBoxLayout()
+        top_row.setSpacing(30)
+
+        rb_style = _radio_style(c)
+
+        # -- Color Profile column --
+        profile_section = QVBoxLayout()
+        profile_section.setSpacing(4)
+
         sec1 = QLabel("COLOR PROFILE")
         sec1.setFont(make_qfont("section_header"))
         sec1.setStyleSheet(f"color: {c['accent']};")
-        sec1.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec1)
+        il.addWidget(sec1, alignment=Qt.AlignmentFlag.AlignCenter)
 
         dark_profiles = [
             ("dark", "Dark"),
@@ -81,19 +89,13 @@ class SettingsScreen(BaseScreen):
             ("light", "Light"),
         ]
 
-        rb_style = _radio_style(c)
         self._profile_group = QButtonGroup(self)
 
-        columns_box = QFrame()
-        columns_box.setFixedWidth(500)
-        columns_box.setStyleSheet("background: transparent;")
-        cols_layout = QHBoxLayout(columns_box)
-        cols_layout.setContentsMargins(0, 0, 0, 0)
-        cols_layout.setSpacing(40)
-
+        theme_cols = QHBoxLayout()
+        theme_cols.setSpacing(20)
         for col_label, profiles in [("DARK", dark_profiles), ("LIGHT", light_profiles)]:
             col = QVBoxLayout()
-            col.setSpacing(4)
+            col.setSpacing(3)
             header = QLabel(col_label)
             header.setFont(make_qfont("btn_sm"))
             header.setStyleSheet(f"color: {c['muted']};")
@@ -108,33 +110,24 @@ class SettingsScreen(BaseScreen):
                 self._profile_group.addButton(rb)
                 col.addWidget(rb)
             col.addStretch()
-            cols_layout.addLayout(col)
-
+            theme_cols.addLayout(col)
+        profile_section.addLayout(theme_cols)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
-        il.addWidget(columns_box, alignment=Qt.AlignmentFlag.AlignCenter)
+        top_row.addLayout(profile_section, 3)
 
-        il.addSpacing(15)
-
-        # --- FOV ---
+        # -- FOV column --
+        fov_section = QVBoxLayout()
+        fov_section.setSpacing(4)
         sec2 = QLabel("FIELD OF VIEW")
         sec2.setFont(make_qfont("section_header"))
         sec2.setStyleSheet(f"color: {c['accent']};")
-        sec2.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec2)
-
-        fov_desc = QLabel("Controls page width and font size in the Pacer exercise")
-        fov_desc.setFont(make_qfont("body"))
+        fov_section.addWidget(sec2)
+        fov_desc = QLabel("Pacer page width & font")
+        fov_desc.setFont(make_qfont("btn_sm"))
         fov_desc.setStyleSheet(f"color: {c['muted']};")
-        fov_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(fov_desc)
+        fov_section.addWidget(fov_desc)
 
         self._fov_group = QButtonGroup(self)
-        fov_box = QFrame()
-        fov_box.setFixedWidth(250)
-        fov_box.setStyleSheet("background: transparent;")
-        fbl = QVBoxLayout(fov_box)
-        fbl.setContentsMargins(0, 0, 0, 0)
-        fbl.setSpacing(4)
         for key, preset in FOV_PRESETS.items():
             rb = QRadioButton(preset["label"])
             rb.setFont(make_qfont("btn"))
@@ -143,32 +136,24 @@ class SettingsScreen(BaseScreen):
             if key == theme_manager.fov:
                 rb.setChecked(True)
             self._fov_group.addButton(rb)
-            fbl.addWidget(rb)
+            fov_section.addWidget(rb)
         self._fov_group.buttonClicked.connect(self._on_fov_changed)
-        il.addWidget(fov_box, alignment=Qt.AlignmentFlag.AlignCenter)
+        fov_section.addStretch()
+        top_row.addLayout(fov_section, 1)
 
-        il.addSpacing(15)
-
-        # --- Display Mode ---
+        # -- Display Mode column --
+        disp_section = QVBoxLayout()
+        disp_section.setSpacing(4)
         sec_disp = QLabel("DISPLAY MODE")
         sec_disp.setFont(make_qfont("section_header"))
         sec_disp.setStyleSheet(f"color: {c['accent']};")
-        sec_disp.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec_disp)
-
-        disp_desc = QLabel("Press F11 at any time to toggle fullscreen")
-        disp_desc.setFont(make_qfont("body"))
+        disp_section.addWidget(sec_disp)
+        disp_desc = QLabel("F11 to toggle")
+        disp_desc.setFont(make_qfont("btn_sm"))
         disp_desc.setStyleSheet(f"color: {c['muted']};")
-        disp_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(disp_desc)
+        disp_section.addWidget(disp_desc)
 
         self._disp_group = QButtonGroup(self)
-        disp_box = QFrame()
-        disp_box.setFixedWidth(250)
-        disp_box.setStyleSheet("background: transparent;")
-        dbl = QVBoxLayout(disp_box)
-        dbl.setContentsMargins(0, 0, 0, 0)
-        dbl.setSpacing(4)
         for key, label in [("fullscreen", "Fullscreen"), ("windowed", "Windowed")]:
             rb = QRadioButton(label)
             rb.setFont(make_qfont("btn"))
@@ -180,9 +165,12 @@ class SettingsScreen(BaseScreen):
                 (key == "windowed" and not is_fs)
             )
             self._disp_group.addButton(rb)
-            dbl.addWidget(rb)
+            disp_section.addWidget(rb)
         self._disp_group.buttonClicked.connect(self._on_display_changed)
-        il.addWidget(disp_box, alignment=Qt.AlignmentFlag.AlignCenter)
+        disp_section.addStretch()
+        top_row.addLayout(disp_section, 1)
+
+        il.addLayout(top_row)
 
         il.addSpacing(15)
 
@@ -366,25 +354,13 @@ class SettingsScreen(BaseScreen):
         is_fs = btn.property("disp_key") == "fullscreen"
         theme_manager.fullscreen = is_fs
         theme_manager.save()
-        window = self.window()
-        if window:
+        # Delegate to the app's window management
+        app = self.navigator._app
+        if app:
             if is_fs:
-                window.setMinimumSize(0, 0)
-                window.setMaximumSize(16777215, 16777215)
-                window.showFullScreen()
+                app._set_fullscreen()
             else:
-                window.setMaximumSize(16777215, 16777215)
-                window.setMinimumSize(1024, 768)
-                window.resize(1024, 768)
-                window.showNormal()
-                # Center on screen
-                from PyQt6.QtWidgets import QApplication
-                screen = QApplication.primaryScreen()
-                if screen:
-                    geo = screen.availableGeometry()
-                    x = (geo.width() - window.width()) // 2 + geo.x()
-                    y = (geo.height() - window.height()) // 2 + geo.y()
-                    window.move(x, y)
+                app._set_windowed()
 
     def _save(self) -> None:
         theme_manager.training_text = self._text_edit.toPlainText()

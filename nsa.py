@@ -129,13 +129,31 @@ class NeuralSpeedAcademy:
             "show_stats": lambda: nav.navigate_to("stats"),
         }
 
-    _WINDOWED_W, _WINDOWED_H = 1024, 768
+    _WINDOWED_MIN_W, _WINDOWED_MIN_H = 900, 650
 
     def _set_windowed(self) -> None:
+        from PyQt6.QtWidgets import QApplication
         self.window.setMaximumSize(16777215, 16777215)
-        self.window.setMinimumSize(self._WINDOWED_W, self._WINDOWED_H)
-        self.window.resize(self._WINDOWED_W, self._WINDOWED_H)
+        self.window.setMinimumSize(self._WINDOWED_MIN_W, self._WINDOWED_MIN_H)
+        # Size to 75% of available screen, but at least the minimum
+        screen = QApplication.primaryScreen()
+        if screen:
+            geo = screen.availableGeometry()
+            w = max(int(geo.width() * 0.75), self._WINDOWED_MIN_W)
+            h = max(int(geo.height() * 0.75), self._WINDOWED_MIN_H)
+            # Don't exceed available area
+            w = min(w, geo.width() - 40)
+            h = min(h, geo.height() - 40)
+            self.window.resize(w, h)
+        else:
+            self.window.resize(self._WINDOWED_MIN_W, self._WINDOWED_MIN_H)
         self.window.showNormal()
+        # Center on screen
+        if screen:
+            geo = screen.availableGeometry()
+            x = (geo.width() - self.window.width()) // 2 + geo.x()
+            y = (geo.height() - self.window.height()) // 2 + geo.y()
+            self.window.move(x, y)
 
     def _set_fullscreen(self) -> None:
         self.window.setMinimumSize(0, 0)
