@@ -332,3 +332,46 @@ class PrimingMenuScreen(BaseMenuScreen):
                 ]),
             ],
         )
+
+
+class SequenceMemoryMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.sequence_memory import (
+            SequenceMemoryExercise,
+        )
+
+        def run(mode: str, start_length: int = 3,
+                flash_ms: int = 800, rounds: int = 10) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                SequenceMemoryExercise, mode=mode,
+                start_length=start_length, flash_ms=flash_ms, rounds=rounds,
+            )
+
+        self._create_column_menu(
+            "SEQUENCE MEMORY", "sequence_memory",
+            columns=[
+                ("NUMBERS", [
+                    ("3 Digits (Slow)", run("numbers", 3, 1000)),
+                    ("4 Digits", run("numbers", 4, 800)),
+                    ("5 Digits", run("numbers", 5, 700)),
+                    ("6 Digits (Fast)", run("numbers", 6, 500)),
+                    ("7+ Digits (Sprint)", run("numbers", 7, 400)),
+                ]),
+                ("WORDS", [
+                    ("3 Words (Slow)", run("words", 3, 1200)),
+                    ("4 Words", run("words", 4, 1000)),
+                    ("5 Words", run("words", 5, 800)),
+                    ("6 Words (Fast)", run("words", 6, 600)),
+                ]),
+                ("MIXED", [
+                    ("3 Items (Slow)", run("mixed", 3, 1000)),
+                    ("4 Items", run("mixed", 4, 800)),
+                    ("5 Items (Fast)", run("mixed", 5, 600)),
+                    ("6+ Items (Sprint)", run("mixed", 6, 400)),
+                ]),
+            ],
+        )

@@ -180,6 +180,28 @@ EXERCISE_GUIDES = {
         "- Complements RSVP: RSVP trains speed, chunking trains breadth\n"
         "- Improves reading comprehension by preserving phrase-level meaning"
     ),
+    "sequence_memory": (
+        "SEQUENCE MEMORY",
+        "HOW TO USE:\n"
+        "A sequence of items (numbers, words, or both) flashes one at a time. "
+        "After the last item, reproduce the sequence in the correct order by "
+        "clicking the buttons. The sequence gets longer when you succeed and "
+        "shorter when you fail (staircase method).\n\n"
+        "THE SCIENCE:\n"
+        "Working memory capacity is one of the strongest predictors of reading "
+        "comprehension and general cognitive ability (Conway et al., 2005). "
+        "Sequence recall tasks engage the phonological loop and visuospatial "
+        "sketchpad — the two subsystems of Baddeley's working memory model. "
+        "Training with increasing sequence lengths pushes the capacity boundary, "
+        "and the staircase method keeps difficulty at the optimal challenge point "
+        "where learning is most efficient (Ericsson, 2006).\n\n"
+        "BENEFITS:\n"
+        "- Expands working memory span for reading and learning\n"
+        "- Trains ordered recall, which supports text comprehension\n"
+        "- Number mode builds digit span (used in cognitive assessments)\n"
+        "- Word mode strengthens verbal working memory\n"
+        "- Mixed mode trains cognitive flexibility and dual coding"
+    ),
 }
 
 # Pacer configuration

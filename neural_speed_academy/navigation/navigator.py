@@ -24,6 +24,7 @@ class Navigator:
         "words_menu": "Word Drills",
         "eyespan_menu": "Eye-Span",
         "priming_menu": "Eye Priming",
+        "sequence_memory_menu": "Sequence Memory",
         "stats": "Stats",
         "settings": "Settings",
         "introduction": "Introduction",

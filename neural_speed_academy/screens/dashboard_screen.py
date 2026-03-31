@@ -87,6 +87,7 @@ class DashboardScreen(BaseScreen):
             ("Word Drills", self._cb("menu_words")),
             ("Eye-Span", self._cb("menu_eyespan")),
             ("Schulte Grid", self._cb("start_schulte")),
+            ("Sequence Memory", self._cb("menu_sequence_memory")),
         ])
         self._create_section(grid, "READING", 1, [
             ("Pacer & Quiz", self._cb("setup_pacer")),
