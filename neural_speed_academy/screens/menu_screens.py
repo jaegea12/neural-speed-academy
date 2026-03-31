@@ -38,8 +38,24 @@ class BaseMenuScreen(BaseScreen):
         columns: list[tuple[str, list[tuple[str, Callable]]]],
         btn_width: int | None = None,
     ) -> None:
+        # Responsive button width: ~28% of screen per column, capped
         if btn_width is None:
-            btn_width = screen_metrics.menu_btn_w
+            from PyQt6.QtWidgets import QApplication
+            screen = QApplication.primaryScreen()
+            if screen:
+                avail_w = screen.availableGeometry().width()
+                # In windowed mode use a smaller reference
+                win = self.window()
+                if win and not win.isFullScreen():
+                    avail_w = min(avail_w, win.width() or 1024)
+            else:
+                avail_w = 1024
+            n_cols = max(len(columns), 1)
+            # Leave margins (60px each side) and spacing between columns
+            usable = avail_w - 120 - (n_cols - 1) * 20
+            btn_width = min(int(usable / n_cols), 340)
+            btn_width = max(btn_width, 160)
+
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar()
@@ -74,7 +90,7 @@ class BaseMenuScreen(BaseScreen):
 
         grid = QGridLayout()
         grid.setSpacing(10)
-        grid.setContentsMargins(40, 0, 40, 0)
+        grid.setContentsMargins(20, 0, 20, 0)
 
         # Headers
         for idx, (header, _items) in enumerate(columns):

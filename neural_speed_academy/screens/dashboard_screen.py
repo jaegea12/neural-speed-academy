@@ -18,7 +18,18 @@ from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, sc
 class DashboardScreen(BaseScreen):
     @property
     def BTN_WIDTH(self) -> int:
-        return screen_metrics.dashboard_btn_w
+        from PyQt6.QtWidgets import QApplication
+        screen = QApplication.primaryScreen()
+        if screen:
+            avail_w = screen.availableGeometry().width()
+            win = self.window()
+            if win and not win.isFullScreen():
+                avail_w = min(avail_w, win.width() or 1024)
+        else:
+            avail_w = 1024
+        # Two columns, leave margins and spacing
+        w = min(int((avail_w - 120) / 2.5), 360)
+        return max(w, 180)
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -54,6 +65,19 @@ class DashboardScreen(BaseScreen):
         self._build_continue_button(cl)
         self._build_personal_bests(cl)
 
+        # Eye Priming — standalone warmup button above exercise grid
+        c_priming = COLORS
+        warmup_btn = QPushButton("EYE WARMUP")
+        warmup_btn.setFixedWidth(self.BTN_WIDTH)
+        warmup_btn.setStyleSheet(
+            btn_css(c_priming["priming"], c_priming["btn_text"],
+                    padding="12px", font_key="btn_bold")
+        )
+        warmup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        warmup_btn.clicked.connect(self._cb("menu_priming"))
+        cl.addWidget(warmup_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addSpacing(4)
+
         # Exercise grid
         grid = QGridLayout()
         grid.setSpacing(12)
@@ -68,7 +92,6 @@ class DashboardScreen(BaseScreen):
             ("Pacer & Quiz", self._cb("setup_pacer")),
             ("RSVP Reader", self._cb("setup_rsvp")),
             ("Chunking", self._cb("setup_chunking")),
-            ("Eye Priming", self._cb("menu_priming")),
         ])
         cl.addLayout(grid)
         cl.addStretch()
