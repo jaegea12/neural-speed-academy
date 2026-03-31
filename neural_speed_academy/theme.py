@@ -66,33 +66,33 @@ LIGHT_COLORS = {
 }
 
 SILVER_COLORS = {
-    # Cool neutral grey — between Twilight and Soft Light.
+    # Cool neutral grey — clearly darker than Soft Light, lighter than Twilight.
     # Minimal color temperature bias for distraction-free reading.
     # All primary text pairs exceed WCAG AA 4.5:1.
-    "bg": "#e8e8ec",
-    "card": "#d4d4da",
-    "fg": "#2a2a32",
-    "accent": "#2e6a4a",
-    "action": "#3a5a8a",
-    "alert": "#a05820",
-    "highlight": "#d4c060",
-    "priming": "#2a7a6a",
-    "grid_btn": "#c0c0c8",
-    "grid_solved": "#a0cca8",
-    "grid_text": "#2a2a32",
-    "success": "#2e6a4a",
-    "cross": "#8a8a92",
+    "bg": "#b0b0b8",
+    "card": "#9a9aa4",
+    "fg": "#1a1a22",
+    "accent": "#144a2e",
+    "action": "#2a4a7a",
+    "alert": "#904810",
+    "highlight": "#c4b050",
+    "priming": "#1a6a5a",
+    "grid_btn": "#a0a0aa",
+    "grid_solved": "#80b088",
+    "grid_text": "#1a1a22",
+    "success": "#144a2e",
+    "cross": "#707078",
     # Semantic roles
     "btn_text": "#f0f0f4",
-    "text_on_card": "#2a2a32",
-    "muted": "#585862",
-    "reader_bg": "#f2f2f6",
-    "reader_fg": "#2a2a32",
+    "text_on_card": "#1a1a22",
+    "muted": "#3e3e48",
+    "reader_bg": "#c8c8d0",
+    "reader_fg": "#1a1a22",
     # Difficulty tiers
-    "diff_beginner": "#2e6a4a",
-    "diff_intermediate": "#3a5a8a",
-    "diff_advanced": "#a05820",
-    "diff_elite": "#a04038",
+    "diff_beginner": "#144a2e",
+    "diff_intermediate": "#2a4a7a",
+    "diff_advanced": "#904810",
+    "diff_elite": "#903028",
 }
 
 SOFT_LIGHT_COLORS = {
