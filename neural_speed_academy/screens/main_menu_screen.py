@@ -122,8 +122,11 @@ class MainMenuScreen(BaseScreen):
         body.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(body)
 
+        from neural_speed_academy import __version__
         credit = QLabel(
+            f"v{__version__}\n\n"
             "Created by Adam Jaeger\n"
+            "admjae@proton.me\n\n"
             "Repository setup and GitLab integration\n"
             "by Orlando Pereira\n"
             "\u00a9 2025"

@@ -362,6 +362,64 @@ TEXT_LIBRARY = {
         "that can improve decision-making by either leveraging System 1 efficiency "
         "or engaging System 2 deliberation when accuracy is paramount."
     ),
+    "Why Reading Changes Everything": (
+        "Easy",
+        "Reading is one of the most powerful habits a person can develop. Unlike "
+        "passive media consumption, reading demands active engagement from your brain. "
+        "You construct mental images, follow arguments, and build connections between "
+        "ideas. This process strengthens neural pathways and improves cognitive "
+        "function in ways that no other activity can replicate. Studies consistently "
+        "show that regular readers have larger vocabularies, stronger analytical "
+        "thinking skills, and greater empathy. Reading fiction, in particular, allows "
+        "you to experience the world through different perspectives, building emotional "
+        "intelligence that transfers directly to real-life relationships. Non-fiction "
+        "reading compounds knowledge over time. Each book you read adds to a mental "
+        "framework that makes learning the next thing easier. Warren Buffett attributes "
+        "much of his success to reading 500 pages a day early in his career. Bill Gates "
+        "reads about 50 books a year. They understand something fundamental: reading is "
+        "not a luxury, it is an investment. The return on that investment is a sharper "
+        "mind, better decisions, and a deeper understanding of the world. Every book "
+        "you finish is proof that you can commit to something and see it through. That "
+        "discipline carries over into every other area of your life."
+    ),
+    "The Power of Your Subconscious Mind": (
+        "Easy",
+        "Your subconscious mind processes roughly 11 million bits of information per "
+        "second, while your conscious mind handles only about 50. This means the vast "
+        "majority of your thinking, decision-making, and behavior is driven by processes "
+        "you are not even aware of. The subconscious does not distinguish between what "
+        "is real and what is vividly imagined. This is why visualization works. Athletes "
+        "who mentally rehearse their performance activate the same neural pathways as "
+        "those who physically practice. The thoughts you repeat become beliefs, and "
+        "beliefs shape actions. If you consistently tell yourself you are a slow reader, "
+        "your subconscious accepts that as truth and acts accordingly. But the reverse "
+        "is equally true. When you train consistently and see measurable progress, your "
+        "subconscious updates its model of what you are capable of. This is not wishful "
+        "thinking. It is how the brain works. Every training session you complete sends "
+        "a signal to your subconscious: I am someone who improves. Over time, that "
+        "identity becomes self-reinforcing. The effort you put into training your "
+        "reading speed is simultaneously training your mind to believe in growth."
+    ),
+    "Thoughts Shape Reality": (
+        "Medium",
+        "The quality of your thoughts determines the quality of your life. This is not "
+        "a motivational cliche but a neurological fact. Every thought you think triggers "
+        "a cascade of neurochemical events. Positive, focused thoughts release dopamine "
+        "and serotonin, which improve mood, motivation, and cognitive performance. "
+        "Negative, scattered thoughts trigger cortisol, which impairs memory, reduces "
+        "focus, and weakens the immune system. The brain is constantly rewiring itself "
+        "based on what you pay attention to. Neuroscientists call this Hebbian learning: "
+        "neurons that fire together wire together. If you spend your time consuming "
+        "shallow content and reacting to distractions, you are literally building a "
+        "brain optimized for distraction. If you spend time reading deeply, training "
+        "your focus, and challenging your perception, you build a brain optimized for "
+        "depth and clarity. The exercises in this application are designed to do exactly "
+        "that. Flash perception trains rapid pattern recognition. Guided pacing builds "
+        "sustained attention. Schulte grids expand peripheral awareness. Each exercise "
+        "is a deliberate act of shaping your neural architecture. You are not just "
+        "reading faster. You are becoming someone who thinks more clearly, focuses "
+        "more deeply, and processes the world with greater precision."
+    ),
 }
 
 # Training paths

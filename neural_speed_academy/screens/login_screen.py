@@ -69,17 +69,39 @@ class LoginScreen(BaseScreen):
                 if has_pw:
                     label += "  \U0001f512"
 
-                row = QPushButton(label)
-                row.setFont(make_qfont("btn_bold"))
-                row.setStyleSheet(
+                row_widget = QFrame()
+                row_widget.setStyleSheet("background: transparent;")
+                row_layout = QHBoxLayout(row_widget)
+                row_layout.setContentsMargins(0, 0, 0, 0)
+                row_layout.setSpacing(4)
+
+                login_btn = QPushButton(label)
+                login_btn.setFont(make_qfont("btn_bold"))
+                login_btn.setStyleSheet(
                     btn_css(c["card"], c["text_on_card"],
                             padding="8px 16px", min_width=250)
                 )
-                row.setCursor(Qt.CursorShape.PointingHandCursor)
-                row.clicked.connect(
+                login_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                login_btn.clicked.connect(
                     lambda checked, n=uname: self._login_as(n)
                 )
-                cl.addWidget(row, alignment=Qt.AlignmentFlag.AlignCenter)
+                row_layout.addWidget(login_btn)
+
+                del_btn = QPushButton("\u2716")
+                del_btn.setFixedSize(32, 32)
+                del_btn.setStyleSheet(
+                    f"QPushButton {{ background-color: transparent; "
+                    f"color: {c['muted']}; border: none; font-size: 14px; }}"
+                    f"QPushButton:hover {{ color: {c['alert']}; }}"
+                )
+                del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                del_btn.setToolTip(f"Delete profile: {uname}")
+                del_btn.clicked.connect(
+                    lambda checked, n=uname: self._confirm_delete(n)
+                )
+                row_layout.addWidget(del_btn)
+
+                cl.addWidget(row_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
             # Separator
             sep = QFrame()
@@ -126,6 +148,31 @@ class LoginScreen(BaseScreen):
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self._layout.addWidget(container, 1)
+
+    def _confirm_delete(self, name: str) -> None:
+        """Ask for confirmation before deleting a profile."""
+        c = COLORS
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Delete Profile")
+        msg.setText(f"Delete profile \"{name}\"?\n\nAll progress, history, and XP will be lost.")
+        msg.setStyleSheet(
+            f"QMessageBox {{ background-color: {c['card']}; color: {c['fg']}; }}"
+            f"QLabel {{ color: {c['fg']}; }}"
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
+        )
+        msg.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        msg.setDefaultButton(QMessageBox.StandardButton.No)
+        if msg.exec() == QMessageBox.StandardButton.Yes:
+            # If deleting the currently logged-in user, log out
+            current = self.navigator.get_user()
+            if current and current.name == name:
+                self.navigator.current_user = None
+            self.navigator.user_repo.delete(name)
+            # Rebuild the login screen to reflect the change
+            self.show_screen()
 
     def _login_as(self, name: str) -> None:
         profile = self.navigator.user_repo.get(name)
