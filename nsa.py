@@ -6,6 +6,7 @@ from __future__ import annotations
 import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics
@@ -145,10 +146,80 @@ class NeuralSpeedAcademy:
             theme_manager.fullscreen = True
         theme_manager.save()
 
+    def _handle_escape(self) -> None:
+        """Esc: go back, then main menu, then quit."""
+        current = self.navigator._current_name
+
+        # If in an exercise, stop it
+        if current == "exercise":
+            widget = self.stack.currentWidget()
+            if widget and hasattr(widget, '_stop_exercise'):
+                widget._stop_exercise()
+            return
+
+        # If on main menu, trigger quit
+        if current == "main_menu":
+            widget = self.stack.currentWidget()
+            if widget and hasattr(widget, '_quit'):
+                widget._quit()
+            return
+
+        # If on settings, check unsaved changes via the intercept
+        if current == "settings":
+            widget = self.stack.currentWidget()
+            if widget and hasattr(widget, '_check_unsaved'):
+                if not widget._check_unsaved():
+                    return
+
+        # Otherwise go back
+        self.navigator.go_back()
+
+    def _handle_enter(self) -> None:
+        """Enter: click the continue/start button if visible."""
+        widget = self.stack.currentWidget()
+        if not widget:
+            return
+
+        # Don't intercept Enter when a text input has focus
+        from PyQt6.QtWidgets import QTextEdit, QLineEdit
+        focus = self.app.focusWidget()
+        if isinstance(focus, (QTextEdit, QLineEdit)):
+            return
+
+        # Look for a CONTINUE or START button on the current screen
+        from PyQt6.QtWidgets import QPushButton
+        for btn in widget.findChildren(QPushButton):
+            text = btn.text().upper()
+            if text in ("CONTINUE", "CONTINUE TRAINING", "CREATE & START") and btn.isVisible():
+                btn.click()
+                return
+
+    def _handle_space(self) -> None:
+        """Space: pause/resume during exercises."""
+        # Don't intercept Space when a text input has focus
+        from PyQt6.QtWidgets import QTextEdit, QLineEdit
+        focus = self.app.focusWidget()
+        if isinstance(focus, (QTextEdit, QLineEdit)):
+            return
+
+        if self.navigator._current_name != "exercise":
+            return
+        widget = self.stack.currentWidget()
+        if widget and hasattr(widget, '_toggle_pause'):
+            widget._toggle_pause()
+
     def run(self) -> None:
-        # F11 to toggle fullscreen
-        shortcut = QShortcut(QKeySequence("F11"), self.window)
-        shortcut.activated.connect(self._toggle_fullscreen)
+        # Global keyboard shortcuts
+        for key, handler in [
+            ("F11", self._toggle_fullscreen),
+            ("Escape", self._handle_escape),
+            ("Return", self._handle_enter),
+            ("Space", self._handle_space),
+            ("Ctrl+Q", lambda: self.app.quit()),
+        ]:
+            s = QShortcut(QKeySequence(key), self.window)
+            s.setContext(Qt.ShortcutContext.ApplicationShortcut)
+            s.activated.connect(handler)
 
         self.navigator.navigate_to("main_menu")
         if theme_manager.fullscreen:

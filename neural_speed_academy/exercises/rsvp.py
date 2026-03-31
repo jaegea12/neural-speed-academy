@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
     QTextEdit, QSlider, QMessageBox,
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, font_css, input_css, theme_manager, screen_metrics
@@ -128,6 +129,9 @@ class RsvpExercise(BaseExercise):
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self._start_from_ui)
 
         self._layout.addWidget(container, 1)
 

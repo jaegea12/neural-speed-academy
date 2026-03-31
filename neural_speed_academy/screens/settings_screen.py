@@ -262,6 +262,43 @@ class SettingsScreen(BaseScreen):
         btn_row.addWidget(reset_btn)
 
         il.addLayout(btn_row)
+
+        il.addSpacing(20)
+
+        # --- Keyboard Shortcuts Reference ---
+        sec_keys = QLabel("KEYBOARD SHORTCUTS")
+        sec_keys.setFont(make_qfont("section_header"))
+        sec_keys.setStyleSheet(f"color: {c['accent']};")
+        sec_keys.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        il.addWidget(sec_keys)
+
+        shortcuts = [
+            ("Esc", "Go back / Main menu / Quit"),
+            ("Enter", "Continue (training path, results)"),
+            ("Space", "Pause / Resume exercise"),
+            ("Ctrl+Enter", "Start exercise from config screen"),
+            ("Ctrl+Q", "Quit application"),
+            ("F11", "Toggle fullscreen"),
+        ]
+        for key, desc in shortcuts:
+            row = QHBoxLayout()
+            row.setContentsMargins(0, 0, 0, 0)
+            key_lbl = QLabel(key)
+            key_lbl.setFont(make_qfont("btn_bold"))
+            key_lbl.setStyleSheet(
+                f"color: {c['accent']}; background-color: {c['card']}; "
+                f"padding: 2px 8px; border-radius: 3px;"
+            )
+            key_lbl.setFixedWidth(120)
+            key_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            row.addWidget(key_lbl)
+            desc_lbl = QLabel(desc)
+            desc_lbl.setFont(make_qfont("body"))
+            desc_lbl.setStyleSheet(f"color: {c['fg']};")
+            row.addWidget(desc_lbl)
+            row.addStretch()
+            il.addLayout(row)
+
         cl.addWidget(inner)
 
     def _has_unsaved_changes(self) -> bool:
