@@ -364,11 +364,19 @@ class FlashExercise(BaseExercise):
 
     def _complete_exercise(self) -> None:
         xp_gained = self.correct_count * USER_DATA_CONFIG["xp_per_correct"]
+        meta = {
+            "mode": self.mode,
+            "rounds": self.rounds_total,
+        }
+        if self.span_config:
+            meta["span_mode"] = self.span_config.get("mode", "h")
+            meta["span_width"] = self.span_config.get("width", 50)
         result = ExerciseResult(
             exercise_name=self.mode.upper(),
             score=self.correct_count,
             total=self.rounds_total,
             xp_gained=xp_gained,
+            metadata=meta,
         )
         is_pb = self.complete(result)
         self.show_result_screen(result, is_personal_best=is_pb)

@@ -303,11 +303,16 @@ class SchulteExercise(BaseExercise):
         self._lbl_score.setText(f"SCORE: {self.score}")
 
     def _complete_exercise(self) -> None:
+        grid_size = theme_manager.schulte_grid_size
         result = ExerciseResult(
             exercise_name=self.name,
             score=self.score,
             total=self.max_num,
             xp_gained=self.score,
+            metadata={
+                "grid_size": grid_size,
+                "cells": grid_size * grid_size,
+            },
         )
         is_pb = self.complete(result)
         self.show_result_screen(

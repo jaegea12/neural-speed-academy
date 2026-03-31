@@ -699,8 +699,19 @@ class PacerExercise(BaseExercise):
         total = len(self._keywords)
 
         xp = score * USER_DATA_CONFIG["xp_per_correct"]
+        elapsed = time.monotonic() - self._start_time
+        word_count = len(self._words)
+        actual_wpm = int(word_count / (elapsed / 60)) if elapsed > 0 else 0
         result = ExerciseResult(
             exercise_name="PACER", score=score, total=total, xp_gained=xp,
+            metadata={
+                "wpm_target": self._wpm_target,
+                "wpm_actual": actual_wpm,
+                "highlight_mode": self._mode,
+                "chunk_size": self._chunk_size,
+                "word_count": word_count,
+                "duration_s": round(elapsed, 1),
+            },
         )
         is_pb = self.complete(result)
 

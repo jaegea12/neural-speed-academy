@@ -236,7 +236,7 @@ CHUNKING_CONFIG = {
 # User data configuration
 USER_DATA_CONFIG = {
     "file_name": "neural_profile.json",
-    "max_history_entries": 50,
+    "max_history_entries": 500,
     "xp_per_correct": 10,
 }
 

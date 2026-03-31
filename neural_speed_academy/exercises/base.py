@@ -37,6 +37,11 @@ class ExerciseResult:
     score: int
     total: int
     xp_gained: int
+    metadata: dict = None
+
+    def __post_init__(self):
+        if self.metadata is None:
+            self.metadata = {}
 
     def score_string(self) -> str:
         return f"{self.score}/{self.total}"
@@ -169,6 +174,7 @@ class BaseExercise(QWidget):
                     exercise=result.exercise_name,
                     result=result.score_string(),
                     max_entries=USER_DATA_CONFIG["max_history_entries"],
+                    metadata=result.metadata,
                 )
                 is_pb = user.update_personal_best(
                     result.exercise_name, result.score, result.total,

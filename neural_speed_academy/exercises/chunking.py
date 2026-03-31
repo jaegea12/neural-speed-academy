@@ -281,6 +281,12 @@ class ChunkingExercise(BaseExercise):
             score=total_words,
             total=total_words,
             xp_gained=xp,
+            metadata={
+                "wpm": self.wpm,
+                "chunk_size": self.chunk_size,
+                "word_count": total_words,
+                "chunk_count": len(self.chunks),
+            },
         )
         is_pb = self.complete(result)
         self.show_result_screen(

@@ -205,6 +205,10 @@ class RsvpExercise(BaseExercise):
             score=word_count,
             total=word_count,
             xp_gained=xp,
+            metadata={
+                "wpm": self.wpm,
+                "word_count": word_count,
+            },
         )
         is_pb = self.complete(result)
         self.show_result_screen(

@@ -15,23 +15,29 @@ class HistoryEntry:
     timestamp: str
     exercise: str
     result: str
+    metadata: dict = field(default_factory=dict)
 
     @classmethod
-    def create(cls, exercise: str, result: str) -> "HistoryEntry":
+    def create(cls, exercise: str, result: str,
+               metadata: dict | None = None) -> "HistoryEntry":
         """Create a new history entry with current timestamp."""
         return cls(
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M"),
             exercise=exercise,
             result=result,
+            metadata=metadata or {},
         )
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
-        return {
+        d = {
             "timestamp": self.timestamp,
             "exercise": self.exercise,
             "result": self.result,
         }
+        if self.metadata:
+            d["metadata"] = self.metadata
+        return d
 
     @classmethod
     def from_dict(cls, data: dict) -> "HistoryEntry":
@@ -40,6 +46,7 @@ class HistoryEntry:
             timestamp=data.get("timestamp", ""),
             exercise=data.get("exercise", ""),
             result=data.get("result", ""),
+            metadata=data.get("metadata", {}),
         )
 
 
@@ -131,9 +138,11 @@ class UserProfile:
         """Add XP to the user profile."""
         self.xp += amount
 
-    def add_history(self, exercise: str, result: str, max_entries: int = 50) -> None:
+    def add_history(self, exercise: str, result: str,
+                    max_entries: int = 50,
+                    metadata: dict | None = None) -> None:
         """Add a history entry, keeping only the most recent entries."""
-        entry = HistoryEntry.create(exercise, result)
+        entry = HistoryEntry.create(exercise, result, metadata)
         self.history.insert(0, entry)
         self.history = self.history[:max_entries]
 
