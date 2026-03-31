@@ -405,10 +405,19 @@ class SequenceMemoryExercise(BaseExercise):
             yours.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self._layout.addWidget(yours)
 
-        self._layout.addStretch()
+        self._layout.addSpacing(20)
 
-        # Auto-advance after 1.5s
-        self._after(1500, self._next_round)
+        cont_btn = QPushButton("CONTINUE")
+        cont_btn.setFont(make_qfont("btn_bold"))
+        cont_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px; }}"
+        )
+        cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cont_btn.clicked.connect(self._next_round)
+        self._layout.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._layout.addStretch()
 
     # ── Completion ──
 
