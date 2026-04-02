@@ -416,18 +416,21 @@ class ReactionTimeExercise(BaseExercise):
     # ── Input handling ──
 
     def eventFilter(self, obj, event) -> bool:
-        if event.type() == QEvent.Type.KeyPress:
+        etype = event.type()
+        if etype in (QEvent.Type.KeyPress, QEvent.Type.ShortcutOverride):
             if event.isAutoRepeat():
                 return True
             key = event.key()
             if key == Qt.Key.Key_Space:
-                self._handle_response(-1)
-                return True
+                if etype == QEvent.Type.KeyPress:
+                    self._handle_response(-1)
+                return True  # consume both KeyPress and ShortcutOverride
             if self._mode == "choice" and key in (
                 Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
             ):
-                idx = key - Qt.Key.Key_1
-                self._handle_response(idx)
+                if etype == QEvent.Type.KeyPress:
+                    idx = key - Qt.Key.Key_1
+                    self._handle_response(idx)
                 return True
         return super().eventFilter(obj, event)
 
