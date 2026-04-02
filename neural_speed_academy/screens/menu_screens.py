@@ -707,11 +707,18 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         cl.addStretch()
         self._layout.addWidget(container, 1)
 
-        # Set defaults
+        # Restore previous selections (persist across build calls)
         self._select_time(self._selected_time)
         self._select_slides(self._selected_slides)
         self._select_lines(self._selected_lines)
-        self._toggle_category("science")
+        if self._selected_categories:
+            for key in list(self._selected_categories):
+                self._cat_buttons[key].setStyleSheet(
+                    self._toggle_on_style()
+                )
+        else:
+            # First visit: default to first category
+            self._toggle_category("science")
 
     def _toggle_on_style(self) -> str:
         c = COLORS
