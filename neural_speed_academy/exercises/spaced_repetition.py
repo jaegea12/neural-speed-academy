@@ -328,8 +328,14 @@ class SpacedRepetitionExercise(BaseExercise):
             show_btn, alignment=Qt.AlignmentFlag.AlignCenter
         )
 
-        # Keyboard shortcut
-        shortcut = QShortcut(QKeySequence(Qt.Key.Key_Space), self)
+        key_hint = QLabel("X to reveal  ·  1-4 to rate")
+        key_hint.setFont(make_qfont("btn_sm"))
+        key_hint.setStyleSheet(f"color: {c['muted']};")
+        key_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._answer_area.addWidget(key_hint)
+
+        # Keyboard shortcut (X — Space conflicts with QPushButton)
+        shortcut = QShortcut(QKeySequence(Qt.Key.Key_X), self)
         shortcut.activated.connect(self._reveal_answer)
 
         self._layout.addLayout(self._answer_area)
@@ -525,7 +531,7 @@ class SpacedRepetitionExercise(BaseExercise):
             f"padding: 8px 40px; border-radius: 4px; }}"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        cont_btn.clicked.connect(self.navigator.finish_exercise)
+        cont_btn.clicked.connect(self.start)
         cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self._layout.addWidget(container, 1)
@@ -539,4 +545,4 @@ class SpacedRepetitionExercise(BaseExercise):
     def _stop(self) -> None:
         self._running = False
         self._save_user()
-        self.navigator.finish_exercise()
+        self.start()
