@@ -53,7 +53,6 @@ class SlideProcessingExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
 
         cfg = SLIDE_PROCESSING_CONFIG
         c = COLORS
@@ -62,6 +61,13 @@ class SlideProcessingExercise(BaseExercise):
         self._display_s = kwargs.get("display_s", cfg["default_display_s"])
         self._total_slides = kwargs.get("slides", cfg["default_slides"])
         self._category = kwargs.get("category", "mixed")
+
+        # If launched from menu with specific params, skip config screen
+        if "," in self._category or kwargs.get("skip_config", False):
+            self._build_and_start()
+            return
+
+        self.add_nav_bar()
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -110,10 +116,16 @@ class SlideProcessingExercise(BaseExercise):
         cat_row.addWidget(cat_lbl)
 
         self._cat_combo = QComboBox()
-        self._cat_combo.addItems(["Mixed", "Science", "Business", "Geography"])
-        idx = {"mixed": 0, "science": 1, "business": 2, "geography": 3}.get(
-            self._category, 0
-        )
+        self._cat_combo.addItems([
+            "Mixed", "Science", "Business", "Geography",
+            "Motivation", "Neuroplasticity", "Humor",
+            "History", "Nutrition",
+        ])
+        idx = {
+            "mixed": 0, "science": 1, "business": 2, "geography": 3,
+            "motivation": 4, "neuroplasticity": 5, "humor": 6,
+            "history": 7, "nutrition": 8,
+        }.get(self._category, 0)
         self._cat_combo.setCurrentIndex(idx)
         self._cat_combo.setStyleSheet(
             f"QComboBox {{ background-color: {c['card']}; color: {c['fg']}; "
@@ -203,16 +215,26 @@ class SlideProcessingExercise(BaseExercise):
     def _begin_exercise(self) -> None:
         self._display_s = self._time_slider.value()
         self._total_slides = self._slides_slider.value()
-        cat_names = ["mixed", "science", "business", "geography"]
+        cat_names = ["mixed", "science", "business", "geography",
+                     "motivation", "neuroplasticity", "humor",
+                     "history", "nutrition"]
         self._category = cat_names[self._cat_combo.currentIndex()]
+        self._build_and_start()
 
-        # Build slide pool
-        if self._category == "mixed":
-            pool = []
+    def _build_and_start(self) -> None:
+        # Build slide pool from selected categories
+        pool = []
+        cats = self._category.split(",")
+        if "mixed" in cats:
             for slides in SLIDE_LIBRARY.values():
                 pool.extend(slides)
         else:
-            pool = list(SLIDE_LIBRARY.get(self._category, []))
+            for cat in cats:
+                pool.extend(SLIDE_LIBRARY.get(cat.strip(), []))
+
+        if not pool:
+            for slides in SLIDE_LIBRARY.values():
+                pool.extend(slides)
 
         random.shuffle(pool)
         self._slides = pool[:self._total_slides]

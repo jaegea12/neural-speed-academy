@@ -489,50 +489,250 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
         super().__init__(navigator, parent)
+        self._selected_categories: set[str] = set()
+        self._selected_time: int = 10
+        self._selected_slides: int = 5
+        self._cat_buttons: dict[str, QPushButton] = {}
+        self._time_buttons: dict[int, QPushButton] = {}
+        self._slide_buttons: dict[int, QPushButton] = {}
 
     def build(self, **kwargs) -> None:
         from neural_speed_academy.exercises.slide_processing import (
             SlideProcessingExercise,
         )
 
-        def run(category: str = "mixed", display_s: int = 5,
-                slides: int = 5) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                SlideProcessingExercise, category=category,
-                display_s=display_s, slides=slides,
-            )
+        c = COLORS
+        self.add_nav_bar()
 
-        self._create_column_menu(
-            "SLIDE PROCESSING", "slide_processing",
-            columns=[
-                ("SCIENCE", [
-                    ("15s · 5 slides", run("science", 15, 5)),
-                    ("12s · 5 slides", run("science", 12, 5)),
-                    ("10s · 5 slides", run("science", 10, 5)),
-                    ("8s · 5 slides", run("science", 8, 5)),
-                    ("6s · 5 slides", run("science", 6, 5)),
-                    ("5s · 8 slides", run("science", 5, 8)),
-                    ("4s · 5 slides", run("science", 4, 5)),
-                ]),
-                ("BUSINESS", [
-                    ("15s · 5 slides", run("business", 15, 5)),
-                    ("12s · 5 slides", run("business", 12, 5)),
-                    ("10s · 5 slides", run("business", 10, 5)),
-                    ("8s · 5 slides", run("business", 8, 5)),
-                    ("6s · 5 slides", run("business", 6, 5)),
-                    ("5s · 8 slides", run("business", 5, 8)),
-                    ("4s · 5 slides", run("business", 4, 5)),
-                ]),
-                ("GEOGRAPHY", [
-                    ("15s · 5 slides", run("geography", 15, 5)),
-                    ("12s · 5 slides", run("geography", 12, 5)),
-                    ("10s · 5 slides", run("geography", 10, 5)),
-                    ("8s · 5 slides", run("geography", 8, 5)),
-                    ("6s · 5 slides", run("geography", 6, 5)),
-                    ("5s · 8 slides", run("geography", 5, 8)),
-                    ("4s · 5 slides", run("geography", 4, 5)),
-                ]),
-            ],
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setContentsMargins(30, 10, 30, 10)
+        cl.setSpacing(8)
+
+        # Guide button
+        top = QHBoxLayout()
+        top.setContentsMargins(0, 0, 0, 0)
+        guide_btn = QPushButton("GUIDE")
+        guide_btn.setFont(make_qfont("btn_sm"))
+        guide_btn.setStyleSheet(
+            f"background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 4px 12px; border-radius: 3px;"
+        )
+        guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        guide_btn.clicked.connect(
+            lambda: self.show_guide("slide_processing")
+        )
+        top.addWidget(guide_btn)
+        top.addStretch()
+        cl.addLayout(top)
+
+        title = QLabel("SLIDE PROCESSING")
+        title.setFont(make_qfont("section_header"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(title)
+
+        cl.addSpacing(6)
+
+        # Two-column layout
+        columns = QHBoxLayout()
+        columns.setSpacing(30)
+
+        # ── Left column: Categories ──
+        left = QVBoxLayout()
+        left.setSpacing(6)
+
+        cat_header = QLabel("CATEGORIES")
+        cat_header.setFont(make_qfont("btn_bold"))
+        cat_header.setStyleSheet(f"color: {c['fg']};")
+        cat_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        left.addWidget(cat_header)
+
+        categories = [
+            ("Science", "science"),
+            ("Business", "business"),
+            ("Geography", "geography"),
+            ("Motivation", "motivation"),
+            ("Neuroplasticity", "neuroplasticity"),
+            ("Humor", "humor"),
+            ("History", "history"),
+            ("Nutrition", "nutrition"),
+        ]
+
+        for label, key in categories:
+            btn = QPushButton(label)
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedHeight(36)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(self._toggle_off_style())
+            btn.clicked.connect(
+                lambda _, k=key: self._toggle_category(k)
+            )
+            left.addWidget(btn)
+            self._cat_buttons[key] = btn
+
+        # Select All / Clear
+        sel_row = QHBoxLayout()
+        sel_all = QPushButton("Select All")
+        sel_all.setFont(make_qfont("btn_sm"))
+        sel_all.setStyleSheet(
+            f"color: {c['accent']}; background: transparent; "
+            f"border: none; padding: 2px;"
+        )
+        sel_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        sel_all.clicked.connect(self._select_all_categories)
+        sel_row.addWidget(sel_all)
+
+        sel_clear = QPushButton("Clear")
+        sel_clear.setFont(make_qfont("btn_sm"))
+        sel_clear.setStyleSheet(
+            f"color: {c['muted']}; background: transparent; "
+            f"border: none; padding: 2px;"
+        )
+        sel_clear.setCursor(Qt.CursorShape.PointingHandCursor)
+        sel_clear.clicked.connect(self._clear_categories)
+        sel_row.addWidget(sel_clear)
+        left.addLayout(sel_row)
+
+        columns.addLayout(left)
+
+        # ── Right column: Timing + Slides ──
+        right = QVBoxLayout()
+        right.setSpacing(6)
+
+        time_header = QLabel("DISPLAY TIME")
+        time_header.setFont(make_qfont("btn_bold"))
+        time_header.setStyleSheet(f"color: {c['fg']};")
+        time_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        right.addWidget(time_header)
+
+        time_options = [15, 12, 10, 8, 6, 5, 4, 3]
+        for t in time_options:
+            btn = QPushButton(f"{t} seconds")
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedHeight(36)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(self._toggle_off_style())
+            btn.clicked.connect(
+                lambda _, v=t: self._select_time(v)
+            )
+            right.addWidget(btn)
+            self._time_buttons[t] = btn
+
+        right.addSpacing(8)
+
+        slides_header = QLabel("SLIDES PER SESSION")
+        slides_header.setFont(make_qfont("btn_bold"))
+        slides_header.setStyleSheet(f"color: {c['fg']};")
+        slides_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        right.addWidget(slides_header)
+
+        slide_options = [3, 5, 8, 10]
+        slide_row = QHBoxLayout()
+        slide_row.setSpacing(8)
+        for s in slide_options:
+            btn = QPushButton(str(s))
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedSize(60, 36)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(self._toggle_off_style())
+            btn.clicked.connect(
+                lambda _, v=s: self._select_slides(v)
+            )
+            slide_row.addWidget(btn)
+            self._slide_buttons[s] = btn
+        right.addLayout(slide_row)
+
+        columns.addLayout(right)
+        cl.addLayout(columns)
+
+        cl.addSpacing(12)
+
+        # START button
+        start_btn = QPushButton("START")
+        start_btn.setFont(make_qfont("btn_lg"))
+        start_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; border: none; "
+            f"padding: 12px 50px; border-radius: 4px; }}"
+        )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(
+            lambda: self._launch(SlideProcessingExercise)
+        )
+        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        cl.addStretch()
+        self._layout.addWidget(container, 1)
+
+        # Set defaults
+        self._select_time(self._selected_time)
+        self._select_slides(self._selected_slides)
+        self._select_all_categories()
+
+    def _toggle_on_style(self) -> str:
+        c = COLORS
+        return (
+            f"QPushButton {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; border: none; "
+            f"padding: 4px 12px; border-radius: 4px; }}"
+        )
+
+    def _toggle_off_style(self) -> str:
+        c = COLORS
+        return (
+            f"QPushButton {{ background-color: {c['card']}; "
+            f"color: {c['fg']}; border: 1px solid {c['muted']}; "
+            f"padding: 4px 12px; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; }}"
+        )
+
+    def _toggle_category(self, key: str) -> None:
+        if key in self._selected_categories:
+            self._selected_categories.discard(key)
+            self._cat_buttons[key].setStyleSheet(self._toggle_off_style())
+        else:
+            self._selected_categories.add(key)
+            self._cat_buttons[key].setStyleSheet(self._toggle_on_style())
+
+    def _select_all_categories(self) -> None:
+        for key, btn in self._cat_buttons.items():
+            self._selected_categories.add(key)
+            btn.setStyleSheet(self._toggle_on_style())
+
+    def _clear_categories(self) -> None:
+        for key, btn in self._cat_buttons.items():
+            self._selected_categories.discard(key)
+            btn.setStyleSheet(self._toggle_off_style())
+
+    def _select_time(self, t: int) -> None:
+        self._selected_time = t
+        for v, btn in self._time_buttons.items():
+            if v == t:
+                btn.setStyleSheet(self._toggle_on_style())
+            else:
+                btn.setStyleSheet(self._toggle_off_style())
+
+    def _select_slides(self, s: int) -> None:
+        self._selected_slides = s
+        for v, btn in self._slide_buttons.items():
+            if v == s:
+                btn.setStyleSheet(self._toggle_on_style())
+            else:
+                btn.setStyleSheet(self._toggle_off_style())
+
+    def _launch(self, exercise_cls) -> None:
+        cats = list(self._selected_categories)
+        if not cats:
+            cats = list(self._cat_buttons.keys())
+        # "mixed" with specific categories
+        self.navigator.launch_exercise(
+            exercise_cls,
+            category=",".join(cats),
+            display_s=self._selected_time,
+            slides=self._selected_slides,
         )
 
 
