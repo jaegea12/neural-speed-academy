@@ -489,9 +489,9 @@ REACTION_TIME_CONFIG = {
 
 # Slide Processing configuration
 SLIDE_PROCESSING_CONFIG = {
-    "default_display_s": 5,
-    "min_display_s": 2,
-    "max_display_s": 8,
+    "default_display_s": 10,
+    "min_display_s": 3,
+    "max_display_s": 20,
     "default_slides": 5,
     "min_slides": 3,
     "max_slides": 10,
