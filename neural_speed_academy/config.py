@@ -202,6 +202,38 @@ EXERCISE_GUIDES = {
         "- Word mode strengthens verbal working memory\n"
         "- Mixed mode trains cognitive flexibility and dual coding"
     ),
+    "rapid_decision": (
+        "RAPID DECISION GRID",
+        "HOW TO USE:\n"
+        "A grid of numbers appears. Follow the rule for the selected mode:\n"
+        "- Ascending: classic 1\u21922\u21923... order\n"
+        "- Descending: start from the highest number\n"
+        "- Even Only: click only even numbers in ascending order\n"
+        "- Odd Only: click only odd numbers in ascending order\n"
+        "- Alternating Colors: red numbers ascending, blue descending, "
+        "alternate between them\n"
+        "- Timed modes add a countdown — finish before time runs out.\n\n"
+        "THE SCIENCE:\n"
+        "Adding rules to visual search tasks engages executive function and "
+        "the prefrontal cortex alongside the attention networks used in standard "
+        "Schulte grids. This dual demand — visual search plus rule application — "
+        "mirrors real-world decision-making under time pressure (Diamond, 2013). "
+        "Research on task-switching shows that practicing rule alternation improves "
+        "cognitive flexibility and reduces switch costs.\n\n"
+        "BENEFITS:\n"
+        "- Trains decision speed under cognitive load\n"
+        "- Improves task-switching and cognitive flexibility\n"
+        "- Strengthens inhibitory control (ignoring irrelevant numbers)\n"
+        "- Builds on Schulte grid skills with higher-order demands"
+    ),
+}
+
+# Rapid Decision Grid configuration
+RAPID_DECISION_CONFIG = {
+    "correct_points": 5,
+    "wrong_penalty": 2,
+    "default_grid_size": 5,
+    "time_limits": [0, 60, 45, 30],
 }
 
 # Pacer configuration

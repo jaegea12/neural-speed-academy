@@ -334,6 +334,59 @@ class PrimingMenuScreen(BaseMenuScreen):
         )
 
 
+class RapidDecisionMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.rapid_decision import (
+            RapidDecisionGridExercise,
+        )
+
+        def run(mode: str, grid_size: int = 5,
+                time_limit: int = 0) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                RapidDecisionGridExercise, mode=mode,
+                grid_size=grid_size, time_limit=time_limit,
+            )
+
+        self._create_column_menu(
+            "RAPID DECISION GRID", "rapid_decision",
+            columns=[
+                ("CLASSIC", [
+                    ("Ascending 3\u00d73", run("ascending", 3)),
+                    ("Ascending 5\u00d75", run("ascending", 5)),
+                    ("Descending 5\u00d75", run("descending", 5)),
+                    ("Ascending 6\u00d76", run("ascending", 6)),
+                    ("Descending 6\u00d76", run("descending", 6)),
+                    ("Ascending 7\u00d77", run("ascending", 7)),
+                    ("Descending 7\u00d77", run("descending", 7)),
+                ]),
+                ("FILTER", [
+                    ("Even Only 4\u00d74", run("even_only", 4)),
+                    ("Odd Only 4\u00d74", run("odd_only", 4)),
+                    ("Even Only 5\u00d75", run("even_only", 5)),
+                    ("Odd Only 5\u00d75", run("odd_only", 5)),
+                    ("Even Only 6\u00d76", run("even_only", 6)),
+                    ("Odd Only 6\u00d76", run("odd_only", 6)),
+                    ("Alternating 4\u00d74", run("alternating", 4)),
+                    ("Alternating 5\u00d75", run("alternating", 5)),
+                ]),
+                ("TIMED", [
+                    ("Ascending 60s", run("ascending", 5, 60)),
+                    ("Descending 60s", run("descending", 5, 60)),
+                    ("Ascending 45s", run("ascending", 5, 45)),
+                    ("Descending 45s", run("descending", 5, 45)),
+                    ("Even Only 60s", run("even_only", 5, 60)),
+                    ("Even Only 45s", run("even_only", 5, 45)),
+                    ("Alternating 60s", run("alternating", 5, 60)),
+                    ("Ascending 30s", run("ascending", 5, 30)),
+                ]),
+            ],
+        )
+
+
 class SequenceMemoryMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
