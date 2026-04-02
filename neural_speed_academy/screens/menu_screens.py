@@ -567,13 +567,12 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             btn = QPushButton(label)
             btn.setFont(make_qfont("menu_btn"))
             btn.setFixedHeight(40)
-            btn.setMaximumWidth(320)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
                 lambda _, k=key: self._toggle_category(k)
             )
-            left.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+            left.addWidget(btn)
             self._cat_buttons[key] = btn
 
         # Select All / Clear — centered, compact
