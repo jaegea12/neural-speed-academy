@@ -711,4 +711,4 @@ class SplitAttentionExercise(BaseExercise):
 
     def _stop(self) -> None:
         self._running = False
-        self.navigator.finish_exercise()
+        self.navigator.go_back()
