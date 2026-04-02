@@ -492,9 +492,11 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         self._selected_categories: set[str] = set()
         self._selected_time: int = 10
         self._selected_slides: int = 5
+        self._selected_lines: int = 6
         self._cat_buttons: dict[str, QPushButton] = {}
         self._time_buttons: dict[int, QPushButton] = {}
         self._slide_buttons: dict[int, QPushButton] = {}
+        self._lines_buttons: dict[int, QPushButton] = {}
 
     def build(self, **kwargs) -> None:
         from neural_speed_academy.exercises.slide_processing import (
@@ -563,13 +565,13 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for label, key in categories:
             btn = QPushButton(label)
             btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedHeight(36)
+            btn.setFixedSize(140, 36)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
                 lambda _, k=key: self._toggle_category(k)
             )
-            left.addWidget(btn)
+            left.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
             self._cat_buttons[key] = btn
 
         # Select All / Clear
@@ -644,6 +646,30 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             self._slide_buttons[s] = btn
         right.addLayout(slide_row)
 
+        right.addSpacing(8)
+
+        lines_header = QLabel("LINES PER SLIDE")
+        lines_header.setFont(make_qfont("btn_bold"))
+        lines_header.setStyleSheet(f"color: {c['fg']};")
+        lines_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        right.addWidget(lines_header)
+
+        lines_options = [3, 4, 5, 6]
+        lines_row = QHBoxLayout()
+        lines_row.setSpacing(8)
+        for n in lines_options:
+            btn = QPushButton(str(n))
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedSize(60, 36)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(self._toggle_off_style())
+            btn.clicked.connect(
+                lambda _, v=n: self._select_lines(v)
+            )
+            lines_row.addWidget(btn)
+            self._lines_buttons[n] = btn
+        right.addLayout(lines_row)
+
         columns.addLayout(right)
         cl.addLayout(columns)
 
@@ -669,6 +695,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         # Set defaults
         self._select_time(self._selected_time)
         self._select_slides(self._selected_slides)
+        self._select_lines(self._selected_lines)
         self._select_all_categories()
 
     def _toggle_on_style(self) -> str:
@@ -723,6 +750,14 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             else:
                 btn.setStyleSheet(self._toggle_off_style())
 
+    def _select_lines(self, n: int) -> None:
+        self._selected_lines = n
+        for v, btn in self._lines_buttons.items():
+            if v == n:
+                btn.setStyleSheet(self._toggle_on_style())
+            else:
+                btn.setStyleSheet(self._toggle_off_style())
+
     def _launch(self, exercise_cls) -> None:
         cats = list(self._selected_categories)
         if not cats:
@@ -733,6 +768,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             category=",".join(cats),
             display_s=self._selected_time,
             slides=self._selected_slides,
+            lines=self._selected_lines,
         )
 
 

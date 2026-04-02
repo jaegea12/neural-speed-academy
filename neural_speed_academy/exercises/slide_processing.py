@@ -8,6 +8,7 @@ of specific details. Trains rapid information extraction.
 from __future__ import annotations
 
 import random
+import re
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -29,6 +30,7 @@ class SlideProcessingExercise(BaseExercise):
         super().__init__(navigator, parent)
         self._display_s: int = 5
         self._total_slides: int = 5
+        self._lines_per_slide: int = 6
         self._category: str = "mixed"
         self._slide_idx: int = 0
         self._question_idx: int = 0
@@ -36,6 +38,7 @@ class SlideProcessingExercise(BaseExercise):
         self._total_questions: int = 0
         self._slides: list = []
         self._current_slide: tuple | None = None
+        self._current_questions: list = []
         self._countdown_remaining: int = 0
         # UI refs
         self._countdown_lbl: QLabel | None = None
@@ -60,6 +63,7 @@ class SlideProcessingExercise(BaseExercise):
 
         self._display_s = kwargs.get("display_s", cfg["default_display_s"])
         self._total_slides = kwargs.get("slides", cfg["default_slides"])
+        self._lines_per_slide = kwargs.get("lines", 6)
         self._category = kwargs.get("category", "mixed")
 
         # If launched from menu with specific params, skip config screen
@@ -249,6 +253,83 @@ class SlideProcessingExercise(BaseExercise):
         self._total_questions = 0
         self._show_slide()
 
+    # ── Bullet/question mapping ──
+
+    @staticmethod
+    def _question_bullet_idx(
+        question: tuple, bullets: list[str],
+    ) -> int | None:
+        """Return the bullet index a question's answer references, or None."""
+        _, choices, correct_idx = question
+        answer = choices[correct_idx].lower()
+
+        # Extract numbers (digits, decimals, commas) from the answer
+        answer_nums = set(re.findall(r"[\d,]+\.?\d*", answer))
+
+        for i, b in enumerate(bullets):
+            bl = b.lower()
+            # Direct substring match
+            if answer in bl:
+                return i
+            # Number-based match: all numbers in the answer appear in bullet
+            if answer_nums:
+                bullet_nums = set(re.findall(r"[\d,]+\.?\d*", bl))
+                if answer_nums and answer_nums.issubset(bullet_nums):
+                    return i
+        return None
+
+    def _select_bullets_and_questions(
+        self, bullets: list[str], questions: list,
+    ) -> tuple[list[str], list]:
+        """Pick a subset of bullets and return only answerable questions."""
+        n = min(self._lines_per_slide, len(bullets))
+        if n >= len(bullets):
+            return list(bullets), list(questions)
+
+        # Map each question to its source bullet
+        q_map: list[tuple[int, tuple]] = []
+        unmapped: list[tuple] = []
+        for q in questions:
+            idx = self._question_bullet_idx(q, bullets)
+            if idx is not None:
+                q_map.append((idx, q))
+            else:
+                unmapped.append(q)
+
+        # Ensure we pick bullets that cover as many questions as possible
+        needed_indices = {idx for idx, _ in q_map}
+        # Start with bullet indices that have questions
+        chosen = set()
+        if len(needed_indices) <= n:
+            chosen = set(needed_indices)
+        else:
+            # Pick n indices prioritising those with questions
+            chosen = set(random.sample(sorted(needed_indices), n))
+
+        # Fill remaining slots with random other bullets
+        remaining = [i for i in range(len(bullets)) if i not in chosen]
+        random.shuffle(remaining)
+        while len(chosen) < n and remaining:
+            chosen.add(remaining.pop())
+
+        chosen_sorted = sorted(chosen)
+        selected_bullets = [bullets[i] for i in chosen_sorted]
+
+        # Filter questions to those whose source bullet is shown
+        valid_qs = [q for idx, q in q_map if idx in chosen]
+        # Include unmapped questions (can't determine source, keep them)
+        valid_qs.extend(unmapped)
+
+        # Ensure at least 2 questions if possible
+        if len(valid_qs) < 2 and len(questions) >= 2:
+            for idx, q in q_map:
+                if q not in valid_qs:
+                    valid_qs.append(q)
+                    if len(valid_qs) >= 2:
+                        break
+
+        return selected_bullets, valid_qs
+
     # ── Slide display ──
 
     def _show_slide(self) -> None:
@@ -264,7 +345,12 @@ class SlideProcessingExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
         self._current_slide = self._slides[self._slide_idx]
-        title, bullets, _ = self._current_slide
+        title, bullets, questions = self._current_slide
+
+        # Subset bullets and filter questions based on lines setting
+        show_bullets, self._current_questions = (
+            self._select_bullets_and_questions(bullets, questions)
+        )
 
         # Top bar
         top = QHBoxLayout()
@@ -328,7 +414,7 @@ class SlideProcessingExercise(BaseExercise):
         card_layout.addSpacing(8)
 
         # Bullet points
-        for bullet in bullets:
+        for bullet in show_bullets:
             bullet_lbl = QLabel(f"  •  {bullet}")
             bullet_lbl.setFont(QFont("Arial", 15))
             bullet_lbl.setStyleSheet(f"color: {c['fg']};")
@@ -369,7 +455,7 @@ class SlideProcessingExercise(BaseExercise):
         if not self._running or not self._current_slide:
             return
 
-        _, _, questions = self._current_slide
+        questions = self._current_questions
         if self._question_idx >= len(questions):
             self._slide_idx += 1
             self._show_slide()
@@ -465,9 +551,9 @@ class SlideProcessingExercise(BaseExercise):
             return
         key = event.key()
         if self._current_slide and self._question_idx < len(
-            self._current_slide[2]
+            self._current_questions
         ):
-            _, _, questions = self._current_slide
+            questions = self._current_questions
             _, _, correct_idx = questions[self._question_idx]
             num_choices = len(questions[self._question_idx][1])
             if key == Qt.Key.Key_1 and num_choices >= 1:
@@ -505,7 +591,7 @@ class SlideProcessingExercise(BaseExercise):
             fb = QLabel("\u2714  Correct!")
             fb.setStyleSheet(f"color: {c['success']};")
         else:
-            _, _, questions = self._current_slide
+            questions = self._current_questions
             _, choices, correct_idx = questions[self._question_idx]
             fb = QLabel(f"\u2718  Answer: {choices[correct_idx]}")
             fb.setStyleSheet(f"color: {c['alert']};")
@@ -540,6 +626,7 @@ class SlideProcessingExercise(BaseExercise):
                 "category": self._category,
                 "display_s": self._display_s,
                 "slides": len(self._slides),
+                "lines_per_slide": self._lines_per_slide,
                 "accuracy_pct": accuracy_pct,
             },
         )
@@ -551,7 +638,8 @@ class SlideProcessingExercise(BaseExercise):
             details=(
                 f"Category: {self._category}  |  "
                 f"Display: {self._display_s}s  |  "
-                f"Slides: {len(self._slides)}\n"
+                f"Slides: {len(self._slides)}  |  "
+                f"Lines: {self._lines_per_slide}\n"
                 f"Questions: {self._correct}/{total_q}  |  "
                 f"Accuracy: {accuracy_pct}%"
             ),
