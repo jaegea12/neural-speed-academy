@@ -539,7 +539,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
 
         # Two-column layout: categories (2/3) | options (1/3)
         columns = QHBoxLayout()
-        columns.setSpacing(20)
+        columns.setSpacing(40)
         columns.setContentsMargins(20, 0, 20, 0)
 
         # ── Left: Categories (single column) ──
@@ -566,13 +566,14 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for label, key in categories:
             btn = QPushButton(label)
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedHeight(40)
+            btn.setFixedHeight(36)
+            btn.setMaximumWidth(280)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
                 lambda _, k=key: self._toggle_category(k)
             )
-            left.addWidget(btn)
+            left.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
             self._cat_buttons[key] = btn
 
         # Select All / Clear — centered, compact
@@ -624,7 +625,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for t in time_options:
             btn = QPushButton(f"{t} seconds")
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedHeight(40)
+            btn.setFixedHeight(36)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -648,7 +649,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for s in slide_options:
             btn = QPushButton(str(s))
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedSize(60, 40)
+            btn.setFixedSize(55, 36)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -673,7 +674,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for n in lines_options:
             btn = QPushButton(str(n))
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedSize(60, 40)
+            btn.setFixedSize(55, 36)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -683,7 +684,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             self._lines_buttons[n] = btn
         right.addLayout(lines_row)
 
-        right.addStretch()
+        right.addSpacing(20)
 
         # START button — at bottom of right column
         start_btn = QPushButton("START")
