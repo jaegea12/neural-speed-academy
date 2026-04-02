@@ -215,6 +215,7 @@ class ReactionTimeExercise(BaseExercise):
 
         exit_btn = QPushButton("\u2716")
         exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['alert']}; "
             f"color: {c['text_on_card']}; "
