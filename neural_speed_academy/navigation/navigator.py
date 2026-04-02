@@ -30,6 +30,7 @@ class Navigator:
         "mot_menu": "Object Tracking",
         "split_attention_menu": "Split Attention",
         "reaction_time_menu": "Reaction Time",
+        "slide_processing_menu": "Slide Processing",
         "stats": "Stats",
         "settings": "Settings",
         "introduction": "Introduction",

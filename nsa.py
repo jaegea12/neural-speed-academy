@@ -23,7 +23,7 @@ from neural_speed_academy.screens.menu_screens import (
     FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, PrimingMenuScreen,
     SequenceMemoryMenuScreen, PeripheralFlashMenuScreen,
     RapidDecisionMenuScreen, MotMenuScreen, SplitAttentionMenuScreen,
-    ReactionTimeMenuScreen,
+    ReactionTimeMenuScreen, SlideProcessingMenuScreen,
 )
 from neural_speed_academy.screens.paths_screen import PathSelectionScreen, CustomPathsScreen
 from neural_speed_academy.screens.path_session_screen import (
@@ -129,6 +129,9 @@ class NeuralSpeedAcademy:
         nav.register_screen(
             "reaction_time_menu",
             lambda: ReactionTimeMenuScreen(nav))
+        nav.register_screen(
+            "slide_processing_menu",
+            lambda: SlideProcessingMenuScreen(nav))
 
     def _exercise_callbacks(self) -> dict:
         nav = self.navigator
@@ -147,6 +150,7 @@ class NeuralSpeedAcademy:
             "menu_mot": lambda: nav.navigate_to("mot_menu"),
             "menu_split_attention": lambda: nav.navigate_to("split_attention_menu"),
             "menu_reaction_time": lambda: nav.navigate_to("reaction_time_menu"),
+            "menu_slide_processing": lambda: nav.navigate_to("slide_processing_menu"),
             "show_paths": lambda: nav.navigate_to("paths"),
             "show_stats": lambda: nav.navigate_to("stats"),
         }

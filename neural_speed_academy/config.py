@@ -321,6 +321,29 @@ EXERCISE_GUIDES = {
         "- Results use median RT (resistant to outliers)\n"
         "- Transfers to driving, sports, and gaming performance"
     ),
+    "slide_processing": (
+        "SLIDE PROCESSING",
+        "HOW TO USE:\n"
+        "A text slide with facts, numbers, and details appears for a limited "
+        "time. Read and absorb as much as you can before it disappears. "
+        "Then answer 2-3 comprehension questions about specific details.\n\n"
+        "A countdown timer shows remaining display time. Focus on numbers, "
+        "names, and key facts — questions target specific details, not "
+        "general understanding.\n\n"
+        "THE SCIENCE:\n"
+        "Rapid information extraction is a core skill in speed reading. "
+        "Research by Rayner & Castelhano (2007) shows that trained readers "
+        "develop efficient scanning patterns that prioritize high-information "
+        "regions. The ability to extract key facts from briefly presented "
+        "material improves with practice and transfers to real-world tasks "
+        "like skimming reports, processing dashboards, and studying.\n\n"
+        "BENEFITS:\n"
+        "- Trains rapid extraction of key information\n"
+        "- Improves scanning efficiency and prioritization\n"
+        "- Builds working memory for structured data\n"
+        "- Difficulty scales via display time and content density\n"
+        "- Transfers to report reading, studying, and data analysis"
+    ),
 }
 
 # MOT configuration
@@ -462,6 +485,313 @@ REACTION_TIME_CONFIG = {
     ],
     "choice_shapes": ["\u25cf", "\u25a0", "\u25b2", "\u25c6"],
     "choice_shape_names": ["circle", "square", "triangle", "diamond"],
+}
+
+# Slide Processing configuration
+SLIDE_PROCESSING_CONFIG = {
+    "default_display_s": 5,
+    "min_display_s": 2,
+    "max_display_s": 8,
+    "default_slides": 5,
+    "min_slides": 3,
+    "max_slides": 10,
+    "questions_per_slide": 3,
+    "categories": ["science", "business", "geography", "mixed"],
+}
+
+# Built-in slide library: (title, [bullet_points], [(question, [choices], correct_idx)])
+SLIDE_LIBRARY = {
+    "science": [
+        (
+            "The Human Brain",
+            [
+                "Weight: 1.4 kg (about 2% of body weight)",
+                "Contains approximately 86 billion neurons",
+                "Uses 20% of the body's total energy",
+                "Generates about 23 watts of electrical power",
+                "Processing speed: up to 120 m/s in myelinated axons",
+                "Storage capacity estimated at 2.5 petabytes",
+            ],
+            [
+                ("How many neurons does the brain contain?",
+                 ["12 billion", "86 billion", "100 billion", "45 billion"], 1),
+                ("What percentage of body energy does the brain use?",
+                 ["10%", "15%", "20%", "30%"], 2),
+                ("What is the brain's estimated storage capacity?",
+                 ["1.5 petabytes", "2.5 petabytes", "5 petabytes", "500 terabytes"], 1),
+            ],
+        ),
+        (
+            "Mars Exploration",
+            [
+                "Distance from Earth: 54.6 to 401 million km",
+                "Surface temperature: -87°C to -5°C average",
+                "Olympus Mons: tallest volcano at 21.9 km",
+                "Day length (sol): 24 hours 37 minutes",
+                "Atmosphere: 95.3% carbon dioxide",
+                "Gravity: 3.72 m/s² (38% of Earth's)",
+            ],
+            [
+                ("What is the height of Olympus Mons?",
+                 ["15.2 km", "18.6 km", "21.9 km", "25.1 km"], 2),
+                ("What percentage of Mars' atmosphere is CO₂?",
+                 ["78.1%", "89.7%", "95.3%", "99.2%"], 2),
+                ("What is Mars' gravity compared to Earth?",
+                 ["28%", "38%", "48%", "58%"], 1),
+            ],
+        ),
+        (
+            "Ocean Facts",
+            [
+                "Oceans cover 71% of Earth's surface",
+                "Average depth: 3,688 meters",
+                "Deepest point: Mariana Trench at 10,994 meters",
+                "Contains 97% of Earth's water",
+                "Pacific Ocean: largest at 165.25 million km²",
+                "Ocean temperature range: -2°C to 36°C",
+            ],
+            [
+                ("What is the average ocean depth?",
+                 ["2,450 m", "3,688 m", "4,200 m", "5,100 m"], 1),
+                ("What percentage of Earth's water is in the oceans?",
+                 ["87%", "92%", "97%", "99%"], 2),
+                ("How deep is the Mariana Trench?",
+                 ["8,848 m", "9,500 m", "10,994 m", "12,100 m"], 2),
+            ],
+        ),
+        (
+            "Speed of Light",
+            [
+                "Speed in vacuum: 299,792,458 m/s",
+                "Light travels 9.461 trillion km per year",
+                "Sunlight reaches Earth in 8 minutes 20 seconds",
+                "Light from the Moon: 1.3 seconds to Earth",
+                "Nearest star (Proxima Centauri): 4.24 light-years",
+                "Light slows to 225,000 km/s in water",
+            ],
+            [
+                ("How long does sunlight take to reach Earth?",
+                 ["4 min 10 sec", "6 min 45 sec", "8 min 20 sec", "12 min 5 sec"], 2),
+                ("How far is Proxima Centauri in light-years?",
+                 ["2.18", "4.24", "6.71", "8.60"], 1),
+                ("What is the speed of light in water?",
+                 ["150,000 km/s", "225,000 km/s", "275,000 km/s", "299,792 km/s"], 1),
+            ],
+        ),
+        (
+            "DNA & Genetics",
+            [
+                "Human genome: 3.2 billion base pairs",
+                "Humans share 98.7% DNA with chimpanzees",
+                "Each cell contains about 2 meters of DNA",
+                "Only 1.5% of DNA codes for proteins",
+                "23 pairs of chromosomes in human cells",
+                "DNA replication speed: 1,000 nucleotides/second",
+            ],
+            [
+                ("How many base pairs in the human genome?",
+                 ["1.8 billion", "3.2 billion", "4.6 billion", "6.4 billion"], 1),
+                ("What percentage of DNA codes for proteins?",
+                 ["1.5%", "5%", "10%", "25%"], 0),
+                ("How much DNA does each cell contain?",
+                 ["0.5 meters", "2 meters", "5 meters", "10 meters"], 1),
+            ],
+        ),
+    ],
+    "business": [
+        (
+            "Global Coffee Market 2024",
+            [
+                "Market value: $495.2 billion",
+                "Annual consumption: 10.5 billion kg worldwide",
+                "Top producer: Brazil (37.4% of global output)",
+                "Average price per kg: $14.80 (arabica)",
+                "Specialty coffee segment growing at 12.3% CAGR",
+                "Finland leads per-capita consumption: 12 kg/year",
+            ],
+            [
+                ("What is the global coffee market value?",
+                 ["$312.8 billion", "$495.2 billion", "$620.5 billion", "$780.1 billion"], 1),
+                ("What percentage of global coffee does Brazil produce?",
+                 ["22.1%", "29.8%", "37.4%", "45.6%"], 2),
+                ("Which country leads per-capita coffee consumption?",
+                 ["Italy", "Colombia", "Finland", "USA"], 2),
+            ],
+        ),
+        (
+            "Electric Vehicle Sales",
+            [
+                "Global EV sales 2024: 17.1 million units",
+                "Market share: 22% of all new car sales",
+                "China leads with 59% of global EV sales",
+                "Average EV battery cost: $139/kWh",
+                "Tesla market share: 18.4% of global EVs",
+                "Average EV range: 348 km per charge",
+            ],
+            [
+                ("How many EVs were sold globally in 2024?",
+                 ["9.8 million", "13.5 million", "17.1 million", "21.4 million"], 2),
+                ("What is China's share of global EV sales?",
+                 ["35%", "47%", "59%", "72%"], 2),
+                ("What is the average EV battery cost per kWh?",
+                 ["$89", "$139", "$189", "$239"], 1),
+            ],
+        ),
+        (
+            "Remote Work Statistics",
+            [
+                "32.6 million Americans will work remotely by 2025",
+                "Productivity increase: 13% for remote workers",
+                "Average commute time saved: 72 minutes/day",
+                "Companies save $11,000 per remote worker annually",
+                "67% of remote workers report better work-life balance",
+                "Video conferencing market: $13.8 billion",
+            ],
+            [
+                ("How much commute time do remote workers save daily?",
+                 ["45 minutes", "72 minutes", "90 minutes", "120 minutes"], 1),
+                ("How much do companies save per remote worker?",
+                 ["$5,000", "$8,500", "$11,000", "$15,000"], 2),
+                ("What is the productivity increase for remote workers?",
+                 ["8%", "13%", "18%", "25%"], 1),
+            ],
+        ),
+        (
+            "Smartphone Market Q4 2024",
+            [
+                "Global shipments: 328.2 million units",
+                "Samsung: 19.4% market share (#1)",
+                "Apple: 18.2% market share (#2)",
+                "Average selling price: $322",
+                "5G phones: 78% of all shipments",
+                "Foldable phones grew 49% year-over-year",
+            ],
+            [
+                ("How many smartphones shipped in Q4 2024?",
+                 ["245.6 million", "328.2 million", "412.7 million", "501.3 million"], 1),
+                ("What was Samsung's market share?",
+                 ["15.8%", "19.4%", "23.1%", "27.6%"], 1),
+                ("What percentage of shipments were 5G phones?",
+                 ["58%", "68%", "78%", "88%"], 2),
+            ],
+        ),
+        (
+            "Global Tourism 2024",
+            [
+                "International arrivals: 1.4 billion",
+                "Tourism revenue: $1.9 trillion",
+                "Most visited country: France (100 million visitors)",
+                "Average spending per tourist: $1,350",
+                "Tourism employs 330 million people worldwide",
+                "Asia-Pacific growth rate: 18% year-over-year",
+            ],
+            [
+                ("How many international tourist arrivals in 2024?",
+                 ["0.8 billion", "1.1 billion", "1.4 billion", "1.8 billion"], 2),
+                ("Which country had the most visitors?",
+                 ["Spain", "USA", "France", "Italy"], 2),
+                ("How many people does tourism employ globally?",
+                 ["180 million", "250 million", "330 million", "420 million"], 2),
+            ],
+        ),
+    ],
+    "geography": [
+        (
+            "Japan",
+            [
+                "Population: 123.3 million (2024)",
+                "Capital: Tokyo (population 13.96 million)",
+                "Area: 377,975 km²",
+                "Highest point: Mount Fuji at 3,776 meters",
+                "GDP per capita: $33,950",
+                "Life expectancy: 84.8 years (highest globally)",
+            ],
+            [
+                ("What is Japan's population?",
+                 ["98.5 million", "123.3 million", "145.7 million", "168.2 million"], 1),
+                ("How tall is Mount Fuji?",
+                 ["2,954 m", "3,776 m", "4,421 m", "5,108 m"], 1),
+                ("What is Japan's life expectancy?",
+                 ["78.2 years", "81.5 years", "84.8 years", "87.3 years"], 2),
+            ],
+        ),
+        (
+            "Brazil",
+            [
+                "Population: 216.4 million (2024)",
+                "Capital: Brasília (not São Paulo or Rio)",
+                "Area: 8,515,767 km² (5th largest country)",
+                "Amazon Rainforest covers 5.5 million km²",
+                "Official language: Portuguese",
+                "Coastline: 7,491 km long",
+            ],
+            [
+                ("What is Brazil's capital?",
+                 ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"], 2),
+                ("How large is the Amazon Rainforest?",
+                 ["3.2 million km²", "5.5 million km²", "7.8 million km²", "9.1 million km²"], 1),
+                ("How long is Brazil's coastline?",
+                 ["4,230 km", "5,860 km", "7,491 km", "9,120 km"], 2),
+            ],
+        ),
+        (
+            "Australia",
+            [
+                "Population: 26.6 million (2024)",
+                "Capital: Canberra (not Sydney)",
+                "Area: 7,692,024 km² (6th largest country)",
+                "Great Barrier Reef: 2,300 km long",
+                "Highest point: Mount Kosciuszko at 2,228 m",
+                "87% of population lives in urban areas",
+            ],
+            [
+                ("What is Australia's population?",
+                 ["18.4 million", "26.6 million", "34.2 million", "42.8 million"], 1),
+                ("How long is the Great Barrier Reef?",
+                 ["1,200 km", "1,800 km", "2,300 km", "2,900 km"], 2),
+                ("What percentage of Australians live in urban areas?",
+                 ["72%", "79%", "87%", "94%"], 2),
+            ],
+        ),
+        (
+            "Switzerland",
+            [
+                "Population: 8.9 million (2024)",
+                "Capital: Bern (not Zurich or Geneva)",
+                "4 official languages: German, French, Italian, Romansh",
+                "Area: 41,285 km²",
+                "Highest point: Dufourspitze at 4,634 m",
+                "GDP per capita: $99,994 (2nd highest globally)",
+            ],
+            [
+                ("What is Switzerland's capital?",
+                 ["Zurich", "Geneva", "Bern", "Basel"], 2),
+                ("How many official languages does Switzerland have?",
+                 ["2", "3", "4", "5"], 2),
+                ("What is Switzerland's GDP per capita?",
+                 ["$67,450", "$82,310", "$99,994", "$115,200"], 2),
+            ],
+        ),
+        (
+            "Egypt",
+            [
+                "Population: 109.3 million (2024)",
+                "Capital: Cairo (population 21.9 million)",
+                "Nile River length: 6,650 km (longest in Africa)",
+                "Great Pyramid height: 146.6 meters (originally)",
+                "Area: 1,002,450 km² (97% desert)",
+                "Suez Canal: 193.3 km long, opened 1869",
+            ],
+            [
+                ("What is Cairo's population?",
+                 ["14.2 million", "17.5 million", "21.9 million", "25.3 million"], 2),
+                ("How long is the Nile River?",
+                 ["4,130 km", "5,390 km", "6,650 km", "7,920 km"], 2),
+                ("How long is the Suez Canal?",
+                 ["120.5 km", "156.8 km", "193.3 km", "231.7 km"], 2),
+            ],
+        ),
+    ],
 }
 
 # User data configuration

@@ -485,6 +485,51 @@ class MotMenuScreen(BaseMenuScreen):
         )
 
 
+class SlideProcessingMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.slide_processing import (
+            SlideProcessingExercise,
+        )
+
+        def run(category: str = "mixed", display_s: int = 5,
+                slides: int = 5) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                SlideProcessingExercise, category=category,
+                display_s=display_s, slides=slides,
+            )
+
+        self._create_column_menu(
+            "SLIDE PROCESSING", "slide_processing",
+            columns=[
+                ("SCIENCE", [
+                    ("5s · 5 slides", run("science", 5, 5)),
+                    ("4s · 5 slides", run("science", 4, 5)),
+                    ("3s · 5 slides", run("science", 3, 5)),
+                    ("3s · 8 slides", run("science", 3, 8)),
+                    ("2s · 5 slides", run("science", 2, 5)),
+                ]),
+                ("BUSINESS", [
+                    ("5s · 5 slides", run("business", 5, 5)),
+                    ("4s · 5 slides", run("business", 4, 5)),
+                    ("3s · 5 slides", run("business", 3, 5)),
+                    ("3s · 8 slides", run("business", 3, 8)),
+                    ("2s · 5 slides", run("business", 2, 5)),
+                ]),
+                ("GEOGRAPHY", [
+                    ("5s · 5 slides", run("geography", 5, 5)),
+                    ("4s · 5 slides", run("geography", 4, 5)),
+                    ("3s · 5 slides", run("geography", 3, 5)),
+                    ("3s · 8 slides", run("geography", 3, 8)),
+                    ("2s · 5 slides", run("geography", 2, 5)),
+                ]),
+            ],
+        )
+
+
 class ReactionTimeMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
