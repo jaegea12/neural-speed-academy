@@ -321,6 +321,29 @@ EXERCISE_GUIDES = {
         "- Results use median RT (resistant to outliers)\n"
         "- Transfers to driving, sports, and gaming performance"
     ),
+    "slide_processing": (
+        "SLIDE PROCESSING",
+        "HOW TO USE:\n"
+        "A text slide with facts, numbers, and details appears for a limited "
+        "time. Read and absorb as much as you can before it disappears. "
+        "Then answer 2-3 comprehension questions about specific details.\n\n"
+        "A countdown timer shows remaining display time. Focus on numbers, "
+        "names, and key facts — questions target specific details, not "
+        "general understanding.\n\n"
+        "THE SCIENCE:\n"
+        "Rapid information extraction is a core skill in speed reading. "
+        "Research by Rayner & Castelhano (2007) shows that trained readers "
+        "develop efficient scanning patterns that prioritize high-information "
+        "regions. The ability to extract key facts from briefly presented "
+        "material improves with practice and transfers to real-world tasks "
+        "like skimming reports, processing dashboards, and studying.\n\n"
+        "BENEFITS:\n"
+        "- Trains rapid extraction of key information\n"
+        "- Improves scanning efficiency and prioritization\n"
+        "- Builds working memory for structured data\n"
+        "- Difficulty scales via display time and content density\n"
+        "- Transfers to report reading, studying, and data analysis"
+    ),
 }
 
 # MOT configuration
@@ -462,6 +485,801 @@ REACTION_TIME_CONFIG = {
     ],
     "choice_shapes": ["\u25cf", "\u25a0", "\u25b2", "\u25c6"],
     "choice_shape_names": ["circle", "square", "triangle", "diamond"],
+}
+
+# Slide Processing configuration
+SLIDE_PROCESSING_CONFIG = {
+    "default_display_s": 10,
+    "min_display_s": 3,
+    "max_display_s": 20,
+    "default_slides": 5,
+    "min_slides": 3,
+    "max_slides": 10,
+    "questions_per_slide": 3,
+    "categories": [
+        "science", "business", "geography",
+        "motivation", "neuroplasticity", "humor", "history", "nutrition",
+    ],
+}
+
+# Built-in slide library: (title, [bullet_points], [(question, [choices], correct_idx)])
+SLIDE_LIBRARY = {
+    "science": [
+        (
+            "The Human Brain",
+            [
+                "Weight: 1.4 kg (about 2% of body weight)",
+                "Contains approximately 86 billion neurons",
+                "Uses 20% of the body's total energy",
+                "Generates about 23 watts of electrical power",
+                "Processing speed: up to 120 m/s in myelinated axons",
+                "Storage capacity estimated at 2.5 petabytes",
+            ],
+            [
+                ("How many neurons does the brain contain?",
+                 ["12 billion", "86 billion", "100 billion", "45 billion"], 1),
+                ("What percentage of body energy does the brain use?",
+                 ["10%", "15%", "20%", "30%"], 2),
+                ("What is the brain's estimated storage capacity?",
+                 ["1.5 petabytes", "2.5 petabytes", "5 petabytes", "500 terabytes"], 1),
+            ],
+        ),
+        (
+            "Mars Exploration",
+            [
+                "Distance from Earth: 54.6 to 401 million km",
+                "Surface temperature: -87°C to -5°C average",
+                "Olympus Mons: tallest volcano at 21.9 km",
+                "Day length (sol): 24 hours 37 minutes",
+                "Atmosphere: 95.3% carbon dioxide",
+                "Gravity: 3.72 m/s² (38% of Earth's)",
+            ],
+            [
+                ("What is the height of Olympus Mons?",
+                 ["15.2 km", "18.6 km", "21.9 km", "25.1 km"], 2),
+                ("What percentage of Mars' atmosphere is CO₂?",
+                 ["78.1%", "89.7%", "95.3%", "99.2%"], 2),
+                ("What is Mars' gravity compared to Earth?",
+                 ["28%", "38%", "48%", "58%"], 1),
+            ],
+        ),
+        (
+            "Ocean Facts",
+            [
+                "Oceans cover 71% of Earth's surface",
+                "Average depth: 3,688 meters",
+                "Deepest point: Mariana Trench at 10,994 meters",
+                "Contains 97% of Earth's water",
+                "Pacific Ocean: largest at 165.25 million km²",
+                "Ocean temperature range: -2°C to 36°C",
+            ],
+            [
+                ("What is the average ocean depth?",
+                 ["2,450 m", "3,688 m", "4,200 m", "5,100 m"], 1),
+                ("What percentage of Earth's water is in the oceans?",
+                 ["87%", "92%", "97%", "99%"], 2),
+                ("How deep is the Mariana Trench?",
+                 ["8,848 m", "9,500 m", "10,994 m", "12,100 m"], 2),
+            ],
+        ),
+        (
+            "Speed of Light",
+            [
+                "Speed in vacuum: 299,792,458 m/s",
+                "Light travels 9.461 trillion km per year",
+                "Sunlight reaches Earth in 8 minutes 20 seconds",
+                "Light from the Moon: 1.3 seconds to Earth",
+                "Nearest star (Proxima Centauri): 4.24 light-years",
+                "Light slows to 225,000 km/s in water",
+            ],
+            [
+                ("How long does sunlight take to reach Earth?",
+                 ["4 min 10 sec", "6 min 45 sec", "8 min 20 sec", "12 min 5 sec"], 2),
+                ("How far is Proxima Centauri in light-years?",
+                 ["2.18", "4.24", "6.71", "8.60"], 1),
+                ("What is the speed of light in water?",
+                 ["150,000 km/s", "225,000 km/s", "275,000 km/s", "299,792 km/s"], 1),
+            ],
+        ),
+        (
+            "DNA & Genetics",
+            [
+                "Human genome: 3.2 billion base pairs",
+                "Humans share 98.7% DNA with chimpanzees",
+                "Each cell contains about 2 meters of DNA",
+                "Only 1.5% of DNA codes for proteins",
+                "23 pairs of chromosomes in human cells",
+                "DNA replication speed: 1,000 nucleotides/second",
+            ],
+            [
+                ("How many base pairs in the human genome?",
+                 ["1.8 billion", "3.2 billion", "4.6 billion", "6.4 billion"], 1),
+                ("What percentage of DNA codes for proteins?",
+                 ["1.5%", "5%", "10%", "25%"], 0),
+                ("How much DNA does each cell contain?",
+                 ["0.5 meters", "2 meters", "5 meters", "10 meters"], 1),
+            ],
+        ),
+    ],
+    "business": [
+        (
+            "Global Coffee Market 2024",
+            [
+                "Market value: $495.2 billion",
+                "Annual consumption: 10.5 billion kg worldwide",
+                "Top producer: Brazil (37.4% of global output)",
+                "Average price per kg: $14.80 (arabica)",
+                "Specialty coffee segment growing at 12.3% CAGR",
+                "Finland leads per-capita consumption: 12 kg/year",
+            ],
+            [
+                ("What is the global coffee market value?",
+                 ["$312.8 billion", "$495.2 billion", "$620.5 billion", "$780.1 billion"], 1),
+                ("What percentage of global coffee does Brazil produce?",
+                 ["22.1%", "29.8%", "37.4%", "45.6%"], 2),
+                ("Which country leads per-capita coffee consumption?",
+                 ["Italy", "Colombia", "Finland", "USA"], 2),
+            ],
+        ),
+        (
+            "Electric Vehicle Sales",
+            [
+                "Global EV sales 2024: 17.1 million units",
+                "Market share: 22% of all new car sales",
+                "China leads with 59% of global EV sales",
+                "Average EV battery cost: $139/kWh",
+                "Tesla market share: 18.4% of global EVs",
+                "Average EV range: 348 km per charge",
+            ],
+            [
+                ("How many EVs were sold globally in 2024?",
+                 ["9.8 million", "13.5 million", "17.1 million", "21.4 million"], 2),
+                ("What is China's share of global EV sales?",
+                 ["35%", "47%", "59%", "72%"], 2),
+                ("What is the average EV battery cost per kWh?",
+                 ["$89", "$139", "$189", "$239"], 1),
+            ],
+        ),
+        (
+            "Remote Work Statistics",
+            [
+                "32.6 million Americans will work remotely by 2025",
+                "Productivity increase: 13% for remote workers",
+                "Average commute time saved: 72 minutes/day",
+                "Companies save $11,000 per remote worker annually",
+                "67% of remote workers report better work-life balance",
+                "Video conferencing market: $13.8 billion",
+            ],
+            [
+                ("How much commute time do remote workers save daily?",
+                 ["45 minutes", "72 minutes", "90 minutes", "120 minutes"], 1),
+                ("How much do companies save per remote worker?",
+                 ["$5,000", "$8,500", "$11,000", "$15,000"], 2),
+                ("What is the productivity increase for remote workers?",
+                 ["8%", "13%", "18%", "25%"], 1),
+            ],
+        ),
+        (
+            "Smartphone Market Q4 2024",
+            [
+                "Global shipments: 328.2 million units",
+                "Samsung: 19.4% market share (#1)",
+                "Apple: 18.2% market share (#2)",
+                "Average selling price: $322",
+                "5G phones: 78% of all shipments",
+                "Foldable phones grew 49% year-over-year",
+            ],
+            [
+                ("How many smartphones shipped in Q4 2024?",
+                 ["245.6 million", "328.2 million", "412.7 million", "501.3 million"], 1),
+                ("What was Samsung's market share?",
+                 ["15.8%", "19.4%", "23.1%", "27.6%"], 1),
+                ("What percentage of shipments were 5G phones?",
+                 ["58%", "68%", "78%", "88%"], 2),
+            ],
+        ),
+        (
+            "Global Tourism 2024",
+            [
+                "International arrivals: 1.4 billion",
+                "Tourism revenue: $1.9 trillion",
+                "Most visited country: France (100 million visitors)",
+                "Average spending per tourist: $1,350",
+                "Tourism employs 330 million people worldwide",
+                "Asia-Pacific growth rate: 18% year-over-year",
+            ],
+            [
+                ("How many international tourist arrivals in 2024?",
+                 ["0.8 billion", "1.1 billion", "1.4 billion", "1.8 billion"], 2),
+                ("Which country had the most visitors?",
+                 ["Spain", "USA", "France", "Italy"], 2),
+                ("How many people does tourism employ globally?",
+                 ["180 million", "250 million", "330 million", "420 million"], 2),
+            ],
+        ),
+    ],
+    "geography": [
+        (
+            "Japan",
+            [
+                "Population: 123.3 million (2024)",
+                "Capital: Tokyo (population 13.96 million)",
+                "Area: 377,975 km²",
+                "Highest point: Mount Fuji at 3,776 meters",
+                "GDP per capita: $33,950",
+                "Life expectancy: 84.8 years (highest globally)",
+            ],
+            [
+                ("What is Japan's population?",
+                 ["98.5 million", "123.3 million", "145.7 million", "168.2 million"], 1),
+                ("How tall is Mount Fuji?",
+                 ["2,954 m", "3,776 m", "4,421 m", "5,108 m"], 1),
+                ("What is Japan's life expectancy?",
+                 ["78.2 years", "81.5 years", "84.8 years", "87.3 years"], 2),
+            ],
+        ),
+        (
+            "Brazil",
+            [
+                "Population: 216.4 million (2024)",
+                "Capital: Brasília (not São Paulo or Rio)",
+                "Area: 8,515,767 km² (5th largest country)",
+                "Amazon Rainforest covers 5.5 million km²",
+                "Official language: Portuguese",
+                "Coastline: 7,491 km long",
+            ],
+            [
+                ("What is Brazil's capital?",
+                 ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"], 2),
+                ("How large is the Amazon Rainforest?",
+                 ["3.2 million km²", "5.5 million km²", "7.8 million km²", "9.1 million km²"], 1),
+                ("How long is Brazil's coastline?",
+                 ["4,230 km", "5,860 km", "7,491 km", "9,120 km"], 2),
+            ],
+        ),
+        (
+            "Australia",
+            [
+                "Population: 26.6 million (2024)",
+                "Capital: Canberra (not Sydney)",
+                "Area: 7,692,024 km² (6th largest country)",
+                "Great Barrier Reef: 2,300 km long",
+                "Highest point: Mount Kosciuszko at 2,228 m",
+                "87% of population lives in urban areas",
+            ],
+            [
+                ("What is Australia's population?",
+                 ["18.4 million", "26.6 million", "34.2 million", "42.8 million"], 1),
+                ("How long is the Great Barrier Reef?",
+                 ["1,200 km", "1,800 km", "2,300 km", "2,900 km"], 2),
+                ("What percentage of Australians live in urban areas?",
+                 ["72%", "79%", "87%", "94%"], 2),
+            ],
+        ),
+        (
+            "Switzerland",
+            [
+                "Population: 8.9 million (2024)",
+                "Capital: Bern (not Zurich or Geneva)",
+                "4 official languages: German, French, Italian, Romansh",
+                "Area: 41,285 km²",
+                "Highest point: Dufourspitze at 4,634 m",
+                "GDP per capita: $99,994 (2nd highest globally)",
+            ],
+            [
+                ("What is Switzerland's capital?",
+                 ["Zurich", "Geneva", "Bern", "Basel"], 2),
+                ("How many official languages does Switzerland have?",
+                 ["2", "3", "4", "5"], 2),
+                ("What is Switzerland's GDP per capita?",
+                 ["$67,450", "$82,310", "$99,994", "$115,200"], 2),
+            ],
+        ),
+        (
+            "Egypt",
+            [
+                "Population: 109.3 million (2024)",
+                "Capital: Cairo (population 21.9 million)",
+                "Nile River length: 6,650 km (longest in Africa)",
+                "Great Pyramid height: 146.6 meters (originally)",
+                "Area: 1,002,450 km² (97% desert)",
+                "Suez Canal: 193.3 km long, opened 1869",
+            ],
+            [
+                ("What is Cairo's population?",
+                 ["14.2 million", "17.5 million", "21.9 million", "25.3 million"], 2),
+                ("How long is the Nile River?",
+                 ["4,130 km", "5,390 km", "6,650 km", "7,920 km"], 2),
+                ("How long is the Suez Canal?",
+                 ["120.5 km", "156.8 km", "193.3 km", "231.7 km"], 2),
+            ],
+        ),
+    ],
+    "motivation": [
+        (
+            "The 10,000 Hour Rule",
+            [
+                "Popularized by Malcolm Gladwell in Outliers (2008)",
+                "Based on research by K. Anders Ericsson",
+                "Elite violinists averaged 10,000 hours of practice by age 20",
+                "Deliberate practice matters more than total hours",
+                "Top performers practice 4 hours/day with full focus",
+                "Feedback loops accelerate skill acquisition by 26%",
+            ],
+            [
+                ("Who popularized the 10,000 hour rule?",
+                 ["Daniel Kahneman", "Malcolm Gladwell", "Cal Newport", "James Clear"], 1),
+                ("How many hours/day do top performers practice?",
+                 ["2 hours", "4 hours", "6 hours", "8 hours"], 1),
+                ("By how much do feedback loops accelerate learning?",
+                 ["12%", "18%", "26%", "35%"], 2),
+            ],
+        ),
+        (
+            "Growth Mindset Research",
+            [
+                "Coined by Carol Dweck at Stanford University",
+                "Students praised for effort improved 30% more",
+                "Fixed mindset: intelligence is static",
+                "Growth mindset: abilities develop through dedication",
+                "73% of top CEOs identify as growth-mindset thinkers",
+                "Mindset interventions raised GPAs by 0.3 points average",
+            ],
+            [
+                ("Who coined the term 'growth mindset'?",
+                 ["Angela Duckworth", "Carol Dweck", "Martin Seligman", "Amy Cuddy"], 1),
+                ("How much more did effort-praised students improve?",
+                 ["10%", "20%", "30%", "40%"], 2),
+                ("What percentage of top CEOs identify as growth-mindset?",
+                 ["53%", "63%", "73%", "83%"], 2),
+            ],
+        ),
+        (
+            "The Power of Habits",
+            [
+                "40% of daily actions are habits, not decisions",
+                "Habit loop: cue → routine → reward (Charles Duhigg)",
+                "New habit formation takes 66 days on average",
+                "Implementation intentions increase success rate by 91%",
+                "Keystone habits trigger cascading positive changes",
+                "Habit stacking: attach new habits to existing ones",
+            ],
+            [
+                ("What percentage of daily actions are habits?",
+                 ["20%", "30%", "40%", "50%"], 2),
+                ("How many days does new habit formation take on average?",
+                 ["21 days", "45 days", "66 days", "90 days"], 2),
+                ("By how much do implementation intentions increase success?",
+                 ["51%", "71%", "81%", "91%"], 3),
+            ],
+        ),
+        (
+            "Flow State Performance",
+            [
+                "Concept developed by Mihaly Csikszentmihalyi in 1975",
+                "Flow increases productivity by up to 500%",
+                "Requires challenge-skill balance (4% above current ability)",
+                "Average time to enter flow: 15-20 minutes",
+                "Interruptions reset the flow timer completely",
+                "Flow triggers 5 neurochemicals: dopamine, norepinephrine, endorphins, anandamide, serotonin",
+            ],
+            [
+                ("Who developed the concept of flow?",
+                 ["Daniel Pink", "Mihaly Csikszentmihalyi", "Cal Newport", "Adam Grant"], 1),
+                ("By how much can flow increase productivity?",
+                 ["100%", "200%", "350%", "500%"], 3),
+                ("How long does it take to enter flow?",
+                 ["5-10 minutes", "15-20 minutes", "25-30 minutes", "35-40 minutes"], 1),
+            ],
+        ),
+        (
+            "Grit and Perseverance",
+            [
+                "Researched by Angela Duckworth at UPenn",
+                "Grit predicts success better than IQ in 78% of studies",
+                "West Point cadets: grit score predicted completion rate",
+                "Grit = passion + sustained persistence over years",
+                "Gritty individuals practice 32% more hours weekly",
+                "Grit can be developed — it's not purely innate",
+            ],
+            [
+                ("Who researched grit?",
+                 ["Carol Dweck", "Angela Duckworth", "Martin Seligman", "Dan Pink"], 1),
+                ("In what percentage of studies does grit outpredict IQ?",
+                 ["58%", "68%", "78%", "88%"], 2),
+                ("How much more do gritty individuals practice weekly?",
+                 ["12%", "22%", "32%", "42%"], 2),
+            ],
+        ),
+    ],
+    "neuroplasticity": [
+        (
+            "Brain Plasticity Basics",
+            [
+                "The brain forms 1 million new neural connections per second in infancy",
+                "Adults generate ~700 new neurons daily in the hippocampus",
+                "London taxi drivers have 16% larger posterior hippocampi",
+                "Neuroplasticity peaks before age 25 but continues lifelong",
+                "Learning a new skill increases gray matter in 2 weeks",
+                "Sleep consolidates neural pathways — 7-9 hours optimal",
+            ],
+            [
+                ("How many new neurons do adults generate daily?",
+                 ["200", "500", "700", "1,000"], 2),
+                ("How much larger are taxi drivers' posterior hippocampi?",
+                 ["8%", "12%", "16%", "22%"], 2),
+                ("How quickly can learning increase gray matter?",
+                 ["2 days", "2 weeks", "2 months", "6 months"], 1),
+            ],
+        ),
+        (
+            "Memory Formation",
+            [
+                "Short-term memory holds 7±2 items (Miller's Law, 1956)",
+                "Long-term potentiation (LTP) strengthens synapses",
+                "Spaced repetition improves retention by 200%",
+                "The forgetting curve: 70% lost within 24 hours without review",
+                "Emotional memories are 3x stronger due to amygdala activation",
+                "Sleep replays memories at 20x speed during REM",
+            ],
+            [
+                ("How many items can short-term memory hold?",
+                 ["3±1", "5±2", "7±2", "9±3"], 2),
+                ("How much is forgotten within 24 hours without review?",
+                 ["40%", "55%", "70%", "85%"], 2),
+                ("How much faster does sleep replay memories?",
+                 ["5x", "10x", "20x", "50x"], 2),
+            ],
+        ),
+        (
+            "Exercise and the Brain",
+            [
+                "Aerobic exercise increases hippocampal volume by 2%",
+                "BDNF (brain-derived neurotrophic factor) rises 32% after exercise",
+                "20 minutes of walking improves attention for 2 hours",
+                "Regular exercisers have 15% better executive function",
+                "Exercise reduces dementia risk by 30-40%",
+                "Peak cognitive benefit: 150 minutes moderate exercise/week",
+            ],
+            [
+                ("By how much does aerobic exercise increase hippocampal volume?",
+                 ["1%", "2%", "4%", "6%"], 1),
+                ("How much does BDNF rise after exercise?",
+                 ["12%", "22%", "32%", "42%"], 2),
+                ("How many minutes of moderate exercise per week is optimal?",
+                 ["90 minutes", "120 minutes", "150 minutes", "200 minutes"], 2),
+            ],
+        ),
+        (
+            "Meditation and Neural Changes",
+            [
+                "8 weeks of meditation increases cortical thickness by 1.5mm",
+                "Meditators show 25% more gray matter in the prefrontal cortex",
+                "Default mode network activity decreases by 50% during meditation",
+                "Mindfulness reduces amygdala reactivity by 22%",
+                "Long-term meditators (10,000+ hours) show gamma wave increases of 700%",
+                "Just 10 minutes daily improves working memory by 14%",
+            ],
+            [
+                ("How much does cortical thickness increase after 8 weeks?",
+                 ["0.5mm", "1.0mm", "1.5mm", "2.0mm"], 2),
+                ("By how much does mindfulness reduce amygdala reactivity?",
+                 ["12%", "17%", "22%", "28%"], 2),
+                ("How much does 10 min daily meditation improve working memory?",
+                 ["8%", "14%", "20%", "26%"], 1),
+            ],
+        ),
+        (
+            "Bilingualism and Cognition",
+            [
+                "Bilinguals switch tasks 28% faster than monolinguals",
+                "Speaking 2+ languages delays dementia onset by 4.5 years",
+                "Bilingual brains have denser gray matter in the ACC",
+                "Language switching strengthens the dorsolateral prefrontal cortex",
+                "Children exposed to 2 languages by age 3 show 20% better attention",
+                "The bilingual advantage peaks between ages 60-80",
+            ],
+            [
+                ("How much faster do bilinguals switch tasks?",
+                 ["14%", "21%", "28%", "35%"], 2),
+                ("By how many years does bilingualism delay dementia?",
+                 ["2.5 years", "3.5 years", "4.5 years", "5.5 years"], 2),
+                ("At what age range does the bilingual advantage peak?",
+                 ["30-50", "40-60", "50-70", "60-80"], 3),
+            ],
+        ),
+    ],
+    "humor": [
+        (
+            "Laughter Science",
+            [
+                "Average adult laughs 17 times per day",
+                "Children laugh about 300 times per day",
+                "A good laugh burns 10-40 calories",
+                "Laughter releases endorphins — pain tolerance rises 10%",
+                "Gelotology: the scientific study of laughter",
+                "Laughter is 30x more likely in social settings",
+            ],
+            [
+                ("How many times does an average adult laugh per day?",
+                 ["7", "17", "27", "47"], 1),
+                ("What is the scientific study of laughter called?",
+                 ["Risology", "Gelotology", "Humorology", "Comicology"], 1),
+                ("How much more likely is laughter in social settings?",
+                 ["10x", "20x", "30x", "50x"], 2),
+            ],
+        ),
+        (
+            "Weird Animal Facts",
+            [
+                "A group of flamingos is called a 'flamboyance'",
+                "Octopuses have 3 hearts and blue blood",
+                "Cows have best friends and get stressed when separated",
+                "A snail can sleep for 3 years continuously",
+                "Dolphins sleep with one eye open (unihemispheric sleep)",
+                "Honey never spoils — 3,000-year-old honey is still edible",
+            ],
+            [
+                ("How many hearts does an octopus have?",
+                 ["1", "2", "3", "4"], 2),
+                ("How long can a snail sleep?",
+                 ["3 months", "1 year", "3 years", "5 years"], 2),
+                ("What is a group of flamingos called?",
+                 ["A flock", "A flamboyance", "A flutter", "A parade"], 1),
+            ],
+        ),
+        (
+            "Absurd World Records",
+            [
+                "Longest hiccupping spree: 68 years (Charles Osborne)",
+                "Most T-shirts worn at once: 260 shirts",
+                "Fastest 100m on all fours: 15.71 seconds (Kenichi Ito)",
+                "Longest fingernails ever: 8.65 meters total (Lee Redmond)",
+                "Most people in a Mini Cooper: 28 people",
+                "Loudest purr by a cat: 67.8 decibels (Merlin)",
+            ],
+            [
+                ("How long did the longest hiccupping spree last?",
+                 ["12 years", "34 years", "68 years", "91 years"], 2),
+                ("How many T-shirts were worn at once?",
+                 ["155", "210", "260", "305"], 2),
+                ("How loud was the loudest cat purr?",
+                 ["45.2 dB", "56.4 dB", "67.8 dB", "78.3 dB"], 2),
+            ],
+        ),
+        (
+            "Food Oddities",
+            [
+                "Bananas are berries, but strawberries are not",
+                "Honey is essentially bee vomit (regurgitated nectar)",
+                "Peanuts are not nuts — they're legumes",
+                "Ketchup was sold as medicine in the 1830s",
+                "Apples float because they are 25% air",
+                "A single spaghetti noodle is called a 'spaghetto'",
+            ],
+            [
+                ("What percentage of an apple is air?",
+                 ["10%", "15%", "25%", "35%"], 2),
+                ("When was ketchup sold as medicine?",
+                 ["1790s", "1830s", "1870s", "1910s"], 1),
+                ("What is a single spaghetti noodle called?",
+                 ["Spaghettino", "Spaghetto", "Spaghettini", "Spago"], 1),
+            ],
+        ),
+        (
+            "Useless But True",
+            [
+                "The inventor of the Pringles can is buried in one",
+                "A jiffy is an actual unit of time: 1/100th of a second",
+                "The dot over the letter 'i' is called a 'tittle'",
+                "Scotland's national animal is the unicorn",
+                "There are more possible chess games than atoms in the universe",
+                "The average person walks 150,000 km in a lifetime (3.75x around Earth)",
+            ],
+            [
+                ("What is a jiffy in seconds?",
+                 ["1/10th", "1/50th", "1/100th", "1/1000th"], 2),
+                ("What is the dot over 'i' called?",
+                 ["A pip", "A tittle", "A dot", "A jot"], 1),
+                ("What is Scotland's national animal?",
+                 ["Highland cow", "Loch Ness monster", "Unicorn", "Red deer"], 2),
+            ],
+        ),
+    ],
+    "history": [
+        (
+            "Ancient Rome",
+            [
+                "Founded: 753 BC (traditional date)",
+                "Peak population: 1 million people (2nd century AD)",
+                "Roman roads network: 400,000 km total",
+                "Colosseum capacity: 50,000-80,000 spectators",
+                "Roman Empire lasted 503 years (27 BC – 476 AD)",
+                "Concrete invented by Romans — Pantheon dome still stands",
+            ],
+            [
+                ("How extensive was the Roman road network?",
+                 ["100,000 km", "250,000 km", "400,000 km", "600,000 km"], 2),
+                ("What was the Colosseum's capacity?",
+                 ["20,000-40,000", "50,000-80,000", "90,000-120,000", "130,000-150,000"], 1),
+                ("How long did the Roman Empire last?",
+                 ["303 years", "403 years", "503 years", "603 years"], 2),
+            ],
+        ),
+        (
+            "The Moon Landing",
+            [
+                "Date: July 20, 1969 (Apollo 11)",
+                "Neil Armstrong: first human on the Moon",
+                "Mission duration: 8 days, 3 hours, 18 minutes",
+                "Distance to Moon: 384,400 km",
+                "Moon walk duration: 2 hours 31 minutes",
+                "Total Apollo Moon walkers: 12 astronauts",
+            ],
+            [
+                ("How long was the Apollo 11 mission?",
+                 ["5 days 12 hours", "8 days 3 hours", "10 days 7 hours", "12 days 1 hour"], 1),
+                ("How far is the Moon from Earth?",
+                 ["284,400 km", "384,400 km", "484,400 km", "584,400 km"], 1),
+                ("How many astronauts walked on the Moon total?",
+                 ["6", "8", "10", "12"], 3),
+            ],
+        ),
+        (
+            "World War II Key Numbers",
+            [
+                "Duration: 1939-1945 (6 years)",
+                "Countries involved: 61 nations",
+                "D-Day: June 6, 1944 — 156,000 Allied troops landed",
+                "Total military deaths: approximately 25 million",
+                "The war cost an estimated $1.3 trillion (1945 dollars)",
+                "V-E Day: May 8, 1945 — Victory in Europe",
+            ],
+            [
+                ("How many nations were involved in WWII?",
+                 ["31", "41", "51", "61"], 3),
+                ("How many Allied troops landed on D-Day?",
+                 ["78,000", "116,000", "156,000", "196,000"], 2),
+                ("What was V-E Day?",
+                 ["April 2, 1945", "May 8, 1945", "June 14, 1945", "July 20, 1945"], 1),
+            ],
+        ),
+        (
+            "The Renaissance",
+            [
+                "Period: roughly 1400-1600 AD",
+                "Birthplace: Florence, Italy",
+                "Gutenberg's printing press: invented around 1440",
+                "Leonardo da Vinci painted the Mona Lisa: 1503-1519",
+                "Michelangelo's Sistine Chapel ceiling: 4 years to complete",
+                "The word 'Renaissance' means 'rebirth' in French",
+            ],
+            [
+                ("When was the printing press invented?",
+                 ["Around 1380", "Around 1440", "Around 1500", "Around 1560"], 1),
+                ("How long did the Sistine Chapel ceiling take?",
+                 ["2 years", "4 years", "6 years", "8 years"], 1),
+                ("Where did the Renaissance originate?",
+                 ["Rome", "Venice", "Florence", "Milan"], 2),
+            ],
+        ),
+        (
+            "The Industrial Revolution",
+            [
+                "Started in Britain around 1760",
+                "Steam engine improved by James Watt in 1769",
+                "World population doubled from 1 to 2 billion (1800-1927)",
+                "First railway: Stockton to Darlington, 1825 (40 km)",
+                "Child labor: children as young as 5 worked 16-hour days",
+                "By 1850, Britain produced 50% of the world's iron",
+            ],
+            [
+                ("When did James Watt improve the steam engine?",
+                 ["1749", "1759", "1769", "1779"], 2),
+                ("How long was the first railway?",
+                 ["20 km", "30 km", "40 km", "50 km"], 2),
+                ("What percentage of world iron did Britain produce by 1850?",
+                 ["30%", "40%", "50%", "60%"], 2),
+            ],
+        ),
+    ],
+    "nutrition": [
+        (
+            "Macronutrients",
+            [
+                "Protein: 4 calories per gram",
+                "Carbohydrates: 4 calories per gram",
+                "Fat: 9 calories per gram",
+                "Alcohol: 7 calories per gram (no nutritional value)",
+                "Recommended daily protein: 0.8g per kg body weight",
+                "Brain uses 120g of glucose per day",
+            ],
+            [
+                ("How many calories per gram does fat contain?",
+                 ["4", "7", "9", "12"], 2),
+                ("How many calories per gram does alcohol have?",
+                 ["4", "5", "7", "9"], 2),
+                ("How much glucose does the brain use daily?",
+                 ["60g", "90g", "120g", "150g"], 2),
+            ],
+        ),
+        (
+            "Hydration Facts",
+            [
+                "Human body is 60% water",
+                "Brain is 73% water",
+                "2% dehydration reduces cognitive performance by 20%",
+                "Recommended intake: 2.7L (women) / 3.7L (men) daily",
+                "Kidneys filter 180 liters of blood per day",
+                "Thirst signal activates at 1-2% body water loss",
+            ],
+            [
+                ("What percentage of the brain is water?",
+                 ["53%", "63%", "73%", "83%"], 2),
+                ("How much blood do kidneys filter daily?",
+                 ["80 liters", "120 liters", "180 liters", "240 liters"], 2),
+                ("At what dehydration level does cognition drop 20%?",
+                 ["1%", "2%", "4%", "6%"], 1),
+            ],
+        ),
+        (
+            "Vitamins and Minerals",
+            [
+                "Vitamin D: 600 IU recommended daily (ages 1-70)",
+                "Iron: men need 8mg/day, women need 18mg/day",
+                "Vitamin C: 90mg/day for men, 75mg for women",
+                "Calcium: 1,000mg/day for adults under 50",
+                "B12 deficiency affects 15% of people over 60",
+                "Magnesium is involved in 300+ enzymatic reactions",
+            ],
+            [
+                ("How much iron do women need daily?",
+                 ["8mg", "12mg", "18mg", "24mg"], 2),
+                ("How many enzymatic reactions involve magnesium?",
+                 ["100+", "200+", "300+", "400+"], 2),
+                ("What percentage of people over 60 are B12 deficient?",
+                 ["5%", "10%", "15%", "25%"], 2),
+            ],
+        ),
+        (
+            "Gut-Brain Connection",
+            [
+                "The gut contains 500 million neurons (enteric nervous system)",
+                "95% of serotonin is produced in the gut",
+                "Gut microbiome: 39 trillion bacteria (more than human cells)",
+                "Vagus nerve: primary communication highway (80% gut→brain)",
+                "Fiber intake of 30g/day reduces depression risk by 26%",
+                "Probiotics improve mood scores by 18% in clinical trials",
+            ],
+            [
+                ("What percentage of serotonin is produced in the gut?",
+                 ["65%", "80%", "95%", "99%"], 2),
+                ("How many bacteria are in the gut microbiome?",
+                 ["9 trillion", "19 trillion", "39 trillion", "59 trillion"], 2),
+                ("By how much does 30g fiber/day reduce depression risk?",
+                 ["12%", "18%", "26%", "34%"], 2),
+            ],
+        ),
+        (
+            "Caffeine and Performance",
+            [
+                "Caffeine half-life: 5-6 hours",
+                "Peak blood concentration: 30-60 minutes after intake",
+                "Improves reaction time by 11% on average",
+                "Optimal dose: 3-6 mg per kg body weight",
+                "400mg/day considered safe for adults (≈4 cups coffee)",
+                "Caffeine blocks adenosine receptors, reducing sleepiness",
+            ],
+            [
+                ("What is caffeine's half-life?",
+                 ["1-2 hours", "3-4 hours", "5-6 hours", "7-8 hours"], 2),
+                ("By how much does caffeine improve reaction time?",
+                 ["5%", "8%", "11%", "15%"], 2),
+                ("How much caffeine per day is considered safe?",
+                 ["200mg", "300mg", "400mg", "500mg"], 2),
+            ],
+        ),
+    ],
 }
 
 # User data configuration
