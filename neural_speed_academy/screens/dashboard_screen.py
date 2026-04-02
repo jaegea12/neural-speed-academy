@@ -92,6 +92,7 @@ class DashboardScreen(BaseScreen):
             ("Rapid Decision", self._cb("menu_rapid_decision")),
             ("Object Tracking", self._cb("menu_mot")),
             ("Split Attention", self._cb("menu_split_attention")),
+            ("Reaction Time", self._cb("menu_reaction_time")),
         ])
         self._create_section(grid, "READING", 1, [
             ("Pacer & Quiz", self._cb("setup_pacer")),

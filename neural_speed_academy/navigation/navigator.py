@@ -29,6 +29,7 @@ class Navigator:
         "rapid_decision_menu": "Rapid Decision",
         "mot_menu": "Object Tracking",
         "split_attention_menu": "Split Attention",
+        "reaction_time_menu": "Reaction Time",
         "stats": "Stats",
         "settings": "Settings",
         "introduction": "Introduction",
