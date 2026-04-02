@@ -26,6 +26,7 @@ class Navigator:
         "priming_menu": "Eye Priming",
         "sequence_memory_menu": "Sequence Memory",
         "rapid_decision_menu": "Rapid Decision",
+        "mot_menu": "Object Tracking",
         "stats": "Stats",
         "settings": "Settings",
         "introduction": "Introduction",
