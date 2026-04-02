@@ -422,12 +422,10 @@ class ReactionTimeExercise(BaseExercise):
         if event.isAutoRepeat():
             return
         key = event.key()
-        if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_X):
-            self._handle_response(-1)
-        elif self._mode == "choice" and key in (
-            Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
-        ):
+        if key in (Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4):
             self._handle_response(key - Qt.Key.Key_1)
+        elif key in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_X):
+            self._handle_response(-1)
         else:
             super().keyPressEvent(event)
 
