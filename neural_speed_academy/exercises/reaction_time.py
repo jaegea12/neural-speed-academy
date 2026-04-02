@@ -267,19 +267,9 @@ class ReactionTimeExercise(BaseExercise):
             legend.addStretch()
             self._layout.addLayout(legend)
 
-        # Keyboard shortcuts
-        if self._mode == "simple" or self._mode == "go_no_go":
-            shortcut = QShortcut(QKeySequence(Qt.Key.Key_Space), self)
-            shortcut.activated.connect(self._on_space)
-        elif self._mode == "choice":
-            for key, idx in [
-                (Qt.Key.Key_1, 0), (Qt.Key.Key_2, 1),
-                (Qt.Key.Key_3, 2), (Qt.Key.Key_4, 3),
-            ]:
-                sc = QShortcut(QKeySequence(key), self)
-                sc.activated.connect(
-                    lambda i=idx: self._on_choice_key(i)
-                )
+        # Grab keyboard focus for keyPressEvent
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFocus()
 
         self._after(1000, self._next_round)
 
@@ -318,6 +308,7 @@ class ReactionTimeExercise(BaseExercise):
             self._show_results()
             return
 
+        self.setFocus()
         self._round += 1
         c = COLORS
         cfg = REACTION_TIME_CONFIG
@@ -423,14 +414,20 @@ class ReactionTimeExercise(BaseExercise):
 
     # ── Input handling ──
 
+    def keyPressEvent(self, event) -> None:
+        key = event.key()
+        if key == Qt.Key.Key_Space:
+            self._handle_response(-1)
+        elif self._mode == "choice" and key in (
+            Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
+        ):
+            idx = key - Qt.Key.Key_1
+            self._handle_response(idx)
+        else:
+            super().keyPressEvent(event)
+
     def _on_arena_click(self, event) -> None:
         self._handle_response(-1)
-
-    def _on_space(self) -> None:
-        self._handle_response(-1)
-
-    def _on_choice_key(self, idx: int) -> None:
-        self._handle_response(idx)
 
     def _handle_response(self, choice_idx: int) -> None:
         if not self._running:
