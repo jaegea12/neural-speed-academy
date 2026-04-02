@@ -28,6 +28,7 @@ class Navigator:
         "peripheral_flash_menu": "Peripheral Flash",
         "rapid_decision_menu": "Rapid Decision",
         "mot_menu": "Object Tracking",
+        "split_attention_menu": "Split Attention",
         "stats": "Stats",
         "settings": "Settings",
         "introduction": "Introduction",
