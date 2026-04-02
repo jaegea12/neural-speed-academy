@@ -561,10 +561,15 @@ class ReactionTimeExercise(BaseExercise):
             round(self._correct / total * 100) if total > 0 else 0
         )
 
-        # Score: lower median RT is better, so invert for XP
-        # Award more XP for faster reactions
-        xp = max(1, int((500 - median_rt) / 10)) if rts else 0
-        xp = max(0, xp) * self._correct
+        # Score ceiling per mode — choice/go-no-go need more time
+        ceiling = {"simple": 500, "choice": 1000, "go_no_go": 800}.get(
+            self._mode, 500
+        )
+
+        score_val = (
+            max(0, ceiling - round(median_rt)) if rts else 0
+        )
+        xp = max(0, score_val // 10) * self._correct if rts else 0
 
         metadata = {
             "mode": self._mode,
@@ -581,14 +586,10 @@ class ReactionTimeExercise(BaseExercise):
         if self._too_early_count > 0:
             metadata["too_early"] = self._too_early_count
 
-        # Use median RT as score (lower is better) — store inverted
-        # so higher score = better in the history
-        score_val = max(0, 500 - round(median_rt)) if rts else 0
-
         result = ExerciseResult(
             exercise_name="REACTION TIME",
             score=score_val,
-            total=500,
+            total=ceiling,
             xp_gained=xp,
             metadata=metadata,
         )
