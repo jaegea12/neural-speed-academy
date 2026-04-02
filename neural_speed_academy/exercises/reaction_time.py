@@ -238,19 +238,18 @@ class ReactionTimeExercise(BaseExercise):
         self._stimulus_lbl.setFixedSize(200, 200)
         self._stimulus_lbl.hide()
 
-        # Instruction text
+        # Instruction text (in arena, below stimulus)
         self._instruction_lbl = QLabel("", self._arena)
         self._instruction_lbl.setFont(make_qfont("body"))
         self._instruction_lbl.setStyleSheet(f"color: {c['muted']};")
         self._instruction_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._instruction_lbl.setFixedSize(400, 40)
 
-        # Feedback label
-        self._feedback_lbl = QLabel("")
-        self._feedback_lbl.setFont(make_qfont("btn_bold"))
+        # Feedback label (in arena, near stimulus so eyes stay centered)
+        self._feedback_lbl = QLabel("", self._arena)
+        self._feedback_lbl.setFont(QFont("Arial", 24, QFont.Weight.Bold))
         self._feedback_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._feedback_lbl.setFixedHeight(30)
-        self._layout.addWidget(self._feedback_lbl)
+        self._feedback_lbl.setFixedSize(500, 40)
 
         # Choice mode: color legend
         if self._mode == "choice":
@@ -297,14 +296,17 @@ class ReactionTimeExercise(BaseExercise):
         if self._stimulus_lbl:
             sw, sh = self._stimulus_lbl.width(), self._stimulus_lbl.height()
             self._stimulus_lbl.move((aw - sw) // 2, (ah - sh) // 2)
-        # Instruction below center
+        # Instruction below stimulus
         if self._instruction_lbl:
-            iw, ih = (
-                self._instruction_lbl.width(),
-                self._instruction_lbl.height(),
-            )
+            iw = self._instruction_lbl.width()
             self._instruction_lbl.move(
                 (aw - iw) // 2, ah // 2 + 120
+            )
+        # Feedback just below stimulus (close to center)
+        if self._feedback_lbl:
+            fw = self._feedback_lbl.width()
+            self._feedback_lbl.move(
+                (aw - fw) // 2, ah // 2 + 110
             )
 
     # ── Round logic ──
