@@ -711,7 +711,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         self._select_time(self._selected_time)
         self._select_slides(self._selected_slides)
         self._select_lines(self._selected_lines)
-        self._select_all_categories()
+        self._toggle_category("science")
 
     def _toggle_on_style(self) -> str:
         c = COLORS
