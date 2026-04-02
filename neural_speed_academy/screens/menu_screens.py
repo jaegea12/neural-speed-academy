@@ -566,8 +566,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for label, key in categories:
             btn = QPushButton(label)
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedHeight(36)
-            btn.setMaximumWidth(280)
+            btn.setFixedHeight(40)
+            btn.setMaximumWidth(320)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -625,7 +625,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for t in time_options:
             btn = QPushButton(f"{t} seconds")
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedHeight(36)
+            btn.setFixedHeight(40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -649,7 +649,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for s in slide_options:
             btn = QPushButton(str(s))
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedSize(55, 36)
+            btn.setFixedSize(60, 40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -674,7 +674,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for n in lines_options:
             btn = QPushButton(str(n))
             btn.setFont(make_qfont("menu_btn"))
-            btn.setFixedSize(55, 36)
+            btn.setFixedSize(60, 40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
