@@ -460,20 +460,26 @@ class SplitAttentionExercise(BaseExercise):
         self._fixation.hide()
 
         if self._mode in ("simultaneous", "rapid"):
-            # Show both at once
+            # Show both at once — raise to front and force repaint
+            self._center_lbl.raise_()
+            self._periph_lbl.raise_()
             self._center_lbl.show()
             self._periph_lbl.show()
+            self._center_lbl.repaint()
+            self._periph_lbl.repaint()
             # Hide center after center_ms
             self._after(self._center_ms, self._hide_center)
             # Hide peripheral after peripheral_ms
             self._after(self._peripheral_ms, self._hide_peripheral)
-            # Rapid: shorter pause before questions
+            # Pause before questions
             pause = 200 if self._mode == "rapid" else 400
             ask_delay = max(self._center_ms, self._peripheral_ms) + pause
             self._after(ask_delay, self._ask_center)
         else:
             # Sequential: center first, then peripheral
+            self._center_lbl.raise_()
             self._center_lbl.show()
+            self._center_lbl.repaint()
             self._after(self._center_ms, self._seq_hide_center)
 
     def _hide_center(self) -> None:
@@ -494,7 +500,9 @@ class SplitAttentionExercise(BaseExercise):
     def _seq_show_peripheral(self) -> None:
         if not self._running:
             return
+        self._periph_lbl.raise_()
         self._periph_lbl.show()
+        self._periph_lbl.repaint()
         self._after(self._peripheral_ms, self._seq_hide_peripheral)
 
     def _seq_hide_peripheral(self) -> None:
