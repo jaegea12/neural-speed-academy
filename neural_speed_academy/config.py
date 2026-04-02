@@ -344,6 +344,102 @@ EXERCISE_GUIDES = {
         "- Difficulty scales via display time and content density\n"
         "- Transfers to report reading, studying, and data analysis"
     ),
+    "spaced_repetition": (
+        "SPACED REPETITION",
+        "HOW TO USE:\n"
+        "Cards have a front (question/word) and back (answer/definition). "
+        "When a card appears, try to recall the answer, then reveal it. "
+        "Rate your recall: Again (forgot), Hard, Good, or Easy. The system "
+        "schedules the next review based on your rating — cards you struggle "
+        "with appear sooner, mastered cards appear days or weeks later.\n\n"
+        "THE SCIENCE:\n"
+        "Spaced repetition exploits the spacing effect (Ebbinghaus, 1885): "
+        "information is retained longer when reviews are spread over increasing "
+        "intervals. The SM-2 algorithm (Wozniak, 1990) adapts intervals based on "
+        "recall quality, keeping each card at the optimal review point just before "
+        "forgetting. This is the most efficient known method for long-term "
+        "memorization, used by medical students, language learners, and "
+        "competitive memory athletes.\n\n"
+        "BENEFITS:\n"
+        "- Maximizes retention with minimal review time\n"
+        "- Adapts to individual learning speed per card\n"
+        "- Builds durable long-term memory\n"
+        "- Pre-built decks for vocabulary and cognitive training\n"
+        "- Create custom decks for any subject"
+    ),
+}
+
+# Spaced Repetition configuration
+SR_CONFIG = {
+    "max_new_per_session": 10,
+    "max_review_per_session": 30,
+    "default_ease": 2.5,
+    "min_ease": 1.3,
+}
+
+# Pre-built decks: list of (front, back) tuples
+SR_BUILTIN_DECKS = {
+    "SAT Vocabulary": [
+        ("Aberration", "A departure from what is normal or expected"),
+        ("Benevolent", "Well-meaning and kindly"),
+        ("Cacophony", "A harsh, discordant mixture of sounds"),
+        ("Debilitate", "To make weak or feeble"),
+        ("Ephemeral", "Lasting for a very short time"),
+        ("Fastidious", "Very attentive to detail; meticulous"),
+        ("Gregarious", "Fond of company; sociable"),
+        ("Hackneyed", "Lacking originality; overused"),
+        ("Iconoclast", "A person who attacks cherished beliefs"),
+        ("Juxtapose", "To place side by side for comparison"),
+        ("Laconic", "Using very few words; concise"),
+        ("Magnanimous", "Generous or forgiving, especially toward a rival"),
+        ("Nefarious", "Wicked or criminal"),
+        ("Obfuscate", "To make unclear or confusing"),
+        ("Pernicious", "Having a harmful effect, especially gradually"),
+        ("Quintessential", "Representing the most perfect example"),
+        ("Recalcitrant", "Stubbornly uncooperative"),
+        ("Sycophant", "A person who flatters to gain advantage"),
+        ("Tenacious", "Holding firmly; persistent"),
+        ("Ubiquitous", "Present, appearing, or found everywhere"),
+    ],
+    "World Capitals": [
+        ("Japan", "Tokyo"),
+        ("France", "Paris"),
+        ("Brazil", "Bras\u00edlia"),
+        ("Australia", "Canberra"),
+        ("Egypt", "Cairo"),
+        ("Canada", "Ottawa"),
+        ("South Korea", "Seoul"),
+        ("Argentina", "Buenos Aires"),
+        ("Thailand", "Bangkok"),
+        ("Turkey", "Ankara"),
+        ("Norway", "Oslo"),
+        ("Peru", "Lima"),
+        ("New Zealand", "Wellington"),
+        ("Kenya", "Nairobi"),
+        ("Switzerland", "Bern"),
+        ("Poland", "Warsaw"),
+        ("Vietnam", "Hanoi"),
+        ("Colombia", "Bogot\u00e1"),
+        ("Morocco", "Rabat"),
+        ("Czech Republic", "Prague"),
+    ],
+    "Speed Reading Terms": [
+        ("Subvocalization", "The habit of silently pronouncing words while reading"),
+        ("Saccade", "A rapid eye movement between fixation points"),
+        ("Fixation", "A pause where the eye rests to process text"),
+        ("Regression", "Moving the eyes backward to re-read text"),
+        ("Peripheral vision", "Vision outside the center of gaze"),
+        ("Chunking", "Grouping words into meaningful units"),
+        ("WPM", "Words per minute — standard reading speed measure"),
+        ("RSVP", "Rapid Serial Visual Presentation — one word at a time"),
+        ("Metaguiding", "Using a finger or pointer to guide eye movement"),
+        ("Foveal vision", "Sharp central vision used for reading"),
+        ("Magnocellular pathway", "Fast visual pathway for motion and periphery"),
+        ("Useful field of view", "Area from which info can be extracted in one fixation"),
+        ("Pacer", "A visual guide that sets reading tempo"),
+        ("Comprehension", "Understanding and retaining what is read"),
+        ("Skimming", "Reading quickly to get the main ideas"),
+    ],
 }
 
 # MOT configuration
