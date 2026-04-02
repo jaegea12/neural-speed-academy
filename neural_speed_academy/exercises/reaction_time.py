@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QSlider, QComboBox,
 )
-from PyQt6.QtCore import Qt, QTimer, QEvent
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
@@ -213,17 +213,17 @@ class ReactionTimeExercise(BaseExercise):
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setFont(make_qfont("exit_btn"))
-        exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
+        exit_lbl = QLabel("\u2716")
+        exit_lbl.setFont(make_qfont("exit_btn"))
+        exit_lbl.setStyleSheet(
+            f"background-color: {c['alert']}; "
             f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            f"padding: 4px 8px; border-radius: 3px;"
         )
-        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        exit_btn.clicked.connect(self._stop)
-        top.addWidget(exit_btn)
+        exit_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        exit_lbl.mousePressEvent = lambda e: self._stop()
+        top.addWidget(exit_lbl)
         self._layout.addLayout(top)
 
         # Arena — clickable area
@@ -418,26 +418,18 @@ class ReactionTimeExercise(BaseExercise):
 
     # ── Input handling ──
 
-    def event(self, event) -> bool:
-        etype = event.type()
-        if etype in (QEvent.Type.KeyPress, QEvent.Type.ShortcutOverride):
-            if not event.isAutoRepeat():
-                key = event.key()
-                if key == Qt.Key.Key_Space:
-                    if etype == QEvent.Type.KeyPress:
-                        self._handle_response(-1)
-                    return True
-                if self._mode == "choice" and key in (
-                    Qt.Key.Key_1, Qt.Key.Key_2,
-                    Qt.Key.Key_3, Qt.Key.Key_4,
-                ):
-                    if etype == QEvent.Type.KeyPress:
-                        idx = key - Qt.Key.Key_1
-                        self._handle_response(idx)
-                    return True
-            else:
-                return True  # swallow auto-repeat
-        return super().event(event)
+    def keyPressEvent(self, event) -> None:
+        if event.isAutoRepeat():
+            return
+        key = event.key()
+        if key == Qt.Key.Key_Space:
+            self._handle_response(-1)
+        elif self._mode == "choice" and key in (
+            Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
+        ):
+            self._handle_response(key - Qt.Key.Key_1)
+        else:
+            super().keyPressEvent(event)
 
     def _on_arena_click(self, event) -> None:
         self.setFocus()
