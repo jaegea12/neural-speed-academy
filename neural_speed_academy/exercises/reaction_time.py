@@ -37,6 +37,7 @@ class ReactionTimeExercise(BaseExercise):
         self._stimulus_time: float = 0.0
         self._waiting_for_stimulus: bool = False
         self._waiting_for_response: bool = False
+        self._input_locked: bool = False
         self._is_go_trial: bool = True
         self._current_color_idx: int = 0
         self._too_early: bool = False
@@ -346,9 +347,10 @@ class ReactionTimeExercise(BaseExercise):
             )
         self._instruction_lbl.show()
 
-        # Random delay before stimulus
+        # Random delay before stimulus — unlock input for "too early" detection
         delay = random.randint(cfg["min_delay_ms"], cfg["max_delay_ms"])
         self._waiting_for_stimulus = True
+        self._input_locked = False
         self._after(delay, self._show_stimulus)
 
     def _show_stimulus(self) -> None:
@@ -402,6 +404,7 @@ class ReactionTimeExercise(BaseExercise):
 
         self._stimulus_time = time.perf_counter()
         self._waiting_for_response = True
+        self._input_locked = False
 
         # Timeout for go/no-go (also used to auto-advance no-go trials)
         if self._mode == "go_no_go":
@@ -417,23 +420,27 @@ class ReactionTimeExercise(BaseExercise):
     def keyPressEvent(self, event) -> None:
         # Ignore auto-repeat (held keys)
         if event.isAutoRepeat():
+            event.accept()
             return
         key = event.key()
         if key == Qt.Key.Key_Space:
+            event.accept()
             self._handle_response(-1)
-        elif self._mode == "choice" and key in (
+            return
+        if self._mode == "choice" and key in (
             Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
         ):
+            event.accept()
             idx = key - Qt.Key.Key_1
             self._handle_response(idx)
-        else:
-            super().keyPressEvent(event)
+            return
+        super().keyPressEvent(event)
 
     def _on_arena_click(self, event) -> None:
         self._handle_response(-1)
 
     def _handle_response(self, choice_idx: int) -> None:
-        if not self._running:
+        if not self._running or self._input_locked:
             return
 
         c = COLORS
@@ -450,6 +457,7 @@ class ReactionTimeExercise(BaseExercise):
             self._stimulus_lbl.repaint()
             self._feedback_lbl.setText("Too early! Wait for the stimulus.")
             self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
+            self._input_locked = True
             # Repeat this round
             self._round -= 1
             self._after(1500, self._next_round)
@@ -459,6 +467,7 @@ class ReactionTimeExercise(BaseExercise):
             return
 
         self._waiting_for_response = False
+        self._input_locked = True
 
         # Cancel timeout
         if self._timeout_timer:
@@ -511,6 +520,7 @@ class ReactionTimeExercise(BaseExercise):
             return
 
         self._waiting_for_response = False
+        self._input_locked = True
         c = COLORS
 
         if self._mode == "go_no_go":
