@@ -391,10 +391,10 @@ CHUNKING_CONFIG = {
 # Split Attention configuration
 SPLIT_ATTENTION_CONFIG = {
     "default_center_ms": 120,
-    "min_center_ms": 20,
+    "min_center_ms": 40,
     "max_center_ms": 300,
     "default_peripheral_ms": 100,
-    "min_peripheral_ms": 20,
+    "min_peripheral_ms": 40,
     "max_peripheral_ms": 250,
     "default_rounds": 15,
     "min_rounds": 5,

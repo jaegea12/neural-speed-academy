@@ -513,7 +513,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
                     ("Word 80ms · Shape 60ms", run("sequential", 80, 60)),
                     ("Word 60ms · Shape 50ms", run("sequential", 60, 50)),
                     ("Word 50ms · Shape 40ms", run("sequential", 50, 40)),
-                    ("Word 40ms · Shape 30ms", run("sequential", 40, 30)),
+                    ("Word 40ms · Shape 40ms", run("sequential", 40, 40)),
                 ]),
                 ("SIMULTANEOUS", [
                     ("Word 150ms · Shape 120ms", run("simultaneous", 150, 120)),
@@ -522,7 +522,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
                     ("Word 80ms · Shape 60ms", run("simultaneous", 80, 60)),
                     ("Word 60ms · Shape 50ms", run("simultaneous", 60, 50)),
                     ("Word 50ms · Shape 40ms", run("simultaneous", 50, 40)),
-                    ("Word 40ms · Shape 30ms", run("simultaneous", 40, 30)),
+                    ("Word 40ms · Shape 40ms", run("simultaneous", 40, 40)),
                 ]),
                 ("RAPID", [
                     ("Word 120ms · Shape 100ms", run("rapid", 120, 100)),
@@ -530,8 +530,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
                     ("Word 80ms · Shape 60ms", run("rapid", 80, 60)),
                     ("Word 60ms · Shape 50ms", run("rapid", 60, 50)),
                     ("Word 50ms · Shape 40ms", run("rapid", 50, 40)),
-                    ("Word 40ms · Shape 30ms", run("rapid", 40, 30)),
-                    ("Word 30ms · Shape 20ms", run("rapid", 30, 20)),
+                    ("Word 40ms · Shape 40ms", run("rapid", 40, 40)),
                 ]),
             ],
         )
