@@ -565,7 +565,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         for label, key in categories:
             btn = QPushButton(label)
             btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedSize(140, 36)
+            btn.setFixedSize(230, 36)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
