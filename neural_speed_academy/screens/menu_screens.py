@@ -387,6 +387,47 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
         )
 
 
+class MotMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.mot import MotExercise
+
+        def run(targets: int = 3, distractors: int = 5,
+                speed: int = 3, duration: int = 6,
+                rounds: int = 5) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                MotExercise, targets=targets, distractors=distractors,
+                speed=speed, duration=duration, rounds=rounds,
+            )
+
+        self._create_column_menu(
+            "MULTIPLE OBJECT TRACKING", "mot",
+            columns=[
+                ("BEGINNER", [
+                    ("2 targets \u00b7 speed 2 \u00b7 5s", run(2, 4, 2, 5)),
+                    ("2 targets \u00b7 speed 3 \u00b7 6s", run(2, 5, 3, 6)),
+                    ("3 targets \u00b7 speed 2 \u00b7 5s", run(3, 4, 2, 5)),
+                    ("3 targets \u00b7 speed 3 \u00b7 6s", run(3, 5, 3, 6)),
+                ]),
+                ("INTERMEDIATE", [
+                    ("3 targets \u00b7 speed 4 \u00b7 6s", run(3, 5, 4, 6)),
+                    ("4 targets \u00b7 speed 3 \u00b7 7s", run(4, 6, 3, 7)),
+                    ("4 targets \u00b7 speed 4 \u00b7 7s", run(4, 6, 4, 7)),
+                    ("4 targets \u00b7 speed 3 \u00b7 10s", run(4, 7, 3, 10)),
+                ]),
+                ("ADVANCED", [
+                    ("5 targets \u00b7 speed 3 \u00b7 8s", run(5, 7, 3, 8)),
+                    ("5 targets \u00b7 speed 5 \u00b7 8s", run(5, 8, 5, 8)),
+                    ("6 targets \u00b7 speed 4 \u00b7 8s", run(6, 8, 4, 8)),
+                    ("6 targets \u00b7 speed 6 \u00b7 10s", run(6, 10, 6, 10)),
+                ]),
+            ],
+        )
+
+
 class SequenceMemoryMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):

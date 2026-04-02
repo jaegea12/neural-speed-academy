@@ -226,6 +226,50 @@ EXERCISE_GUIDES = {
         "- Strengthens inhibitory control (ignoring irrelevant numbers)\n"
         "- Builds on Schulte grid skills with higher-order demands"
     ),
+    "mot": (
+        "MULTIPLE OBJECT TRACKING",
+        "HOW TO USE:\n"
+        "Several dots appear on screen. Some are highlighted as targets. "
+        "Memorize which ones are targets, then all dots become identical and "
+        "start moving. Track the targets with your attention (not your eyes). "
+        "When movement stops, click the dots you believe were the targets. "
+        "Selected dots turn highlighted — feedback is only shown after all "
+        "selections are made: green = correct, orange = missed target, "
+        "red = wrong pick.\n\n"
+        "THE SCIENCE:\n"
+        "Multiple Object Tracking (MOT) was introduced by Pylyshyn & Storm (1988) "
+        "to study how the visual system tracks multiple moving objects simultaneously. "
+        "NeuroTracker, a commercial MOT system, is used by professional sports teams "
+        "(NFL, NHL, Premier League) and military organizations. Research shows MOT "
+        "training transfers to improved decision-making in dynamic environments "
+        "(Faubert & Sidebottom, 2012) and correlates with athletic performance.\n\n"
+        "BENEFITS:\n"
+        "- Trains sustained attention across multiple moving objects\n"
+        "- Improves dynamic visual acuity and spatial awareness\n"
+        "- Enhances performance in fast-paced sports and gaming\n"
+        "- Strengthens the dorsal attention network\n"
+        "- Difficulty scales via target count, speed, and duration"
+    ),
+}
+
+# MOT configuration
+MOT_CONFIG = {
+    "default_targets": 3,
+    "min_targets": 2,
+    "max_targets": 6,
+    "default_distractors": 5,
+    "min_distractors": 2,
+    "max_distractors": 10,
+    "default_speed": 3,
+    "min_speed": 1,
+    "max_speed": 7,
+    "default_duration": 6,
+    "min_duration": 3,
+    "max_duration": 12,
+    "default_rounds": 5,
+    "highlight_ms": 2000,
+    "dot_radius": 20,
+    "arena_padding": 30,
 }
 
 # Rapid Decision Grid configuration
