@@ -631,10 +631,24 @@ class ReactionTimeExercise(BaseExercise):
             details=details,
         )
 
+        # Rewire CONTINUE button to go back to menu instead of dashboard
+        for btn in self.findChildren(QPushButton):
+            if btn.text() == "CONTINUE":
+                btn.disconnect()
+                btn.clicked.connect(
+                    lambda: self.navigator.navigate_to("reaction_time_menu")
+                )
+
     def _stop(self) -> None:
         self._running = False
         self._waiting_for_stimulus = False
         self._waiting_for_response = False
+        self._input_locked = True
+        # Stop all timers to prevent delayed callbacks
+        for timer in self._timers:
+            timer.stop()
+        self._timers.clear()
         if self._timeout_timer:
             self._timeout_timer.stop()
+            self._timeout_timer = None
         self.navigator.navigate_to("reaction_time_menu")
