@@ -15,10 +15,10 @@ from statistics import median
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QSlider, QComboBox,
+    QSlider, QComboBox, QApplication,
 )
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont, QKeySequence, QShortcut
+from PyQt6.QtCore import Qt, QTimer, QEvent
+from PyQt6.QtGui import QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
@@ -268,9 +268,8 @@ class ReactionTimeExercise(BaseExercise):
             legend.addStretch()
             self._layout.addLayout(legend)
 
-        # Grab keyboard focus for keyPressEvent
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.setFocus()
+        # Install app-level event filter to catch keys regardless of focus
+        QApplication.instance().installEventFilter(self)
 
         self._after(1000, self._next_round)
 
@@ -309,7 +308,6 @@ class ReactionTimeExercise(BaseExercise):
             self._show_results()
             return
 
-        self.setFocus()
         self._round += 1
         c = COLORS
         cfg = REACTION_TIME_CONFIG
@@ -417,24 +415,21 @@ class ReactionTimeExercise(BaseExercise):
 
     # ── Input handling ──
 
-    def keyPressEvent(self, event) -> None:
-        # Ignore auto-repeat (held keys)
-        if event.isAutoRepeat():
-            event.accept()
-            return
-        key = event.key()
-        if key == Qt.Key.Key_Space:
-            event.accept()
-            self._handle_response(-1)
-            return
-        if self._mode == "choice" and key in (
-            Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
-        ):
-            event.accept()
-            idx = key - Qt.Key.Key_1
-            self._handle_response(idx)
-            return
-        super().keyPressEvent(event)
+    def eventFilter(self, obj, event) -> bool:
+        if event.type() == QEvent.Type.KeyPress:
+            if event.isAutoRepeat():
+                return True
+            key = event.key()
+            if key == Qt.Key.Key_Space:
+                self._handle_response(-1)
+                return True
+            if self._mode == "choice" and key in (
+                Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
+            ):
+                idx = key - Qt.Key.Key_1
+                self._handle_response(idx)
+                return True
+        return super().eventFilter(obj, event)
 
     def _on_arena_click(self, event) -> None:
         self._handle_response(-1)
@@ -547,6 +542,9 @@ class ReactionTimeExercise(BaseExercise):
 
     def _show_results(self) -> None:
         self._running = False
+        app = QApplication.instance()
+        if app:
+            app.removeEventFilter(self)
         c = COLORS
 
         total = self._total_rounds
@@ -638,4 +636,7 @@ class ReactionTimeExercise(BaseExercise):
         self._waiting_for_response = False
         if self._timeout_timer:
             self._timeout_timer.stop()
+        app = QApplication.instance()
+        if app:
+            app.removeEventFilter(self)
         self.navigator.go_back()
