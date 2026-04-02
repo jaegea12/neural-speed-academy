@@ -334,6 +334,51 @@ class PrimingMenuScreen(BaseMenuScreen):
         )
 
 
+class PeripheralFlashMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.peripheral_flash import (
+            PeripheralFlashExercise,
+        )
+
+        def run(stim_type: str, flash_ms: int = 300,
+                eccentricity: int = 50, rounds: int = 15) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                PeripheralFlashExercise, stim_type=stim_type,
+                flash_ms=flash_ms, eccentricity=eccentricity, rounds=rounds,
+            )
+
+        self._create_column_menu(
+            "PERIPHERAL FLASH", "peripheral_flash",
+            columns=[
+                ("LETTERS", [
+                    ("Easy (400ms, 30%)", run("letters", 400, 30)),
+                    ("Medium (300ms, 50%)", run("letters", 300, 50)),
+                    ("Hard (200ms, 70%)", run("letters", 200, 70)),
+                    ("Expert (100ms, 80%)", run("letters", 100, 80)),
+                    ("Elite (50ms, 90%)", run("letters", 50, 90)),
+                ]),
+                ("NUMBERS", [
+                    ("Easy (400ms, 30%)", run("numbers", 400, 30)),
+                    ("Medium (300ms, 50%)", run("numbers", 300, 50)),
+                    ("Hard (200ms, 70%)", run("numbers", 200, 70)),
+                    ("Expert (100ms, 80%)", run("numbers", 100, 80)),
+                    ("Elite (50ms, 90%)", run("numbers", 50, 90)),
+                ]),
+                ("SHAPES", [
+                    ("Easy (500ms, 30%)", run("shapes", 500, 30)),
+                    ("Medium (350ms, 50%)", run("shapes", 350, 50)),
+                    ("Hard (200ms, 70%)", run("shapes", 200, 70)),
+                    ("Expert (100ms, 85%)", run("shapes", 100, 85)),
+                    ("Elite (50ms, 90%)", run("shapes", 50, 90)),
+                ]),
+            ],
+        )
+
+
 class RapidDecisionMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
