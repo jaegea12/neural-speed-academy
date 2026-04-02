@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QSlider, QComboBox,
 )
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
@@ -176,6 +176,10 @@ class ReactionTimeExercise(BaseExercise):
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._begin_exercise)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # Enter to start
+        enter_sc = QShortcut(QKeySequence(Qt.Key.Key_Return), self)
+        enter_sc.activated.connect(self._begin_exercise)
 
         cl.addStretch()
         self._layout.addWidget(container, 1)
@@ -336,15 +340,15 @@ class ReactionTimeExercise(BaseExercise):
         # Instruction
         if self._mode == "simple":
             self._instruction_lbl.setText(
-                "Click or press Enter / X when the circle appears"
+                "Click or press X when the circle appears"
             )
         elif self._mode == "choice":
             self._instruction_lbl.setText(
-                "Press the number key (1-4) matching the color"
+                "Press 1-4 for the color, or X to skip"
             )
         else:
             self._instruction_lbl.setText(
-                "Green = Click / Enter / X  |  Red = Don't!"
+                "Green = Click / X  |  Red = Don't!"
             )
         self._instruction_lbl.show()
 
@@ -424,7 +428,7 @@ class ReactionTimeExercise(BaseExercise):
         key = event.key()
         if key in (Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4):
             self._handle_response(key - Qt.Key.Key_1)
-        elif key in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_X):
+        elif key == Qt.Key.Key_X:
             self._handle_response(-1)
         else:
             super().keyPressEvent(event)
