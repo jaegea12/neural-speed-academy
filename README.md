@@ -1,28 +1,45 @@
 # Neural Speed Academy
 
-**v0.9.0**
+**v0.18.0**
 
 A desktop application for speed reading and cognitive training built with Python and PyQt6.
 
-## Features
+## Exercises
 
-- **Flash Perception** — rapid number, word, and eye-span recognition training with configurable difficulty
+### Reading & Perception
+- **Flash Perception** — rapid number, word, and eye-span recognition with configurable difficulty
 - **Pacer Reading** — guided reading with highlight modes (single-line, multi-line, Z-pattern), adjustable WPM, chunk size, and comprehension quiz
 - **RSVP** — rapid serial visual presentation for speed reading
 - **Chunking** — text chunking exercises to increase reading span
-- **Schulte Grid** — numbered grid exercises for peripheral vision training with configurable grid size (3x3 to 7x7) and cell size
-- **Eye Priming** — saccade and smooth pursuit exercises (horizontal, vertical, diagonal, expanding, circular, figure-8)
-- **Training Paths** — structured multi-exercise sessions with progress tracking
+- **Peripheral Flash** — peripheral vision training with directional flash detection
 
-### Additional features
+### Cognitive Training
+- **Sequence Memory** — remember and reproduce increasingly long sequences
+- **Recall Training** — memorise and recall words, numbers, or mixed lists
+- **Schulte Grid** — numbered grid exercises for peripheral vision (3×3 to 7×7)
+- **Rapid Decision Grid** — timed grid-based decision making under pressure
+- **Multiple Object Tracking** — track moving targets among distractors
+- **Spaced Repetition** — SM-2 algorithm flashcard review
+- **Split Attention** — dual-task training (center word + peripheral shape) in sequential, simultaneous, and rapid modes
+- **Reaction Time** — simple, choice, and go/no-go reaction drills
+- **Slide Processing** — absorb text slides with facts, then answer comprehension questions. Configurable categories, display time, slides per session, and lines per slide
+
+### Visual Training
+- **Eye Priming** — saccade and smooth pursuit exercises (horizontal, vertical, diagonal, expanding, circular, figure-8)
+
+### Structured Training
+- **Training Paths** — multi-exercise sessions with progress tracking
+
+## Additional Features
 
 - 7 color themes (Dark, Twilight, Silver, Soft Light, Focus, Light, High Contrast) — all WCAG AA compliant
 - Field of View presets affecting pacer page width and font sizing
-- Responsive layout scaling to any screen size (reference: 1920x1080)
+- Responsive layout scaling to any screen size (reference: 1920×1080)
 - Fullscreen and windowed mode (F11 to toggle)
 - User profiles with optional password protection
 - Per-exercise progress charts and session history
 - CSV/JSON export of training data
+- Keyboard navigation (Ctrl+Enter to start exercises, number keys for answers)
 
 ## Requirements
 
@@ -44,12 +61,12 @@ pip install -e .
 python nsa.py
 ```
 
-## Project structure
+## Project Structure
 
 ```
 nsa.py                              # Entry point
 neural_speed_academy/
-  config.py                         # Exercise configs, guides, constants
+  config.py                         # Exercise configs, guides, slide library
   theme.py                          # Color themes, fonts, screen metrics
   state.py                          # User profile and history data models
   navigation/
@@ -64,6 +81,14 @@ neural_speed_academy/
     chunking.py                     # Text chunking
     schulte.py                      # Schulte grid
     priming.py                      # Eye movement exercises
+    sequence_memory.py              # Sequence memory
+    recall.py                       # Recall training
+    peripheral_flash.py             # Peripheral flash detection
+    rapid_decision.py               # Rapid decision grid
+    mot.py                          # Multiple object tracking
+    split_attention.py              # Split attention dual-task
+    reaction_time.py                # Reaction time drills
+    slide_processing.py             # Slide processing with comprehension
   screens/
     base.py                         # BaseScreen, shared guide dialog
     main_menu_screen.py             # Main menu with login-aware buttons
