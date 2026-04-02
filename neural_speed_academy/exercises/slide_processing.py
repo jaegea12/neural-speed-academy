@@ -278,13 +278,31 @@ class SlideProcessingExercise(BaseExercise):
                     return i
         return None
 
+    @staticmethod
+    def _shuffle_choices(question: tuple) -> tuple:
+        """Return question with answer choices in random order."""
+        q_text, choices, correct_idx = question
+        correct_answer = choices[correct_idx]
+        shuffled = list(choices)
+        random.shuffle(shuffled)
+        new_idx = shuffled.index(correct_answer)
+        return (q_text, shuffled, new_idx)
+
     def _select_bullets_and_questions(
         self, bullets: list[str], questions: list,
     ) -> tuple[list[str], list]:
-        """Pick a subset of bullets and return only answerable questions."""
+        """Pick a subset of bullets and return only answerable questions.
+
+        Bullets are shuffled. Questions are shuffled and their answer
+        choices are randomised so repeated plays feel different.
+        """
         n = min(self._lines_per_slide, len(bullets))
         if n >= len(bullets):
-            return list(bullets), list(questions)
+            shuffled_bullets = list(bullets)
+            random.shuffle(shuffled_bullets)
+            shuffled_qs = [self._shuffle_choices(q) for q in questions]
+            random.shuffle(shuffled_qs)
+            return shuffled_bullets, shuffled_qs
 
         # Map each question to its source bullet
         q_map: list[tuple[int, tuple]] = []
@@ -312,8 +330,8 @@ class SlideProcessingExercise(BaseExercise):
         while len(chosen) < n and remaining:
             chosen.add(remaining.pop())
 
-        chosen_sorted = sorted(chosen)
-        selected_bullets = [bullets[i] for i in chosen_sorted]
+        selected_bullets = [bullets[i] for i in chosen]
+        random.shuffle(selected_bullets)
 
         # Filter questions to those whose source bullet is shown
         valid_qs = [q for idx, q in q_map if idx in chosen]
@@ -327,6 +345,10 @@ class SlideProcessingExercise(BaseExercise):
                     valid_qs.append(q)
                     if len(valid_qs) >= 2:
                         break
+
+        # Shuffle question order and answer choices
+        valid_qs = [self._shuffle_choices(q) for q in valid_qs]
+        random.shuffle(valid_qs)
 
         return selected_bullets, valid_qs
 
