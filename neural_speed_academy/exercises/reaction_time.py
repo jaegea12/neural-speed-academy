@@ -213,17 +213,17 @@ class ReactionTimeExercise(BaseExercise):
 
         top.addStretch()
 
-        exit_lbl = QLabel("\u2716")
-        exit_lbl.setFont(make_qfont("exit_btn"))
-        exit_lbl.setStyleSheet(
-            f"background-color: {c['alert']}; "
+        exit_btn = QPushButton("\u2716")
+        exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        exit_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['alert']}; "
             f"color: {c['text_on_card']}; "
-            f"padding: 4px 8px; border-radius: 3px;"
+            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
         )
-        exit_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-        exit_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        exit_lbl.mousePressEvent = lambda e: self._stop()
-        top.addWidget(exit_lbl)
+        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_btn.clicked.connect(self._stop)
+        top.addWidget(exit_btn)
         self._layout.addLayout(top)
 
         # Arena — clickable area
@@ -336,7 +336,7 @@ class ReactionTimeExercise(BaseExercise):
         # Instruction
         if self._mode == "simple":
             self._instruction_lbl.setText(
-                "Click or press Space when the circle appears"
+                "Click or press Enter / X when the circle appears"
             )
         elif self._mode == "choice":
             self._instruction_lbl.setText(
@@ -344,7 +344,7 @@ class ReactionTimeExercise(BaseExercise):
             )
         else:
             self._instruction_lbl.setText(
-                "Green = Click  |  Red = Don't click"
+                "Green = Click / Enter / X  |  Red = Don't!"
             )
         self._instruction_lbl.show()
 
@@ -422,7 +422,7 @@ class ReactionTimeExercise(BaseExercise):
         if event.isAutoRepeat():
             return
         key = event.key()
-        if key == Qt.Key.Key_Space:
+        if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_X):
             self._handle_response(-1)
         elif self._mode == "choice" and key in (
             Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3, Qt.Key.Key_4,
