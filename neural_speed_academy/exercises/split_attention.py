@@ -37,14 +37,12 @@ class SplitAttentionExercise(BaseExercise):
         self._mode: str = "sequential"  # sequential | simultaneous | rapid
         self._center_correct: int = 0
         self._periph_correct: int = 0
-        self._position_correct: int = 0
         # Current round state
         self._correct_word: str = ""
         self._wrong_word: str = ""
         self._correct_shape: str = ""
         self._correct_shape_name: str = ""
         self._shape_color: str = ""
-        self._word_quadrant: str = ""  # rapid mode: which quadrant the word appeared in
         # UI refs
         self._arena: QWidget | None = None
         self._fixation: QLabel | None = None
@@ -58,9 +56,7 @@ class SplitAttentionExercise(BaseExercise):
         # Answer tracking
         self._center_answered: bool = False
         self._periph_answered: bool = False
-        self._position_answered: bool = False
         self._center_was_correct: bool = False
-        self._position_was_correct: bool = False
 
     @property
     def name(self) -> str:
@@ -260,7 +256,6 @@ class SplitAttentionExercise(BaseExercise):
         self._round = 0
         self._center_correct = 0
         self._periph_correct = 0
-        self._position_correct = 0
         self._build_arena()
 
     # ── Arena ──
@@ -395,9 +390,7 @@ class SplitAttentionExercise(BaseExercise):
         self._answer_container.hide()
         self._center_answered = False
         self._periph_answered = False
-        self._position_answered = False
         self._center_was_correct = False
-        self._position_was_correct = False
 
         self._position_elements()
 
@@ -439,31 +432,13 @@ class SplitAttentionExercise(BaseExercise):
         # Prepare center word
         self._center_lbl.setText(self._correct_word)
 
-        # In rapid mode, place word in a random quadrant
+        # In rapid mode, place word at a random position in the arena
         if self._mode == "rapid":
             lbl_w = self._center_lbl.width()
             lbl_h = self._center_lbl.height()
             margin = 20
-            quadrants = {
-                "Top-Left": (
-                    random.randint(margin, aw // 2 - lbl_w - margin),
-                    random.randint(margin, ah // 2 - lbl_h - margin),
-                ),
-                "Top-Right": (
-                    random.randint(aw // 2 + margin, aw - lbl_w - margin),
-                    random.randint(margin, ah // 2 - lbl_h - margin),
-                ),
-                "Bottom-Left": (
-                    random.randint(margin, aw // 2 - lbl_w - margin),
-                    random.randint(ah // 2 + margin, ah - lbl_h - margin),
-                ),
-                "Bottom-Right": (
-                    random.randint(aw // 2 + margin, aw - lbl_w - margin),
-                    random.randint(ah // 2 + margin, ah - lbl_h - margin),
-                ),
-            }
-            self._word_quadrant = random.choice(list(quadrants.keys()))
-            wx, wy = quadrants[self._word_quadrant]
+            wx = random.randint(margin, max(margin, aw - lbl_w - margin))
+            wy = random.randint(margin, max(margin, ah - lbl_h - margin))
             self._center_lbl.move(wx, wy)
 
         # Show fixation, then flash
@@ -581,63 +556,6 @@ class SplitAttentionExercise(BaseExercise):
         if self._center_was_correct:
             self._center_correct += 1
 
-        if self._mode == "rapid":
-            self._ask_position()
-        else:
-            self._ask_peripheral()
-
-    # ── Position question (rapid mode only) ──
-
-    def _ask_position(self) -> None:
-        """Ask which quadrant the word appeared in."""
-        if not self._running:
-            return
-
-        c = COLORS
-        self._clear_answer_area()
-
-        prompt = QLabel("Where did the word appear?")
-        prompt.setFont(make_qfont("body"))
-        prompt.setStyleSheet(f"color: {c['fg']};")
-        prompt.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._answer_layout.addWidget(prompt)
-
-        grid = QGridLayout()
-        grid.setSpacing(10)
-
-        quadrants = [
-            ("Top-Left", 0, 0), ("Top-Right", 0, 1),
-            ("Bottom-Left", 1, 0), ("Bottom-Right", 1, 1),
-        ]
-        for label, row, col in quadrants:
-            btn = QPushButton(label)
-            btn.setFont(make_qfont("btn_bold"))
-            btn.setFixedSize(160, 50)
-            btn.setStyleSheet(
-                f"QPushButton {{ background-color: {c['card']}; "
-                f"color: {c['fg']}; border: 1px solid {c['muted']}; "
-                f"padding: 8px; border-radius: 4px; }}"
-                f"QPushButton:hover {{ background-color: {c['accent']}; "
-                f"color: {c['btn_text']}; }}"
-            )
-            btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.clicked.connect(
-                lambda _, q=label: self._check_position(q)
-            )
-            grid.addWidget(btn, row, col, Qt.AlignmentFlag.AlignCenter)
-
-        self._answer_layout.addLayout(grid)
-        self._answer_container.show()
-
-    def _check_position(self, chosen: str) -> None:
-        if not self._running or self._position_answered:
-            return
-        self._position_answered = True
-        self._position_was_correct = chosen == self._word_quadrant
-
-        if self._position_was_correct:
-            self._position_correct += 1
-
         self._ask_peripheral()
 
     def _ask_peripheral(self) -> None:
@@ -693,41 +611,20 @@ class SplitAttentionExercise(BaseExercise):
             self._periph_correct += 1
 
         # Update score display
-        if self._mode == "rapid":
-            self._score_lbl.setText(
-                f"Word: {self._center_correct}  |  "
-                f"Pos: {self._position_correct}  |  "
-                f"Shape: {self._periph_correct}"
-            )
-        else:
-            self._score_lbl.setText(
-                f"Center: {self._center_correct}  |  "
-                f"Peripheral: {self._periph_correct}"
-            )
+        self._score_lbl.setText(
+            f"Word: {self._center_correct}  |  "
+            f"Shape: {self._periph_correct}"
+        )
 
         # Combined feedback
         center_mark = "\u2714" if self._center_was_correct else "\u2718"
         periph_mark = "\u2714" if periph_ok else "\u2718"
-
-        if self._mode == "rapid":
-            pos_mark = "\u2714" if self._position_was_correct else "\u2718"
-            feedback = (
-                f"{center_mark} Word  |  "
-                f"{pos_mark} Position  |  "
-                f"{periph_mark} Shape"
-            )
-            all_ok = (
-                self._center_was_correct
-                and self._position_was_correct
-                and periph_ok
-            )
-        else:
-            feedback = (
-                f"{center_mark} Word: {self._correct_word}  |  "
-                f"{periph_mark} Shape: "
-                f"{self._correct_shape} {self._correct_shape_name}"
-            )
-            all_ok = self._center_was_correct and periph_ok
+        feedback = (
+            f"{center_mark} Word: {self._correct_word}  |  "
+            f"{periph_mark} Shape: "
+            f"{self._correct_shape} {self._correct_shape_name}"
+        )
+        all_ok = self._center_was_correct and periph_ok
 
         self._feedback_lbl.setText(feedback)
         self._feedback_lbl.setStyleSheet(
@@ -768,21 +665,8 @@ class SplitAttentionExercise(BaseExercise):
             round(self._periph_correct / total * 100) if total > 0 else 0
         )
 
-        if self._mode == "rapid":
-            pos_pct = (
-                round(self._position_correct / total * 100)
-                if total > 0 else 0
-            )
-            combined = (
-                self._center_correct
-                + self._periph_correct
-                + self._position_correct
-            )
-            combined_total = total * 3
-        else:
-            pos_pct = 0
-            combined = self._center_correct + self._periph_correct
-            combined_total = total * 2
+        combined = self._center_correct + self._periph_correct
+        combined_total = total * 2
 
         combined_pct = (
             round(combined / combined_total * 100)
@@ -790,50 +674,33 @@ class SplitAttentionExercise(BaseExercise):
         )
         xp = combined * USER_DATA_CONFIG["xp_per_correct"]
 
-        metadata = {
-            "mode": self._mode,
-            "center_ms": self._center_ms,
-            "peripheral_ms": self._peripheral_ms,
-            "center_accuracy_pct": center_pct,
-            "peripheral_accuracy_pct": periph_pct,
-            "combined_accuracy_pct": combined_pct,
-        }
-        if self._mode == "rapid":
-            metadata["position_accuracy_pct"] = pos_pct
-
         result = ExerciseResult(
             exercise_name="SPLIT ATTENTION",
             score=combined,
             total=combined_total,
             xp_gained=xp,
-            metadata=metadata,
+            metadata={
+                "mode": self._mode,
+                "center_ms": self._center_ms,
+                "peripheral_ms": self._peripheral_ms,
+                "center_accuracy_pct": center_pct,
+                "peripheral_accuracy_pct": periph_pct,
+                "combined_accuracy_pct": combined_pct,
+            },
         )
         is_pb = self.complete(result)
-
-        if self._mode == "rapid":
-            details = (
-                f"Mode: rapid  |  "
-                f"Word flash: {self._center_ms}ms  |  "
-                f"Shape flash: {self._peripheral_ms}ms\n"
-                f"Word: {center_pct}%  |  "
-                f"Position: {pos_pct}%  |  "
-                f"Shape: {periph_pct}%\n"
-                f"Combined: {combined_pct}%"
-            )
-        else:
-            details = (
-                f"Mode: {self._mode}  |  "
-                f"Word flash: {self._center_ms}ms  |  "
-                f"Shape flash: {self._peripheral_ms}ms\n"
-                f"Center accuracy: {center_pct}%  |  "
-                f"Peripheral accuracy: {periph_pct}%\n"
-                f"Combined: {combined_pct}%"
-            )
 
         self.show_result_screen(
             result,
             is_personal_best=is_pb,
-            details=details,
+            details=(
+                f"Mode: {self._mode}  |  "
+                f"Word flash: {self._center_ms}ms  |  "
+                f"Shape flash: {self._peripheral_ms}ms\n"
+                f"Word accuracy: {center_pct}%  |  "
+                f"Shape accuracy: {periph_pct}%\n"
+                f"Combined: {combined_pct}%"
+            ),
         )
 
     def _stop(self) -> None:
