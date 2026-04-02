@@ -293,6 +293,34 @@ EXERCISE_GUIDES = {
         "- Transfers to real-world tasks like driving, sports, and monitoring\n"
         "- Difficulty scales via flash duration and simultaneous vs. sequential mode"
     ),
+    "reaction_time": (
+        "REACTION TIME",
+        "HOW TO USE:\n"
+        "Simple: A green circle appears after a random delay. Click or press "
+        "X as fast as you can. Responding before the stimulus appears counts "
+        "as 'too early' and the round is repeated.\n\n"
+        "Choice: A colored shape appears — press the matching number key "
+        "(1 = Green, 2 = Red, 3 = Blue, 4 = Yellow). "
+        "Press X to skip a round. Speed and accuracy both matter.\n\n"
+        "Go/No-Go: Green circle = click or X (Go). Red circle = don't react "
+        "(No-Go). Tests impulse control — false alarms on red count against you.\n\n"
+        "KEYBOARD:\n"
+        "X — respond (all modes)  |  1-4 — select color (choice mode)\n"
+        "Ctrl+Enter — start exercise from config screen\n\n"
+        "THE SCIENCE:\n"
+        "Simple reaction time averages 200-250ms in adults (Luce, 1986). "
+        "Choice reaction time increases logarithmically with the number of "
+        "alternatives (Hick's Law, 1952). Go/No-Go tasks engage the right "
+        "inferior frontal gyrus for response inhibition (Aron et al., 2004). "
+        "Regular training can reduce reaction times by 10-20% and improve "
+        "inhibitory control.\n\n"
+        "BENEFITS:\n"
+        "- Measures and improves processing speed\n"
+        "- Choice mode trains rapid decision-making under uncertainty\n"
+        "- Go/No-Go strengthens impulse control and response inhibition\n"
+        "- Results use median RT (resistant to outliers)\n"
+        "- Transfers to driving, sports, and gaming performance"
+    ),
 }
 
 # MOT configuration
@@ -414,6 +442,26 @@ SPLIT_ATTENTION_CONFIG = {
         (0.7, 0.7),    # bottom-right
     ],
     "eccentricity": 65,
+}
+
+# Reaction Time configuration
+REACTION_TIME_CONFIG = {
+    "default_rounds": 15,
+    "min_rounds": 5,
+    "max_rounds": 30,
+    "min_delay_ms": 1000,
+    "max_delay_ms": 4000,
+    "timeout_ms": 1000,         # max wait for response in go/no-go
+    "modes": ["simple", "choice", "go_no_go"],
+    "go_ratio": 0.7,            # default fraction of go trials
+    "choice_colors": [
+        ("#2ecc71", "Green"),
+        ("#e74c3c", "Red"),
+        ("#3498db", "Blue"),
+        ("#f1c40f", "Yellow"),
+    ],
+    "choice_shapes": ["\u25cf", "\u25a0", "\u25b2", "\u25c6"],
+    "choice_shape_names": ["circle", "square", "triangle", "diamond"],
 }
 
 # User data configuration

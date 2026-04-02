@@ -485,6 +485,52 @@ class MotMenuScreen(BaseMenuScreen):
         )
 
 
+class ReactionTimeMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.reaction_time import (
+            ReactionTimeExercise,
+        )
+
+        def run(mode: str = "simple", rounds: int = 15,
+                go_ratio: float = 0.7) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                ReactionTimeExercise, mode=mode, rounds=rounds,
+                go_ratio=go_ratio,
+            )
+
+        self._create_column_menu(
+            "REACTION TIME", "reaction_time",
+            columns=[
+                ("SIMPLE", [
+                    ("10 Rounds", run("simple", 10)),
+                    ("15 Rounds", run("simple", 15)),
+                    ("20 Rounds", run("simple", 20)),
+                    ("25 Rounds", run("simple", 25)),
+                    ("30 Rounds", run("simple", 30)),
+                ]),
+                ("CHOICE", [
+                    ("10 Rounds", run("choice", 10)),
+                    ("15 Rounds", run("choice", 15)),
+                    ("20 Rounds", run("choice", 20)),
+                    ("25 Rounds", run("choice", 25)),
+                    ("30 Rounds", run("choice", 30)),
+                ]),
+                ("GO / NO-GO", [
+                    ("70/30 · 10 Rounds", run("go_no_go", 10, 0.7)),
+                    ("70/30 · 15 Rounds", run("go_no_go", 15, 0.7)),
+                    ("60/40 · 15 Rounds", run("go_no_go", 15, 0.6)),
+                    ("60/40 · 20 Rounds", run("go_no_go", 20, 0.6)),
+                    ("50/50 · 20 Rounds", run("go_no_go", 20, 0.5)),
+                    ("50/50 · 25 Rounds", run("go_no_go", 25, 0.5)),
+                ]),
+            ],
+        )
+
+
 class SplitAttentionMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
