@@ -65,16 +65,22 @@ class BaseExercise(QWidget):
         pass
 
     def _clear(self) -> None:
-        """Remove all child widgets and stop timers."""
+        """Remove all child widgets, nested layouts, and stop timers."""
         self._running = False
         for timer in self._timers:
             timer.stop()
         self._timers.clear()
-        while self._layout.count():
-            item = self._layout.takeAt(0)
-            w = item.widget()
-            if w:
-                w.deleteLater()
+        self._clear_layout(self._layout)
+
+    @staticmethod
+    def _clear_layout(layout) -> None:
+        """Recursively remove all items from a layout."""
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                BaseExercise._clear_layout(item.layout())
 
     def _after(self, ms: int, callback) -> QTimer:
         """Schedule a callback after ms milliseconds. Returns the timer."""
