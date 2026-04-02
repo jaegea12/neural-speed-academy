@@ -226,6 +226,26 @@ EXERCISE_GUIDES = {
         "- Strengthens inhibitory control (ignoring irrelevant numbers)\n"
         "- Builds on Schulte grid skills with higher-order demands"
     ),
+    "peripheral_flash": (
+        "PERIPHERAL FLASH",
+        "HOW TO USE:\n"
+        "Keep your eyes fixed on the center cross at all times. A stimulus "
+        "(letter, number, or shape) will flash briefly at the edge of the screen. "
+        "Identify what appeared without moving your eyes from the center.\n\n"
+        "THE SCIENCE:\n"
+        "Peripheral vision processes information through the magnocellular pathway, "
+        "which is faster but lower resolution than central (foveal) vision. Training "
+        "peripheral awareness expands the useful field of view (UFOV), a measure "
+        "strongly correlated with reading speed, driving safety, and athletic "
+        "performance (Ball et al., 1988). Professional athletes and esports players "
+        "consistently show wider UFOV than untrained individuals.\n\n"
+        "BENEFITS:\n"
+        "- Expands useful field of view for faster reading\n"
+        "- Trains stimulus detection without eye movement\n"
+        "- Improves situational awareness for sports and driving\n"
+        "- Strengthens the magnocellular visual pathway\n"
+        "- Difficulty scales via flash duration and eccentricity"
+    ),
     "mot": (
         "MULTIPLE OBJECT TRACKING",
         "HOW TO USE:\n"
@@ -270,6 +290,20 @@ MOT_CONFIG = {
     "highlight_ms": 2000,
     "dot_radius": 20,
     "arena_padding": 30,
+}
+
+# Peripheral flash configuration
+PERIPHERAL_FLASH_CONFIG = {
+    "default_flash_ms": 100,
+    "min_flash_ms": 50,
+    "max_flash_ms": 100,
+    "default_eccentricity": 50,
+    "min_eccentricity": 20,
+    "max_eccentricity": 90,
+    "default_rounds": 15,
+    "stimulus_types": ["letters", "numbers", "shapes"],
+    "shapes": ["\u25b2", "\u25cf", "\u25a0", "\u25c6", "\u2605"],
+    "shape_names": ["triangle", "circle", "square", "diamond", "star"],
 }
 
 # Rapid Decision Grid configuration
