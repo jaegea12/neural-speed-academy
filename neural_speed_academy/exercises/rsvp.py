@@ -220,30 +220,33 @@ class RsvpExercise(BaseExercise):
             exercise_label="RSVP — COMPREHENSION CHECK",
         )
 
-    def _on_recall_scored(self, score, total, matched, keywords) -> None:
+    def _on_recall_scored(self, score, total, matches, keywords) -> None:
         from neural_speed_academy.exercises.recall import build_recall_results
         self._clear()
         self.add_nav_bar()
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
-        xp = self._word_count // 10 + score * USER_DATA_CONFIG["xp_per_correct"]
+        int_score = int(score) if score == int(score) else round(score, 1)
+        comprehension_pct = round(score / total * 100) if total > 0 else 0
+        xp = self._word_count // 10 + int(score) * USER_DATA_CONFIG["xp_per_correct"]
         result = ExerciseResult(
             exercise_name="RSVP",
-            score=score,
+            score=int_score,
             total=total,
             xp_gained=xp,
             metadata={
                 "wpm": self.wpm,
                 "word_count": self._word_count,
-                "comprehension_score": score,
+                "comprehension_score": int_score,
                 "comprehension_total": total,
+                "comprehension_pct": comprehension_pct,
             },
         )
         is_pb = self.complete(result)
 
         cl = build_recall_results(
-            self._layout, score, total, matched, keywords,
+            self._layout, score, total, matches, keywords,
         )
 
         cl.addSpacing(10)

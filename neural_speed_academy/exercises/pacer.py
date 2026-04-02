@@ -21,7 +21,9 @@ from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, input_css, theme_manager, screen_metrics
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
-from neural_speed_academy.exercises.recall import extract_keywords
+from neural_speed_academy.exercises.recall import (
+    build_recall_screen, build_recall_results,
+)
 
 
 # ── Helpers ──
@@ -630,60 +632,26 @@ class PacerExercise(BaseExercise):
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
-        self._keywords = extract_keywords(self._source_text)
-
-        container = QWidget()
-        container.setStyleSheet(f"background-color: {c['bg']};")
-        cl = QVBoxLayout(container)
-        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setSpacing(8)
-
-        title = QLabel("COMPREHENSION CHECK")
-        title.setFont(make_qfont("header"))
-        title.setStyleSheet(f"color: {c['accent']};")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(title)
-
-        desc = QLabel("Summarize what you just read in your own words.")
-        desc.setFont(make_qfont("body"))
-        desc.setStyleSheet(f"color: {c['fg']};")
-        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(desc)
-
-        self._quiz_input = QTextEdit()
-        self._quiz_input.setFont(make_qfont("pacer_text"))
-        self._quiz_input.setStyleSheet(input_css(widget="QTextEdit"))
-        self._quiz_input.setFixedHeight(150)
-        self._quiz_input.setFixedWidth(screen_metrics.text_input_w)
-        cl.addWidget(self._quiz_input, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        check_btn = QPushButton("CHECK")
-        check_btn.setFont(make_qfont("btn_bold"))
-        check_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 30px; border-radius: 4px; }}"
+        build_recall_screen(
+            self, self._layout, self._source_text,
+            on_scored=self._on_recall_scored,
+            exercise_label="PACER — COMPREHENSION CHECK",
         )
-        check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        check_btn.clicked.connect(self._score_quiz)
-        cl.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self._layout.addWidget(container, 1)
-        self._quiz_input.setFocus()
+    def _on_recall_scored(self, score, total, matches, keywords) -> None:
+        self._clear()
+        self.add_nav_bar()
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
 
-    def _score_quiz(self) -> None:
-        summary = self._quiz_input.toPlainText().lower()
-        summary_words = set(re.findall(r"[a-zA-Z]+", summary))
-
-        matched = [kw for kw in self._keywords if kw in summary_words]
-        score = len(matched)
-        total = len(self._keywords)
-
-        xp = score * USER_DATA_CONFIG["xp_per_correct"]
+        int_score = int(score) if score == int(score) else round(score, 1)
+        comprehension_pct = round(score / total * 100) if total > 0 else 0
+        xp = int(score) * USER_DATA_CONFIG["xp_per_correct"]
         elapsed = time.monotonic() - self._start_time
         word_count = len(self._words)
         actual_wpm = int(word_count / (elapsed / 60)) if elapsed > 0 else 0
         result = ExerciseResult(
-            exercise_name="PACER", score=score, total=total, xp_gained=xp,
+            exercise_name="PACER", score=int_score, total=total, xp_gained=xp,
             metadata={
                 "wpm_target": self._wpm_target,
                 "wpm_actual": actual_wpm,
@@ -691,42 +659,25 @@ class PacerExercise(BaseExercise):
                 "chunk_size": self._chunk_size,
                 "word_count": word_count,
                 "duration_s": round(elapsed, 1),
-                "comprehension_score": score,
+                "comprehension_score": int_score,
                 "comprehension_total": total,
+                "comprehension_pct": comprehension_pct,
             },
         )
         is_pb = self.complete(result)
 
-        # Results screen with keyword breakdown
-        self._clear()
-        self.add_nav_bar()
+        cl = build_recall_results(
+            self._layout, score, total, matches, keywords,
+        )
 
-        c = COLORS
-        self.setStyleSheet(f"background-color: {c['bg']};")
-
-        container = QWidget()
-        container.setStyleSheet(f"background-color: {c['bg']};")
-        cl = QVBoxLayout(container)
-        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setSpacing(6)
-
-        title = QLabel("RESULTS")
-        title.setFont(make_qfont("header"))
-        title.setStyleSheet(f"color: {c['accent']};")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(title)
-
-        score_lbl = QLabel(f"Key concepts recalled: {score}/{total}")
-        score_lbl.setFont(make_qfont("btn_lg"))
-        score_lbl.setStyleSheet(f"color: {c['fg']};")
-        score_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(score_lbl)
-
-        xp_lbl = QLabel(f"XP earned: +{xp}")
-        xp_lbl.setFont(make_qfont("counter"))
-        xp_lbl.setStyleSheet(f"color: {c['accent']};")
-        xp_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(xp_lbl)
+        cl.addSpacing(10)
+        details = QLabel(
+            f"Read {word_count} words at {actual_wpm} WPM (target {self._wpm_target})"
+        )
+        details.setFont(make_qfont("body"))
+        details.setStyleSheet(f"color: {c['fg']};")
+        details.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(details)
 
         if is_pb:
             pb = QLabel("NEW PERSONAL BEST!")
@@ -735,23 +686,13 @@ class PacerExercise(BaseExercise):
             pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             cl.addWidget(pb)
 
-        for kw in self._keywords:
-            found = kw in summary_words
-            color = c["success"] if found else c["alert"]
-            marker = "\u2713" if found else "\u2717"
-            lbl = QLabel(f"  {marker}  {kw}")
-            lbl.setFont(make_qfont("body"))
-            lbl.setStyleSheet(f"color: {color};")
-            cl.addWidget(lbl, alignment=Qt.AlignmentFlag.AlignCenter)
-
+        cl.addSpacing(10)
         cont_btn = QPushButton("CONTINUE")
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
-            f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 40px; border-radius: 4px;"
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px; }}"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         cont_btn.clicked.connect(self.navigator.finish_exercise)
         cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self._layout.addWidget(container, 1)
