@@ -387,6 +387,47 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
         )
 
 
+class MotMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.mot import MotExercise
+
+        def run(targets: int = 3, distractors: int = 5,
+                speed: int = 3, duration: int = 6,
+                rounds: int = 5) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                MotExercise, targets=targets, distractors=distractors,
+                speed=speed, duration=duration, rounds=rounds,
+            )
+
+        self._create_column_menu(
+            "MULTIPLE OBJECT TRACKING", "mot",
+            columns=[
+                ("BEGINNER", [
+                    ("2 targets, slow", run(2, 4, 2, 5)),
+                    ("2 targets, medium", run(2, 5, 3, 6)),
+                    ("3 targets, slow", run(3, 4, 2, 5)),
+                    ("3 targets, medium", run(3, 5, 3, 6)),
+                ]),
+                ("INTERMEDIATE", [
+                    ("3 targets, fast", run(3, 5, 4, 6)),
+                    ("4 targets, medium", run(4, 6, 3, 7)),
+                    ("4 targets, fast", run(4, 6, 4, 7)),
+                    ("4 targets, long", run(4, 7, 3, 10)),
+                ]),
+                ("ADVANCED", [
+                    ("5 targets, medium", run(5, 7, 3, 8)),
+                    ("5 targets, fast", run(5, 8, 5, 8)),
+                    ("6 targets, medium", run(6, 8, 4, 8)),
+                    ("6 targets, fast", run(6, 10, 6, 10)),
+                ]),
+            ],
+        )
+
+
 class SequenceMemoryMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):

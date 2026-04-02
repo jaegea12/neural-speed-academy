@@ -21,7 +21,7 @@ from neural_speed_academy.screens.stats_screen import StatsScreen
 from neural_speed_academy.screens.introduction_screen import IntroductionScreen
 from neural_speed_academy.screens.menu_screens import (
     FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, PrimingMenuScreen,
-    SequenceMemoryMenuScreen, RapidDecisionMenuScreen,
+    SequenceMemoryMenuScreen, RapidDecisionMenuScreen, MotMenuScreen,
 )
 from neural_speed_academy.screens.paths_screen import PathSelectionScreen, CustomPathsScreen
 from neural_speed_academy.screens.path_session_screen import (
@@ -115,6 +115,9 @@ class NeuralSpeedAcademy:
         nav.register_screen(
             "rapid_decision_menu",
             lambda: RapidDecisionMenuScreen(nav))
+        nav.register_screen(
+            "mot_menu",
+            lambda: MotMenuScreen(nav))
 
     def _exercise_callbacks(self) -> dict:
         nav = self.navigator
@@ -129,6 +132,7 @@ class NeuralSpeedAcademy:
             "setup_chunking": lambda: nav.launch_exercise(ChunkingExercise),
             "menu_sequence_memory": lambda: nav.navigate_to("sequence_memory_menu"),
             "menu_rapid_decision": lambda: nav.navigate_to("rapid_decision_menu"),
+            "menu_mot": lambda: nav.navigate_to("mot_menu"),
             "show_paths": lambda: nav.navigate_to("paths"),
             "show_stats": lambda: nav.navigate_to("stats"),
         }
