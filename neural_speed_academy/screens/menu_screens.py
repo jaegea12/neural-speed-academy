@@ -504,50 +504,51 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         )
 
         c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar()
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
-        cl.setContentsMargins(30, 10, 30, 10)
-        cl.setSpacing(8)
+        cl.setContentsMargins(30, 20, 30, 20)
+        cl.setSpacing(10)
 
-        # Guide button
-        top = QHBoxLayout()
-        top.setContentsMargins(0, 0, 0, 0)
+        # Title row (matches _create_column_menu style)
+        title_row = QHBoxLayout()
+        title_row.addStretch()
+        title_lbl = QLabel("SLIDE PROCESSING")
+        title_lbl.setFont(make_qfont("header"))
+        title_lbl.setStyleSheet(f"color: {c['fg']};")
+        title_row.addWidget(title_lbl)
+
         guide_btn = QPushButton("GUIDE")
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: none; padding: 6px 16px; border-radius: 4px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(
             lambda: self.show_guide("slide_processing")
         )
-        top.addWidget(guide_btn)
-        top.addStretch()
-        cl.addLayout(top)
+        title_row.addWidget(guide_btn)
+        title_row.addStretch()
+        cl.addLayout(title_row)
 
-        title = QLabel("SLIDE PROCESSING")
-        title.setFont(make_qfont("section_header"))
-        title.setStyleSheet(f"color: {c['accent']};")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(title)
+        cl.addStretch()
 
-        cl.addSpacing(6)
-
-        # Two-column layout
+        # Two-column layout: categories (2/3) | options (1/3)
         columns = QHBoxLayout()
-        columns.setSpacing(30)
+        columns.setSpacing(20)
+        columns.setContentsMargins(20, 0, 20, 0)
 
-        # ── Left column: Categories ──
+        # ── Left: Categories (2-column grid) ──
         left = QVBoxLayout()
-        left.setSpacing(6)
+        left.setSpacing(8)
 
         cat_header = QLabel("CATEGORIES")
-        cat_header.setFont(make_qfont("btn_bold"))
-        cat_header.setStyleSheet(f"color: {c['fg']};")
+        cat_header.setFont(make_qfont("menu_header"))
+        cat_header.setStyleSheet(f"color: {c['accent']};")
         cat_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         left.addWidget(cat_header)
 
@@ -562,58 +563,70 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             ("Nutrition", "nutrition"),
         ]
 
-        for label, key in categories:
+        cat_grid = QGridLayout()
+        cat_grid.setSpacing(10)
+        for idx, (label, key) in enumerate(categories):
+            row, col = divmod(idx, 2)
             btn = QPushButton(label)
-            btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedSize(230, 36)
+            btn.setFont(make_qfont("menu_btn"))
+            btn.setFixedHeight(40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
                 lambda _, k=key: self._toggle_category(k)
             )
-            left.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+            cat_grid.addWidget(btn, row, col)
             self._cat_buttons[key] = btn
+        left.addLayout(cat_grid)
 
-        # Select All / Clear
+        # Select All / Clear — centered, compact
         sel_row = QHBoxLayout()
+        sel_row.addStretch()
         sel_all = QPushButton("Select All")
         sel_all.setFont(make_qfont("btn_sm"))
         sel_all.setStyleSheet(
             f"color: {c['accent']}; background: transparent; "
-            f"border: none; padding: 2px;"
+            f"border: none; padding: 4px 10px;"
         )
         sel_all.setCursor(Qt.CursorShape.PointingHandCursor)
         sel_all.clicked.connect(self._select_all_categories)
         sel_row.addWidget(sel_all)
 
+        sep_lbl = QLabel("·")
+        sep_lbl.setStyleSheet(f"color: {c['muted']};")
+        sel_row.addWidget(sep_lbl)
+
         sel_clear = QPushButton("Clear")
         sel_clear.setFont(make_qfont("btn_sm"))
         sel_clear.setStyleSheet(
             f"color: {c['muted']}; background: transparent; "
-            f"border: none; padding: 2px;"
+            f"border: none; padding: 4px 10px;"
         )
         sel_clear.setCursor(Qt.CursorShape.PointingHandCursor)
         sel_clear.clicked.connect(self._clear_categories)
         sel_row.addWidget(sel_clear)
+        sel_row.addStretch()
         left.addLayout(sel_row)
 
-        columns.addLayout(left)
+        # Give left column stretch factor 2 (2/3 of space)
+        columns.addLayout(left, 2)
 
-        # ── Right column: Timing + Slides ──
+        # ── Right: Options ──
         right = QVBoxLayout()
-        right.setSpacing(6)
+        right.setSpacing(8)
 
+        # Display time
         time_header = QLabel("DISPLAY TIME")
-        time_header.setFont(make_qfont("btn_bold"))
-        time_header.setStyleSheet(f"color: {c['fg']};")
+        time_header.setFont(make_qfont("menu_header"))
+        time_header.setStyleSheet(f"color: {c['accent']};")
         time_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right.addWidget(time_header)
 
         time_options = [15, 12, 10, 8, 6, 5, 4, 3]
         for t in time_options:
             btn = QPushButton(f"{t} seconds")
-            btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedHeight(36)
+            btn.setFont(make_qfont("menu_btn"))
+            btn.setFixedHeight(40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -622,11 +635,12 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             right.addWidget(btn)
             self._time_buttons[t] = btn
 
-        right.addSpacing(8)
+        right.addSpacing(10)
 
+        # Slides per session
         slides_header = QLabel("SLIDES PER SESSION")
-        slides_header.setFont(make_qfont("btn_bold"))
-        slides_header.setStyleSheet(f"color: {c['fg']};")
+        slides_header.setFont(make_qfont("menu_header"))
+        slides_header.setStyleSheet(f"color: {c['accent']};")
         slides_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right.addWidget(slides_header)
 
@@ -635,8 +649,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         slide_row.setSpacing(8)
         for s in slide_options:
             btn = QPushButton(str(s))
-            btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedSize(60, 36)
+            btn.setFont(make_qfont("menu_btn"))
+            btn.setFixedSize(60, 40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -646,11 +660,12 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             self._slide_buttons[s] = btn
         right.addLayout(slide_row)
 
-        right.addSpacing(8)
+        right.addSpacing(10)
 
+        # Lines per slide
         lines_header = QLabel("LINES PER SLIDE")
-        lines_header.setFont(make_qfont("btn_bold"))
-        lines_header.setStyleSheet(f"color: {c['fg']};")
+        lines_header.setFont(make_qfont("menu_header"))
+        lines_header.setStyleSheet(f"color: {c['accent']};")
         lines_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right.addWidget(lines_header)
 
@@ -659,8 +674,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         lines_row.setSpacing(8)
         for n in lines_options:
             btn = QPushButton(str(n))
-            btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedSize(60, 36)
+            btn.setFont(make_qfont("menu_btn"))
+            btn.setFixedSize(60, 40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(self._toggle_off_style())
             btn.clicked.connect(
@@ -670,10 +685,12 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             self._lines_buttons[n] = btn
         right.addLayout(lines_row)
 
-        columns.addLayout(right)
+        # Give right column stretch factor 1 (1/3 of space)
+        columns.addLayout(right, 1)
+
         cl.addLayout(columns)
 
-        cl.addSpacing(12)
+        cl.addStretch()
 
         # START button
         start_btn = QPushButton("START")
@@ -703,7 +720,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         return (
             f"QPushButton {{ background-color: {c['accent']}; "
             f"color: {c['btn_text']}; border: none; "
-            f"padding: 4px 12px; border-radius: 4px; }}"
+            f"padding: 6px 14px; border-radius: 4px; }}"
         )
 
     def _toggle_off_style(self) -> str:
@@ -711,7 +728,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         return (
             f"QPushButton {{ background-color: {c['card']}; "
             f"color: {c['fg']}; border: 1px solid {c['muted']}; "
-            f"padding: 4px 12px; border-radius: 4px; }}"
+            f"padding: 6px 14px; border-radius: 4px; }}"
             f"QPushButton:hover {{ background-color: {c['accent']}; "
             f"color: {c['btn_text']}; }}"
         )
