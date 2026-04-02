@@ -446,12 +446,12 @@ class SplitAttentionExercise(BaseExercise):
         self._periph_lbl.hide()
 
         if self._mode == "rapid":
-            # No fixation pause — flash immediately
-            self._fixation.hide()
-            self._flash_stimuli()
+            # Brief fixation to let eyes settle after traveling from buttons
+            self._fixation.show()
+            self._after(400, self._flash_stimuli)
         else:
             self._fixation.show()
-            self._after(500, self._flash_stimuli)
+            self._after(800, self._flash_stimuli)
 
     def _flash_stimuli(self) -> None:
         if not self._running:
@@ -632,9 +632,7 @@ class SplitAttentionExercise(BaseExercise):
         )
 
         self._answer_container.hide()
-        # Rapid: shorter pause between rounds
-        delay = 800 if self._mode == "rapid" else 1500
-        self._after(delay, self._next_round)
+        self._after(2000, self._next_round)
 
     def _clear_answer_area(self) -> None:
         if not self._answer_layout:
