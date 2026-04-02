@@ -88,6 +88,7 @@ class DashboardScreen(BaseScreen):
             ("Eye-Span", self._cb("menu_eyespan")),
             ("Schulte Grid", self._cb("start_schulte")),
             ("Sequence Memory", self._cb("menu_sequence_memory")),
+            ("Peripheral Flash", self._cb("menu_peripheral_flash")),
             ("Rapid Decision", self._cb("menu_rapid_decision")),
             ("Object Tracking", self._cb("menu_mot")),
         ])

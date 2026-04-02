@@ -334,6 +334,63 @@ class PrimingMenuScreen(BaseMenuScreen):
         )
 
 
+class PeripheralFlashMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.peripheral_flash import (
+            PeripheralFlashExercise,
+        )
+
+        def run(stim_type: str, flash_ms: int = 300,
+                eccentricity: int = 50, rounds: int = 15) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                PeripheralFlashExercise, stim_type=stim_type,
+                flash_ms=flash_ms, eccentricity=eccentricity, rounds=rounds,
+            )
+
+        self._create_column_menu(
+            "PERIPHERAL FLASH", "peripheral_flash",
+            columns=[
+                ("LETTERS", [
+                    ("300ms \u00b7 30%", run("letters", 300, 30)),
+                    ("250ms \u00b7 50%", run("letters", 250, 50)),
+                    ("200ms \u00b7 50%", run("letters", 200, 50)),
+                    ("200ms \u00b7 70%", run("letters", 200, 70)),
+                    ("150ms \u00b7 70%", run("letters", 150, 70)),
+                    ("100ms \u00b7 70%", run("letters", 100, 70)),
+                    ("100ms \u00b7 80%", run("letters", 100, 80)),
+                    ("50ms \u00b7 80%", run("letters", 50, 80)),
+                    ("50ms \u00b7 90%", run("letters", 50, 90)),
+                ]),
+                ("NUMBERS", [
+                    ("300ms \u00b7 30%", run("numbers", 300, 30)),
+                    ("250ms \u00b7 50%", run("numbers", 250, 50)),
+                    ("200ms \u00b7 50%", run("numbers", 200, 50)),
+                    ("200ms \u00b7 70%", run("numbers", 200, 70)),
+                    ("150ms \u00b7 70%", run("numbers", 150, 70)),
+                    ("100ms \u00b7 70%", run("numbers", 100, 70)),
+                    ("100ms \u00b7 80%", run("numbers", 100, 80)),
+                    ("50ms \u00b7 80%", run("numbers", 50, 80)),
+                    ("50ms \u00b7 90%", run("numbers", 50, 90)),
+                ]),
+                ("SHAPES", [
+                    ("350ms \u00b7 30%", run("shapes", 350, 30)),
+                    ("300ms \u00b7 50%", run("shapes", 300, 50)),
+                    ("250ms \u00b7 50%", run("shapes", 250, 50)),
+                    ("200ms \u00b7 70%", run("shapes", 200, 70)),
+                    ("150ms \u00b7 70%", run("shapes", 150, 70)),
+                    ("100ms \u00b7 70%", run("shapes", 100, 70)),
+                    ("100ms \u00b7 80%", run("shapes", 100, 80)),
+                    ("50ms \u00b7 80%", run("shapes", 50, 80)),
+                    ("50ms \u00b7 90%", run("shapes", 50, 90)),
+                ]),
+            ],
+        )
+
+
 class RapidDecisionMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
