@@ -399,7 +399,7 @@ SPLIT_ATTENTION_CONFIG = {
     "default_rounds": 15,
     "min_rounds": 5,
     "max_rounds": 30,
-    "modes": ["sequential", "simultaneous"],
+    "modes": ["sequential", "simultaneous", "rapid"],
     "shapes": ["\u25b2", "\u25cf", "\u25a0", "\u25c6", "\u2605"],
     "shape_names": ["triangle", "circle", "square", "diamond", "star"],
     "shape_colors": ["#e74c3c", "#3498db", "#2ecc71", "#f39c12"],
