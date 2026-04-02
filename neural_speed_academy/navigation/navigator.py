@@ -25,6 +25,7 @@ class Navigator:
         "eyespan_menu": "Eye-Span",
         "priming_menu": "Eye Priming",
         "sequence_memory_menu": "Sequence Memory",
+        "peripheral_flash_menu": "Peripheral Flash",
         "rapid_decision_menu": "Rapid Decision",
         "mot_menu": "Object Tracking",
         "stats": "Stats",
