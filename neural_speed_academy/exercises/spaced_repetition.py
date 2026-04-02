@@ -294,6 +294,14 @@ class SpacedRepetitionExercise(BaseExercise):
         # Card front
         self._layout.addStretch()
 
+        hint_lbl = QLabel("Think of the answer, then reveal it")
+        hint_lbl.setFont(make_qfont("body"))
+        hint_lbl.setStyleSheet(f"color: {c['muted']}; font-style: italic;")
+        hint_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._layout.addWidget(hint_lbl)
+
+        self._layout.addSpacing(12)
+
         front_lbl = QLabel(self._current_card.front)
         front_lbl.setFont(make_qfont("section_header"))
         front_lbl.setStyleSheet(f"color: {c['fg']};")
