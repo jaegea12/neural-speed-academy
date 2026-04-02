@@ -637,4 +637,4 @@ class ReactionTimeExercise(BaseExercise):
         self._waiting_for_response = False
         if self._timeout_timer:
             self._timeout_timer.stop()
-        self.navigator.go_back()
+        self.navigator.navigate_to("reaction_time_menu")
