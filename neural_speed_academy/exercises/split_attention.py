@@ -632,7 +632,7 @@ class SplitAttentionExercise(BaseExercise):
         )
 
         self._answer_container.hide()
-        self._after(2000, self._next_round)
+        self._after(1000, self._next_round)
 
     def _clear_answer_area(self) -> None:
         if not self._answer_layout:
