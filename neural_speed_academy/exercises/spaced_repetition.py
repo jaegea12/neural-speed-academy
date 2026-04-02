@@ -89,7 +89,7 @@ class SpacedRepetitionExercise(BaseExercise):
         cl.addSpacing(10)
 
         # Deck list
-        user = self.navigator.app_state.user
+        user = self.navigator.get_user()
         decks = user.sr_decks if user else []
 
         for deck in decks:
@@ -187,7 +187,7 @@ class SpacedRepetitionExercise(BaseExercise):
 
     def _ensure_builtin_decks(self) -> None:
         """Initialize built-in decks if user doesn't have them yet."""
-        user = self.navigator.app_state.user
+        user = self.navigator.get_user()
         if not user:
             return
         existing_names = {d.name for d in user.sr_decks}
@@ -204,7 +204,7 @@ class SpacedRepetitionExercise(BaseExercise):
             self, "New Deck", "Deck name:",
         )
         if ok and name.strip():
-            user = self.navigator.app_state.user
+            user = self.navigator.get_user()
             if user:
                 user.sr_decks.append(SRDeck(name=name.strip()))
                 self._save_user()
@@ -526,12 +526,7 @@ class SpacedRepetitionExercise(BaseExercise):
 
     def _save_user(self) -> None:
         """Persist user data after card updates."""
-        if self.navigator.app_state.user:
-            from neural_speed_academy.repositories.user_repository import (
-                JsonUserRepository,
-            )
-            repo = JsonUserRepository()
-            repo.save(self.navigator.app_state.user)
+        self.navigator.save_user()
 
     def _stop(self) -> None:
         self._running = False
