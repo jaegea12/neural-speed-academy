@@ -270,6 +270,29 @@ EXERCISE_GUIDES = {
         "- Strengthens the dorsal attention network\n"
         "- Difficulty scales via target count, speed, and duration"
     ),
+    "split_attention": (
+        "SPLIT ATTENTION",
+        "HOW TO USE:\n"
+        "Two tasks happen each round. A word flashes in the center — remember it. "
+        "At the same time (or just after), a colored shape appears at the screen "
+        "edge. After both disappear you answer two questions: which word was shown, "
+        "and which shape appeared.\n\n"
+        "Sequential mode shows the center word first, then the peripheral shape. "
+        "Simultaneous mode shows both at once, demanding true divided attention.\n\n"
+        "THE SCIENCE:\n"
+        "Divided attention tasks measure the brain's ability to process multiple "
+        "information streams in parallel. Neuroimaging studies (Corbetta & Shulman, "
+        "2002) show that the dorsal and ventral attention networks must coordinate "
+        "when attention is split between central and peripheral targets. Training "
+        "this coordination improves multitasking performance and reduces attentional "
+        "bottleneck effects (Dux et al., 2009).\n\n"
+        "BENEFITS:\n"
+        "- Trains divided attention across central and peripheral vision\n"
+        "- Improves multitasking under time pressure\n"
+        "- Strengthens coordination between dorsal and ventral attention networks\n"
+        "- Transfers to real-world tasks like driving, sports, and monitoring\n"
+        "- Difficulty scales via flash duration and simultaneous vs. sequential mode"
+    ),
 }
 
 # MOT configuration
@@ -363,6 +386,34 @@ CHUNKING_CONFIG = {
     "min_wpm": 150,
     "max_wpm": 800,
     "default_wpm": 250,
+}
+
+# Split Attention configuration
+SPLIT_ATTENTION_CONFIG = {
+    "default_center_ms": 400,
+    "min_center_ms": 150,
+    "max_center_ms": 800,
+    "default_peripheral_ms": 300,
+    "min_peripheral_ms": 100,
+    "max_peripheral_ms": 600,
+    "default_rounds": 15,
+    "min_rounds": 5,
+    "max_rounds": 30,
+    "modes": ["sequential", "simultaneous"],
+    "shapes": ["\u25b2", "\u25cf", "\u25a0", "\u25c6", "\u2605"],
+    "shape_names": ["triangle", "circle", "square", "diamond", "star"],
+    "shape_colors": ["#e74c3c", "#3498db", "#2ecc71", "#f39c12"],
+    "peripheral_directions": [
+        (0.0, -1.0),   # top
+        (0.0, 1.0),    # bottom
+        (-1.0, 0.0),   # left
+        (1.0, 0.0),    # right
+        (-0.7, -0.7),  # top-left
+        (0.7, -0.7),   # top-right
+        (-0.7, 0.7),   # bottom-left
+        (0.7, 0.7),    # bottom-right
+    ],
+    "eccentricity": 65,
 }
 
 # User data configuration

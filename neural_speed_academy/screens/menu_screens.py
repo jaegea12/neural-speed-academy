@@ -485,6 +485,58 @@ class MotMenuScreen(BaseMenuScreen):
         )
 
 
+class SplitAttentionMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        from neural_speed_academy.exercises.split_attention import (
+            SplitAttentionExercise,
+        )
+
+        def run(mode: str = "sequential", center_ms: int = 400,
+                peripheral_ms: int = 300, rounds: int = 15) -> Callable:
+            return lambda: self.navigator.launch_exercise(
+                SplitAttentionExercise, mode=mode,
+                center_ms=center_ms, peripheral_ms=peripheral_ms,
+                rounds=rounds,
+            )
+
+        self._create_column_menu(
+            "SPLIT ATTENTION", "split_attention",
+            columns=[
+                ("SEQUENTIAL", [
+                    ("Word 600ms · Shape 400ms", run("sequential", 600, 400)),
+                    ("Word 500ms · Shape 350ms", run("sequential", 500, 350)),
+                    ("Word 400ms · Shape 300ms", run("sequential", 400, 300)),
+                    ("Word 350ms · Shape 250ms", run("sequential", 350, 250)),
+                    ("Word 300ms · Shape 200ms", run("sequential", 300, 200)),
+                    ("Word 250ms · Shape 200ms", run("sequential", 250, 200)),
+                    ("Word 200ms · Shape 150ms", run("sequential", 200, 150)),
+                ]),
+                ("SIMULTANEOUS", [
+                    ("Word 600ms · Shape 400ms", run("simultaneous", 600, 400)),
+                    ("Word 500ms · Shape 350ms", run("simultaneous", 500, 350)),
+                    ("Word 400ms · Shape 300ms", run("simultaneous", 400, 300)),
+                    ("Word 350ms · Shape 250ms", run("simultaneous", 350, 250)),
+                    ("Word 300ms · Shape 200ms", run("simultaneous", 300, 200)),
+                    ("Word 250ms · Shape 200ms", run("simultaneous", 250, 200)),
+                    ("Word 200ms · Shape 150ms", run("simultaneous", 200, 150)),
+                ]),
+                ("RAPID", [
+                    ("Word 250ms · Shape 200ms", run("simultaneous", 250, 200)),
+                    ("Word 200ms · Shape 180ms", run("simultaneous", 200, 180)),
+                    ("Word 200ms · Shape 150ms", run("simultaneous", 200, 150)),
+                    ("Word 180ms · Shape 150ms", run("simultaneous", 180, 150)),
+                    ("Word 180ms · Shape 120ms", run("simultaneous", 180, 120)),
+                    ("Word 150ms · Shape 120ms", run("simultaneous", 150, 120)),
+                    ("Word 150ms · Shape 100ms", run("simultaneous", 150, 100)),
+                ]),
+            ],
+        )
+
+
 class SequenceMemoryMenuScreen(BaseMenuScreen):
 
     def __init__(self, navigator, parent: QWidget | None = None):
