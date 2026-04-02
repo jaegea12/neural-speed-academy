@@ -415,6 +415,9 @@ class ReactionTimeExercise(BaseExercise):
     # ── Input handling ──
 
     def keyPressEvent(self, event) -> None:
+        # Ignore auto-repeat (held keys)
+        if event.isAutoRepeat():
+            return
         key = event.key()
         if key == Qt.Key.Key_Space:
             self._handle_response(-1)
