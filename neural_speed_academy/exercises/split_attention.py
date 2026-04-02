@@ -316,7 +316,6 @@ class SplitAttentionExercise(BaseExercise):
             f"color: {c['fg']}; background: transparent;"
         )
         self._center_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._center_lbl.setFixedSize(300, 60)
         self._center_lbl.hide()
 
         # Peripheral shape label (hidden until flash)
@@ -360,10 +359,12 @@ class SplitAttentionExercise(BaseExercise):
         # Center fixation
         fw, fh = self._fixation.width(), self._fixation.height()
         self._fixation.move((aw - fw) // 2, (ah - fh) // 2)
-        # Center word label (same center as fixation)
+        # Center word label — size to arena width, center vertically
         if self._center_lbl:
-            cw, ch = self._center_lbl.width(), self._center_lbl.height()
-            self._center_lbl.move((aw - cw) // 2, (ah - ch) // 2)
+            lbl_w = min(aw - 40, 600)
+            lbl_h = 60
+            self._center_lbl.setFixedSize(lbl_w, lbl_h)
+            self._center_lbl.move((aw - lbl_w) // 2, (ah - lbl_h) // 2)
 
     # ── Round logic ──
 
