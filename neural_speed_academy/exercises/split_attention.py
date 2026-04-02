@@ -617,12 +617,17 @@ class SplitAttentionExercise(BaseExercise):
     def _clear_answer_area(self) -> None:
         if not self._answer_layout:
             return
-        while self._answer_layout.count():
-            item = self._answer_layout.takeAt(0)
+        self._remove_layout_items(self._answer_layout)
+
+    @staticmethod
+    def _remove_layout_items(layout) -> None:
+        """Recursively remove all items from a layout."""
+        while layout.count():
+            item = layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
             elif item.layout():
-                self._clear_layout(item.layout())
+                SplitAttentionExercise._remove_layout_items(item.layout())
 
     # ── Results ──
 
