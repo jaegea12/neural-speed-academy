@@ -21,27 +21,7 @@ from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, input_css, theme_manager, screen_metrics
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
-# ── Keyword extraction ──
-
-_STOP_WORDS = frozenset(
-    "the a an and or but in on at to for of is it that this with from by as "
-    "are was were be been has have had do does did not no nor so if then than "
-    "can will would could should may might shall its you your we our they them "
-    "he she his her my me us who what when where how all each every some any "
-    "also just about more most very much many such only other into over after "
-    "before between through during without again further once here there which "
-    "these those being both same own too up out off down".split()
-)
-
-
-def _extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
-    words = re.findall(r"[a-zA-Z]+", text.lower())
-    freq: dict[str, int] = {}
-    for w in words:
-        if len(w) >= 4 and w not in _STOP_WORDS:
-            freq[w] = freq.get(w, 0) + 1
-    ranked = sorted(freq, key=lambda w: freq[w], reverse=True)
-    return ranked[:max_keywords]
+from neural_speed_academy.exercises.recall import extract_keywords
 
 
 # ── Helpers ──
@@ -650,7 +630,7 @@ class PacerExercise(BaseExercise):
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
-        self._keywords = _extract_keywords(self._source_text)
+        self._keywords = extract_keywords(self._source_text)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -711,6 +691,8 @@ class PacerExercise(BaseExercise):
                 "chunk_size": self._chunk_size,
                 "word_count": word_count,
                 "duration_s": round(elapsed, 1),
+                "comprehension_score": score,
+                "comprehension_total": total,
             },
         )
         is_pb = self.complete(result)

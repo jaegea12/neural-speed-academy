@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, input_css, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, input_css, theme_manager, screen_metrics, btn_css
 from neural_speed_academy.config import RSVP_CONFIG, USER_DATA_CONFIG
 
 
@@ -202,20 +202,73 @@ class RsvpExercise(BaseExercise):
 
     def _complete_exercise(self) -> None:
         self._running = False
-        word_count = len(self.words)
-        xp = word_count // 10
+        self._source_text = " ".join(self.words)
+        self._word_count = len(self.words)
+        self._quiz_phase()
+
+    def _quiz_phase(self) -> None:
+        from neural_speed_academy.exercises.recall import (
+            build_recall_screen,
+        )
+        self._clear()
+        self.add_nav_bar()
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+        build_recall_screen(
+            self, self._layout, self._source_text,
+            on_scored=self._on_recall_scored,
+            exercise_label="RSVP — COMPREHENSION CHECK",
+        )
+
+    def _on_recall_scored(self, score, total, matched, keywords) -> None:
+        from neural_speed_academy.exercises.recall import build_recall_results
+        self._clear()
+        self.add_nav_bar()
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
+        xp = self._word_count // 10 + score * USER_DATA_CONFIG["xp_per_correct"]
         result = ExerciseResult(
             exercise_name="RSVP",
-            score=word_count,
-            total=word_count,
+            score=score,
+            total=total,
             xp_gained=xp,
             metadata={
                 "wpm": self.wpm,
-                "word_count": word_count,
+                "word_count": self._word_count,
+                "comprehension_score": score,
+                "comprehension_total": total,
             },
         )
         is_pb = self.complete(result)
-        self.show_result_screen(
-            result, is_personal_best=is_pb,
-            details=f"Read {word_count} words at {self.wpm} WPM",
+
+        cl = build_recall_results(
+            self._layout, score, total, matched, keywords,
         )
+
+        cl.addSpacing(10)
+        details = QLabel(
+            f"Read {self._word_count} words at {self.wpm} WPM"
+        )
+        details.setFont(make_qfont("body"))
+        details.setStyleSheet(f"color: {c['fg']};")
+        details.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(details)
+
+        if is_pb:
+            pb = QLabel("NEW PERSONAL BEST!")
+            pb.setFont(make_qfont("btn_bold"))
+            pb.setStyleSheet(f"color: {c['highlight']};")
+            pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(pb)
+
+        cl.addSpacing(10)
+        cont_btn = QPushButton("CONTINUE")
+        cont_btn.setFont(make_qfont("btn_bold"))
+        cont_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px; }}"
+        )
+        cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cont_btn.clicked.connect(self.navigator.finish_exercise)
+        cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)

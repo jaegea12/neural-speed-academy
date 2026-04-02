@@ -278,22 +278,73 @@ class ChunkingExercise(BaseExercise):
 
     def _complete_exercise(self) -> None:
         self._running = False
-        total_words = sum(len(c.split()) for c in self.chunks)
-        xp = total_words // 10
+        self._total_words = sum(len(c.split()) for c in self.chunks)
+        self._source_text = " ".join(self.chunks)
+        self._quiz_phase()
+
+    def _quiz_phase(self) -> None:
+        from neural_speed_academy.exercises.recall import build_recall_screen
+        self._clear()
+        self.add_nav_bar()
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+        build_recall_screen(
+            self, self._layout, self._source_text,
+            on_scored=self._on_recall_scored,
+            exercise_label="CHUNKING — COMPREHENSION CHECK",
+        )
+
+    def _on_recall_scored(self, score, total, matched, keywords) -> None:
+        from neural_speed_academy.exercises.recall import build_recall_results
+        self._clear()
+        self.add_nav_bar()
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
+        xp = self._total_words // 10 + score * USER_DATA_CONFIG["xp_per_correct"]
         result = ExerciseResult(
             exercise_name="CHUNKING",
-            score=total_words,
-            total=total_words,
+            score=score,
+            total=total,
             xp_gained=xp,
             metadata={
                 "wpm": self.wpm,
                 "chunk_size": self.chunk_size,
-                "word_count": total_words,
+                "word_count": self._total_words,
                 "chunk_count": len(self.chunks),
+                "comprehension_score": score,
+                "comprehension_total": total,
             },
         )
         is_pb = self.complete(result)
-        self.show_result_screen(
-            result, is_personal_best=is_pb,
-            details=f"Read {total_words} words in {len(self.chunks)} chunks at {self.wpm} WPM",
+
+        cl = build_recall_results(
+            self._layout, score, total, matched, keywords,
         )
+
+        cl.addSpacing(10)
+        details = QLabel(
+            f"Read {self._total_words} words in {len(self.chunks)} chunks at {self.wpm} WPM"
+        )
+        details.setFont(make_qfont("body"))
+        details.setStyleSheet(f"color: {c['fg']};")
+        details.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(details)
+
+        if is_pb:
+            pb = QLabel("NEW PERSONAL BEST!")
+            pb.setFont(make_qfont("btn_bold"))
+            pb.setStyleSheet(f"color: {c['highlight']};")
+            pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(pb)
+
+        cl.addSpacing(10)
+        cont_btn = QPushButton("CONTINUE")
+        cont_btn.setFont(make_qfont("btn_bold"))
+        cont_btn.setStyleSheet(
+            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
+            f"border: none; padding: 8px 40px; border-radius: 4px; }}"
+        )
+        cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cont_btn.clicked.connect(self.navigator.finish_exercise)
+        cl.addWidget(cont_btn, alignment=Qt.AlignmentFlag.AlignCenter)
