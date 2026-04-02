@@ -177,9 +177,9 @@ class ReactionTimeExercise(BaseExercise):
         start_btn.clicked.connect(self._begin_exercise)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # Enter to start
-        enter_sc = QShortcut(QKeySequence(Qt.Key.Key_Return), self)
-        enter_sc.activated.connect(self._begin_exercise)
+        # Ctrl+Enter to start (matches other exercises)
+        shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
+        shortcut.activated.connect(self._begin_exercise)
 
         cl.addStretch()
         self._layout.addWidget(container, 1)
