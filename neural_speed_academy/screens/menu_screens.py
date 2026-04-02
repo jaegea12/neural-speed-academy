@@ -542,7 +542,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         columns.setSpacing(20)
         columns.setContentsMargins(20, 0, 20, 0)
 
-        # ── Left: Categories (2-column grid) ──
+        # ── Left: Categories (single column) ──
         left = QVBoxLayout()
         left.setSpacing(8)
 
@@ -563,10 +563,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             ("Nutrition", "nutrition"),
         ]
 
-        cat_grid = QGridLayout()
-        cat_grid.setSpacing(10)
-        for idx, (label, key) in enumerate(categories):
-            row, col = divmod(idx, 2)
+        for label, key in categories:
             btn = QPushButton(label)
             btn.setFont(make_qfont("menu_btn"))
             btn.setFixedHeight(40)
@@ -575,9 +572,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             btn.clicked.connect(
                 lambda _, k=key: self._toggle_category(k)
             )
-            cat_grid.addWidget(btn, row, col)
+            left.addWidget(btn)
             self._cat_buttons[key] = btn
-        left.addLayout(cat_grid)
 
         # Select All / Clear — centered, compact
         sel_row = QHBoxLayout()
@@ -607,6 +603,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         sel_row.addWidget(sel_clear)
         sel_row.addStretch()
         left.addLayout(sel_row)
+
+        left.addStretch()
 
         # Give left column stretch factor 2 (2/3 of space)
         columns.addLayout(left, 2)
@@ -685,14 +683,9 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             self._lines_buttons[n] = btn
         right.addLayout(lines_row)
 
-        # Give right column stretch factor 1 (1/3 of space)
-        columns.addLayout(right, 1)
+        right.addStretch()
 
-        cl.addLayout(columns)
-
-        cl.addStretch()
-
-        # START button
+        # START button — at bottom of right column
         start_btn = QPushButton("START")
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
@@ -704,7 +697,12 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         start_btn.clicked.connect(
             lambda: self._launch(SlideProcessingExercise)
         )
-        cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        right.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # Give right column stretch factor 1 (1/3 of space)
+        columns.addLayout(right, 1)
+
+        cl.addLayout(columns)
 
         cl.addStretch()
         self._layout.addWidget(container, 1)
