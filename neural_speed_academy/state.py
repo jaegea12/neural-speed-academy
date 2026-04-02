@@ -5,7 +5,7 @@ Uses dataclasses for type safety and clarity.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 
@@ -77,6 +77,112 @@ class PathProgress:
 
 
 @dataclass
+class SRCard:
+    """A single spaced repetition card with SM-2 scheduling state."""
+    front: str
+    back: str
+    ease: float = 2.5
+    interval: int = 0       # days until next review
+    repetitions: int = 0    # consecutive correct recalls
+    due_date: str = ""      # YYYY-MM-DD, empty = new card
+    last_review: str = ""
+
+    def review(self, quality: int) -> None:
+        """Apply SM-2 algorithm. quality: 0=again, 1=hard, 2=good, 3=easy."""
+        today = datetime.now().strftime("%Y-%m-%d")
+        self.last_review = today
+
+        if quality < 1:
+            # Failed — reset
+            self.repetitions = 0
+            self.interval = 0
+            self.due_date = today
+            return
+
+        if self.repetitions == 0:
+            self.interval = 1
+        elif self.repetitions == 1:
+            self.interval = 3
+        else:
+            self.interval = max(1, round(self.interval * self.ease))
+
+        # Adjust ease factor
+        ease_delta = {1: -0.15, 2: 0.0, 3: 0.15}
+        self.ease = max(1.3, self.ease + ease_delta.get(quality, 0.0))
+
+        # Bonus for easy
+        if quality == 3:
+            self.interval = round(self.interval * 1.3)
+
+        self.repetitions += 1
+        due = datetime.now() + timedelta(days=self.interval)
+        self.due_date = due.strftime("%Y-%m-%d")
+
+    def is_due(self) -> bool:
+        if not self.due_date:
+            return True  # new card
+        today = datetime.now().strftime("%Y-%m-%d")
+        return self.due_date <= today
+
+    def to_dict(self) -> dict:
+        return {
+            "front": self.front, "back": self.back,
+            "ease": self.ease, "interval": self.interval,
+            "repetitions": self.repetitions,
+            "due_date": self.due_date, "last_review": self.last_review,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SRCard":
+        return cls(
+            front=data.get("front", ""),
+            back=data.get("back", ""),
+            ease=data.get("ease", 2.5),
+            interval=data.get("interval", 0),
+            repetitions=data.get("repetitions", 0),
+            due_date=data.get("due_date", ""),
+            last_review=data.get("last_review", ""),
+        )
+
+
+@dataclass
+class SRDeck:
+    """A deck of spaced repetition cards."""
+    name: str
+    cards: list[SRCard] = field(default_factory=list)
+    builtin: bool = False
+
+    def due_cards(self) -> list[SRCard]:
+        return [c for c in self.cards if c.is_due()]
+
+    def new_cards(self) -> list[SRCard]:
+        return [c for c in self.cards if not c.due_date]
+
+    def stats(self) -> dict:
+        total = len(self.cards)
+        due = len(self.due_cards())
+        new = len(self.new_cards())
+        learned = total - new
+        return {"total": total, "due": due, "new": new, "learned": learned}
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "cards": [c.to_dict() for c in self.cards],
+            "builtin": self.builtin,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SRDeck":
+        cards = [SRCard.from_dict(c) for c in data.get("cards", [])]
+        return cls(
+            name=data.get("name", ""),
+            cards=cards,
+            builtin=data.get("builtin", False),
+        )
+
+
+@dataclass
 class UserProfile:
     """User profile with XP, streak, and exercise history."""
     name: str
@@ -89,6 +195,7 @@ class UserProfile:
     path_progress: dict = field(default_factory=dict)
     personal_bests: dict = field(default_factory=dict)
     custom_paths: dict = field(default_factory=dict)
+    sr_decks: list = field(default_factory=list)
 
     def __post_init__(self):
         if not self.last_login:
@@ -161,6 +268,7 @@ class UserProfile:
             "path_progress": pp,
             "personal_bests": self.personal_bests,
             "custom_paths": self.custom_paths,
+            "sr_decks": [d.to_dict() for d in self.sr_decks],
         }
         if self.password_hash:
             d["password_hash"] = self.password_hash
@@ -198,6 +306,7 @@ class UserProfile:
             path_progress=pp,
             personal_bests=data.get("personal_bests", {}),
             custom_paths=data.get("custom_paths", {}),
+            sr_decks=[SRDeck.from_dict(d) for d in data.get("sr_decks", [])],
         )
 
 
