@@ -71,6 +71,8 @@ class BaseScreen(QWidget):
             action()
 
         back_btn = QPushButton("\u2190 Back")
+        back_btn.setAccessibleName("Go back")
+        back_btn.setToolTip("Go back (Escape)")
         back_btn.setStyleSheet(
             nav_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
