@@ -96,6 +96,7 @@ class LoginScreen(BaseScreen):
                 )
                 del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 del_btn.setToolTip(f"Delete profile: {uname}")
+                del_btn.setAccessibleName(f"Delete profile {uname}")
                 del_btn.clicked.connect(
                     lambda checked, n=uname: self._confirm_delete(n)
                 )

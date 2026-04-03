@@ -212,6 +212,8 @@ class ChunkingExercise(BaseExercise):
         top_row.addStretch()
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
