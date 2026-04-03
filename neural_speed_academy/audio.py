@@ -101,6 +101,8 @@ class AudioEngine:
         self._enabled: bool = True
         self._volume: float = 0.5  # 0.0 – 1.0
         self._sink: Optional[object] = None
+        self._buf: Optional[object] = None
+        self._ba: Optional[object] = None
         self._format: Optional[object] = None
         self._cache: dict[str, bytes] = {}
 
@@ -142,26 +144,34 @@ class AudioEngine:
         pcm_data = self._cache[tone_name]
 
         try:
+            # Stop any previous playback
+            if self._sink is not None:
+                self._sink.stop()
+                self._sink = None
+            if self._buf is not None:
+                self._buf.close()
+                self._buf = None
+
+            ba = QByteArray(pcm_data)
             buf = QBuffer()
-            buf.setData(QByteArray(pcm_data))
-            buf.open(QIODevice.OpenModeFlag.ReadOnly)
+            buf.setData(ba)
+            if not buf.open(QIODevice.OpenModeFlag.ReadOnly):
+                return
 
             sink = QAudioSink(self._format)
-            sink.start(buf)
 
-            # Keep references alive until playback finishes
-            # Connect stateChanged to clean up
+            # Keep references alive for entire playback duration
+            self._sink = sink
+            self._buf = buf
+            self._ba = ba  # prevent QByteArray garbage collection
+
             def _on_state(state):
                 from PyQt6.QtMultimedia import QAudio
                 if state == QAudio.State.IdleState:
                     sink.stop()
-                    buf.close()
 
             sink.stateChanged.connect(_on_state)
-
-            # Store reference to prevent garbage collection
-            self._sink = sink
-            self._buf = buf
+            sink.start(buf)
         except Exception:
             pass  # audio failure is never fatal
 
