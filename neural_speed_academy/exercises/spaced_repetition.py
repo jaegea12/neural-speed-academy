@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QKeySequence, QShortcut, QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, input_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, screen_metrics
 from neural_speed_academy.config import SR_CONFIG, SR_BUILTIN_DECKS, USER_DATA_CONFIG
 from neural_speed_academy.state import SRCard, SRDeck
 
@@ -80,7 +80,7 @@ class SpacedRepetitionExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 16px; border-radius: 4px;"
+            f"border: 2px solid transparent; padding: 6px 16px; border-radius: 4px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(
@@ -153,7 +153,7 @@ class SpacedRepetitionExercise(BaseExercise):
                 review_btn.setFont(make_qfont("btn_bold"))
                 review_btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['success']}; "
-                    f"color: {c['btn_text']}; border: none; "
+                    f"color: {c['btn_text']}; border: 2px solid transparent; "
                     f"padding: 6px 14px; border-radius: 4px; }}"
                 )
                 review_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -171,10 +171,11 @@ class SpacedRepetitionExercise(BaseExercise):
             if not deck.builtin:
                 manage_btn = QPushButton("\u2795")
                 manage_btn.setFont(make_qfont("btn_sm"))
+                manage_btn.setAccessibleName("Add cards")
                 manage_btn.setToolTip("Add cards")
                 manage_btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['accent']}; "
-                    f"color: {c['btn_text']}; border: none; "
+                    f"color: {c['btn_text']}; border: 2px solid transparent; "
                     f"padding: 6px 10px; border-radius: 4px; }}"
                 )
                 manage_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -303,7 +304,7 @@ class SpacedRepetitionExercise(BaseExercise):
         c = COLORS
         return (
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 6px 14px; border-radius: 4px; }}"
         )
 
@@ -445,7 +446,7 @@ class SpacedRepetitionExercise(BaseExercise):
         skip_btn.setFont(make_qfont("btn_sm"))
         skip_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 4px 12px; border-radius: 3px; }}"
         )
         skip_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -455,12 +456,13 @@ class SpacedRepetitionExercise(BaseExercise):
         top.addWidget(skip_btn)
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -532,7 +534,7 @@ class SpacedRepetitionExercise(BaseExercise):
             next_btn.setFont(make_qfont("btn_bold"))
             next_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['accent']}; "
-                f"color: {c['btn_text']}; border: none; "
+                f"color: {c['btn_text']}; border: 2px solid transparent; "
                 f"padding: 8px 24px; border-radius: 4px; }}"
             )
             next_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -543,7 +545,7 @@ class SpacedRepetitionExercise(BaseExercise):
             start_btn.setFont(make_qfont("btn_bold"))
             start_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['success']}; "
-                f"color: {c['btn_text']}; border: none; "
+                f"color: {c['btn_text']}; border: 2px solid transparent; "
                 f"padding: 8px 24px; border-radius: 4px; }}"
             )
             start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -686,12 +688,13 @@ class SpacedRepetitionExercise(BaseExercise):
             top.addSpacing(10)
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -726,7 +729,7 @@ class SpacedRepetitionExercise(BaseExercise):
         show_btn.setFont(make_qfont("btn_lg"))
         show_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 12px 40px; border-radius: 4px; }}"
         )
         show_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -840,7 +843,7 @@ class SpacedRepetitionExercise(BaseExercise):
             btn.setFixedWidth(90)
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {color}; "
-                f"color: {c['btn_text']}; border: none; "
+                f"color: {c['btn_text']}; border: 2px solid transparent; "
                 f"padding: 8px; border-radius: 4px; }}"
             )
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -990,7 +993,7 @@ class SpacedRepetitionExercise(BaseExercise):
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 8px 40px; border-radius: 4px; }}"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)

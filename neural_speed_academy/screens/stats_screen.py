@@ -297,7 +297,7 @@ class StatsScreen(BaseScreen):
         progress.setTextVisible(False)
         progress.setStyleSheet(
             f"QProgressBar {{ background-color: {c['bg']}; "
-            f"border: none; border-radius: 4px; }}"
+            f"border: 2px solid transparent; border-radius: 4px; }}"
             f"QProgressBar::chunk {{ background-color: {c['accent']}; "
             f"border-radius: 4px; }}"
         )
@@ -754,11 +754,11 @@ class StatsScreen(BaseScreen):
         )
         table.setStyleSheet(
             f"QTableWidget {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; border: none; "
+            f"color: {c['text_on_card']}; border: 2px solid transparent; "
             f"gridline-color: {c['bg']}; {font_css('treeview')} "
             f"alternate-background-color: {alt_color.name()}; }}"
             f"QHeaderView::section {{ background-color: {c['action']}; "
-            f"color: {c['btn_text']}; border: none; padding: 6px; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; padding: 6px; "
             f"{font_css('treeview_heading')} }}"
             f"QTableWidget::item {{ padding: 4px 8px; }}"
         )

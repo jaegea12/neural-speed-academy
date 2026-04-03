@@ -23,7 +23,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics
 from neural_speed_academy.config import (
     SPLIT_ATTENTION_CONFIG, WORD_PAIRS, USER_DATA_CONFIG,
 )
@@ -96,7 +96,7 @@ class SplitAttentionExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(
@@ -239,7 +239,7 @@ class SplitAttentionExercise(BaseExercise):
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 12px 50px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -289,11 +289,12 @@ class SplitAttentionExercise(BaseExercise):
         top.addStretch()
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -330,25 +331,27 @@ class SplitAttentionExercise(BaseExercise):
         self._periph_lbl.setFixedSize(80, 80)
         self._periph_lbl.hide()
 
-        # Answer area
+        # Answer area — takes full stretch when visible (arena hidden)
         self._answer_container = QWidget()
         self._answer_container.setStyleSheet(
             f"background-color: {c['bg']};"
         )
-        self._answer_layout = QVBoxLayout(self._answer_container)
-        self._answer_layout.setSpacing(10)
-        self._answer_container.hide()
-        self._layout.addWidget(
-            self._answer_container, 0,
-            Qt.AlignmentFlag.AlignCenter,
-        )
-
-        # Feedback
+        al = QVBoxLayout(self._answer_container)
+        al.setSpacing(10)
+        al.addStretch(1)
+        self._answer_inner = QVBoxLayout()
+        self._answer_inner.setSpacing(10)
+        al.addLayout(self._answer_inner)
+        # Feedback label inside the answer area
         self._feedback_lbl = QLabel("")
         self._feedback_lbl.setFont(make_qfont("btn_bold"))
         self._feedback_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._feedback_lbl.setFixedHeight(30)
-        self._layout.addWidget(self._feedback_lbl)
+        al.addWidget(self._feedback_lbl)
+        al.addStretch(1)
+        self._answer_layout = self._answer_inner
+        self._answer_container.hide()
+        self._layout.addWidget(self._answer_container, 1)
 
         self._after(800, self._next_round)
 
@@ -391,6 +394,7 @@ class SplitAttentionExercise(BaseExercise):
         self._feedback_lbl.setText("")
         self._feedback_lbl.setStyleSheet(f"color: {c['bg']};")
         self._answer_container.hide()
+        self._arena.show()
         self._center_answered = False
         self._periph_answered = False
         self._center_was_correct = False
@@ -522,6 +526,8 @@ class SplitAttentionExercise(BaseExercise):
             return
 
         c = COLORS
+        self._arena.hide()
+        self._answer_container.show()
         self._clear_answer_area()
 
         prompt = QLabel("Which word was shown?")
@@ -556,7 +562,6 @@ class SplitAttentionExercise(BaseExercise):
 
         btn_row.addStretch()
         self._answer_layout.addLayout(btn_row)
-        self._answer_container.show()
 
     def _check_center(self, chosen: str) -> None:
         if not self._running or self._center_answered:
@@ -613,7 +618,6 @@ class SplitAttentionExercise(BaseExercise):
 
         btn_row.addStretch()
         self._answer_layout.addLayout(btn_row)
-        self._answer_container.show()
 
     def _check_peripheral(self, chosen: str) -> None:
         if not self._running or self._periph_answered:
@@ -652,7 +656,7 @@ class SplitAttentionExercise(BaseExercise):
             self._center_was_correct,
         )
 
-        self._answer_container.hide()
+        self._clear_answer_area()
         self._after(1000, self._next_round)
 
     def _clear_answer_area(self) -> None:
