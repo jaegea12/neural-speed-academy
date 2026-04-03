@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QSlider, QComboBox, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
@@ -61,7 +61,7 @@ class PeripheralFlashExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
 
         cfg = PERIPHERAL_FLASH_CONFIG
         c = COLORS
@@ -227,6 +227,18 @@ class PeripheralFlashExercise(BaseExercise):
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_from_ui)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        hint = QLabel("Ctrl+Enter to start")
+        hint.setFont(make_qfont("btn_sm"))
+        hint.setStyleSheet(f"color: {c['muted']};")
+        hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(hint)
+
+        # Ctrl+Enter shortcut
+        shortcut = QShortcut(
+            QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Return), self
+        )
+        shortcut.activated.connect(self._start_from_ui)
 
         cl.addStretch()
         self._layout.addWidget(container, 1)

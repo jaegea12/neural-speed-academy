@@ -31,7 +31,7 @@ class RsvpExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
@@ -223,7 +223,7 @@ class RsvpExercise(BaseExercise):
     def _on_recall_scored(self, score, total, matches, keywords) -> None:
         from neural_speed_academy.exercises.recall import build_recall_results
         self._clear()
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
