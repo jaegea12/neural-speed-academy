@@ -1721,10 +1721,19 @@ TEXT_LIBRARY = {
 # Training paths
 # Each step: (exercise_type, label, params_dict)
 # exercise_type maps to a launcher in the path execution screen.
+TRAINING_PATH_CATEGORIES = [
+    ("daily", "Daily Routines"),
+    ("reading", "Speed Reading"),
+    ("cognitive", "Cognitive Performance"),
+    ("visual", "Visual Processing"),
+    ("info", "Information Processing"),
+]
+
 TRAINING_PATHS = {
-    # Daily Warmup first — most frequently used
+    # ── Daily Routines ──
     "daily_warmup": {
         "name": "Daily Warmup",
+        "category": "daily",
         "description": "Quick 5-minute session to keep skills sharp",
         "adaptive": True,
         "steps": [
@@ -1738,6 +1747,7 @@ TRAINING_PATHS = {
     # Paths ordered by difficulty
     "foundation": {
         "name": "Foundation",
+        "category": "reading",
         "description": "Build baseline perception and focus skills (2 weeks)",
         "steps": [
             ("priming", "Eye Priming: Horizontal Saccades", {"mode": "saccade_h", "delay": 600}),
@@ -1755,6 +1765,7 @@ TRAINING_PATHS = {
     },
     "path_300": {
         "name": "Path to 300 WPM",
+        "category": "reading",
         "description": "Gentle introduction to speed reading for complete beginners",
         "steps": [
             ("priming", "Eye Priming: Horizontal Saccades", {"mode": "saccade_h", "delay": 600}),
@@ -1776,6 +1787,7 @@ TRAINING_PATHS = {
     },
     "path_400": {
         "name": "Path to 400 WPM",
+        "category": "reading",
         "description": "Develop speed reading fundamentals for comfortable fast reading",
         "steps": [
             # Warmup
@@ -1802,6 +1814,7 @@ TRAINING_PATHS = {
     },
     "path_600": {
         "name": "Path to 600 WPM",
+        "category": "reading",
         "description": "Advanced training for high-speed reading with comprehension",
         "steps": [
             # Warmup
@@ -1833,6 +1846,7 @@ TRAINING_PATHS = {
     },
     "path_800": {
         "name": "Path to 800 WPM",
+        "category": "reading",
         "description": "Elite training pushing the limits of visual processing",
         "steps": [
             # Warmup
@@ -1869,6 +1883,7 @@ TRAINING_PATHS = {
     },
     "perception_master": {
         "name": "Perception Master",
+        "category": "visual",
         "description": "Intensive flash and eye-span training for maximum visual processing",
         "steps": [
             ("priming", "Eye Priming: Fast Horizontal Saccades", {"mode": "saccade_h", "delay": 400}),
@@ -1888,6 +1903,143 @@ TRAINING_PATHS = {
             ("flash", "Flash: 7-8 Digits", {"low": 7, "high": 8, "rounds": 15}),
             ("eyespan", "Eye-Span: Horizontal 60%", {"mode": "h", "width": 60, "low": 3, "high": 4, "rounds": 12}),
             ("eyespan", "Eye-Span: Mixed 70%", {"mode": "m", "width": 70, "low": 3, "high": 4, "rounds": 15}),
+        ],
+    },
+
+    # ── Cognitive Performance ──
+    "memory_foundations": {
+        "name": "Memory Foundations",
+        "category": "cognitive",
+        "description": "Build working memory capacity through progressive challenges",
+        "steps": [
+            ("sequence_memory", "Sequence Memory: Warmup", {}),
+            ("recall", "Recall: Words (5 items)", {"mode": "words", "count": 5}),
+            ("recall", "Recall: Numbers (5 items)", {"mode": "numbers", "count": 5}),
+            ("sequence_memory", "Sequence Memory: Extended", {}),
+            ("recall", "Recall: Mixed (7 items)", {"mode": "mixed", "count": 7}),
+            ("spaced_repetition", "Spaced Repetition: Review", {}),
+            ("recall", "Recall: Words (10 items)", {"mode": "words", "count": 10}),
+            ("sequence_memory", "Sequence Memory: Challenge", {}),
+        ],
+    },
+    "attention_focus": {
+        "name": "Attention & Focus",
+        "category": "cognitive",
+        "description": "Train sustained and divided attention across multiple tasks",
+        "steps": [
+            ("priming", "Eye Priming: Warmup", {"mode": "saccade_h", "delay": 500}),
+            ("schulte", "Schulte Grid: Focus", {}),
+            ("split_attention", "Split Attention: Sequential", {"mode": "sequential"}),
+            ("mot", "MOT: 3 Targets", {"targets": 3, "duration": 6}),
+            ("split_attention", "Split Attention: Simultaneous", {"mode": "simultaneous"}),
+            ("mot", "MOT: 4 Targets", {"targets": 4, "duration": 8}),
+            ("split_attention", "Split Attention: Rapid", {"mode": "rapid"}),
+            ("mot", "MOT: 5 Targets", {"targets": 5, "duration": 8}),
+        ],
+    },
+    "mental_agility": {
+        "name": "Mental Agility",
+        "category": "cognitive",
+        "description": "Speed up decision-making and reaction time under pressure",
+        "steps": [
+            ("reaction_time", "Reaction Time: Simple", {"mode": "simple"}),
+            ("rapid_decision", "Rapid Decision Grid: Warmup", {}),
+            ("reaction_time", "Reaction Time: Choice", {"mode": "choice"}),
+            ("split_attention", "Split Attention: Sequential", {"mode": "sequential"}),
+            ("rapid_decision", "Rapid Decision Grid: Challenge", {}),
+            ("reaction_time", "Reaction Time: Go/No-Go", {"mode": "go_nogo"}),
+            ("split_attention", "Split Attention: Rapid", {"mode": "rapid"}),
+            ("rapid_decision", "Rapid Decision Grid: Final", {}),
+        ],
+    },
+
+    # ── Visual Processing ──
+    "peripheral_vision": {
+        "name": "Peripheral Vision",
+        "category": "visual",
+        "description": "Expand your useful field of view for faster reading and awareness",
+        "steps": [
+            ("priming", "Eye Priming: Expanding Saccades", {"mode": "saccade_expand", "delay": 500}),
+            ("peripheral_flash", "Peripheral Flash: Warmup", {}),
+            ("schulte", "Schulte Grid", {}),
+            ("eyespan", "Eye-Span: Horizontal 30%", {"mode": "h", "width": 30, "low": 2, "high": 2, "rounds": 10}),
+            ("peripheral_flash", "Peripheral Flash: Challenge", {}),
+            ("eyespan", "Eye-Span: Horizontal 50%", {"mode": "h", "width": 50, "low": 2, "high": 3, "rounds": 12}),
+            ("priming", "Eye Priming: Diagonal Saccades", {"mode": "saccade_diag", "delay": 400}),
+            ("eyespan", "Eye-Span: Mixed 60%", {"mode": "m", "width": 60, "low": 3, "high": 4, "rounds": 12}),
+        ],
+    },
+    "visual_tracking": {
+        "name": "Visual Tracking",
+        "category": "visual",
+        "description": "Track moving objects and process fast visual stimuli",
+        "steps": [
+            ("priming", "Eye Priming: Smooth Pursuit Circle", {"mode": "pursuit_circle", "cycles": 10}),
+            ("mot", "MOT: 3 Targets · 6s", {"targets": 3, "duration": 6}),
+            ("peripheral_flash", "Peripheral Flash", {}),
+            ("priming", "Eye Priming: Figure-8 Pursuit", {"mode": "pursuit_figure8", "cycles": 12}),
+            ("mot", "MOT: 4 Targets · 8s", {"targets": 4, "duration": 8}),
+            ("reaction_time", "Reaction Time: Choice", {"mode": "choice"}),
+            ("mot", "MOT: 5 Targets · 8s", {"targets": 5, "duration": 8}),
+            ("priming", "Eye Priming: Fast Expanding", {"mode": "saccade_expand", "delay": 350}),
+        ],
+    },
+
+    # ── Information Processing ──
+    "rapid_comprehension": {
+        "name": "Rapid Comprehension",
+        "category": "info",
+        "description": "Extract and retain key facts from briefly presented information",
+        "steps": [
+            ("flash", "Flash: 4 Digits Warmup", {"digits": 4, "rounds": 10}),
+            ("slide_processing", "Slides: 10s · Science", {"display_s": 10, "slides": 3, "category": "science"}),
+            ("recall", "Recall: Words", {"mode": "words", "count": 7}),
+            ("slide_processing", "Slides: 8s · Mixed", {"display_s": 8, "slides": 3, "category": "science,business,history"}),
+            ("recall", "Recall: Mixed", {"mode": "mixed", "count": 8}),
+            ("slide_processing", "Slides: 6s · Mixed", {"display_s": 6, "slides": 5, "category": "science,geography,nutrition"}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
+        ],
+    },
+    "study_session": {
+        "name": "Study Session",
+        "category": "info",
+        "description": "Structured learning and retention — review, absorb, recall",
+        "steps": [
+            ("spaced_repetition", "Spaced Repetition: Review Due Cards", {}),
+            ("slide_processing", "Slides: 12s · Neuroplasticity", {"display_s": 12, "slides": 5, "category": "neuroplasticity"}),
+            ("recall", "Recall: Words", {"mode": "words", "count": 8}),
+            ("slide_processing", "Slides: 10s · Science", {"display_s": 10, "slides": 5, "category": "science"}),
+            ("recall", "Recall: Numbers", {"mode": "numbers", "count": 6}),
+            ("spaced_repetition", "Spaced Repetition: Final Review", {}),
+        ],
+    },
+
+    # ── Daily Routines (additional) ──
+    "full_brain_workout": {
+        "name": "Full Brain Workout",
+        "category": "daily",
+        "description": "Comprehensive 15-20 minute session hitting all cognitive areas",
+        "steps": [
+            ("priming", "Eye Priming: Mixed Saccades", {"mode": "saccade_diag", "delay": 450}),
+            ("flash", "Flash: 4-5 Digits", {"low": 4, "high": 5, "rounds": 10}),
+            ("reaction_time", "Reaction Time: Simple", {"mode": "simple"}),
+            ("mot", "MOT: 4 Targets", {"targets": 4, "duration": 8}),
+            ("split_attention", "Split Attention: Simultaneous", {"mode": "simultaneous"}),
+            ("slide_processing", "Slides: 8s · Mixed", {"display_s": 8, "slides": 5, "category": "science,history,business"}),
+            ("recall", "Recall: Mixed", {"mode": "mixed", "count": 8}),
+            ("schulte", "Schulte Grid", {}),
+            ("pacer", "Pacer & Quiz: Comprehension Check", {}),
+        ],
+    },
+    "quick_cognitive_check": {
+        "name": "Quick Cognitive Check",
+        "category": "daily",
+        "description": "5-minute cognitive sharpness test — reaction, decisions, memory",
+        "steps": [
+            ("reaction_time", "Reaction Time: Simple", {"mode": "simple"}),
+            ("rapid_decision", "Rapid Decision Grid", {}),
+            ("sequence_memory", "Sequence Memory", {}),
+            ("reaction_time", "Reaction Time: Go/No-Go", {"mode": "go_nogo"}),
         ],
     },
 }

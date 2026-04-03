@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.theme import COLORS, make_qfont
-from neural_speed_academy.config import TRAINING_PATHS
+from neural_speed_academy.config import TRAINING_PATHS, TRAINING_PATH_CATEGORIES
 from neural_speed_academy.state import PathProgress
 
 
@@ -39,15 +39,35 @@ class PathSelectionScreen(BaseScreen):
         cl.addWidget(sub)
         cl.addSpacing(10)
 
-        # Built-in paths only
+        # Group paths by category
         user = self.navigator.get_user()
-        grid = QGridLayout()
-        grid.setSpacing(8)
-        for i, (path_id, path_data) in enumerate(TRAINING_PATHS.items()):
-            row, col = i // 3, i % 3
-            card = self._make_card(path_id, path_data, user)
-            grid.addWidget(card, row, col)
-        cl.addLayout(grid)
+
+        # Build category → paths mapping
+        cat_paths: dict[str, list[tuple[str, dict]]] = {}
+        for path_id, path_data in TRAINING_PATHS.items():
+            cat = path_data.get("category", "other")
+            cat_paths.setdefault(cat, []).append((path_id, path_data))
+
+        # Render in defined category order
+        for cat_key, cat_label in TRAINING_PATH_CATEGORIES:
+            paths = cat_paths.get(cat_key, [])
+            if not paths:
+                continue
+
+            cat_header = QLabel(cat_label.upper())
+            cat_header.setFont(make_qfont("menu_header"))
+            cat_header.setStyleSheet(f"color: {c['accent']};")
+            cat_header.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            cl.addWidget(cat_header)
+
+            grid = QGridLayout()
+            grid.setSpacing(8)
+            for i, (path_id, path_data) in enumerate(paths):
+                row, col = i // 3, i % 3
+                card = self._make_card(path_id, path_data, user)
+                grid.addWidget(card, row, col)
+            cl.addLayout(grid)
+            cl.addSpacing(12)
 
         cl.addSpacing(10)
 
