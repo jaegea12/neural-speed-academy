@@ -344,7 +344,13 @@ class SettingsScreen(BaseScreen):
             self._text_edit.setPlainText(text)
 
     def _on_profile_changed(self, btn) -> None:
-        theme_manager.set_profile(btn.property("profile_key"))
+        profile = btn.property("profile_key")
+        theme_manager.set_profile(profile)
+        # Save to user profile if logged in
+        user = self.navigator.get_user()
+        if user:
+            user.theme = profile
+            self.navigator.save_user()
         # Rebuild in-place to reflect new colors without polluting nav history
         self.show_screen()
 
