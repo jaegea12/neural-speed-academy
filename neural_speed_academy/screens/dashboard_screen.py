@@ -16,12 +16,7 @@ from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, sc
 
 
 class DashboardScreen(BaseScreen):
-    @property
-    def _btn_width(self) -> int:
-        win = self.window()
-        w = win.width() if win and win.width() > 100 else 900
-        # 3 columns: subtract margins (40*2) and spacing, divide by 3, cap at 220
-        return min(max(int((w - 120) / 3.5), 120), 220)
+
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -75,7 +70,7 @@ class DashboardScreen(BaseScreen):
         # Eye Priming — standalone warmup button above exercise grid
         c_priming = COLORS
         warmup_btn = QPushButton("EYE WARMUP")
-        warmup_btn.setFixedWidth(self._btn_width)
+        warmup_btn.setMaximumWidth(250)
         warmup_btn.setStyleSheet(
             btn_css(c_priming["priming"], c_priming["btn_text"],
                     padding="12px", font_key="btn_bold")
@@ -85,9 +80,13 @@ class DashboardScreen(BaseScreen):
         cl.addWidget(warmup_btn, alignment=Qt.AlignmentFlag.AlignCenter)
         cl.addSpacing(4)
 
-        # Exercise grid — three columns
-        grid = QGridLayout()
+        # Exercise grid — three columns, constrained width
+        grid_container = QWidget()
+        grid_container.setMaximumWidth(750)
+        grid_container.setStyleSheet("background: transparent;")
+        grid = QGridLayout(grid_container)
         grid.setSpacing(8)
+        grid.setContentsMargins(0, 0, 0, 0)
 
         self._create_section(grid, "PERCEPTION", 0, [
             ("Flash Numbers", self._cb("menu_flash")),
@@ -110,7 +109,7 @@ class DashboardScreen(BaseScreen):
             ("Spaced Repetition", self._cb("start_sr")),
             ("Slide Processing", self._cb("menu_slide_processing")),
         ])
-        cl.addLayout(grid)
+        cl.addWidget(grid_container, alignment=Qt.AlignmentFlag.AlignCenter)
         cl.addStretch()
 
         scroll.setWidget(content)
@@ -312,8 +311,12 @@ class DashboardScreen(BaseScreen):
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(header)
 
-        grid = QGridLayout()
+        pb_container = QWidget()
+        pb_container.setMaximumWidth(750)
+        pb_container.setStyleSheet("background: transparent;")
+        grid = QGridLayout(pb_container)
         grid.setSpacing(6)
+        grid.setContentsMargins(0, 0, 0, 0)
 
         items = list(user.personal_bests.items())
         cols = 3
@@ -343,7 +346,7 @@ class DashboardScreen(BaseScreen):
 
             grid.addWidget(cell, row_idx, col_idx)
 
-        layout.addLayout(grid)
+        layout.addWidget(pb_container, alignment=Qt.AlignmentFlag.AlignCenter)
 
     # ── Exercise grid ──
 
@@ -358,16 +361,12 @@ class DashboardScreen(BaseScreen):
 
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
-            btn.setFixedWidth(self._btn_width)
             btn.setFixedHeight(38)
             btn.setStyleSheet(btn_css(c["accent"], c["btn_text"],
                                       padding="4px 12px"))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
-            grid.addWidget(
-                btn, i + 1, column,
-                alignment=Qt.AlignmentFlag.AlignCenter,
-            )
+            grid.addWidget(btn, i + 1, column)
 
     def _cb(self, name: str) -> Callable:
         return self.exercise_callbacks.get(name, lambda: None)
