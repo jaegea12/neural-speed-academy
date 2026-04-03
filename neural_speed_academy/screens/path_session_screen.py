@@ -163,7 +163,6 @@ class PathSessionScreen(BaseScreen):
         from neural_speed_academy.exercises.schulte import SchulteExercise
         from neural_speed_academy.exercises.priming import PrimingExercise
         from neural_speed_academy.exercises.sequence_memory import SequenceMemoryExercise
-        from neural_speed_academy.exercises.recall import RecallExercise
         from neural_speed_academy.exercises.peripheral_flash import PeripheralFlashExercise
         from neural_speed_academy.exercises.rapid_decision import RapidDecisionExercise
         from neural_speed_academy.exercises.mot import MotExercise
@@ -214,7 +213,7 @@ class PathSessionScreen(BaseScreen):
         elif ex_type == "sequence_memory":
             self.navigator.launch_exercise(SequenceMemoryExercise, **params)
         elif ex_type == "recall":
-            self.navigator.launch_exercise(RecallExercise, **params)
+            self.navigator.launch_exercise(ChunkingExercise, **params)
         elif ex_type == "peripheral_flash":
             self.navigator.launch_exercise(PeripheralFlashExercise, **params)
         elif ex_type == "rapid_decision":
