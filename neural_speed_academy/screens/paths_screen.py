@@ -92,7 +92,7 @@ class PathSelectionScreen(BaseScreen):
         custom_btn.setFont(make_qfont("btn_bold"))
         custom_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['action']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 20px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 8px 20px; border-radius: 4px; }}"
         )
         custom_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         custom_btn.clicked.connect(
@@ -104,7 +104,7 @@ class PathSelectionScreen(BaseScreen):
         create_btn.setFont(make_qfont("btn_bold"))
         create_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-            f"border: none; padding: 8px 20px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 8px 20px; border-radius: 4px; }}"
         )
         create_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         create_btn.clicked.connect(self._create_custom_path)
@@ -121,7 +121,7 @@ class PathSelectionScreen(BaseScreen):
         c = COLORS
         return (
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 6px 18px; border-radius: 4px; }}"
         )
 
@@ -258,7 +258,7 @@ class PathSelectionScreen(BaseScreen):
         btn.setFixedWidth(120)
         btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 16px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 6px 16px; border-radius: 4px; }}"
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(lambda checked, pid=path_id: self._start_path(pid))
@@ -332,7 +332,7 @@ class CustomPathsScreen(BaseScreen):
         create_btn.setFont(make_qfont("btn_bold"))
         create_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; }}"
         )
         create_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         create_btn.clicked.connect(
@@ -365,7 +365,7 @@ class CustomPathsScreen(BaseScreen):
         btn.setFont(make_qfont("btn_sm"))
         btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px; border-radius: 3px; }}"
+            f"border: 2px solid transparent; padding: 4px; border-radius: 3px; }}"
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(lambda checked, pid=path_id: self._start(pid))

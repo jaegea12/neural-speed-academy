@@ -47,7 +47,7 @@ class DashboardScreen(BaseScreen):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         scroll.setStyleSheet(
-            f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
+            f"QScrollArea {{ background-color: {c['bg']}; border: 2px solid transparent; }}"
             f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
             f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
             f"border-radius: 4px; min-height: 30px; }}"
@@ -158,7 +158,7 @@ class DashboardScreen(BaseScreen):
         progress.setTextVisible(False)
         progress.setStyleSheet(
             f"QProgressBar {{ background-color: {c['card']}; "
-            f"border: none; border-radius: 4px; }}"
+            f"border: 2px solid transparent; border-radius: 4px; }}"
             f"QProgressBar::chunk {{ background-color: {c['accent']}; "
             f"border-radius: 4px; }}"
         )
@@ -195,7 +195,7 @@ class DashboardScreen(BaseScreen):
         start_btn.setFont(make_qfont("btn_bold"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['btn_text']}; "
-            f"color: {c['accent']}; border: none; "
+            f"color: {c['accent']}; border: 2px solid transparent; "
             f"padding: 4px 12px; border-radius: 3px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -284,7 +284,7 @@ class DashboardScreen(BaseScreen):
         btn.setFont(make_qfont("btn_bold"))
         btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 10px; border-radius: 4px; }}"
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
