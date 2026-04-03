@@ -58,7 +58,7 @@ class DashboardScreen(BaseScreen):
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
-        cl.setContentsMargins(40, 12, 40, 12)
+        cl.setContentsMargins(60, 12, 60, 12)
         cl.setSpacing(8)
 
         self._build_user_card(cl)
@@ -80,13 +80,9 @@ class DashboardScreen(BaseScreen):
         cl.addWidget(warmup_btn, alignment=Qt.AlignmentFlag.AlignCenter)
         cl.addSpacing(4)
 
-        # Exercise grid — three columns, constrained width
-        grid_container = QWidget()
-        grid_container.setMaximumWidth(750)
-        grid_container.setStyleSheet("background: transparent;")
-        grid = QGridLayout(grid_container)
+        # Exercise grid — three columns
+        grid = QGridLayout()
         grid.setSpacing(8)
-        grid.setContentsMargins(0, 0, 0, 0)
 
         self._create_section(grid, "PERCEPTION", 0, [
             ("Flash Numbers", self._cb("menu_flash")),
@@ -109,7 +105,7 @@ class DashboardScreen(BaseScreen):
             ("Spaced Repetition", self._cb("start_sr")),
             ("Slide Processing", self._cb("menu_slide_processing")),
         ])
-        cl.addWidget(grid_container, alignment=Qt.AlignmentFlag.AlignCenter)
+        cl.addLayout(grid)
         cl.addStretch()
 
         scroll.setWidget(content)
@@ -311,12 +307,8 @@ class DashboardScreen(BaseScreen):
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(header)
 
-        pb_container = QWidget()
-        pb_container.setMaximumWidth(750)
-        pb_container.setStyleSheet("background: transparent;")
-        grid = QGridLayout(pb_container)
+        grid = QGridLayout()
         grid.setSpacing(6)
-        grid.setContentsMargins(0, 0, 0, 0)
 
         items = list(user.personal_bests.items())
         cols = 3
@@ -346,7 +338,7 @@ class DashboardScreen(BaseScreen):
 
             grid.addWidget(cell, row_idx, col_idx)
 
-        layout.addWidget(pb_container, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addLayout(grid)
 
     # ── Exercise grid ──
 
