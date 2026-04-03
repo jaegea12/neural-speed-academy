@@ -128,7 +128,8 @@ class Navigator:
                     self.user_repo.save(user)
             self.navigate_to("path_session")
         else:
-            self.to_dashboard()
+            # Return to the screen that launched the exercise (menu)
+            self.go_back()
 
     def to_stats(self) -> None:
         self.navigate_to("stats")

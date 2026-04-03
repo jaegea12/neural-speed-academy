@@ -671,11 +671,7 @@ class SlideProcessingExercise(BaseExercise):
         for btn in self.findChildren(QPushButton):
             if btn.text() == "CONTINUE":
                 btn.disconnect()
-                btn.clicked.connect(
-                    lambda: self.navigator.navigate_to(
-                        "slide_processing_menu"
-                    )
-                )
+                btn.clicked.connect(self.navigator.finish_exercise)
 
     def _stop(self) -> None:
         self._running = False
@@ -685,4 +681,4 @@ class SlideProcessingExercise(BaseExercise):
         for timer in self._timers:
             timer.stop()
         self._timers.clear()
-        self.navigator.navigate_to("slide_processing_menu")
+        self.navigator.finish_exercise()

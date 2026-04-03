@@ -113,9 +113,9 @@ class MainMenuScreen(BaseScreen):
         body = QLabel(
             "A desktop application for speed reading\n"
             "and cognitive training.\n\n"
-            "Exercises based on established techniques:\n"
-            "RSVP, guided pacing, Schulte grids,\n"
-            "peripheral vision training, and chunking."
+            "15 exercises across reading, cognition,\n"
+            "visual processing, and information retention.\n"
+            "16 structured training paths in 5 categories."
         )
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['text_on_card']};")
@@ -126,7 +126,7 @@ class MainMenuScreen(BaseScreen):
         credit = QLabel(
             f"v{__version__}\n\n"
             "Created by Adam Jaeger\n"
-            "admjae@proton.me\n\n"
+            "adam.jaeger@roche.com  |  admjae@proton.me\n\n"
             "Repository setup and GitLab integration\n"
             "by Orlando Pereira\n"
             "\u00a9 2025"
