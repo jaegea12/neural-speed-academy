@@ -89,6 +89,8 @@ class BaseScreen(QWidget):
         hub_btn.clicked.connect(lambda: _guarded_nav(self.navigator.to_dashboard))
         bar_layout.addWidget(hub_btn)
 
+        bar_layout.addStretch()
+
         menu_btn = QPushButton("Main Menu")
         menu_btn.setStyleSheet(
             nav_style
@@ -98,8 +100,6 @@ class BaseScreen(QWidget):
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         menu_btn.clicked.connect(lambda: _guarded_nav(lambda: self.navigator.navigate_to("main_menu")))
         bar_layout.addWidget(menu_btn)
-
-        bar_layout.addStretch()
 
         user = self.navigator.get_user()
         if user:

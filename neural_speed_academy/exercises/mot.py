@@ -300,7 +300,7 @@ class MotExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
 
         cfg = MOT_CONFIG
         c = COLORS

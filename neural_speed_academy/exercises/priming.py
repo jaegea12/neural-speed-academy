@@ -199,7 +199,7 @@ class PrimingExercise(BaseExercise):
     def _complete_exercise(self) -> None:
         self._running = False
         self._clear()
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
