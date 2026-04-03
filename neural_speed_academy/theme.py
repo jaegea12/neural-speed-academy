@@ -371,6 +371,8 @@ class ThemeManager:
         self._fov = DEFAULT_FOV
         self._font_scale: float = 1.0
         self._fullscreen: bool = True
+        self._sound_enabled: bool = True
+        self._sound_volume: float = 0.5
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
         self._listeners: list = []
@@ -411,6 +413,22 @@ class ThemeManager:
     @fullscreen.setter
     def fullscreen(self, value: bool) -> None:
         self._fullscreen = value
+
+    @property
+    def sound_enabled(self) -> bool:
+        return self._sound_enabled
+
+    @sound_enabled.setter
+    def sound_enabled(self, value: bool) -> None:
+        self._sound_enabled = value
+
+    @property
+    def sound_volume(self) -> float:
+        return self._sound_volume
+
+    @sound_volume.setter
+    def sound_volume(self, value: float) -> None:
+        self._sound_volume = max(0.0, min(1.0, value))
 
     @property
     def schulte_grid_size(self) -> int:
@@ -460,6 +478,8 @@ class ThemeManager:
                 "fov": self._fov,
                 "font_scale": self._font_scale,
                 "fullscreen": self._fullscreen,
+                "sound_enabled": self._sound_enabled,
+                "sound_volume": self._sound_volume,
             }
             if self._schulte_grid_size is not None:
                 data["schulte_grid_size"] = self._schulte_grid_size
@@ -490,6 +510,10 @@ class ThemeManager:
                 self._font_scale = max(0.8, min(1.5, float(data["font_scale"])))
             if "fullscreen" in data:
                 self._fullscreen = bool(data["fullscreen"])
+            if "sound_enabled" in data:
+                self._sound_enabled = bool(data["sound_enabled"])
+            if "sound_volume" in data:
+                self._sound_volume = max(0.0, min(1.0, float(data["sound_volume"])))
             sg = data.get("schulte_grid_size")
             if sg is not None:
                 self._schulte_grid_size = int(sg)

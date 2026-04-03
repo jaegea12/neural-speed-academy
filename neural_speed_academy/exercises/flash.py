@@ -296,15 +296,19 @@ class FlashExercise(BaseExercise):
         combined = f"{left} {right}"
         if combined.upper() == self.target_val:
             self.correct_count += 1
+            self._play("correct")
             self._next_round()
         else:
+            self._play("incorrect")
             self._show_correction()
 
     def _verify(self, user_input: str) -> None:
         if user_input.upper().strip() == self.target_val:
             self.correct_count += 1
+            self._play("correct")
             self._next_round()
         else:
+            self._play("incorrect")
             self._show_correction()
 
     def _show_correction(self) -> None:

@@ -59,6 +59,14 @@ class BaseExercise(QWidget):
         self._layout.setSpacing(0)
         self._timers: list[QTimer] = []
 
+    def _play(self, tone: str) -> None:
+        """Play an audio cue, syncing engine state from theme settings."""
+        from neural_speed_academy.audio import audio_engine
+        from neural_speed_academy.theme import theme_manager
+        audio_engine.enabled = theme_manager.sound_enabled
+        audio_engine.volume = theme_manager.sound_volume
+        audio_engine.play(tone)
+
     @property
     @abstractmethod
     def name(self) -> str:
@@ -208,6 +216,7 @@ class BaseExercise(QWidget):
         details: str = "",
     ) -> None:
         """Display a standardized result screen."""
+        self._play("completion")
         self._clear()
         c = COLORS
 

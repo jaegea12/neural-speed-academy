@@ -500,9 +500,11 @@ class PeripheralFlashExercise(BaseExercise):
 
         if chosen == self._current_answer:
             self._correct += 1
+            self._play("correct")
             self._feedback_lbl.setText("\u2714 Correct!")
             self._feedback_lbl.setStyleSheet(f"color: {c['success']};")
         else:
+            self._play("incorrect")
             expected = self._current_answer
             if self._stim_type == "shapes":
                 cfg = PERIPHERAL_FLASH_CONFIG

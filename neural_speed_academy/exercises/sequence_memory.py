@@ -346,12 +346,14 @@ class SequenceMemoryExercise(BaseExercise):
     def _evaluate(self) -> None:
         correct = self._user_input == self._sequence
         if correct:
+            self._play("correct")
             self.correct_count += 1
             self.max_reached = max(self.max_reached, self.seq_length)
             self.seq_length = min(
                 self.seq_length + 1, SEQUENCE_CONFIG["max_length"]
             )
         else:
+            self._play("incorrect")
             self.seq_length = max(
                 self.seq_length - 1, SEQUENCE_CONFIG["min_length"]
             )

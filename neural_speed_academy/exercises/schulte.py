@@ -284,6 +284,7 @@ class SchulteExercise(BaseExercise):
     def _on_click(self, value: int, button: QPushButton) -> None:
         c = COLORS
         if value == self.target:
+            self._play("correct")
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['grid_solved']}; "
                 f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
@@ -297,6 +298,7 @@ class SchulteExercise(BaseExercise):
                 return
             self._lbl_target.setText(f"FIND: {self.target}")
         else:
+            self._play("incorrect")
             self._errors += 1
             self.score -= SCHULTE_CONFIG["wrong_penalty"]
             orig_style = button.styleSheet()

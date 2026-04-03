@@ -627,7 +627,9 @@ class MotExercise(BaseExercise):
         self._phase_lbl.setText(
             f"{correct}/{self._num_targets} correct"
         )
-        color = c["success"] if correct == self._num_targets else c["alert"]
+        all_correct = correct == self._num_targets
+        self._play("correct" if all_correct else "incorrect")
+        color = c["success"] if all_correct else c["alert"]
         self._phase_lbl.setStyleSheet(f"color: {color};")
 
         # Next round or final results
