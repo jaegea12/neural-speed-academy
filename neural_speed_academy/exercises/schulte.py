@@ -62,7 +62,7 @@ class SchulteExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("schulte"))
@@ -174,7 +174,7 @@ class SchulteExercise(BaseExercise):
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
             f"color: {c['btn_text']}; "
-            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_grid)
@@ -267,7 +267,7 @@ class SchulteExercise(BaseExercise):
                 btn.setFixedSize(btn_size, btn_size)
                 btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['grid_btn']}; "
-                    f"color: {c['grid_text']}; border: none; "
+                    f"color: {c['grid_text']}; border: 2px solid transparent; "
                     f"border-radius: 4px; }}"
                     f"QPushButton:hover {{ opacity: 0.9; }}"
                 )
@@ -286,7 +286,7 @@ class SchulteExercise(BaseExercise):
         if value == self.target:
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['grid_solved']}; "
-                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
             )
             button.setEnabled(False)
             self.target += 1
@@ -302,7 +302,7 @@ class SchulteExercise(BaseExercise):
             orig_style = button.styleSheet()
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['alert']}; "
-                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
             )
             self._after(200, lambda: button.setStyleSheet(orig_style))
 
