@@ -232,96 +232,6 @@ class SettingsScreen(BaseScreen):
 
         cl.addSpacing(15)
 
-        # --- Sound ---
-        sound_row = QHBoxLayout()
-        sound_row.addStretch(1)
-
-        sound_section = QVBoxLayout()
-        sound_section.setSpacing(4)
-        sec_sound = QLabel("SOUND")
-        sec_sound.setFont(make_qfont("section_header"))
-        sec_sound.setStyleSheet(f"color: {c['accent']};")
-        sound_section.addWidget(sec_sound)
-
-        sound_desc = QLabel("Audio feedback for exercises")
-        sound_desc.setFont(make_qfont("btn_sm"))
-        sound_desc.setStyleSheet(f"color: {c['muted']};")
-        sound_section.addWidget(sound_desc)
-
-        # Toggle
-        toggle_row = QHBoxLayout()
-        toggle_row.setSpacing(12)
-        self._sound_toggle = QPushButton(
-            "ON" if theme_manager.sound_enabled else "OFF"
-        )
-        self._sound_toggle.setFixedWidth(60)
-        self._sound_toggle.setStyleSheet(
-            f"QPushButton {{ background-color: "
-            f"{c['accent'] if theme_manager.sound_enabled else c['card']}; "
-            f"color: {c['btn_text'] if theme_manager.sound_enabled else c['muted']}; "
-            f"border: none; padding: 4px; border-radius: 4px; "
-            f"{font_css('btn_bold')} }}"
-        )
-        self._sound_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._sound_toggle.clicked.connect(self._on_sound_toggled)
-        toggle_row.addWidget(self._sound_toggle)
-
-        toggle_label = QLabel("Enable audio cues")
-        toggle_label.setFont(make_qfont("body"))
-        toggle_label.setStyleSheet(f"color: {c['fg']};")
-        toggle_row.addWidget(toggle_label)
-        toggle_row.addStretch()
-        sound_section.addLayout(toggle_row)
-
-        # Volume slider
-        vol_row = QHBoxLayout()
-        vol_row.setSpacing(12)
-
-        vol_label = QLabel("Volume")
-        vol_label.setFont(make_qfont("btn_sm"))
-        vol_label.setStyleSheet(f"color: {c['fg']};")
-        vol_row.addWidget(vol_label)
-
-        self._vol_slider = QSlider(Qt.Orientation.Horizontal)
-        self._vol_slider.setMinimum(0)
-        self._vol_slider.setMaximum(100)
-        self._vol_slider.setValue(int(theme_manager.sound_volume * 100))
-        self._vol_slider.setFixedWidth(200)
-        self._vol_slider.setStyleSheet(
-            f"QSlider::groove:horizontal {{ background: {c['card']}; "
-            f"height: 6px; border-radius: 3px; }}"
-            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
-            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
-        )
-        self._vol_slider.valueChanged.connect(self._on_volume_changed)
-        vol_row.addWidget(self._vol_slider)
-
-        self._vol_label = QLabel(f"{int(theme_manager.sound_volume * 100)}%")
-        self._vol_label.setFont(make_qfont("btn_bold"))
-        self._vol_label.setStyleSheet(f"color: {c['fg']};")
-        self._vol_label.setFixedWidth(50)
-        vol_row.addWidget(self._vol_label)
-        vol_row.addStretch()
-        sound_section.addLayout(vol_row)
-
-        # Test button
-        test_btn = QPushButton("TEST")
-        test_btn.setFixedWidth(80)
-        test_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['card']}; "
-            f"color: {c['fg']}; border: none; padding: 4px 12px; "
-            f"border-radius: 4px; {font_css('btn_sm')} }}"
-        )
-        test_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        test_btn.clicked.connect(self._test_sound)
-        sound_section.addWidget(test_btn)
-
-        sound_row.addLayout(sound_section)
-        sound_row.addStretch(1)
-        cl.addLayout(sound_row)
-
-        cl.addSpacing(15)
-
         # --- Training Text (constrained width) ---
         text_wrapper = QHBoxLayout()
         text_wrapper.addStretch(1)
@@ -518,38 +428,6 @@ class SettingsScreen(BaseScreen):
             self.navigator.save_user()
         # Rebuild in-place to reflect new colors without polluting nav history
         self.show_screen()
-
-    def _on_sound_toggled(self) -> None:
-        c = COLORS
-        enabled = not theme_manager.sound_enabled
-        theme_manager.sound_enabled = enabled
-        self._sound_toggle.setText("ON" if enabled else "OFF")
-        self._sound_toggle.setStyleSheet(
-            f"QPushButton {{ background-color: "
-            f"{c['accent'] if enabled else c['card']}; "
-            f"color: {c['btn_text'] if enabled else c['muted']}; "
-            f"border: none; padding: 4px; border-radius: 4px; "
-            f"{font_css('btn_bold')} }}"
-        )
-        user = self.navigator.get_user()
-        if user:
-            user.sound_enabled = enabled
-            self.navigator.save_user()
-
-    def _on_volume_changed(self, value: int) -> None:
-        vol = value / 100.0
-        theme_manager.sound_volume = vol
-        self._vol_label.setText(f"{value}%")
-        user = self.navigator.get_user()
-        if user:
-            user.sound_volume = vol
-            self.navigator.save_user()
-
-    def _test_sound(self) -> None:
-        from neural_speed_academy.audio import audio_engine
-        audio_engine.enabled = theme_manager.sound_enabled
-        audio_engine.volume = theme_manager.sound_volume
-        audio_engine.play("correct")
 
     def _on_fov_changed(self, btn) -> None:
         theme_manager.fov = btn.property("fov_key")

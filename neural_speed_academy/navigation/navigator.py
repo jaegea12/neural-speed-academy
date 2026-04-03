@@ -84,10 +84,6 @@ class Navigator:
             theme_manager.set_profile(user.theme)
         if user.font_scale:
             theme_manager.font_scale = user.font_scale
-        if user.sound_enabled is not None:
-            theme_manager.sound_enabled = user.sound_enabled
-        if user.sound_volume:
-            theme_manager.sound_volume = user.sound_volume
 
     def get_user(self) -> Optional["UserProfile"]:
         return self.current_user

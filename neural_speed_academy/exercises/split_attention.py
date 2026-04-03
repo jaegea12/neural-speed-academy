@@ -633,7 +633,6 @@ class SplitAttentionExercise(BaseExercise):
             f"{self._correct_shape} {self._correct_shape_name}"
         )
         all_ok = self._center_was_correct and periph_ok
-        self._play("correct" if all_ok else "incorrect")
 
         self._feedback_lbl.setText(feedback)
         self._feedback_lbl.setStyleSheet(

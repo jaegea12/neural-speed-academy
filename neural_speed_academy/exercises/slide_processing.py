@@ -601,9 +601,6 @@ class SlideProcessingExercise(BaseExercise):
 
         if is_correct:
             self._correct += 1
-            self._play("correct")
-        else:
-            self._play("incorrect")
 
         # Show feedback briefly
         self._clear()

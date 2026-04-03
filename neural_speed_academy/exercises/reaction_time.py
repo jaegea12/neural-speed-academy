@@ -487,7 +487,6 @@ class ReactionTimeExercise(BaseExercise):
                 self._feedback_lbl.setText(f"\u2714 {rt_ms:.0f} ms")
                 self._feedback_lbl.setStyleSheet(f"color: {c['success']};")
             else:
-                self._play("incorrect")
                 cfg = REACTION_TIME_CONFIG
                 correct_name = cfg["choice_colors"][
                     self._current_color_idx
@@ -505,7 +504,6 @@ class ReactionTimeExercise(BaseExercise):
                 self._feedback_lbl.setStyleSheet(f"color: {c['success']};")
             else:
                 # False alarm — clicked on no-go
-                self._play("incorrect")
                 self._false_alarms += 1
                 self._feedback_lbl.setText(
                     "\u2718 False alarm — don't click on red!"

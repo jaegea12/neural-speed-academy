@@ -198,8 +198,6 @@ class UserProfile:
     sr_decks: list = field(default_factory=list)
     theme: str = ""  # empty = use global default
     font_scale: float = 0.0  # 0 = use global default
-    sound_enabled: Optional[bool] = None  # None = use global default
-    sound_volume: float = 0.0  # 0 = use global default
 
     def __post_init__(self):
         if not self.last_login:
@@ -286,10 +284,6 @@ class UserProfile:
             d["theme"] = self.theme
         if self.font_scale:
             d["font_scale"] = self.font_scale
-        if self.sound_enabled is not None:
-            d["sound_enabled"] = self.sound_enabled
-        if self.sound_volume:
-            d["sound_volume"] = self.sound_volume
         return d
 
     @classmethod
@@ -327,8 +321,6 @@ class UserProfile:
             sr_decks=[SRDeck.from_dict(d) for d in data.get("sr_decks", [])],
             theme=data.get("theme", ""),
             font_scale=float(data.get("font_scale", 0.0)),
-            sound_enabled=data.get("sound_enabled"),
-            sound_volume=float(data.get("sound_volume", 0.0)),
         )
 
 

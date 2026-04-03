@@ -445,8 +445,6 @@ class RapidDecisionGridExercise(BaseExercise):
         if self._time_limit > 0:
             remaining = max(0, self._time_limit - elapsed)
             self._lbl_timer.setText(f"{remaining}s")
-            if remaining in (5, 3, 1):
-                self._play("tick")
             if remaining <= 10:
                 self._lbl_timer.setStyleSheet(f"color: {c['alert']};")
             if remaining <= 0:
@@ -490,7 +488,6 @@ class RapidDecisionGridExercise(BaseExercise):
             )
             button.setEnabled(False)
             self._score += cfg["correct_points"]
-            self._play("correct")
             self._target_idx += 1
 
             if self._target_idx >= len(self._targets):
@@ -515,7 +512,6 @@ class RapidDecisionGridExercise(BaseExercise):
                 )
                 button.setEnabled(False)
                 self._score += cfg["correct_points"]
-                self._play("correct")
                 self._red_idx += 1
                 self._next_color = "blue"
 
@@ -534,7 +530,6 @@ class RapidDecisionGridExercise(BaseExercise):
                 )
                 button.setEnabled(False)
                 self._score += cfg["correct_points"]
-                self._play("correct")
                 self._blue_idx += 1
                 self._next_color = "red"
 
@@ -570,7 +565,6 @@ class RapidDecisionGridExercise(BaseExercise):
                 self._update_alternating_target()
 
     def _wrong_click(self, button: QPushButton) -> None:
-        self._play("incorrect")
         c = COLORS
         cfg = RAPID_DECISION_CONFIG
         self._score -= cfg["wrong_penalty"]
