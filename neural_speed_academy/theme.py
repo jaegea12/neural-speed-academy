@@ -55,7 +55,7 @@ LIGHT_COLORS = {
     # Semantic roles
     "btn_text": "#ffffff",
     "text_on_card": "#1e293b",
-    "muted": "#64748b",
+    "muted": "#596980",
     "reader_bg": "#ffffff",
     "reader_fg": "#1e293b",
     # Difficulty tiers
@@ -85,7 +85,7 @@ SILVER_COLORS = {
     # Semantic roles
     "btn_text": "#f0f0f4",
     "text_on_card": "#1a1a22",
-    "muted": "#3e3e48",
+    "muted": "#32323c",
     "reader_bg": "#c8c8d0",
     "reader_fg": "#1a1a22",
     # Difficulty tiers
@@ -112,7 +112,7 @@ SOFT_LIGHT_COLORS = {
     # Semantic roles
     "btn_text": "#faf7f2",
     "text_on_card": "#3d3929",
-    "muted": "#74705e",
+    "muted": "#6d6957",
     "reader_bg": "#f5f0e8",
     "reader_fg": "#3d3929",
     # Difficulty tiers
@@ -170,7 +170,7 @@ FOCUS_COLORS = {
     # Semantic roles
     "btn_text": "#f4ecd8",
     "text_on_card": "#2c2416",
-    "muted": "#6e6454",
+    "muted": "#6c6252",
     "reader_bg": "#f4ecd8",
     "reader_fg": "#2c2416",
     # Difficulty tiers
@@ -200,7 +200,7 @@ TWILIGHT_COLORS = {
     # Semantic roles
     "btn_text": "#1e1e22",
     "text_on_card": "#e8e4dc",
-    "muted": "#9a968e",
+    "muted": "#a5a199",
     "reader_bg": "#d4d0c8",
     "reader_fg": "#1e1e22",
     # Difficulty tiers
@@ -257,7 +257,7 @@ EMBER_COLORS = {
     # Semantic roles
     "btn_text": "#ffffff",
     "text_on_card": "#e0d0d0",
-    "muted": "#8a7070",
+    "muted": "#917777",
     "reader_bg": "#e0d0d0",
     "reader_fg": "#0a0a0a",
     # Difficulty tiers
@@ -660,6 +660,15 @@ def make_qfont(key: str):
     return font
 
 
+def _luminance(hex_color: str) -> float:
+    """Relative luminance of a hex color (0.0–1.0)."""
+    vals = []
+    for i in (1, 3, 5):
+        s = int(hex_color[i:i + 2], 16) / 255.0
+        vals.append(s / 12.92 if s <= 0.04045 else ((s + 0.055) / 1.055) ** 2.4)
+    return 0.2126 * vals[0] + 0.7152 * vals[1] + 0.0722 * vals[2]
+
+
 def _color_shift(hex_color: str, amount: int) -> str:
     """Lighten (positive) or darken (negative) a hex color."""
     r = max(0, min(255, int(hex_color[1:3], 16) + amount))
@@ -684,13 +693,24 @@ def btn_css(bg: str, fg: str, *, padding: str = "12px",
             radius: int = 4, min_width: int = 0,
             font_key: str = "btn_bold") -> str:
     """Generate QPushButton QSS with hover and pressed states."""
-    hover_bg = _color_shift(bg, 25)
-    press_bg = _color_shift(bg, -20)
+    # Shift hover away from the screen background to avoid blending
+    bg_lum = _luminance(COLORS["bg"])
+    btn_lum = _luminance(bg)
+    # If lightening the button would move it toward the screen bg, darken instead
+    if btn_lum < bg_lum:
+        hover_bg = _color_shift(bg, -25)
+        press_bg = _color_shift(bg, -40)
+    else:
+        hover_bg = _color_shift(bg, 25)
+        press_bg = _color_shift(bg, -20)
     mw = f"min-width: {min_width}px; " if min_width else ""
+    c = COLORS
     return (
         f"QPushButton {{ {font_css(font_key)} background-color: {bg}; "
-        f"color: {fg}; border: none; padding: {padding}; "
+        f"color: {fg}; border: 2px solid transparent; padding: {padding}; "
         f"border-radius: {radius}px; {mw}}}"
         f"QPushButton:hover {{ background-color: {hover_bg}; }}"
         f"QPushButton:pressed {{ background-color: {press_bg}; }}"
+        f"QPushButton:focus {{ border: 2px solid {c['accent']}; }}"
     )
+

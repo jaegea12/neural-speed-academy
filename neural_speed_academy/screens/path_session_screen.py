@@ -582,6 +582,8 @@ class PathBuilderScreen(BaseScreen):
                 f"border: none; }}"
             )
             rm.setCursor(Qt.CursorShape.PointingHandCursor)
+            rm.setAccessibleName(f"Remove step {i + 1}")
+            rm.setToolTip(f"Remove step {i + 1}")
             rm.clicked.connect(lambda checked, idx=i: self._remove_step(idx))
             row.addWidget(rm)
 
