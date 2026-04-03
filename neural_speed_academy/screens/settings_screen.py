@@ -45,22 +45,15 @@ class SettingsScreen(BaseScreen):
             self._initial_text = theme_manager.training_text
 
         scroll, content, cl = make_scroll_area(self._layout)
-        cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        cl.setContentsMargins(20, 20, 20, 20)
-
-        # Use available width instead of fixed
-        inner = QFrame()
-        inner.setStyleSheet("background: transparent;")
-        il = QVBoxLayout(inner)
-        il.setSpacing(6)
-        il.setContentsMargins(40, 0, 40, 0)
+        cl.setContentsMargins(50, 20, 50, 20)
+        cl.setSpacing(6)
 
         title = QLabel("SETTINGS")
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['fg']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(title)
-        il.addSpacing(10)
+        cl.addWidget(title)
+        cl.addSpacing(10)
 
         # --- Settings: 3 sections side by side ---
         rb_style = _radio_style(c)
@@ -171,9 +164,9 @@ class SettingsScreen(BaseScreen):
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
 
-        il.addLayout(top_row)
+        cl.addLayout(top_row)
 
-        il.addSpacing(15)
+        cl.addSpacing(15)
 
         # --- Training Text (constrained width) ---
         text_wrapper = QHBoxLayout()
@@ -230,9 +223,9 @@ class SettingsScreen(BaseScreen):
 
         text_wrapper.addLayout(text_section, 8)
         text_wrapper.addStretch(1)
-        il.addLayout(text_wrapper)
+        cl.addLayout(text_wrapper)
 
-        il.addSpacing(15)
+        cl.addSpacing(15)
 
         # Buttons
         btn_row = QHBoxLayout()
@@ -260,16 +253,16 @@ class SettingsScreen(BaseScreen):
         reset_btn.clicked.connect(self._reset_defaults)
         btn_row.addWidget(reset_btn)
 
-        il.addLayout(btn_row)
+        cl.addLayout(btn_row)
 
-        il.addSpacing(20)
+        cl.addSpacing(20)
 
         # --- Keyboard Shortcuts Reference ---
         sec_keys = QLabel("KEYBOARD SHORTCUTS")
         sec_keys.setFont(make_qfont("section_header"))
         sec_keys.setStyleSheet(f"color: {c['accent']};")
         sec_keys.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec_keys)
+        cl.addWidget(sec_keys)
 
         shortcuts = [
             ("Esc", "Go back / Main menu / Quit"),
@@ -279,6 +272,10 @@ class SettingsScreen(BaseScreen):
             ("Ctrl+Q", "Quit application"),
             ("F11", "Toggle fullscreen"),
         ]
+        keys_wrapper = QHBoxLayout()
+        keys_wrapper.addStretch(1)
+        keys_col = QVBoxLayout()
+        keys_col.setSpacing(4)
         for key, desc in shortcuts:
             row = QHBoxLayout()
             row.setContentsMargins(0, 0, 0, 0)
@@ -288,17 +285,21 @@ class SettingsScreen(BaseScreen):
                 f"color: {c['accent']}; background-color: {c['card']}; "
                 f"padding: 2px 8px; border-radius: 3px;"
             )
-            key_lbl.setFixedWidth(120)
+            key_lbl.setFixedWidth(110)
             key_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             row.addWidget(key_lbl)
+            row.addSpacing(10)
             desc_lbl = QLabel(desc)
             desc_lbl.setFont(make_qfont("body"))
             desc_lbl.setStyleSheet(f"color: {c['fg']};")
             row.addWidget(desc_lbl)
             row.addStretch()
-            il.addLayout(row)
+            keys_col.addLayout(row)
+        keys_wrapper.addLayout(keys_col, 3)
+        keys_wrapper.addStretch(1)
+        cl.addLayout(keys_wrapper)
 
-        cl.addWidget(inner)
+
 
     def _has_unsaved_changes(self) -> bool:
         """Check if any settings differ from the last saved state."""

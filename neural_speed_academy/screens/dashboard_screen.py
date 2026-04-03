@@ -56,8 +56,8 @@ class DashboardScreen(BaseScreen):
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
-        cl.setContentsMargins(30, 12, 30, 12)
-        cl.setSpacing(10)
+        cl.setContentsMargins(16, 12, 16, 12)
+        cl.setSpacing(8)
 
         self._build_user_card(cl)
         self._build_onboarding(cl)
