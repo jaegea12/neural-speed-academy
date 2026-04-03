@@ -196,6 +196,7 @@ class UserProfile:
     personal_bests: dict = field(default_factory=dict)
     custom_paths: dict = field(default_factory=dict)
     sr_decks: list = field(default_factory=list)
+    theme: str = ""  # empty = use global default
 
     def __post_init__(self):
         if not self.last_login:
@@ -272,6 +273,8 @@ class UserProfile:
         }
         if self.password_hash:
             d["password_hash"] = self.password_hash
+        if self.theme:
+            d["theme"] = self.theme
         return d
 
     @classmethod
@@ -307,6 +310,7 @@ class UserProfile:
             personal_bests=data.get("personal_bests", {}),
             custom_paths=data.get("custom_paths", {}),
             sr_decks=[SRDeck.from_dict(d) for d in data.get("sr_decks", [])],
+            theme=data.get("theme", ""),
         )
 
 

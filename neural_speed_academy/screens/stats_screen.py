@@ -131,7 +131,7 @@ class StatsScreen(BaseScreen):
             return
 
         scroll, content, cl = make_scroll_area(self._layout)
-        cl.setContentsMargins(50, 20, 50, 30)
+        cl.setContentsMargins(20, 20, 20, 30)
 
         title = QLabel("PERFORMANCE ANALYTICS")
         title.setFont(make_qfont("header"))

@@ -120,10 +120,21 @@ class BaseScreen(QWidget):
 
 def make_scroll_area(parent_layout: QVBoxLayout) -> tuple[QScrollArea, QWidget, QVBoxLayout]:
     """Create a scrollable area. Returns (scroll_area, content_widget, content_layout)."""
+    c = COLORS
     scroll = QScrollArea()
     scroll.setWidgetResizable(True)
     scroll.setFrameShape(QFrame.Shape.NoFrame)
-    scroll.setStyleSheet(f"background-color: {COLORS['bg']};")
+    scroll.setHorizontalScrollBarPolicy(
+        Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+    )
+    scroll.setStyleSheet(
+        f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
+        f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
+        f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
+        f"border-radius: 4px; min-height: 30px; }}"
+        f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
+        f"{{ height: 0; }}"
+    )
 
     content = QWidget()
     content_layout = QVBoxLayout(content)

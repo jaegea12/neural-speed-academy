@@ -70,7 +70,7 @@ class MainMenuScreen(BaseScreen):
                  lambda: self.navigator.to_dashboard()),
             )
             buttons.append(
-                ("SWITCH PROFILE", c["action"], c["btn_text"],
+                ("SWITCH PROFILE", c["card"], c["text_on_card"],
                  lambda: self.navigator.navigate_to("login")),
             )
         else:
@@ -80,13 +80,13 @@ class MainMenuScreen(BaseScreen):
             )
 
         buttons += [
-            ("INTRODUCTION", c["action"], c["btn_text"],
-             lambda: self.navigator.navigate_to("introduction")),
-            ("TRAINING PATHS", c["action"], c["btn_text"],
+            ("TRAINING PATHS", c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("paths")),
-            ("SETTINGS", c["card"], c["fg"],
+            ("INTRODUCTION", c["accent"], c["btn_text"],
+             lambda: self.navigator.navigate_to("introduction")),
+            ("SETTINGS", c["muted"], c["bg"],
              lambda: self.navigator.navigate_to("settings")),
-            ("INFORMATION", c["card"], c["fg"], self._show_info),
+            ("INFORMATION", c["muted"], c["bg"], self._show_info),
             ("QUIT", c["alert"], c["btn_text"], self._quit),
         ]
 
