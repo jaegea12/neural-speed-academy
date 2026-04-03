@@ -197,6 +197,7 @@ class UserProfile:
     custom_paths: dict = field(default_factory=dict)
     sr_decks: list = field(default_factory=list)
     theme: str = ""  # empty = use global default
+    font_scale: float = 0.0  # 0 = use global default
 
     def __post_init__(self):
         if not self.last_login:
@@ -275,6 +276,8 @@ class UserProfile:
             d["password_hash"] = self.password_hash
         if self.theme:
             d["theme"] = self.theme
+        if self.font_scale:
+            d["font_scale"] = self.font_scale
         return d
 
     @classmethod
@@ -311,6 +314,7 @@ class UserProfile:
             custom_paths=data.get("custom_paths", {}),
             sr_decks=[SRDeck.from_dict(d) for d in data.get("sr_decks", [])],
             theme=data.get("theme", ""),
+            font_scale=float(data.get("font_scale", 0.0)),
         )
 
 

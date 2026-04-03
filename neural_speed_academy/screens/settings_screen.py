@@ -6,7 +6,7 @@ from __future__ import annotations
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QRadioButton, QButtonGroup, QTextEdit, QComboBox, QFrame,
-    QMessageBox,
+    QMessageBox, QSlider,
 )
 from PyQt6.QtCore import Qt
 
@@ -165,6 +165,70 @@ class SettingsScreen(BaseScreen):
         top_row.addLayout(disp_section, 1)
 
         cl.addLayout(top_row)
+
+        cl.addSpacing(15)
+
+        # --- Font Scale ---
+        scale_row = QHBoxLayout()
+        scale_row.addStretch(1)
+
+        scale_section = QVBoxLayout()
+        scale_section.setSpacing(4)
+        sec_font = QLabel("FONT SIZE")
+        sec_font.setFont(make_qfont("section_header"))
+        sec_font.setStyleSheet(f"color: {c['accent']};")
+        scale_section.addWidget(sec_font)
+
+        SCALE_STEPS = [0.8, 0.9, 1.0, 1.1, 1.25, 1.5]
+        SCALE_LABELS = ["80%", "90%", "100%", "110%", "125%", "150%"]
+
+        current_scale = theme_manager.font_scale
+        # Find closest step index
+        current_idx = min(
+            range(len(SCALE_STEPS)),
+            key=lambda i: abs(SCALE_STEPS[i] - current_scale),
+        )
+
+        slider_row = QHBoxLayout()
+        slider_row.setSpacing(12)
+
+        self._font_slider = QSlider(Qt.Orientation.Horizontal)
+        self._font_slider.setMinimum(0)
+        self._font_slider.setMaximum(len(SCALE_STEPS) - 1)
+        self._font_slider.setValue(current_idx)
+        self._font_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self._font_slider.setTickInterval(1)
+        self._font_slider.setFixedWidth(200)
+        self._font_slider.setStyleSheet(
+            f"QSlider::groove:horizontal {{ background: {c['card']}; "
+            f"height: 6px; border-radius: 3px; }}"
+            f"QSlider::handle:horizontal {{ background: {c['accent']}; "
+            f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+        )
+        slider_row.addWidget(self._font_slider)
+
+        self._scale_label = QLabel(SCALE_LABELS[current_idx])
+        self._scale_label.setFont(make_qfont("btn_bold"))
+        self._scale_label.setStyleSheet(f"color: {c['fg']};")
+        self._scale_label.setFixedWidth(50)
+        slider_row.addWidget(self._scale_label)
+
+        def _on_scale_changed(idx: int) -> None:
+            scale = SCALE_STEPS[idx]
+            self._scale_label.setText(SCALE_LABELS[idx])
+            theme_manager.font_scale = scale
+            user = self.navigator.get_user()
+            if user:
+                user.font_scale = scale
+                self.navigator.save_user()
+            self.show_screen()
+
+        self._font_slider.valueChanged.connect(_on_scale_changed)
+        scale_section.addLayout(slider_row)
+
+        scale_row.addLayout(scale_section)
+        scale_row.addStretch(1)
+        cl.addLayout(scale_row)
 
         cl.addSpacing(15)
 
