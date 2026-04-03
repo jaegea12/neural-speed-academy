@@ -20,13 +20,16 @@ from neural_speed_academy.theme import (
 def _radio_style(c: dict) -> str:
     """QSS for radio buttons with visible indicator in all themes."""
     return (
-        f"QRadioButton {{ color: {c['fg']}; background: transparent; spacing: 8px; }}"
+        f"QRadioButton {{ color: {c['fg']}; background: transparent; "
+        f"spacing: 8px; padding: 2px 4px; border-radius: 3px; }}"
+        f"QRadioButton:hover {{ background-color: {c['card']}; }}"
         f"QRadioButton::indicator {{ width: 16px; height: 16px; "
         f"border: 2px solid {c['muted']}; border-radius: 8px; "
         f"background: transparent; }}"
         f"QRadioButton::indicator:checked {{ "
         f"border: 2px solid {c['accent']}; "
         f"background: {c['accent']}; }}"
+        f"QRadioButton:focus {{ outline: 2px solid {c['accent']}; }}"
     )
 
 
@@ -60,6 +63,7 @@ class SettingsScreen(BaseScreen):
 
         top_row = QHBoxLayout()
         top_row.setSpacing(40)
+        top_row.addStretch(1)
 
         # -- COLOR PROFILE section (two sub-columns) --
         dark_profiles = [
@@ -163,6 +167,7 @@ class SettingsScreen(BaseScreen):
         self._disp_group.buttonClicked.connect(self._on_display_changed)
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
+        top_row.addStretch(1)
 
         cl.addLayout(top_row)
 
@@ -204,6 +209,7 @@ class SettingsScreen(BaseScreen):
             f"height: 6px; border-radius: 3px; }}"
             f"QSlider::handle:horizontal {{ background: {c['accent']}; "
             f"width: 16px; margin: -5px 0; border-radius: 8px; }}"
+            f"QSlider:focus {{ border: 2px solid {c['accent']}; border-radius: 4px; }}"
         )
         slider_row.addWidget(self._font_slider)
 
@@ -263,8 +269,9 @@ class SettingsScreen(BaseScreen):
         self._lib_combo.setFont(make_qfont("btn_sm"))
         self._lib_combo.setStyleSheet(
             f"QComboBox {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; border: none; "
+            f"color: {c['text_on_card']}; border: 2px solid transparent; "
             f"padding: 4px 8px; border-radius: 3px; }}"
+            f"QComboBox:focus {{ border: 2px solid {c['accent']}; }}"
             f"QComboBox::drop-down {{ border: none; }}"
             f"QComboBox QAbstractItemView {{ background-color: {c['card']}; "
             f"color: {c['text_on_card']}; "
@@ -299,8 +306,9 @@ class SettingsScreen(BaseScreen):
         save_btn.setFont(make_qfont("btn_bold"))
         save_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 8px 30px; border-radius: 4px; }}"
+            f"QPushButton:focus {{ border: 2px solid {c['fg']}; }}"
         )
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self._save)
@@ -310,8 +318,9 @@ class SettingsScreen(BaseScreen):
         reset_btn.setFont(make_qfont("btn_bold"))
         reset_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; "
-            f"color: {c['fg']}; border: none; "
+            f"color: {c['fg']}; border: 2px solid transparent; "
             f"padding: 8px 30px; border-radius: 4px; }}"
+            f"QPushButton:focus {{ border: 2px solid {c['accent']}; }}"
         )
         reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         reset_btn.clicked.connect(self._reset_defaults)
@@ -392,7 +401,8 @@ class SettingsScreen(BaseScreen):
             f"QMessageBox {{ background-color: {c['card']}; color: {c['fg']}; }}"
             f"QLabel {{ color: {c['fg']}; }}"
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
+            f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
+            f"QPushButton:focus {{ border: 2px solid {c['fg']}; }}"
         )
         save_btn = msg.addButton("Save", QMessageBox.ButtonRole.AcceptRole)
         discard_btn = msg.addButton("Discard", QMessageBox.ButtonRole.DestructiveRole)

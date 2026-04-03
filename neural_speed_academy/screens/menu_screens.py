@@ -78,7 +78,7 @@ class BaseMenuScreen(BaseScreen):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 16px; border-radius: 4px;"
+            f"border: 2px solid transparent; padding: 6px 16px; border-radius: 4px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide(guide_key))
@@ -525,7 +525,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 16px; border-radius: 4px;"
+            f"border: 2px solid transparent; padding: 6px 16px; border-radius: 4px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(
@@ -582,7 +582,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         sel_all.setFont(make_qfont("btn_sm"))
         sel_all.setStyleSheet(
             f"color: {c['accent']}; background: transparent; "
-            f"border: none; padding: 4px 10px;"
+            f"border: 2px solid transparent; padding: 4px 10px;"
         )
         sel_all.setCursor(Qt.CursorShape.PointingHandCursor)
         sel_all.clicked.connect(self._select_all_categories)
@@ -596,7 +596,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         sel_clear.setFont(make_qfont("btn_sm"))
         sel_clear.setStyleSheet(
             f"color: {c['muted']}; background: transparent; "
-            f"border: none; padding: 4px 10px;"
+            f"border: 2px solid transparent; padding: 4px 10px;"
         )
         sel_clear.setCursor(Qt.CursorShape.PointingHandCursor)
         sel_clear.clicked.connect(self._clear_categories)
@@ -690,7 +690,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 12px 50px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -724,7 +724,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         c = COLORS
         return (
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 6px 14px; border-radius: 4px; }}"
         )
 

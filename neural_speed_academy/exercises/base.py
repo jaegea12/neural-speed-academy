@@ -106,11 +106,13 @@ class BaseExercise(QWidget):
         bar_layout.setContentsMargins(10, 8, 10, 8)
 
         btn_style = (
-            f"QPushButton {{ {font_css('btn_sm')} border: none; "
+            f"QPushButton {{ {font_css('btn_sm')} border: 2px solid transparent; "
             f"padding: 2px 8px; border-radius: 3px; }}"
         )
 
         back_btn = QPushButton("\u2190 Back")
+        back_btn.setAccessibleName("Go back")
+        back_btn.setToolTip("Go back (Escape)")
         back_btn.setStyleSheet(
             btn_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -121,6 +123,7 @@ class BaseExercise(QWidget):
         bar_layout.addWidget(back_btn)
 
         hub_btn = QPushButton("Training Hub")
+        hub_btn.setAccessibleName("Go to Training Hub")
         hub_btn.setStyleSheet(
             btn_style
             + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
@@ -132,6 +135,7 @@ class BaseExercise(QWidget):
         bar_layout.addStretch()
 
         menu_btn = QPushButton("Main Menu")
+        menu_btn.setAccessibleName("Go to Main Menu")
         menu_btn.setStyleSheet(
             btn_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -143,6 +147,8 @@ class BaseExercise(QWidget):
 
         if show_stop:
             stop_btn = QPushButton("\u25a0 STOP")
+            stop_btn.setAccessibleName("Stop exercise")
+            stop_btn.setToolTip("Stop exercise")
             stop_btn.setStyleSheet(
                 btn_style
                 + f"QPushButton {{ background-color: {c['alert']}; color: {c['btn_text']}; }}"
@@ -257,7 +263,7 @@ class BaseExercise(QWidget):
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 40px; border-radius: 4px;"
+            f"border: 2px solid transparent; padding: 8px 40px; border-radius: 4px;"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         cont_btn.clicked.connect(self.navigator.finish_exercise)

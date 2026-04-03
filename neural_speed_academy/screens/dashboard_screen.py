@@ -47,7 +47,7 @@ class DashboardScreen(BaseScreen):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         scroll.setStyleSheet(
-            f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
+            f"QScrollArea {{ background-color: {c['bg']}; border: 2px solid transparent; }}"
             f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
             f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
             f"border-radius: 4px; min-height: 30px; }}"
@@ -158,7 +158,7 @@ class DashboardScreen(BaseScreen):
         progress.setTextVisible(False)
         progress.setStyleSheet(
             f"QProgressBar {{ background-color: {c['card']}; "
-            f"border: none; border-radius: 4px; }}"
+            f"border: 2px solid transparent; border-radius: 4px; }}"
             f"QProgressBar::chunk {{ background-color: {c['accent']}; "
             f"border-radius: 4px; }}"
         )
@@ -192,11 +192,8 @@ class DashboardScreen(BaseScreen):
         bl.addStretch()
 
         start_btn = QPushButton("START FOUNDATION PATH")
-        start_btn.setFont(make_qfont("btn_bold"))
         start_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['btn_text']}; "
-            f"color: {c['accent']}; border: none; "
-            f"padding: 4px 12px; border-radius: 3px; }}"
+            btn_css(c["btn_text"], c["accent"], padding="4px 12px", radius=3)
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_foundation)
@@ -281,11 +278,8 @@ class DashboardScreen(BaseScreen):
         btn = QPushButton(
             f"CONTINUE: {path_data['name']} \u2014 {step_label}"
         )
-        btn.setFont(make_qfont("btn_bold"))
         btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['success']}; "
-            f"color: {c['btn_text']}; border: none; "
-            f"padding: 10px; border-radius: 4px; }}"
+            btn_css(c["success"], c["btn_text"], padding="10px")
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(
