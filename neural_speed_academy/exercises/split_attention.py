@@ -10,7 +10,10 @@ colored shape in the periphery. Three modes:
 """
 from __future__ import annotations
 
+import logging
 import random
+
+logger = logging.getLogger(__name__)
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -559,7 +562,11 @@ class SplitAttentionExercise(BaseExercise):
         if not self._running or self._center_answered:
             return
         self._center_answered = True
-        self._center_was_correct = chosen == self._correct_word
+        self._center_was_correct = (chosen == self._correct_word)
+        logger.debug(
+            "center: chose=%r correct=%r match=%s",
+            chosen, self._correct_word, self._center_was_correct,
+        )
 
         if self._center_was_correct:
             self._center_correct += 1
@@ -624,19 +631,25 @@ class SplitAttentionExercise(BaseExercise):
             f"Shape: {self._periph_correct}"
         )
 
-        # Combined feedback
+        # Combined feedback — show per-task result
         center_mark = "\u2714" if self._center_was_correct else "\u2718"
         periph_mark = "\u2714" if periph_ok else "\u2718"
-        feedback = (
-            f"{center_mark} Word: {self._correct_word}  |  "
+        center_color = c["success"] if self._center_was_correct else c["alert"]
+        periph_color = c["success"] if periph_ok else c["alert"]
+        self._feedback_lbl.setText("")
+        self._feedback_lbl.setStyleSheet("")
+        self._feedback_lbl.setText(
+            f'<span style="color:{center_color}">'
+            f"{center_mark} Word: {self._correct_word}</span>"
+            f"  |  "
+            f'<span style="color:{periph_color}">'
             f"{periph_mark} Shape: "
-            f"{self._correct_shape} {self._correct_shape_name}"
+            f"{self._correct_shape} {self._correct_shape_name}</span>"
         )
-        all_ok = self._center_was_correct and periph_ok
-
-        self._feedback_lbl.setText(feedback)
-        self._feedback_lbl.setStyleSheet(
-            f"color: {c['success'] if all_ok else c['alert']};"
+        logger.debug(
+            "peripheral: chose=%r correct=%r match=%s | center_was=%s",
+            chosen, self._correct_shape_name, periph_ok,
+            self._center_was_correct,
         )
 
         self._answer_container.hide()
