@@ -132,9 +132,11 @@ class MainMenuScreen(BaseScreen):
         body = QLabel(
             "A desktop application for speed reading\n"
             "and cognitive training.\n\n"
-            "15 exercises across perception, cognition,\n"
-            "and reading.\n"
-            "16 structured training paths in 5 categories."
+            "15 exercises across three categories:\n"
+            "Perception \u2022 Cognition \u2022 Reading\n\n"
+            "16 training paths \u2022 9 color profiles\n"
+            "Progress tracking \u2022 CSV/JSON export\n"
+            "Per-user profiles \u2022 Adjustable font scale"
         )
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['text_on_card']};")
