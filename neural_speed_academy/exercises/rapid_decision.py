@@ -597,13 +597,14 @@ class RapidDecisionGridExercise(BaseExercise):
 
         result = ExerciseResult(
             exercise_name="RAPID DECISION",
-            score=self._score,
+            score=completed,
             total=total_targets,
             xp_gained=max(self._score, 0),
             metadata={
                 "mode": self._mode,
                 "grid_size": self._grid_size,
                 "cells": max_num,
+                "points": self._score,
                 "targets_completed": completed,
                 "targets_total": total_targets,
                 "time_limit": self._time_limit,

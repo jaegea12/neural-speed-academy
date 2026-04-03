@@ -329,9 +329,9 @@ class DashboardScreen(BaseScreen):
 
             cl.addStretch()
 
-            score_lbl = QLabel(
-                f"{data['score']}/{data['total']}  ({data['pct']}%)"
-            )
+            from neural_speed_academy.screens.stats_screen import StatsScreen
+            primary, _ = StatsScreen._pb_display(exercise, data)
+            score_lbl = QLabel(primary)
             score_lbl.setFont(make_qfont("btn_bold"))
             score_lbl.setStyleSheet(f"color: {c['text_on_card']};")
             cl.addWidget(score_lbl)

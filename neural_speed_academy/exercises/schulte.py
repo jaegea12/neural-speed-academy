@@ -4,6 +4,7 @@ Schulte Grid exercise for focus and peripheral vision training.
 from __future__ import annotations
 
 import random
+import time
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGridLayout,
@@ -24,6 +25,8 @@ class SchulteExercise(BaseExercise):
         self.target: int = 1
         self.score: int = 0
         self.max_num: int = 0
+        self._errors: int = 0
+        self._start_time: float = 0.0
 
     @property
     def name(self) -> str:
@@ -228,6 +231,8 @@ class SchulteExercise(BaseExercise):
         self.max_num = grid_size * grid_size
         self.target = 1
         self.score = 0
+        self._errors = 0
+        self._start_time = time.monotonic()
 
         btn_size = self._cell_px(cell_idx)
 
@@ -292,6 +297,7 @@ class SchulteExercise(BaseExercise):
                 return
             self._lbl_target.setText(f"FIND: {self.target}")
         else:
+            self._errors += 1
             self.score -= SCHULTE_CONFIG["wrong_penalty"]
             orig_style = button.styleSheet()
             button.setStyleSheet(
@@ -304,14 +310,19 @@ class SchulteExercise(BaseExercise):
 
     def _complete_exercise(self) -> None:
         grid_size = theme_manager.schulte_grid_size
+        elapsed = round(time.monotonic() - self._start_time, 1)
+        completed = self.target - 1  # cells successfully found
         result = ExerciseResult(
             exercise_name=self.name,
-            score=self.score,
+            score=completed,
             total=self.max_num,
-            xp_gained=self.score,
+            xp_gained=max(self.score, 0),
             metadata={
                 "grid_size": grid_size,
                 "cells": grid_size * grid_size,
+                "points": self.score,
+                "errors": self._errors,
+                "duration_s": elapsed,
             },
         )
         is_pb = self.complete(result)

@@ -245,6 +245,7 @@ class StatsScreen(BaseScreen):
         self._build_summary(cl, user)
         self._build_consistency(cl, user)
         self._build_personal_bests(cl, user)
+        self._build_insights(cl, user)
         self._build_progress_charts(cl, user)
         self._build_history(cl, user)
         self._build_export(cl, user)
@@ -360,6 +361,49 @@ class StatsScreen(BaseScreen):
 
     # ── Personal bests ──
 
+    @staticmethod
+    def _pb_display(exercise: str, data: dict) -> tuple[str, str]:
+        """Return (primary_text, secondary_text) for a personal best entry.
+
+        Chooses exercise-appropriate metrics from stored metadata.
+        """
+        pct = min(data.get("pct", 0), 100.0)
+        score = data.get("score", 0)
+        total = data.get("total", 0)
+        meta = data.get("metadata", {})
+
+        primary = f"{score}/{total}  ({pct}%)"
+
+        if exercise == "REACTION TIME":
+            rt = meta.get("median_rt_ms")
+            if rt:
+                primary = f"{rt} ms median"
+            acc = meta.get("accuracy_pct")
+            return primary, f"{acc}% accuracy" if acc is not None else ""
+
+        if exercise == "Schulte Grid":
+            t = meta.get("duration_s")
+            errs = meta.get("errors", 0)
+            if t:
+                primary = f"{t}s"
+            return primary, f"{errs} error{'s' if errs != 1 else ''}"
+
+        if exercise == "RAPID DECISION":
+            t = meta.get("duration_s")
+            time_str = f" in {t}s" if t else ""
+            primary = f"{score}/{total}{time_str}"
+            return primary, f"{pct}% completed"
+
+        # Reading exercises — show WPM when available
+        if exercise in ("PACER", "RSVP", "CHUNKING"):
+            wpm = meta.get("wpm") or meta.get("wpm_actual")
+            secondary = f"{wpm} WPM" if wpm else ""
+            primary = f"{score}/{total}  ({pct}%)"
+            return primary, secondary
+
+        # Default: accuracy-based exercises
+        return primary, ""
+
     def _build_personal_bests(self, layout: QVBoxLayout, user) -> None:
         if not user.personal_bests:
             return
@@ -380,28 +424,207 @@ class StatsScreen(BaseScreen):
             cell.setStyleSheet(
                 f"background-color: {c['card']}; border-radius: 4px;"
             )
-            cl = QHBoxLayout(cell)
-            cl.setContentsMargins(10, 6, 10, 6)
-            cl.setSpacing(8)
+            cl = QVBoxLayout(cell)
+            cl.setContentsMargins(10, 8, 10, 8)
+            cl.setSpacing(2)
 
+            # Exercise name
             name_lbl = QLabel(exercise)
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)
 
-            cl.addStretch()
+            # Primary metric
+            primary, secondary = self._pb_display(exercise, data)
+            primary_lbl = QLabel(primary)
+            primary_lbl.setFont(make_qfont("btn_bold"))
+            primary_lbl.setStyleSheet(f"color: {c['text_on_card']};")
+            cl.addWidget(primary_lbl)
 
-            score_lbl = QLabel(
-                f"{data['score']}/{data['total']}  ({data['pct']}%)"
-            )
-            score_lbl.setFont(make_qfont("btn_bold"))
-            score_lbl.setStyleSheet(f"color: {c['text_on_card']};")
-            cl.addWidget(score_lbl)
+            # Secondary metric (if available)
+            if secondary:
+                sec_lbl = QLabel(secondary)
+                sec_lbl.setFont(make_qfont("body"))
+                sec_lbl.setStyleSheet(f"color: {c['muted']};")
+                cl.addWidget(sec_lbl)
 
             grid.addWidget(cell, row_idx, col_idx)
 
         layout.addLayout(grid)
         layout.addSpacing(15)
+
+    # ── Insights (tiered analytics) ──
+
+    def _build_insights(self, layout: QVBoxLayout, user) -> None:
+        if not user.history:
+            return
+        c = COLORS
+
+        header = QLabel("INSIGHTS")
+        header.setFont(make_qfont("section_header"))
+        header.setStyleSheet(f"color: {c['fg']};")
+        layout.addWidget(header)
+
+        # Parse all scored history entries
+        scored: list[tuple[str, str, float]] = []  # (date, exercise, pct)
+        by_exercise: dict[str, list[float]] = {}
+        for entry in user.history:
+            m = re.match(r"(\d+)/(\d+)", entry.result)
+            if not m:
+                continue
+            s, t = int(m.group(1)), int(m.group(2))
+            if t == 0:
+                continue
+            pct = min(s / t * 100, 100.0)
+            date_part = entry.timestamp[:10]
+            scored.append((date_part, entry.exercise, pct))
+            by_exercise.setdefault(entry.exercise, []).append(pct)
+
+        if not scored:
+            return
+
+        card = QFrame()
+        card.setStyleSheet(
+            f"background-color: {c['card']}; border-radius: 6px; "
+            f"padding: 16px;"
+        )
+        cl = QVBoxLayout(card)
+        cl.setSpacing(10)
+
+        # ── Immediate: last session vs average ──
+        last_date, last_ex, last_pct = scored[0]
+        ex_scores = by_exercise.get(last_ex, [last_pct])
+        avg = sum(ex_scores) / len(ex_scores)
+        diff = last_pct - avg
+
+        last_lbl = QLabel("LAST SESSION")
+        last_lbl.setFont(make_qfont("btn_sm"))
+        last_lbl.setStyleSheet(f"color: {c['muted']};")
+        cl.addWidget(last_lbl)
+
+        if diff > 0:
+            trend_text = f"▲ {abs(diff):.0f}% above your average"
+            trend_color = c["accent"]
+        elif diff < -1:
+            trend_text = f"▼ {abs(diff):.0f}% below your average"
+            trend_color = c["alert"]
+        else:
+            trend_text = "≈ At your average level"
+            trend_color = c["muted"]
+
+        detail = QLabel(
+            f"{last_ex}: {last_pct:.0f}%  —  {trend_text}"
+        )
+        detail.setFont(make_qfont("body"))
+        detail.setStyleSheet(f"color: {trend_color};")
+        cl.addWidget(detail)
+
+        n_sessions = len(scored)
+
+        # ── Short-term: 7-day comparison (≥5 sessions) ──
+        if n_sessions >= 5:
+            self._add_separator(cl, c)
+
+            today = datetime.now().date()
+            week_ago = (today - timedelta(days=7)).strftime("%Y-%m-%d")
+            two_weeks = (today - timedelta(days=14)).strftime("%Y-%m-%d")
+
+            this_week = [p for d, _, p in scored if d >= week_ago]
+            last_week = [p for d, _, p in scored if two_weeks <= d < week_ago]
+
+            short_lbl = QLabel("7-DAY TREND")
+            short_lbl.setFont(make_qfont("btn_sm"))
+            short_lbl.setStyleSheet(f"color: {c['muted']};")
+            cl.addWidget(short_lbl)
+
+            if this_week:
+                tw_avg = sum(this_week) / len(this_week)
+                parts = [f"This week: {tw_avg:.0f}% avg ({len(this_week)} sessions)"]
+                if last_week:
+                    lw_avg = sum(last_week) / len(last_week)
+                    delta = tw_avg - lw_avg
+                    arrow = "▲" if delta > 0 else "▼" if delta < -1 else "≈"
+                    parts.append(
+                        f"Last week: {lw_avg:.0f}% avg  ({arrow} {abs(delta):.0f}%)"
+                    )
+                for text in parts:
+                    lbl = QLabel(text)
+                    lbl.setFont(make_qfont("body"))
+                    lbl.setStyleSheet(f"color: {c['text_on_card']};")
+                    cl.addWidget(lbl)
+
+        # ── Long-term: strengths/weaknesses (≥20 sessions, ≥14 days) ──
+        if n_sessions >= 20:
+            dates = {d for d, _, _ in scored}
+            if len(dates) >= 7:
+                self._add_separator(cl, c)
+
+                long_lbl = QLabel("STRENGTHS & WEAKNESSES")
+                long_lbl.setFont(make_qfont("btn_sm"))
+                long_lbl.setStyleSheet(f"color: {c['muted']};")
+                cl.addWidget(long_lbl)
+
+                # Find strongest and weakest exercises (min 3 attempts)
+                qualified = {
+                    ex: scores for ex, scores in by_exercise.items()
+                    if len(scores) >= 3
+                }
+                if qualified:
+                    avgs = {
+                        ex: sum(s) / len(s) for ex, s in qualified.items()
+                    }
+                    strongest = max(avgs, key=avgs.get)
+                    weakest = min(avgs, key=avgs.get)
+
+                    row = QHBoxLayout()
+                    for label, ex, color in [
+                        ("Strongest", strongest, c["accent"]),
+                        ("Weakest", weakest, c["alert"]),
+                    ]:
+                        cell_l = QVBoxLayout()
+                        tag = QLabel(label.upper())
+                        tag.setFont(make_qfont("btn_sm"))
+                        tag.setStyleSheet(f"color: {c['muted']};")
+                        cell_l.addWidget(tag)
+                        val = QLabel(f"{ex}  ({avgs[ex]:.0f}%)")
+                        val.setFont(make_qfont("btn_bold"))
+                        val.setStyleSheet(f"color: {color};")
+                        cell_l.addWidget(val)
+                        row.addLayout(cell_l)
+                    row.addStretch()
+                    cl.addLayout(row)
+
+                    # Improvement rates for exercises with ≥5 attempts
+                    improving = {}
+                    for ex, scores in qualified.items():
+                        if len(scores) >= 5:
+                            first_half = scores[len(scores)//2:]
+                            second_half = scores[:len(scores)//2]
+                            early = sum(first_half) / len(first_half)
+                            recent = sum(second_half) / len(second_half)
+                            improving[ex] = recent - early
+
+                    if improving:
+                        most_improved = max(improving, key=improving.get)
+                        imp_val = improving[most_improved]
+                        if imp_val > 2:
+                            imp_lbl = QLabel(
+                                f"Most improved: {most_improved} "
+                                f"(+{imp_val:.0f}% from early sessions)"
+                            )
+                            imp_lbl.setFont(make_qfont("body"))
+                            imp_lbl.setStyleSheet(f"color: {c['accent']};")
+                            cl.addWidget(imp_lbl)
+
+        layout.addWidget(card)
+        layout.addSpacing(15)
+
+    @staticmethod
+    def _add_separator(layout: QVBoxLayout, c: dict) -> None:
+        sep = QFrame()
+        sep.setFixedHeight(1)
+        sep.setStyleSheet(f"background-color: {c['bg']};")
+        layout.addWidget(sep)
 
     # ── Progress charts ──
 
@@ -422,7 +645,7 @@ class StatsScreen(BaseScreen):
             if not m:
                 continue
             score, total = int(m.group(1)), int(m.group(2))
-            pct = (score / total * 100) if total > 0 else 0
+            pct = min(score / total * 100, 100.0) if total > 0 else 0
             exercises.setdefault(entry.exercise, []).append(
                 (entry.timestamp, pct)
             )
