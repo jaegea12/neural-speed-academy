@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
-from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import TRAINING_PATHS, TRAINING_PATH_CATEGORIES
 from neural_speed_academy.state import PathProgress
 
@@ -89,10 +89,8 @@ class PathSelectionScreen(BaseScreen):
         btn_row.setSpacing(12)
 
         custom_btn = QPushButton("MY CUSTOM PATHS")
-        custom_btn.setFont(make_qfont("btn_bold"))
         custom_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['action']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 20px; border-radius: 4px; }}"
+            btn_css(c["action"], c["btn_text"], padding="8px 20px")
         )
         custom_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         custom_btn.clicked.connect(
@@ -101,10 +99,8 @@ class PathSelectionScreen(BaseScreen):
         btn_row.addWidget(custom_btn)
 
         create_btn = QPushButton("+ CREATE NEW")
-        create_btn.setFont(make_qfont("btn_bold"))
         create_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-            f"border: none; padding: 8px 20px; border-radius: 4px; }}"
+            btn_css(c["card"], c["fg"], padding="8px 20px")
         )
         create_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         create_btn.clicked.connect(self._create_custom_path)
@@ -118,22 +114,10 @@ class PathSelectionScreen(BaseScreen):
         self._select_category(self._selected_cat)
 
     def _tab_on(self) -> str:
-        c = COLORS
-        return (
-            f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
-            f"padding: 6px 18px; border-radius: 4px; }}"
-        )
+        return btn_css(COLORS["accent"], COLORS["btn_text"], padding="6px 18px")
 
     def _tab_off(self) -> str:
-        c = COLORS
-        return (
-            f"QPushButton {{ background-color: {c['card']}; "
-            f"color: {c['fg']}; border: 1px solid {c['muted']}; "
-            f"padding: 6px 18px; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; }}"
-        )
+        return btn_css(COLORS["card"], COLORS["fg"], padding="6px 18px")
 
     def _select_category(self, cat_key: str) -> None:
         self._selected_cat = cat_key
@@ -254,11 +238,9 @@ class PathSelectionScreen(BaseScreen):
         action_col.addWidget(prog)
 
         btn = QPushButton(btn_text)
-        btn.setFont(make_qfont("btn_bold"))
         btn.setFixedWidth(120)
         btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 16px; border-radius: 4px; }}"
+            btn_css(c["accent"], c["btn_text"], padding="6px 16px")
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(lambda checked, pid=path_id: self._start_path(pid))
@@ -329,10 +311,8 @@ class CustomPathsScreen(BaseScreen):
 
         cl.addSpacing(10)
         create_btn = QPushButton("+ CREATE NEW PATH")
-        create_btn.setFont(make_qfont("btn_bold"))
         create_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 4px; }}"
+            btn_css(c["accent"], c["btn_text"], padding="6px 20px")
         )
         create_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         create_btn.clicked.connect(
@@ -362,10 +342,9 @@ class CustomPathsScreen(BaseScreen):
         cl.addWidget(info)
 
         btn = QPushButton("START")
-        btn.setFont(make_qfont("btn_sm"))
         btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px; border-radius: 3px; }}"
+            btn_css(c["accent"], c["btn_text"], padding="4px", radius=3,
+                    font_key="btn_sm")
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(lambda checked, pid=path_id: self._start(pid))

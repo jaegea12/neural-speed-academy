@@ -17,7 +17,7 @@ from PyQt6.QtCore import Qt, QTimer, QRectF, QPointF
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QFont, QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics
 from neural_speed_academy.config import MOT_CONFIG, USER_DATA_CONFIG
 
 
@@ -332,7 +332,7 @@ class MotExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("mot"))
@@ -485,7 +485,7 @@ class MotExercise(BaseExercise):
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
             f"color: {c['btn_text']}; "
-            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_from_ui)
@@ -555,11 +555,12 @@ class MotExercise(BaseExercise):
         top.addWidget(self._score_lbl)
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
