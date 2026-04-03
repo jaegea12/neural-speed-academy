@@ -210,14 +210,56 @@ TWILIGHT_COLORS = {
     "diff_elite": "#c45a4a",
 }
 
+MONO_COLORS = {
+    # Pure black/white/grey — zero color distraction.
+    # Useful for users who find color overstimulating.
+    "bg": "#121212",
+    "card": "#1e1e1e",
+    "fg": "#e0e0e0",
+    "accent": "#ffffff",
+    "action": "#b0b0b0",
+    "alert": "#ff6b6b",
+    "highlight": "#ffffff",
+    "priming": "#c0c0c0",
+    "grid_btn": "#2a2a2a",
+    "grid_solved": "#4a4a4a",
+    "grid_text": "#e0e0e0",
+    "success": "#ffffff",
+    "cross": "#666666",
+    # Semantic roles
+    "btn_text": "#121212",
+    "text_on_card": "#e0e0e0",
+    "muted": "#888888",
+    "reader_bg": "#e0e0e0",
+    "reader_fg": "#121212",
+    # Difficulty tiers (greyscale gradient)
+    "diff_beginner": "#c0c0c0",
+    "diff_intermediate": "#909090",
+    "diff_advanced": "#606060",
+    "diff_elite": "#ffffff",
+}
+
 THEME_PROFILES = {
     "dark": DARK_COLORS,
-    "twilight": TWILIGHT_COLORS,
-    "silver": SILVER_COLORS,
-    "soft_light": SOFT_LIGHT_COLORS,
-    "focus": FOCUS_COLORS,
     "light": LIGHT_COLORS,
     "high_contrast": HIGH_CONTRAST_COLORS,
+    "focus": FOCUS_COLORS,
+    "twilight": TWILIGHT_COLORS,
+    "soft_light": SOFT_LIGHT_COLORS,
+    "silver": SILVER_COLORS,
+    "mono": MONO_COLORS,
+}
+
+# Human-readable labels for the settings screen
+THEME_LABELS = {
+    "dark": "Dark",
+    "light": "Light",
+    "high_contrast": "High Contrast",
+    "focus": "Warm / Focus",
+    "twilight": "Twilight",
+    "soft_light": "Soft Light",
+    "silver": "Silver",
+    "mono": "Monochrome",
 }
 
 # --- Font Definitions ---

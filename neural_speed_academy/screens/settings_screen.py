@@ -13,7 +13,7 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.config import TEXT_LIBRARY
 from neural_speed_academy.theme import (
-    COLORS, FOV_PRESETS, make_qfont, font_css, theme_manager,
+    COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, theme_manager,
 )
 
 
@@ -78,15 +78,16 @@ class SettingsScreen(BaseScreen):
         il.addWidget(sec1, alignment=Qt.AlignmentFlag.AlignCenter)
 
         dark_profiles = [
-            ("dark", "Dark"),
-            ("twilight", "Twilight"),
-            ("high_contrast", "High Contrast"),
+            ("dark", THEME_LABELS["dark"]),
+            ("twilight", THEME_LABELS["twilight"]),
+            ("high_contrast", THEME_LABELS["high_contrast"]),
+            ("mono", THEME_LABELS["mono"]),
         ]
         light_profiles = [
-            ("silver", "Silver"),
-            ("soft_light", "Soft Light"),
-            ("focus", "Focus (Low Fatigue)"),
-            ("light", "Light"),
+            ("silver", THEME_LABELS["silver"]),
+            ("soft_light", THEME_LABELS["soft_light"]),
+            ("focus", THEME_LABELS["focus"]),
+            ("light", THEME_LABELS["light"]),
         ]
 
         self._profile_group = QButtonGroup(self)
