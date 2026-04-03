@@ -113,8 +113,8 @@ class MainMenuScreen(BaseScreen):
         body = QLabel(
             "A desktop application for speed reading\n"
             "and cognitive training.\n\n"
-            "15 exercises across reading, cognition,\n"
-            "visual processing, and information retention.\n"
+            "15 exercises across perception, cognition,\n"
+            "and reading.\n"
             "16 structured training paths in 5 categories."
         )
         body.setFont(make_qfont("body"))

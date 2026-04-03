@@ -27,9 +27,9 @@ class DashboardScreen(BaseScreen):
                 avail_w = min(avail_w, win.width() or 1024)
         else:
             avail_w = 1024
-        # Two columns, leave margins and spacing
-        w = min(int((avail_w - 120) / 2.5), 360)
-        return max(w, 180)
+        # Three columns, leave margins and spacing
+        w = min(int((avail_w - 140) / 3.5), 300)
+        return max(w, 160)
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -90,7 +90,7 @@ class DashboardScreen(BaseScreen):
         cl.addWidget(warmup_btn, alignment=Qt.AlignmentFlag.AlignCenter)
         cl.addSpacing(4)
 
-        # Exercise grid
+        # Exercise grid — three columns
         grid = QGridLayout()
         grid.setSpacing(8)
 
@@ -99,19 +99,21 @@ class DashboardScreen(BaseScreen):
             ("Word Drills", self._cb("menu_words")),
             ("Eye-Span", self._cb("menu_eyespan")),
             ("Schulte Grid", self._cb("start_schulte")),
-            ("Sequence Memory", self._cb("menu_sequence_memory")),
             ("Peripheral Flash", self._cb("menu_peripheral_flash")),
+        ])
+        self._create_section(grid, "COGNITION", 1, [
+            ("Sequence Memory", self._cb("menu_sequence_memory")),
             ("Rapid Decision", self._cb("menu_rapid_decision")),
             ("Object Tracking", self._cb("menu_mot")),
             ("Split Attention", self._cb("menu_split_attention")),
             ("Reaction Time", self._cb("menu_reaction_time")),
-            ("Slide Processing", self._cb("menu_slide_processing")),
         ])
-        self._create_section(grid, "READING", 1, [
+        self._create_section(grid, "READING", 2, [
             ("Pacer & Quiz", self._cb("setup_pacer")),
             ("RSVP Reader", self._cb("setup_rsvp")),
             ("Chunking", self._cb("setup_chunking")),
             ("Spaced Repetition", self._cb("start_sr")),
+            ("Slide Processing", self._cb("menu_slide_processing")),
         ])
         cl.addLayout(grid)
         cl.addStretch()
