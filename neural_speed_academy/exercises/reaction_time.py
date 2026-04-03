@@ -588,8 +588,8 @@ class ReactionTimeExercise(BaseExercise):
 
         result = ExerciseResult(
             exercise_name="REACTION TIME",
-            score=score_val,
-            total=ceiling,
+            score=self._correct,
+            total=total,
             xp_gained=xp,
             metadata=metadata,
         )
