@@ -171,6 +171,7 @@ class SpacedRepetitionExercise(BaseExercise):
             if not deck.builtin:
                 manage_btn = QPushButton("\u2795")
                 manage_btn.setFont(make_qfont("btn_sm"))
+                manage_btn.setAccessibleName("Add cards")
                 manage_btn.setToolTip("Add cards")
                 manage_btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['accent']}; "
@@ -455,6 +456,8 @@ class SpacedRepetitionExercise(BaseExercise):
         top.addWidget(skip_btn)
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
@@ -686,6 +689,8 @@ class SpacedRepetitionExercise(BaseExercise):
             top.addSpacing(10)
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
