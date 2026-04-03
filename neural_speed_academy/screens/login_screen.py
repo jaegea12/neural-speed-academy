@@ -124,6 +124,7 @@ class LoginScreen(BaseScreen):
         self._entry.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._entry.setFixedWidth(300)
         self._entry.setStyleSheet(input_css())
+        self._entry.returnPressed.connect(self._do_login)
         cl.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         # Password entry (optional for new profiles)
