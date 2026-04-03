@@ -164,7 +164,7 @@ class PathSessionScreen(BaseScreen):
         from neural_speed_academy.exercises.priming import PrimingExercise
         from neural_speed_academy.exercises.sequence_memory import SequenceMemoryExercise
         from neural_speed_academy.exercises.peripheral_flash import PeripheralFlashExercise
-        from neural_speed_academy.exercises.rapid_decision import RapidDecisionExercise
+        from neural_speed_academy.exercises.rapid_decision import RapidDecisionGridExercise as RapidDecisionExercise
         from neural_speed_academy.exercises.mot import MotExercise
         from neural_speed_academy.exercises.split_attention import SplitAttentionExercise
         from neural_speed_academy.exercises.reaction_time import ReactionTimeExercise
