@@ -150,16 +150,14 @@ class AudioEngine:
             self._play_qt(data)
 
     def _play_windows(self, wav_data: bytes) -> None:
-        """Play WAV data via winsound in a background thread."""
-        def _do():
-            try:
-                winsound.PlaySound(
-                    wav_data,
-                    winsound.SND_MEMORY | winsound.SND_NODEFAULT,
-                )
-            except Exception:
-                pass
-        threading.Thread(target=_do, daemon=True).start()
+        """Play WAV data via winsound asynchronously."""
+        try:
+            winsound.PlaySound(
+                wav_data,
+                winsound.SND_MEMORY | winsound.SND_ASYNC | winsound.SND_NODEFAULT,
+            )
+        except Exception:
+            pass
 
     def _play_qt(self, pcm_data: bytes) -> None:
         """Play raw PCM via QAudioSink."""
