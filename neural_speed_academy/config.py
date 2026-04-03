@@ -344,6 +344,253 @@ EXERCISE_GUIDES = {
         "- Difficulty scales via display time and content density\n"
         "- Transfers to report reading, studying, and data analysis"
     ),
+    "spaced_repetition": (
+        "SPACED REPETITION",
+        "HOW TO USE:\n"
+        "Select a deck and configure options on the right panel. "
+        "A reading phase shows all cards (front and back) so you can "
+        "familiarize yourself — skip it anytime with 'Skip to Review'. "
+        "During review, recall the answer, then press X or click "
+        "'Show Answer' to reveal it. Rate your recall: Again (forgot), "
+        "Hard, Good, or Easy. The system schedules the next review based "
+        "on your rating.\n\n"
+        "OPTIONS:\n"
+        "Normal / Reverse — Reverse shows the back and asks you to recall "
+        "the front.\n"
+        "Time Limit — Adds a countdown per card. The answer auto-reveals "
+        "when time runs out.\n"
+        "Session Size — Limits how many cards per session.\n\n"
+        "KEYBOARD:\n"
+        "X — reveal answer  |  1-4 — rate (Again/Hard/Good/Easy)\n"
+        "Arrow keys or A/D — navigate reading phase\n\n"
+        "THE SCIENCE:\n"
+        "Spaced repetition exploits the spacing effect (Ebbinghaus, 1885): "
+        "information is retained longer when reviews are spread over increasing "
+        "intervals. The SM-2 algorithm (Wozniak, 1990) adapts intervals based on "
+        "recall quality, keeping each card at the optimal review point just before "
+        "forgetting. This is the most efficient known method for long-term "
+        "memorization, used by medical students, language learners, and "
+        "competitive memory athletes.\n\n"
+        "BENEFITS:\n"
+        "- Maximizes retention with minimal review time\n"
+        "- Adapts to individual learning speed per card\n"
+        "- Builds durable long-term memory\n"
+        "- 10 built-in decks across vocabulary, science, history, and more\n"
+        "- Create custom decks for any subject\n"
+        "- Streak tracking rewards consistent recall"
+    ),
+}
+
+# Spaced Repetition configuration
+SR_CONFIG = {
+    "max_new_per_session": 10,
+    "max_review_per_session": 30,
+    "default_ease": 2.5,
+    "min_ease": 1.3,
+}
+
+# Pre-built decks: list of (front, back) tuples
+SR_BUILTIN_DECKS = {
+    "SAT Vocabulary": [
+        ("Aberration", "A departure from what is normal or expected"),
+        ("Benevolent", "Well-meaning and kindly"),
+        ("Cacophony", "A harsh, discordant mixture of sounds"),
+        ("Debilitate", "To make weak or feeble"),
+        ("Ephemeral", "Lasting for a very short time"),
+        ("Fastidious", "Very attentive to detail; meticulous"),
+        ("Gregarious", "Fond of company; sociable"),
+        ("Hackneyed", "Lacking originality; overused"),
+        ("Iconoclast", "A person who attacks cherished beliefs"),
+        ("Juxtapose", "To place side by side for comparison"),
+        ("Laconic", "Using very few words; concise"),
+        ("Magnanimous", "Generous or forgiving, especially toward a rival"),
+        ("Nefarious", "Wicked or criminal"),
+        ("Obfuscate", "To make unclear or confusing"),
+        ("Pernicious", "Having a harmful effect, especially gradually"),
+        ("Quintessential", "Representing the most perfect example"),
+        ("Recalcitrant", "Stubbornly uncooperative"),
+        ("Sycophant", "A person who flatters to gain advantage"),
+        ("Tenacious", "Holding firmly; persistent"),
+        ("Ubiquitous", "Present, appearing, or found everywhere"),
+    ],
+    "World Capitals": [
+        ("Japan", "Tokyo"),
+        ("France", "Paris"),
+        ("Brazil", "Bras\u00edlia"),
+        ("Australia", "Canberra"),
+        ("Egypt", "Cairo"),
+        ("Canada", "Ottawa"),
+        ("South Korea", "Seoul"),
+        ("Argentina", "Buenos Aires"),
+        ("Thailand", "Bangkok"),
+        ("Turkey", "Ankara"),
+        ("Norway", "Oslo"),
+        ("Peru", "Lima"),
+        ("New Zealand", "Wellington"),
+        ("Kenya", "Nairobi"),
+        ("Switzerland", "Bern"),
+        ("Poland", "Warsaw"),
+        ("Vietnam", "Hanoi"),
+        ("Colombia", "Bogot\u00e1"),
+        ("Morocco", "Rabat"),
+        ("Czech Republic", "Prague"),
+    ],
+    "Speed Reading Terms": [
+        ("Subvocalization", "The habit of silently pronouncing words while reading"),
+        ("Saccade", "A rapid eye movement between fixation points"),
+        ("Fixation", "A pause where the eye rests to process text"),
+        ("Regression", "Moving the eyes backward to re-read text"),
+        ("Peripheral vision", "Vision outside the center of gaze"),
+        ("Chunking", "Grouping words into meaningful units"),
+        ("WPM", "Words per minute — standard reading speed measure"),
+        ("RSVP", "Rapid Serial Visual Presentation — one word at a time"),
+        ("Metaguiding", "Using a finger or pointer to guide eye movement"),
+        ("Foveal vision", "Sharp central vision used for reading"),
+        ("Magnocellular pathway", "Fast visual pathway for motion and periphery"),
+        ("Useful field of view", "Area from which info can be extracted in one fixation"),
+        ("Pacer", "A visual guide that sets reading tempo"),
+        ("Comprehension", "Understanding and retaining what is read"),
+        ("Skimming", "Reading quickly to get the main ideas"),
+    ],
+    "Neuroscience Basics": [
+        ("Neuron", "A nerve cell that transmits electrical and chemical signals"),
+        ("Synapse", "The junction between two neurons where signals are transmitted"),
+        ("Axon", "Long projection of a neuron that conducts electrical impulses away from the cell body"),
+        ("Dendrite", "Branched extension of a neuron that receives signals from other neurons"),
+        ("Myelin sheath", "Insulating layer around axons that speeds up signal transmission"),
+        ("Neurotransmitter", "Chemical messenger released at synapses (e.g. dopamine, serotonin)"),
+        ("Hippocampus", "Brain region essential for forming new long-term memories"),
+        ("Amygdala", "Brain structure involved in processing emotions, especially fear"),
+        ("Prefrontal cortex", "Front brain region responsible for planning, decision-making, and impulse control"),
+        ("Cerebellum", "Brain region that coordinates movement, balance, and motor learning"),
+        ("Neuroplasticity", "The brain's ability to reorganize and form new neural connections"),
+        ("Long-term potentiation", "Strengthening of synapses based on repeated stimulation — basis of learning"),
+        ("Dopamine", "Neurotransmitter involved in reward, motivation, and motor control"),
+        ("Serotonin", "Neurotransmitter that regulates mood, sleep, and appetite"),
+        ("GABA", "Main inhibitory neurotransmitter — reduces neuronal excitability"),
+        ("Broca's area", "Brain region in the left frontal lobe responsible for speech production"),
+        ("Wernicke's area", "Brain region in the left temporal lobe responsible for language comprehension"),
+        ("Corpus callosum", "Bundle of nerve fibers connecting the left and right brain hemispheres"),
+        ("Thalamus", "Brain relay station that routes sensory information to the cortex"),
+        ("Basal ganglia", "Group of nuclei involved in motor control, learning, and habit formation"),
+    ],
+    "Historical Dates": [
+        ("Fall of the Roman Empire", "476 AD"),
+        ("Signing of the Magna Carta", "1215"),
+        ("Columbus reaches the Americas", "1492"),
+        ("Start of the French Revolution", "1789"),
+        ("Declaration of US Independence", "1776"),
+        ("Battle of Waterloo", "1815"),
+        ("Start of World War I", "1914"),
+        ("End of World War II", "1945"),
+        ("Moon landing (Apollo 11)", "July 20, 1969"),
+        ("Fall of the Berlin Wall", "November 9, 1989"),
+        ("Invention of the printing press", "c. 1440 (Gutenberg)"),
+        ("Start of the Industrial Revolution", "c. 1760"),
+        ("Russian Revolution", "1917"),
+        ("Discovery of penicillin", "1928 (Alexander Fleming)"),
+        ("Founding of the United Nations", "1945"),
+        ("First human in space", "April 12, 1961 (Yuri Gagarin)"),
+        ("Invention of the World Wide Web", "1989 (Tim Berners-Lee)"),
+        ("End of apartheid in South Africa", "1994"),
+        ("Treaty of Versailles", "1919"),
+        ("Assassination of Julius Caesar", "44 BC"),
+    ],
+    "Science & Nature": [
+        ("Speed of light", "299,792,458 m/s (approx. 300,000 km/s)"),
+        ("Absolute zero", "−273.15 °C (0 Kelvin)"),
+        ("Chemical symbol for gold", "Au (from Latin 'aurum')"),
+        ("Largest planet in the solar system", "Jupiter"),
+        ("Smallest bone in the human body", "Stapes (in the middle ear)"),
+        ("pH of pure water", "7 (neutral)"),
+        ("Number of chromosomes in a human cell", "46 (23 pairs)"),
+        ("Hardest natural substance", "Diamond (10 on Mohs scale)"),
+        ("Distance from Earth to the Sun", "~149.6 million km (1 AU)"),
+        ("Boiling point of water at sea level", "100 °C (212 °F)"),
+        ("Most abundant gas in Earth's atmosphere", "Nitrogen (78%)"),
+        ("Speed of sound in air", "~343 m/s at 20 °C"),
+        ("Largest organ of the human body", "Skin"),
+        ("Chemical formula for table salt", "NaCl (sodium chloride)"),
+        ("Number of bones in the adult human body", "206"),
+        ("Closest star to Earth (after the Sun)", "Proxima Centauri (4.24 light-years)"),
+        ("Avogadro's number", "6.022 × 10²³"),
+        ("Planck's constant", "6.626 × 10⁻³⁴ J·s"),
+        ("Half-life of Carbon-14", "5,730 years"),
+        ("Density of water at 4 °C", "1,000 kg/m³"),
+    ],
+    "Programming Concepts": [
+        ("Big O notation", "Describes the upper bound of an algorithm's time or space complexity"),
+        ("Recursion", "A function that calls itself to solve smaller instances of the same problem"),
+        ("Stack vs. Queue", "Stack: LIFO (last in, first out) — Queue: FIFO (first in, first out)"),
+        ("Hash table", "Data structure that maps keys to values using a hash function — O(1) average lookup"),
+        ("Binary search", "Search algorithm that halves the search space each step — O(log n)"),
+        ("Polymorphism", "Objects of different types responding to the same interface/method"),
+        ("Deadlock", "Two or more processes waiting for each other to release resources — none can proceed"),
+        ("REST", "Representational State Transfer — architectural style for stateless web APIs"),
+        ("SQL JOIN", "Combines rows from two or more tables based on a related column"),
+        ("Git rebase vs. merge", "Rebase: replays commits on new base — Merge: creates a merge commit"),
+        ("TCP vs. UDP", "TCP: reliable, ordered delivery — UDP: fast, no guarantee of delivery"),
+        ("Mutex", "Mutual exclusion lock — ensures only one thread accesses a resource at a time"),
+        ("Garbage collection", "Automatic memory management that reclaims unused objects"),
+        ("Design pattern: Singleton", "Ensures a class has only one instance with a global access point"),
+        ("Design pattern: Observer", "Object notifies dependents automatically when its state changes"),
+        ("ACID properties", "Atomicity, Consistency, Isolation, Durability — guarantees for database transactions"),
+        ("CAP theorem", "A distributed system can guarantee at most 2 of: Consistency, Availability, Partition tolerance"),
+        ("Idempotent operation", "An operation that produces the same result regardless of how many times it's applied"),
+        ("Memoization", "Caching the results of expensive function calls to avoid redundant computation"),
+        ("Dependency injection", "Providing dependencies to a class from outside rather than creating them internally"),
+    ],
+    "Cognitive Biases": [
+        ("Confirmation bias", "Tendency to search for information that confirms existing beliefs"),
+        ("Anchoring bias", "Over-relying on the first piece of information encountered"),
+        ("Dunning-Kruger effect", "Low-ability individuals overestimate their competence; experts underestimate theirs"),
+        ("Availability heuristic", "Judging probability by how easily examples come to mind"),
+        ("Sunk cost fallacy", "Continuing an endeavor because of previously invested resources"),
+        ("Bandwagon effect", "Adopting beliefs or behaviors because many others do"),
+        ("Halo effect", "Letting one positive trait influence overall judgment of a person"),
+        ("Survivorship bias", "Focusing on successes while overlooking failures that are less visible"),
+        ("Framing effect", "Drawing different conclusions from the same data depending on how it's presented"),
+        ("Status quo bias", "Preference for the current state of affairs over change"),
+        ("Recency bias", "Giving more weight to recent events than earlier ones"),
+        ("Negativity bias", "Negative experiences have a greater impact than positive ones of equal intensity"),
+        ("Hindsight bias", "Believing, after an event, that one would have predicted it ('I knew it all along')"),
+        ("Fundamental attribution error", "Attributing others' behavior to character while attributing own behavior to circumstances"),
+        ("Peak-end rule", "Judging an experience based on its most intense point and its end, not the average"),
+    ],
+    "Latin Phrases": [
+        ("Carpe diem", "Seize the day"),
+        ("Veni, vidi, vici", "I came, I saw, I conquered"),
+        ("Cogito, ergo sum", "I think, therefore I am"),
+        ("E pluribus unum", "Out of many, one"),
+        ("Ad hominem", "Attacking the person rather than the argument"),
+        ("Habeas corpus", "You shall have the body — right to appear before a court"),
+        ("Tabula rasa", "Blank slate — the mind before experience"),
+        ("Memento mori", "Remember that you will die"),
+        ("Quid pro quo", "Something for something — an exchange"),
+        ("Status quo", "The existing state of affairs"),
+        ("Bona fide", "In good faith; genuine"),
+        ("Per se", "By itself; intrinsically"),
+        ("De facto", "In fact; in practice (whether by right or not)"),
+        ("Alma mater", "Nourishing mother — one's former school or university"),
+        ("Vice versa", "The other way around"),
+    ],
+    "Mental Models": [
+        ("First principles thinking", "Breaking problems down to fundamental truths and reasoning up from there"),
+        ("Inversion", "Approaching a problem backward — think about what you want to avoid"),
+        ("Circle of competence", "Knowing the boundaries of what you truly understand"),
+        ("Second-order thinking", "Considering the consequences of consequences, not just immediate effects"),
+        ("Occam's razor", "The simplest explanation is usually the correct one"),
+        ("Hanlon's razor", "Never attribute to malice what can be explained by incompetence"),
+        ("Map is not the territory", "Models and abstractions are simplifications, not reality itself"),
+        ("Pareto principle (80/20)", "Roughly 80% of effects come from 20% of causes"),
+        ("Margin of safety", "Building in a buffer for error or uncertainty"),
+        ("Opportunity cost", "The value of the next best alternative you give up when making a choice"),
+        ("Compounding", "Small consistent gains accumulate exponentially over time"),
+        ("Feedback loops", "Outputs of a system that circle back as inputs, amplifying or dampening effects"),
+        ("Regression to the mean", "Extreme outcomes tend to be followed by more average ones"),
+        ("Antifragility", "Systems that gain from disorder and stress (Nassim Taleb)"),
+        ("Leverage", "Using a small input to achieve a disproportionately large output"),
+    ],
 }
 
 # MOT configuration
