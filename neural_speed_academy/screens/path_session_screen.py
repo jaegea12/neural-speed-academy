@@ -162,6 +162,15 @@ class PathSessionScreen(BaseScreen):
         from neural_speed_academy.exercises.pacer import PacerExercise
         from neural_speed_academy.exercises.schulte import SchulteExercise
         from neural_speed_academy.exercises.priming import PrimingExercise
+        from neural_speed_academy.exercises.sequence_memory import SequenceMemoryExercise
+        from neural_speed_academy.exercises.recall import RecallExercise
+        from neural_speed_academy.exercises.peripheral_flash import PeripheralFlashExercise
+        from neural_speed_academy.exercises.rapid_decision import RapidDecisionExercise
+        from neural_speed_academy.exercises.mot import MotExercise
+        from neural_speed_academy.exercises.split_attention import SplitAttentionExercise
+        from neural_speed_academy.exercises.reaction_time import ReactionTimeExercise
+        from neural_speed_academy.exercises.slide_processing import SlideProcessingExercise
+        from neural_speed_academy.exercises.spaced_repetition import SpacedRepetitionExercise
 
         user = self.navigator.get_user()
         if user:
@@ -195,13 +204,31 @@ class PathSessionScreen(BaseScreen):
                 },
             )
         elif ex_type == "schulte":
-            self.navigator.launch_exercise(SchulteExercise)
+            self.navigator.launch_exercise(SchulteExercise, **params)
         elif ex_type == "pacer":
-            self.navigator.launch_exercise(PacerExercise)
+            self.navigator.launch_exercise(PacerExercise, **params)
         elif ex_type == "rsvp":
             self.navigator.launch_exercise(RsvpExercise, **params)
         elif ex_type == "chunking":
             self.navigator.launch_exercise(ChunkingExercise, **params)
+        elif ex_type == "sequence_memory":
+            self.navigator.launch_exercise(SequenceMemoryExercise, **params)
+        elif ex_type == "recall":
+            self.navigator.launch_exercise(RecallExercise, **params)
+        elif ex_type == "peripheral_flash":
+            self.navigator.launch_exercise(PeripheralFlashExercise, **params)
+        elif ex_type == "rapid_decision":
+            self.navigator.launch_exercise(RapidDecisionExercise, **params)
+        elif ex_type == "mot":
+            self.navigator.launch_exercise(MotExercise, **params)
+        elif ex_type == "split_attention":
+            self.navigator.launch_exercise(SplitAttentionExercise, **params)
+        elif ex_type == "reaction_time":
+            self.navigator.launch_exercise(ReactionTimeExercise, **params)
+        elif ex_type == "slide_processing":
+            self.navigator.launch_exercise(SlideProcessingExercise, **params)
+        elif ex_type == "spaced_repetition":
+            self.navigator.launch_exercise(SpacedRepetitionExercise, **params)
 
     def _show_path_complete(self, path_data: dict, user) -> None:
         c = COLORS
@@ -343,6 +370,43 @@ EXERCISE_CATALOG = [
     ]),
     ("pacer", "Pacer & Quiz", [
         ("Comprehension Check", {}),
+    ]),
+    ("sequence_memory", "Sequence Memory", [
+        ("Standard", {}),
+    ]),
+    ("recall", "Recall Training", [
+        ("Words", {"mode": "words"}),
+        ("Numbers", {"mode": "numbers"}),
+        ("Mixed", {"mode": "mixed"}),
+    ]),
+    ("peripheral_flash", "Peripheral Flash", [
+        ("Standard", {}),
+    ]),
+    ("rapid_decision", "Rapid Decision Grid", [
+        ("Standard", {}),
+    ]),
+    ("mot", "Multiple Object Tracking", [
+        ("3 targets · 6s", {"targets": 3, "duration": 6}),
+        ("4 targets · 8s", {"targets": 4, "duration": 8}),
+        ("5 targets · 8s", {"targets": 5, "duration": 8}),
+    ]),
+    ("split_attention", "Split Attention", [
+        ("Sequential", {"mode": "sequential"}),
+        ("Simultaneous", {"mode": "simultaneous"}),
+        ("Rapid", {"mode": "rapid"}),
+    ]),
+    ("reaction_time", "Reaction Time", [
+        ("Simple", {"mode": "simple"}),
+        ("Choice", {"mode": "choice"}),
+        ("Go/No-Go", {"mode": "go_nogo"}),
+    ]),
+    ("slide_processing", "Slide Processing", [
+        ("10s · 5 slides", {"display_s": 10, "slides": 5}),
+        ("8s · 5 slides", {"display_s": 8, "slides": 5}),
+        ("5s · 5 slides", {"display_s": 5, "slides": 5}),
+    ]),
+    ("spaced_repetition", "Spaced Repetition", [
+        ("Review Session", {}),
     ]),
 ]
 
