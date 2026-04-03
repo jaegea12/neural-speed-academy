@@ -49,6 +49,11 @@ class NeuralSpeedAcademy:
         theme_manager.load()
         screen_metrics.init_from_screen()
 
+        # Global focus indicators for accessibility
+        from neural_speed_academy.theme import global_focus_css
+        self.app.setStyleSheet(global_focus_css())
+        theme_manager.on_change(lambda _: self.app.setStyleSheet(global_focus_css()))
+
         # Main window
         self.window = QMainWindow()
         self.window.setWindowTitle("Neural Speed Academy")

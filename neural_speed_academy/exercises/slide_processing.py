@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import (
     SLIDE_PROCESSING_CONFIG, SLIDE_LIBRARY, USER_DATA_CONFIG,
 )
@@ -86,7 +86,7 @@ class SlideProcessingExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(
@@ -203,7 +203,7 @@ class SlideProcessingExercise(BaseExercise):
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
-            f"color: {c['btn_text']}; border: none; "
+            f"color: {c['btn_text']}; border: 2px solid transparent; "
             f"padding: 12px 50px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -395,12 +395,13 @@ class SlideProcessingExercise(BaseExercise):
         top.addStretch()
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -516,12 +517,13 @@ class SlideProcessingExercise(BaseExercise):
         top.addStretch()
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
