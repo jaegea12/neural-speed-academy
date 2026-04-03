@@ -62,21 +62,13 @@ class SettingsScreen(BaseScreen):
         il.addWidget(title)
         il.addSpacing(10)
 
-        # --- Top row: Color Profile | FOV | Display Mode side by side ---
+        # --- Settings columns: 4 equal-width columns ---
         top_row = QHBoxLayout()
-        top_row.setSpacing(30)
+        top_row.setSpacing(20)
 
         rb_style = _radio_style(c)
 
-        # -- Color Profile column --
-        profile_section = QVBoxLayout()
-        profile_section.setSpacing(4)
-
-        sec1 = QLabel("COLOR PROFILE")
-        sec1.setFont(make_qfont("section_header"))
-        sec1.setStyleSheet(f"color: {c['accent']};")
-        il.addWidget(sec1, alignment=Qt.AlignmentFlag.AlignCenter)
-
+        # -- Color Profile: DARK column --
         dark_profiles = [
             ("dark", THEME_LABELS["dark"]),
             ("twilight", THEME_LABELS["twilight"]),
@@ -93,14 +85,12 @@ class SettingsScreen(BaseScreen):
 
         self._profile_group = QButtonGroup(self)
 
-        theme_cols = QHBoxLayout()
-        theme_cols.setSpacing(20)
         for col_label, profiles in [("DARK", dark_profiles), ("LIGHT", light_profiles)]:
             col = QVBoxLayout()
             col.setSpacing(3)
             header = QLabel(col_label)
-            header.setFont(make_qfont("btn_sm"))
-            header.setStyleSheet(f"color: {c['muted']};")
+            header.setFont(make_qfont("section_header"))
+            header.setStyleSheet(f"color: {c['accent']};")
             col.addWidget(header)
             for key, label in profiles:
                 rb = QRadioButton(label)
@@ -112,22 +102,20 @@ class SettingsScreen(BaseScreen):
                 self._profile_group.addButton(rb)
                 col.addWidget(rb)
             col.addStretch()
-            theme_cols.addLayout(col)
-        profile_section.addLayout(theme_cols)
+            top_row.addLayout(col, 1)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
-        top_row.addLayout(profile_section, 3)
 
         # -- FOV column --
-        fov_section = QVBoxLayout()
-        fov_section.setSpacing(4)
+        fov_col = QVBoxLayout()
+        fov_col.setSpacing(3)
         sec2 = QLabel("FIELD OF VIEW")
         sec2.setFont(make_qfont("section_header"))
         sec2.setStyleSheet(f"color: {c['accent']};")
-        fov_section.addWidget(sec2)
+        fov_col.addWidget(sec2)
         fov_desc = QLabel("Pacer page width & font")
         fov_desc.setFont(make_qfont("btn_sm"))
         fov_desc.setStyleSheet(f"color: {c['muted']};")
-        fov_section.addWidget(fov_desc)
+        fov_col.addWidget(fov_desc)
 
         self._fov_group = QButtonGroup(self)
         for key, preset in FOV_PRESETS.items():
@@ -138,22 +126,22 @@ class SettingsScreen(BaseScreen):
             if key == theme_manager.fov:
                 rb.setChecked(True)
             self._fov_group.addButton(rb)
-            fov_section.addWidget(rb)
+            fov_col.addWidget(rb)
         self._fov_group.buttonClicked.connect(self._on_fov_changed)
-        fov_section.addStretch()
-        top_row.addLayout(fov_section, 1)
+        fov_col.addStretch()
+        top_row.addLayout(fov_col, 1)
 
         # -- Display Mode column --
-        disp_section = QVBoxLayout()
-        disp_section.setSpacing(4)
+        disp_col = QVBoxLayout()
+        disp_col.setSpacing(3)
         sec_disp = QLabel("DISPLAY MODE")
         sec_disp.setFont(make_qfont("section_header"))
         sec_disp.setStyleSheet(f"color: {c['accent']};")
-        disp_section.addWidget(sec_disp)
+        disp_col.addWidget(sec_disp)
         disp_desc = QLabel("F11 to toggle")
         disp_desc.setFont(make_qfont("btn_sm"))
         disp_desc.setStyleSheet(f"color: {c['muted']};")
-        disp_section.addWidget(disp_desc)
+        disp_col.addWidget(disp_desc)
 
         self._disp_group = QButtonGroup(self)
         for key, label in [("fullscreen", "Fullscreen"), ("windowed", "Windowed")]:
@@ -167,27 +155,33 @@ class SettingsScreen(BaseScreen):
                 (key == "windowed" and not is_fs)
             )
             self._disp_group.addButton(rb)
-            disp_section.addWidget(rb)
+            disp_col.addWidget(rb)
         self._disp_group.buttonClicked.connect(self._on_display_changed)
-        disp_section.addStretch()
-        top_row.addLayout(disp_section, 1)
+        disp_col.addStretch()
+        top_row.addLayout(disp_col, 1)
 
         il.addLayout(top_row)
 
         il.addSpacing(15)
 
-        # --- Training Text ---
+        # --- Training Text (constrained width) ---
+        text_wrapper = QHBoxLayout()
+        text_wrapper.addStretch(1)
+
+        text_section = QVBoxLayout()
+        text_section.setSpacing(6)
+
         sec3 = QLabel("TRAINING TEXT")
         sec3.setFont(make_qfont("section_header"))
         sec3.setStyleSheet(f"color: {c['accent']};")
         sec3.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec3)
+        text_section.addWidget(sec3)
 
         text_desc = QLabel("Used as the default text for Pacer, RSVP, and Chunking exercises")
         text_desc.setFont(make_qfont("body"))
         text_desc.setStyleSheet(f"color: {c['muted']};")
         text_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(text_desc)
+        text_section.addWidget(text_desc)
 
         # Library selector
         lib_row = QHBoxLayout()
@@ -213,15 +207,19 @@ class SettingsScreen(BaseScreen):
             self._lib_combo.addItem(name)
         self._lib_combo.currentTextChanged.connect(self._load_library_text)
         lib_row.addWidget(self._lib_combo)
-        il.addLayout(lib_row)
+        text_section.addLayout(lib_row)
 
         from neural_speed_academy.theme import input_css
         self._text_edit = QTextEdit()
         self._text_edit.setFont(make_qfont("body"))
         self._text_edit.setStyleSheet(input_css(widget="QTextEdit"))
-        self._text_edit.setFixedHeight(180)
+        self._text_edit.setFixedHeight(160)
         self._text_edit.setPlainText(theme_manager.training_text)
-        il.addWidget(self._text_edit)
+        text_section.addWidget(self._text_edit)
+
+        text_wrapper.addLayout(text_section, 5)
+        text_wrapper.addStretch(1)
+        il.addLayout(text_wrapper)
 
         il.addSpacing(15)
 
