@@ -13,7 +13,7 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.config import TEXT_LIBRARY
 from neural_speed_academy.theme import (
-    COLORS, FOV_PRESETS, make_qfont, font_css, theme_manager,
+    COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, theme_manager,
 )
 
 
@@ -45,55 +45,49 @@ class SettingsScreen(BaseScreen):
             self._initial_text = theme_manager.training_text
 
         scroll, content, cl = make_scroll_area(self._layout)
-        cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        cl.setContentsMargins(20, 20, 20, 20)
-
-        # Use available width instead of fixed
-        inner = QFrame()
-        inner.setStyleSheet("background: transparent;")
-        il = QVBoxLayout(inner)
-        il.setSpacing(6)
-        il.setContentsMargins(20, 0, 20, 0)
+        cl.setContentsMargins(50, 20, 50, 20)
+        cl.setSpacing(6)
 
         title = QLabel("SETTINGS")
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['fg']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(title)
-        il.addSpacing(10)
+        cl.addWidget(title)
+        cl.addSpacing(10)
 
-        # --- Top row: Color Profile | FOV | Display Mode side by side ---
-        top_row = QHBoxLayout()
-        top_row.setSpacing(30)
-
+        # --- Settings: 3 sections side by side ---
         rb_style = _radio_style(c)
 
-        # -- Color Profile column --
-        profile_section = QVBoxLayout()
-        profile_section.setSpacing(4)
+        top_row = QHBoxLayout()
+        top_row.setSpacing(40)
 
-        sec1 = QLabel("COLOR PROFILE")
-        sec1.setFont(make_qfont("section_header"))
-        sec1.setStyleSheet(f"color: {c['accent']};")
-        il.addWidget(sec1, alignment=Qt.AlignmentFlag.AlignCenter)
-
+        # -- COLOR PROFILE section (two sub-columns) --
         dark_profiles = [
-            ("dark", "Dark"),
-            ("twilight", "Twilight"),
-            ("high_contrast", "High Contrast"),
+            ("dark", THEME_LABELS["dark"]),
+            ("twilight", THEME_LABELS["twilight"]),
+            ("high_contrast", THEME_LABELS["high_contrast"]),
+            ("mono", THEME_LABELS["mono"]),
+            ("ember", THEME_LABELS["ember"]),
         ]
         light_profiles = [
-            ("silver", "Silver"),
-            ("soft_light", "Soft Light"),
-            ("focus", "Focus (Low Fatigue)"),
-            ("light", "Light"),
+            ("silver", THEME_LABELS["silver"]),
+            ("soft_light", THEME_LABELS["soft_light"]),
+            ("focus", THEME_LABELS["focus"]),
+            ("light", THEME_LABELS["light"]),
         ]
 
         self._profile_group = QButtonGroup(self)
 
+        profile_section = QVBoxLayout()
+        profile_section.setSpacing(4)
+        sec1 = QLabel("COLOR PROFILE")
+        sec1.setFont(make_qfont("section_header"))
+        sec1.setStyleSheet(f"color: {c['accent']};")
+        profile_section.addWidget(sec1)
+
         theme_cols = QHBoxLayout()
-        theme_cols.setSpacing(20)
-        for col_label, profiles in [("DARK", dark_profiles), ("LIGHT", light_profiles)]:
+        theme_cols.setSpacing(30)
+        for col_label, profiles in [("Dark", dark_profiles), ("Light", light_profiles)]:
             col = QVBoxLayout()
             col.setSpacing(3)
             header = QLabel(col_label)
@@ -113,9 +107,9 @@ class SettingsScreen(BaseScreen):
             theme_cols.addLayout(col)
         profile_section.addLayout(theme_cols)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
-        top_row.addLayout(profile_section, 3)
+        top_row.addLayout(profile_section, 2)
 
-        # -- FOV column --
+        # -- FIELD OF VIEW section --
         fov_section = QVBoxLayout()
         fov_section.setSpacing(4)
         sec2 = QLabel("FIELD OF VIEW")
@@ -141,7 +135,7 @@ class SettingsScreen(BaseScreen):
         fov_section.addStretch()
         top_row.addLayout(fov_section, 1)
 
-        # -- Display Mode column --
+        # -- DISPLAY MODE section --
         disp_section = QVBoxLayout()
         disp_section.setSpacing(4)
         sec_disp = QLabel("DISPLAY MODE")
@@ -170,22 +164,28 @@ class SettingsScreen(BaseScreen):
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
 
-        il.addLayout(top_row)
+        cl.addLayout(top_row)
 
-        il.addSpacing(15)
+        cl.addSpacing(15)
 
-        # --- Training Text ---
+        # --- Training Text (constrained width) ---
+        text_wrapper = QHBoxLayout()
+        text_wrapper.addStretch(1)
+
+        text_section = QVBoxLayout()
+        text_section.setSpacing(6)
+
         sec3 = QLabel("TRAINING TEXT")
         sec3.setFont(make_qfont("section_header"))
         sec3.setStyleSheet(f"color: {c['accent']};")
         sec3.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec3)
+        text_section.addWidget(sec3)
 
         text_desc = QLabel("Used as the default text for Pacer, RSVP, and Chunking exercises")
         text_desc.setFont(make_qfont("body"))
         text_desc.setStyleSheet(f"color: {c['muted']};")
         text_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(text_desc)
+        text_section.addWidget(text_desc)
 
         # Library selector
         lib_row = QHBoxLayout()
@@ -211,17 +211,21 @@ class SettingsScreen(BaseScreen):
             self._lib_combo.addItem(name)
         self._lib_combo.currentTextChanged.connect(self._load_library_text)
         lib_row.addWidget(self._lib_combo)
-        il.addLayout(lib_row)
+        text_section.addLayout(lib_row)
 
         from neural_speed_academy.theme import input_css
         self._text_edit = QTextEdit()
         self._text_edit.setFont(make_qfont("body"))
         self._text_edit.setStyleSheet(input_css(widget="QTextEdit"))
-        self._text_edit.setFixedHeight(180)
+        self._text_edit.setFixedHeight(160)
         self._text_edit.setPlainText(theme_manager.training_text)
-        il.addWidget(self._text_edit)
+        text_section.addWidget(self._text_edit)
 
-        il.addSpacing(15)
+        text_wrapper.addLayout(text_section, 8)
+        text_wrapper.addStretch(1)
+        cl.addLayout(text_wrapper)
+
+        cl.addSpacing(15)
 
         # Buttons
         btn_row = QHBoxLayout()
@@ -249,16 +253,16 @@ class SettingsScreen(BaseScreen):
         reset_btn.clicked.connect(self._reset_defaults)
         btn_row.addWidget(reset_btn)
 
-        il.addLayout(btn_row)
+        cl.addLayout(btn_row)
 
-        il.addSpacing(20)
+        cl.addSpacing(20)
 
         # --- Keyboard Shortcuts Reference ---
         sec_keys = QLabel("KEYBOARD SHORTCUTS")
         sec_keys.setFont(make_qfont("section_header"))
         sec_keys.setStyleSheet(f"color: {c['accent']};")
         sec_keys.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        il.addWidget(sec_keys)
+        cl.addWidget(sec_keys)
 
         shortcuts = [
             ("Esc", "Go back / Main menu / Quit"),
@@ -268,6 +272,10 @@ class SettingsScreen(BaseScreen):
             ("Ctrl+Q", "Quit application"),
             ("F11", "Toggle fullscreen"),
         ]
+        keys_wrapper = QHBoxLayout()
+        keys_wrapper.addStretch(1)
+        keys_col = QVBoxLayout()
+        keys_col.setSpacing(4)
         for key, desc in shortcuts:
             row = QHBoxLayout()
             row.setContentsMargins(0, 0, 0, 0)
@@ -277,17 +285,21 @@ class SettingsScreen(BaseScreen):
                 f"color: {c['accent']}; background-color: {c['card']}; "
                 f"padding: 2px 8px; border-radius: 3px;"
             )
-            key_lbl.setFixedWidth(120)
+            key_lbl.setFixedWidth(110)
             key_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             row.addWidget(key_lbl)
+            row.addSpacing(10)
             desc_lbl = QLabel(desc)
             desc_lbl.setFont(make_qfont("body"))
             desc_lbl.setStyleSheet(f"color: {c['fg']};")
             row.addWidget(desc_lbl)
             row.addStretch()
-            il.addLayout(row)
+            keys_col.addLayout(row)
+        keys_wrapper.addLayout(keys_col, 3)
+        keys_wrapper.addStretch(1)
+        cl.addLayout(keys_wrapper)
 
-        cl.addWidget(inner)
+
 
     def _has_unsaved_changes(self) -> bool:
         """Check if any settings differ from the last saved state."""
@@ -343,7 +355,13 @@ class SettingsScreen(BaseScreen):
             self._text_edit.setPlainText(text)
 
     def _on_profile_changed(self, btn) -> None:
-        theme_manager.set_profile(btn.property("profile_key"))
+        profile = btn.property("profile_key")
+        theme_manager.set_profile(profile)
+        # Save to user profile if logged in
+        user = self.navigator.get_user()
+        if user:
+            user.theme = profile
+            self.navigator.save_user()
         # Rebuild in-place to reflect new colors without polluting nav history
         self.show_screen()
 

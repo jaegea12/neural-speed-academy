@@ -16,20 +16,7 @@ from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, sc
 
 
 class DashboardScreen(BaseScreen):
-    @property
-    def BTN_WIDTH(self) -> int:
-        from PyQt6.QtWidgets import QApplication
-        screen = QApplication.primaryScreen()
-        if screen:
-            avail_w = screen.availableGeometry().width()
-            win = self.window()
-            if win and not win.isFullScreen():
-                avail_w = min(avail_w, win.width() or 1024)
-        else:
-            avail_w = 1024
-        # Three columns, leave margins and spacing
-        w = min(int((avail_w - 140) / 3.5), 300)
-        return max(w, 160)
+
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -52,10 +39,13 @@ class DashboardScreen(BaseScreen):
         hl.addWidget(title)
         self._layout.addWidget(header)
 
-        # Scrollable main content
+        # Scrollable main content (vertical only)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         scroll.setStyleSheet(
             f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
             f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
@@ -68,8 +58,8 @@ class DashboardScreen(BaseScreen):
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
-        cl.setContentsMargins(30, 12, 30, 12)
-        cl.setSpacing(10)
+        cl.setContentsMargins(60, 12, 60, 12)
+        cl.setSpacing(8)
 
         self._build_user_card(cl)
         self._build_onboarding(cl)
@@ -80,7 +70,7 @@ class DashboardScreen(BaseScreen):
         # Eye Priming — standalone warmup button above exercise grid
         c_priming = COLORS
         warmup_btn = QPushButton("EYE WARMUP")
-        warmup_btn.setFixedWidth(self.BTN_WIDTH)
+        warmup_btn.setMaximumWidth(250)
         warmup_btn.setStyleSheet(
             btn_css(c_priming["priming"], c_priming["btn_text"],
                     padding="12px", font_key="btn_bold")
@@ -310,28 +300,45 @@ class DashboardScreen(BaseScreen):
         if not user or not user.personal_bests:
             return
         c = COLORS
-        row = QHBoxLayout()
-        for exercise, data in user.personal_bests.items():
+
+        header = QLabel("PERSONAL BESTS")
+        header.setFont(make_qfont("section_header"))
+        header.setStyleSheet(f"color: {c['muted']};")
+        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(header)
+
+        grid = QGridLayout()
+        grid.setSpacing(6)
+
+        items = list(user.personal_bests.items())
+        cols = 3
+        for i, (exercise, data) in enumerate(items):
+            row_idx, col_idx = divmod(i, cols)
             cell = QFrame()
             cell.setStyleSheet(
-                f"background-color: {c['card']}; border-radius: 4px; "
-                f"padding: 6px 12px;"
+                f"background-color: {c['card']}; border-radius: 4px;"
             )
-            cl = QVBoxLayout(cell)
-            cl.setSpacing(2)
+            cl = QHBoxLayout(cell)
+            cl.setContentsMargins(10, 6, 10, 6)
+            cl.setSpacing(8)
+
             name_lbl = QLabel(exercise)
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)
+
+            cl.addStretch()
+
             score_lbl = QLabel(
                 f"{data['score']}/{data['total']}  ({data['pct']}%)"
             )
             score_lbl.setFont(make_qfont("btn_bold"))
             score_lbl.setStyleSheet(f"color: {c['text_on_card']};")
             cl.addWidget(score_lbl)
-            row.addWidget(cell)
-        row.addStretch()
-        layout.addLayout(row)
+
+            grid.addWidget(cell, row_idx, col_idx)
+
+        layout.addLayout(grid)
 
     # ── Exercise grid ──
 
@@ -346,16 +353,12 @@ class DashboardScreen(BaseScreen):
 
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
-            btn.setFixedWidth(self.BTN_WIDTH)
             btn.setFixedHeight(38)
             btn.setStyleSheet(btn_css(c["accent"], c["btn_text"],
                                       padding="4px 12px"))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
-            grid.addWidget(
-                btn, i + 1, column,
-                alignment=Qt.AlignmentFlag.AlignCenter,
-            )
+            grid.addWidget(btn, i + 1, column)
 
     def _cb(self, name: str) -> Callable:
         return self.exercise_callbacks.get(name, lambda: None)

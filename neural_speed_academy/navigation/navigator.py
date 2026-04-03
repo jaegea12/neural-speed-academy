@@ -78,6 +78,11 @@ class Navigator:
 
     def set_user(self, user: "UserProfile") -> None:
         self.current_user = user
+        # Apply user's theme preference if set
+        if user.theme:
+            from neural_speed_academy.theme import theme_manager, THEME_PROFILES
+            if user.theme in THEME_PROFILES:
+                theme_manager.set_profile(user.theme)
 
     def get_user(self) -> Optional["UserProfile"]:
         return self.current_user
@@ -90,6 +95,9 @@ class Navigator:
         self.current_user = None
         self._post_login_redirect = None
         self._path_step_pending = None
+        # Revert to global default theme
+        from neural_speed_academy.theme import theme_manager
+        theme_manager.load()
         self.navigate_to("main_menu")
 
     def to_login(self) -> None:
