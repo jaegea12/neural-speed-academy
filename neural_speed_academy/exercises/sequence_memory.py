@@ -285,8 +285,8 @@ class SequenceMemoryExercise(BaseExercise):
         self._layout.addWidget(pad_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
     def _build_word_buttons(self, c: dict) -> None:
-        # Show the words from the sequence plus distractors, shuffled
-        options = list(self._sequence)
+        # Show only words from the sequence (exclude numbers in mixed mode)
+        options = [w for w in self._sequence if not w.isdigit()]
         # Add some distractors
         distractors = [w for w in WORD_POOL if w not in options]
         n_distractors = min(len(options), len(distractors))
