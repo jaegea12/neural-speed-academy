@@ -84,9 +84,9 @@ class MainMenuScreen(BaseScreen):
              lambda: self.navigator.navigate_to("introduction")),
             ("TRAINING PATHS", c["action"], c["btn_text"],
              lambda: self.navigator.navigate_to("paths")),
-            ("SETTINGS", c["card"], c["fg"],
+            ("SETTINGS", c["grid_btn"], c["fg"],
              lambda: self.navigator.navigate_to("settings")),
-            ("INFORMATION", c["card"], c["fg"], self._show_info),
+            ("INFORMATION", c["grid_btn"], c["fg"], self._show_info),
             ("QUIT", c["alert"], c["btn_text"], self._quit),
         ]
 

@@ -82,6 +82,7 @@ class SettingsScreen(BaseScreen):
             ("twilight", THEME_LABELS["twilight"]),
             ("high_contrast", THEME_LABELS["high_contrast"]),
             ("mono", THEME_LABELS["mono"]),
+            ("ember", THEME_LABELS["ember"]),
         ]
         light_profiles = [
             ("silver", THEME_LABELS["silver"]),

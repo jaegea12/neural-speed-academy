@@ -239,6 +239,34 @@ MONO_COLORS = {
     "diff_elite": "#ffffff",
 }
 
+EMBER_COLORS = {
+    # Black and red — high energy, low blue light.
+    "bg": "#0a0a0a",
+    "card": "#1a1010",
+    "fg": "#e0d0d0",
+    "accent": "#cc3333",
+    "action": "#cc6633",
+    "alert": "#ff6633",
+    "highlight": "#ff9944",
+    "priming": "#cc5544",
+    "grid_btn": "#2a1818",
+    "grid_solved": "#4a1a1a",
+    "grid_text": "#e0d0d0",
+    "success": "#cc3333",
+    "cross": "#5a4040",
+    # Semantic roles
+    "btn_text": "#ffffff",
+    "text_on_card": "#e0d0d0",
+    "muted": "#8a7070",
+    "reader_bg": "#e0d0d0",
+    "reader_fg": "#0a0a0a",
+    # Difficulty tiers
+    "diff_beginner": "#cc6633",
+    "diff_intermediate": "#cc3333",
+    "diff_advanced": "#aa2222",
+    "diff_elite": "#ff4444",
+}
+
 THEME_PROFILES = {
     "dark": DARK_COLORS,
     "light": LIGHT_COLORS,
@@ -248,6 +276,7 @@ THEME_PROFILES = {
     "soft_light": SOFT_LIGHT_COLORS,
     "silver": SILVER_COLORS,
     "mono": MONO_COLORS,
+    "ember": EMBER_COLORS,
 }
 
 # Human-readable labels for the settings screen
@@ -260,6 +289,7 @@ THEME_LABELS = {
     "soft_light": "Soft Light",
     "silver": "Silver",
     "mono": "Monochrome",
+    "ember": "Ember (Black/Red)",
 }
 
 # --- Font Definitions ---

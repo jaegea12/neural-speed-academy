@@ -16,21 +16,6 @@ from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, sc
 
 
 class DashboardScreen(BaseScreen):
-    @property
-    def BTN_WIDTH(self) -> int:
-        from PyQt6.QtWidgets import QApplication
-        screen = QApplication.primaryScreen()
-        if screen:
-            avail_w = screen.availableGeometry().width()
-            win = self.window()
-            if win and not win.isFullScreen():
-                avail_w = min(avail_w, win.width() or 1024)
-        else:
-            avail_w = 1024
-        # Three columns, leave margins and spacing
-        w = min(int((avail_w - 140) / 3.5), 300)
-        return max(w, 160)
-
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
         super().__init__(navigator, parent)
@@ -52,10 +37,13 @@ class DashboardScreen(BaseScreen):
         hl.addWidget(title)
         self._layout.addWidget(header)
 
-        # Scrollable main content
+        # Scrollable main content (vertical only)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         scroll.setStyleSheet(
             f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
             f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
@@ -80,7 +68,7 @@ class DashboardScreen(BaseScreen):
         # Eye Priming — standalone warmup button above exercise grid
         c_priming = COLORS
         warmup_btn = QPushButton("EYE WARMUP")
-        warmup_btn.setFixedWidth(self.BTN_WIDTH)
+        warmup_btn.setMaximumWidth(300)
         warmup_btn.setStyleSheet(
             btn_css(c_priming["priming"], c_priming["btn_text"],
                     padding="12px", font_key="btn_bold")
@@ -346,16 +334,12 @@ class DashboardScreen(BaseScreen):
 
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
-            btn.setFixedWidth(self.BTN_WIDTH)
             btn.setFixedHeight(38)
             btn.setStyleSheet(btn_css(c["accent"], c["btn_text"],
                                       padding="4px 12px"))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
-            grid.addWidget(
-                btn, i + 1, column,
-                alignment=Qt.AlignmentFlag.AlignCenter,
-            )
+            grid.addWidget(btn, i + 1, column)
 
     def _cb(self, name: str) -> Callable:
         return self.exercise_callbacks.get(name, lambda: None)
