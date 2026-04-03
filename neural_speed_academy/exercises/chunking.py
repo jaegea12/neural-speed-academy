@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, input_css, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, theme_manager, screen_metrics
 from neural_speed_academy.config import CHUNKING_CONFIG, USER_DATA_CONFIG
 
 
@@ -57,7 +57,7 @@ class ChunkingExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("chunking"))
@@ -154,7 +154,7 @@ class ChunkingExercise(BaseExercise):
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
             f"color: {c['btn_text']}; "
-            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_from_ui)
@@ -203,7 +203,7 @@ class ChunkingExercise(BaseExercise):
         self._pause_btn.setFont(make_qfont("btn_sm"))
         self._pause_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['action']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 14px; border-radius: 3px; }}"
+            f"border: 2px solid transparent; padding: 4px 14px; border-radius: 3px; }}"
         )
         self._pause_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._pause_btn.clicked.connect(self._toggle_pause)
@@ -212,10 +212,12 @@ class ChunkingExercise(BaseExercise):
         top_row.addStretch()
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
-            f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -244,7 +246,7 @@ class ChunkingExercise(BaseExercise):
             self._pause_btn.setText("PAUSE")
             self._pause_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['action']}; color: {c['btn_text']}; "
-                f"border: none; padding: 4px 14px; border-radius: 3px; }}"
+                f"border: 2px solid transparent; padding: 4px 14px; border-radius: 3px; }}"
             )
             self._flash_chunk()
         else:
@@ -252,7 +254,7 @@ class ChunkingExercise(BaseExercise):
             self._pause_btn.setText("CONTINUE")
             self._pause_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['success']}; color: {c['btn_text']}; "
-                f"border: none; padding: 4px 14px; border-radius: 3px; }}"
+                f"border: 2px solid transparent; padding: 4px 14px; border-radius: 3px; }}"
             )
             status = self._lbl_progress.text()
             self._lbl_progress.setText(f"PAUSED | {status.split('|', 1)[-1].strip()}")
@@ -346,7 +348,7 @@ class ChunkingExercise(BaseExercise):
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 8px 40px; border-radius: 4px; }}"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         cont_btn.clicked.connect(self.navigator.finish_exercise)

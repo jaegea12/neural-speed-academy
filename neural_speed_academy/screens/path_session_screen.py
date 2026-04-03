@@ -103,7 +103,7 @@ class PathSessionScreen(BaseScreen):
         launch.setFont(make_qfont("btn_lg"))
         launch.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 12px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 12px 40px; border-radius: 4px; }}"
         )
         launch.setCursor(Qt.CursorShape.PointingHandCursor)
         launch.clicked.connect(
@@ -120,7 +120,7 @@ class PathSessionScreen(BaseScreen):
             prev_btn.setFont(make_qfont("btn_sm"))
             prev_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-                f"border: none; padding: 4px 12px; border-radius: 3px; }}"
+                f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px; }}"
             )
             prev_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             prev_btn.clicked.connect(
@@ -132,7 +132,7 @@ class PathSessionScreen(BaseScreen):
         skip_btn.setFont(make_qfont("btn_sm"))
         skip_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px; }}"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px; }}"
         )
         skip_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         skip_btn.clicked.connect(
@@ -301,7 +301,7 @@ class PathSessionScreen(BaseScreen):
             btn.setFont(make_qfont("btn_bold"))
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {bg}; color: {fg}; "
-                f"border: none; padding: 8px 24px; border-radius: 4px; }}"
+                f"border: 2px solid transparent; padding: 8px 24px; border-radius: 4px; }}"
             )
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(cb)
@@ -479,7 +479,7 @@ class PathBuilderScreen(BaseScreen):
                 btn.setFont(make_qfont("body"))
                 btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-                    f"border: none; padding: 4px 8px; text-align: left; "
+                    f"border: 2px solid transparent; padding: 4px 8px; text-align: left; "
                     f"border-radius: 3px; }}"
                     f"QPushButton:hover {{ background-color: {c['accent']}; }}"
                 )
@@ -518,7 +518,7 @@ class PathBuilderScreen(BaseScreen):
         save_btn.setFont(make_qfont("btn_bold"))
         save_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 24px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 8px 24px; border-radius: 4px; }}"
         )
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self._save_path)
@@ -528,7 +528,7 @@ class PathBuilderScreen(BaseScreen):
         cancel_btn.setFont(make_qfont("btn_bold"))
         cancel_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-            f"border: none; padding: 8px 24px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 8px 24px; border-radius: 4px; }}"
         )
         cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         cancel_btn.clicked.connect(lambda: self.navigator.navigate_to("paths"))
@@ -579,9 +579,11 @@ class PathBuilderScreen(BaseScreen):
             rm.setFont(make_qfont("btn_sm"))
             rm.setStyleSheet(
                 f"QPushButton {{ color: {c['alert']}; background: transparent; "
-                f"border: none; }}"
+                f"border: 2px solid transparent; }}"
             )
             rm.setCursor(Qt.CursorShape.PointingHandCursor)
+            rm.setAccessibleName(f"Remove step {i + 1}")
+            rm.setToolTip(f"Remove step {i + 1}")
             rm.clicked.connect(lambda checked, idx=i: self._remove_step(idx))
             row.addWidget(rm)
 

@@ -61,7 +61,7 @@ class PrimingExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("priming"))
@@ -225,7 +225,7 @@ class PrimingExercise(BaseExercise):
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 40px; border-radius: 4px;"
+            f"border: 2px solid transparent; padding: 8px 40px; border-radius: 4px;"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         cont_btn.clicked.connect(self.navigator.finish_exercise)
