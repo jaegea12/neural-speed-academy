@@ -78,7 +78,7 @@ class Navigator:
 
     def set_user(self, user: "UserProfile") -> None:
         self.current_user = user
-        # Apply user's theme and font scale preferences
+        # Apply user's theme, font scale, and sound preferences
         from neural_speed_academy.theme import theme_manager, THEME_PROFILES
         if user.theme and user.theme in THEME_PROFILES:
             theme_manager.set_profile(user.theme)
