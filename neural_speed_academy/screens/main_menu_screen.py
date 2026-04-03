@@ -80,9 +80,9 @@ class MainMenuScreen(BaseScreen):
             )
 
         buttons += [
-            ("TRAINING PATHS", c["action"], c["btn_text"],
+            ("TRAINING PATHS", c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("paths")),
-            ("INTRODUCTION", c["card"], c["text_on_card"],
+            ("INTRODUCTION", c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("introduction")),
             ("SETTINGS", c["muted"], c["bg"],
              lambda: self.navigator.navigate_to("settings")),
