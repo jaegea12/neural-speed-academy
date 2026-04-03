@@ -305,28 +305,45 @@ class DashboardScreen(BaseScreen):
         if not user or not user.personal_bests:
             return
         c = COLORS
-        row = QHBoxLayout()
-        for exercise, data in user.personal_bests.items():
+
+        header = QLabel("PERSONAL BESTS")
+        header.setFont(make_qfont("section_header"))
+        header.setStyleSheet(f"color: {c['muted']};")
+        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(header)
+
+        grid = QGridLayout()
+        grid.setSpacing(6)
+
+        items = list(user.personal_bests.items())
+        cols = 3
+        for i, (exercise, data) in enumerate(items):
+            row_idx, col_idx = divmod(i, cols)
             cell = QFrame()
             cell.setStyleSheet(
-                f"background-color: {c['card']}; border-radius: 4px; "
-                f"padding: 6px 12px;"
+                f"background-color: {c['card']}; border-radius: 4px;"
             )
-            cl = QVBoxLayout(cell)
-            cl.setSpacing(2)
+            cl = QHBoxLayout(cell)
+            cl.setContentsMargins(10, 6, 10, 6)
+            cl.setSpacing(8)
+
             name_lbl = QLabel(exercise)
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)
+
+            cl.addStretch()
+
             score_lbl = QLabel(
                 f"{data['score']}/{data['total']}  ({data['pct']}%)"
             )
             score_lbl.setFont(make_qfont("btn_bold"))
             score_lbl.setStyleSheet(f"color: {c['text_on_card']};")
             cl.addWidget(score_lbl)
-            row.addWidget(cell)
-        row.addStretch()
-        layout.addLayout(row)
+
+            grid.addWidget(cell, row_idx, col_idx)
+
+        layout.addLayout(grid)
 
     # ── Exercise grid ──
 
