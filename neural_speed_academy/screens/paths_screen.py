@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QFrame, QGridLayout, QMessageBox, QScrollArea,
+    QFrame, QGridLayout, QScrollArea,
 )
 from PyQt6.QtCore import Qt
 
@@ -270,7 +270,6 @@ class PathSelectionScreen(BaseScreen):
     def _create_custom_path(self) -> None:
         user = self.navigator.get_user()
         if not user:
-            QMessageBox.information(self, "Login Required", "Please log in first.")
             self.navigator.require_login("paths")
             return
         self.navigator.navigate_to("path_builder")
@@ -278,7 +277,6 @@ class PathSelectionScreen(BaseScreen):
     def _start_path(self, path_id: str) -> None:
         user = self.navigator.get_user()
         if not user:
-            QMessageBox.information(self, "Login Required", "Please log in first.")
             self.navigator.require_login("paths")
             return
         pp = user.path_progress.get(path_id)
