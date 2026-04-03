@@ -91,8 +91,13 @@ class BaseExercise(QWidget):
         self._timers.append(timer)
         return timer
 
-    def add_nav_bar(self) -> QFrame:
-        """Add a navigation bar (same pattern as BaseScreen)."""
+    def add_nav_bar(self, show_stop: bool = True) -> QFrame:
+        """Add a navigation bar (same pattern as BaseScreen).
+
+        Args:
+            show_stop: Show the STOP button. Set False for config/menu
+                       screens where Back is sufficient.
+        """
         c = COLORS
         bar = QFrame()
         bar.setStyleSheet(f"background-color: {c['card']};")
@@ -124,6 +129,8 @@ class BaseExercise(QWidget):
         hub_btn.clicked.connect(self.navigator.to_dashboard)
         bar_layout.addWidget(hub_btn)
 
+        bar_layout.addStretch()
+
         menu_btn = QPushButton("Main Menu")
         menu_btn.setStyleSheet(
             btn_style
@@ -134,16 +141,15 @@ class BaseExercise(QWidget):
         menu_btn.clicked.connect(lambda: self.navigator.navigate_to("main_menu"))
         bar_layout.addWidget(menu_btn)
 
-        bar_layout.addStretch()
-
-        stop_btn = QPushButton("\u25a0 STOP")
-        stop_btn.setStyleSheet(
-            btn_style
-            + f"QPushButton {{ background-color: {c['alert']}; color: {c['btn_text']}; }}"
-        )
-        stop_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        stop_btn.clicked.connect(self._stop_exercise)
-        bar_layout.addWidget(stop_btn)
+        if show_stop:
+            stop_btn = QPushButton("\u25a0 STOP")
+            stop_btn.setStyleSheet(
+                btn_style
+                + f"QPushButton {{ background-color: {c['alert']}; color: {c['btn_text']}; }}"
+            )
+            stop_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            stop_btn.clicked.connect(self._stop_exercise)
+            bar_layout.addWidget(stop_btn)
 
         user = self.navigator.get_user()
         if user:

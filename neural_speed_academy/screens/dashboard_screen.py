@@ -7,7 +7,7 @@ from typing import Callable
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
-    QGridLayout, QProgressBar,
+    QGridLayout, QProgressBar, QScrollArea,
 )
 from PyQt6.QtCore import Qt
 
@@ -27,9 +27,9 @@ class DashboardScreen(BaseScreen):
                 avail_w = min(avail_w, win.width() or 1024)
         else:
             avail_w = 1024
-        # Two columns, leave margins and spacing
-        w = min(int((avail_w - 120) / 2.5), 360)
-        return max(w, 180)
+        # Three columns, leave margins and spacing
+        w = min(int((avail_w - 140) / 3.5), 300)
+        return max(w, 160)
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -52,7 +52,19 @@ class DashboardScreen(BaseScreen):
         hl.addWidget(title)
         self._layout.addWidget(header)
 
-        # Main content
+        # Scrollable main content
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet(
+            f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
+            f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
+            f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
+            f"border-radius: 4px; min-height: 30px; }}"
+            f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
+            f"{{ height: 0; }}"
+        )
+
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
@@ -78,33 +90,36 @@ class DashboardScreen(BaseScreen):
         cl.addWidget(warmup_btn, alignment=Qt.AlignmentFlag.AlignCenter)
         cl.addSpacing(4)
 
-        # Exercise grid
+        # Exercise grid — three columns
         grid = QGridLayout()
-        grid.setSpacing(12)
+        grid.setSpacing(8)
 
         self._create_section(grid, "PERCEPTION", 0, [
             ("Flash Numbers", self._cb("menu_flash")),
             ("Word Drills", self._cb("menu_words")),
             ("Eye-Span", self._cb("menu_eyespan")),
             ("Schulte Grid", self._cb("start_schulte")),
-            ("Sequence Memory", self._cb("menu_sequence_memory")),
             ("Peripheral Flash", self._cb("menu_peripheral_flash")),
+        ])
+        self._create_section(grid, "COGNITION", 1, [
+            ("Sequence Memory", self._cb("menu_sequence_memory")),
             ("Rapid Decision", self._cb("menu_rapid_decision")),
             ("Object Tracking", self._cb("menu_mot")),
             ("Split Attention", self._cb("menu_split_attention")),
             ("Reaction Time", self._cb("menu_reaction_time")),
-            ("Slide Processing", self._cb("menu_slide_processing")),
         ])
-        self._create_section(grid, "READING", 1, [
+        self._create_section(grid, "READING", 2, [
             ("Pacer & Quiz", self._cb("setup_pacer")),
             ("RSVP Reader", self._cb("setup_rsvp")),
             ("Chunking", self._cb("setup_chunking")),
             ("Spaced Repetition", self._cb("start_sr")),
+            ("Slide Processing", self._cb("menu_slide_processing")),
         ])
         cl.addLayout(grid)
         cl.addStretch()
 
-        self._layout.addWidget(content, 1)
+        scroll.setWidget(content)
+        self._layout.addWidget(scroll, 1)
 
     # ── User card ──
 
@@ -332,7 +347,9 @@ class DashboardScreen(BaseScreen):
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
             btn.setFixedWidth(self.BTN_WIDTH)
-            btn.setStyleSheet(btn_css(c["accent"], c["btn_text"]))
+            btn.setFixedHeight(38)
+            btn.setStyleSheet(btn_css(c["accent"], c["btn_text"],
+                                      padding="4px 12px"))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
             grid.addWidget(

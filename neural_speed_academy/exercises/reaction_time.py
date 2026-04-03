@@ -635,9 +635,7 @@ class ReactionTimeExercise(BaseExercise):
         for btn in self.findChildren(QPushButton):
             if btn.text() == "CONTINUE":
                 btn.disconnect()
-                btn.clicked.connect(
-                    lambda: self.navigator.navigate_to("reaction_time_menu")
-                )
+                btn.clicked.connect(self.navigator.finish_exercise)
 
     def _stop(self) -> None:
         self._running = False
@@ -651,4 +649,4 @@ class ReactionTimeExercise(BaseExercise):
         if self._timeout_timer:
             self._timeout_timer.stop()
             self._timeout_timer = None
-        self.navigator.navigate_to("reaction_time_menu")
+        self.navigator.finish_exercise()

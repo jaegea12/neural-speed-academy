@@ -96,7 +96,7 @@ class PacerExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
@@ -640,7 +640,7 @@ class PacerExercise(BaseExercise):
 
     def _on_recall_scored(self, score, total, matches, keywords) -> None:
         self._clear()
-        self.add_nav_bar()
+        self.add_nav_bar(show_stop=False)
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
