@@ -254,7 +254,7 @@ def build_recall_screen(
     check_btn.setFont(make_qfont("btn_bold"))
     check_btn.setStyleSheet(
         f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-        f"border: none; padding: 8px 30px; border-radius: 4px; }}"
+        f"border: 2px solid transparent; padding: 8px 30px; border-radius: 4px; }}"
     )
     check_btn.setCursor(Qt.CursorShape.PointingHandCursor)
     check_btn.clicked.connect(_score)
@@ -264,7 +264,7 @@ def build_recall_screen(
     skip_btn.setFont(make_qfont("btn_sm"))
     skip_btn.setStyleSheet(
         f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-        f"border: none; padding: 6px 20px; border-radius: 4px; }}"
+        f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; }}"
         f"QPushButton:hover {{ background-color: {c['bg']}; }}"
     )
     skip_btn.setCursor(Qt.CursorShape.PointingHandCursor)

@@ -99,7 +99,7 @@ class RapidDecisionGridExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(
@@ -246,7 +246,7 @@ class RapidDecisionGridExercise(BaseExercise):
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
             f"color: {c['btn_text']}; "
-            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_from_ui)
@@ -351,11 +351,13 @@ class RapidDecisionGridExercise(BaseExercise):
         stats.addWidget(self._lbl_timer)
 
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['alert']}; "
             f"color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            f"border: 2px solid transparent; padding: 4px 8px; border-radius: 3px; }}"
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -402,19 +404,19 @@ class RapidDecisionGridExercise(BaseExercise):
                 if self._mode == "alternating" and val in red_set:
                     btn.setStyleSheet(
                         f"QPushButton {{ background-color: {c['grid_btn']}; "
-                        f"color: #ef4444; border: none; border-radius: 4px; "
+                        f"color: #ef4444; border: 2px solid transparent; border-radius: 4px; "
                         f"font-weight: bold; }}"
                     )
                 elif self._mode == "alternating" and val in blue_set:
                     btn.setStyleSheet(
                         f"QPushButton {{ background-color: {c['grid_btn']}; "
-                        f"color: #3b82f6; border: none; border-radius: 4px; "
+                        f"color: #3b82f6; border: 2px solid transparent; border-radius: 4px; "
                         f"font-weight: bold; }}"
                     )
                 else:
                     btn.setStyleSheet(
                         f"QPushButton {{ background-color: {c['grid_btn']}; "
-                        f"color: {c['grid_text']}; border: none; "
+                        f"color: {c['grid_text']}; border: 2px solid transparent; "
                         f"border-radius: 4px; }}"
                     )
 
@@ -484,7 +486,7 @@ class RapidDecisionGridExercise(BaseExercise):
         if value == expected:
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['grid_solved']}; "
-                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
             )
             button.setEnabled(False)
             self._score += cfg["correct_points"]
@@ -508,7 +510,7 @@ class RapidDecisionGridExercise(BaseExercise):
             if self._red_idx < len(self._red_targets) and value == self._red_targets[self._red_idx]:
                 button.setStyleSheet(
                     f"QPushButton {{ background-color: {c['grid_solved']}; "
-                    f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                    f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
                 )
                 button.setEnabled(False)
                 self._score += cfg["correct_points"]
@@ -526,7 +528,7 @@ class RapidDecisionGridExercise(BaseExercise):
             if self._blue_idx < len(self._blue_targets) and value == self._blue_targets[self._blue_idx]:
                 button.setStyleSheet(
                     f"QPushButton {{ background-color: {c['grid_solved']}; "
-                    f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                    f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
                 )
                 button.setEnabled(False)
                 self._score += cfg["correct_points"]
@@ -571,7 +573,7 @@ class RapidDecisionGridExercise(BaseExercise):
         orig_style = button.styleSheet()
         button.setStyleSheet(
             f"QPushButton {{ background-color: {c['alert']}; "
-            f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+            f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
         )
         self._after(200, lambda: button.setStyleSheet(orig_style))
 
