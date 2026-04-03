@@ -22,22 +22,36 @@ class MainMenuScreen(BaseScreen):
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.setSpacing(6)
+        cl.setSpacing(0)
 
-        title = QLabel("NEURAL SPEED ACADEMY")
-        title.setFont(make_qfont("title"))
+        # ── Branding block ──
+        cl.addStretch(2)
+
+        title = QLabel("NEURAL SPEED\nACADEMY")
+        title.setFont(make_qfont("title_lg"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        slogan = QLabel("Let your brain process more information in less time")
-        slogan.setFont(make_qfont("sub"))
-        slogan.setStyleSheet(f"color: {c['muted']};")
-        slogan.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addSpacing(30)
-        cl.addWidget(slogan)
-        cl.addSpacing(20)
+        cl.addSpacing(6)
 
+        # Accent line
+        line = QWidget()
+        line.setFixedSize(120, 2)
+        line.setStyleSheet(f"background-color: {c['accent']};")
+        cl.addWidget(line, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        cl.addSpacing(14)
+
+        tagline = QLabel("Let your brain process more information in less time")
+        tagline.setFont(make_qfont("tagline"))
+        tagline.setStyleSheet(f"color: {c['muted']};")
+        tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(tagline)
+
+        cl.addStretch(1)
+
+        # ── User greeting ──
         logged_in = self.navigator.current_user is not None
         user = self.navigator.current_user
 
@@ -49,7 +63,7 @@ class MainMenuScreen(BaseScreen):
             welcome.setStyleSheet(f"color: {c['fg']};")
             welcome.setAlignment(Qt.AlignmentFlag.AlignCenter)
             cl.addWidget(welcome)
-            cl.addSpacing(8)
+            cl.addSpacing(12)
 
             buttons.append(
                 ("CONTINUE TRAINING", c["accent"], c["btn_text"],
@@ -82,6 +96,9 @@ class MainMenuScreen(BaseScreen):
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(callback)
             cl.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+            cl.addSpacing(2)
+
+        cl.addStretch(2)
 
         self._layout.addWidget(container, 1)
 
@@ -89,7 +106,9 @@ class MainMenuScreen(BaseScreen):
         from neural_speed_academy import __version__
         ver = QLabel(f"v{__version__}")
         ver.setFont(make_qfont("btn_sm"))
-        ver.setStyleSheet(f"color: {c['muted']}; background: transparent; padding: 6px 12px;")
+        ver.setStyleSheet(
+            f"color: {c['muted']}; background: transparent; padding: 4px 12px;"
+        )
         ver.setAlignment(Qt.AlignmentFlag.AlignRight)
         self._layout.addWidget(ver)
 

@@ -224,8 +224,10 @@ THEME_PROFILES = {
 
 FONTS = {
     "title": ("Segoe UI", 36, "bold"),
+    "title_lg": ("Segoe UI", 48, "bold"),
     "header": ("Segoe UI", 26, "bold"),
     "sub": ("Segoe UI", 12),
+    "tagline": ("Segoe UI", 16),
     "body": ("Segoe UI", 11),
     "flash": ("Consolas", 90, "bold"),
     "rsvp": ("Segoe UI", 48, "bold"),
