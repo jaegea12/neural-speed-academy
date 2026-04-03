@@ -53,7 +53,7 @@ class SettingsScreen(BaseScreen):
         inner.setStyleSheet("background: transparent;")
         il = QVBoxLayout(inner)
         il.setSpacing(6)
-        il.setContentsMargins(20, 0, 20, 0)
+        il.setContentsMargins(40, 0, 40, 0)
 
         title = QLabel("SETTINGS")
         title.setFont(make_qfont("header"))
@@ -62,13 +62,13 @@ class SettingsScreen(BaseScreen):
         il.addWidget(title)
         il.addSpacing(10)
 
-        # --- Settings columns: 4 equal-width columns ---
-        top_row = QHBoxLayout()
-        top_row.setSpacing(20)
-
+        # --- Settings: 3 sections side by side ---
         rb_style = _radio_style(c)
 
-        # -- Color Profile: DARK column --
+        top_row = QHBoxLayout()
+        top_row.setSpacing(40)
+
+        # -- COLOR PROFILE section (two sub-columns) --
         dark_profiles = [
             ("dark", THEME_LABELS["dark"]),
             ("twilight", THEME_LABELS["twilight"]),
@@ -85,12 +85,21 @@ class SettingsScreen(BaseScreen):
 
         self._profile_group = QButtonGroup(self)
 
-        for col_label, profiles in [("DARK", dark_profiles), ("LIGHT", light_profiles)]:
+        profile_section = QVBoxLayout()
+        profile_section.setSpacing(4)
+        sec1 = QLabel("COLOR PROFILE")
+        sec1.setFont(make_qfont("section_header"))
+        sec1.setStyleSheet(f"color: {c['accent']};")
+        profile_section.addWidget(sec1)
+
+        theme_cols = QHBoxLayout()
+        theme_cols.setSpacing(30)
+        for col_label, profiles in [("Dark", dark_profiles), ("Light", light_profiles)]:
             col = QVBoxLayout()
             col.setSpacing(3)
             header = QLabel(col_label)
-            header.setFont(make_qfont("section_header"))
-            header.setStyleSheet(f"color: {c['accent']};")
+            header.setFont(make_qfont("btn_sm"))
+            header.setStyleSheet(f"color: {c['muted']};")
             col.addWidget(header)
             for key, label in profiles:
                 rb = QRadioButton(label)
@@ -102,20 +111,22 @@ class SettingsScreen(BaseScreen):
                 self._profile_group.addButton(rb)
                 col.addWidget(rb)
             col.addStretch()
-            top_row.addLayout(col, 1)
+            theme_cols.addLayout(col)
+        profile_section.addLayout(theme_cols)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
+        top_row.addLayout(profile_section, 2)
 
-        # -- FOV column --
-        fov_col = QVBoxLayout()
-        fov_col.setSpacing(3)
+        # -- FIELD OF VIEW section --
+        fov_section = QVBoxLayout()
+        fov_section.setSpacing(4)
         sec2 = QLabel("FIELD OF VIEW")
         sec2.setFont(make_qfont("section_header"))
         sec2.setStyleSheet(f"color: {c['accent']};")
-        fov_col.addWidget(sec2)
+        fov_section.addWidget(sec2)
         fov_desc = QLabel("Pacer page width & font")
         fov_desc.setFont(make_qfont("btn_sm"))
         fov_desc.setStyleSheet(f"color: {c['muted']};")
-        fov_col.addWidget(fov_desc)
+        fov_section.addWidget(fov_desc)
 
         self._fov_group = QButtonGroup(self)
         for key, preset in FOV_PRESETS.items():
@@ -126,22 +137,22 @@ class SettingsScreen(BaseScreen):
             if key == theme_manager.fov:
                 rb.setChecked(True)
             self._fov_group.addButton(rb)
-            fov_col.addWidget(rb)
+            fov_section.addWidget(rb)
         self._fov_group.buttonClicked.connect(self._on_fov_changed)
-        fov_col.addStretch()
-        top_row.addLayout(fov_col, 1)
+        fov_section.addStretch()
+        top_row.addLayout(fov_section, 1)
 
-        # -- Display Mode column --
-        disp_col = QVBoxLayout()
-        disp_col.setSpacing(3)
+        # -- DISPLAY MODE section --
+        disp_section = QVBoxLayout()
+        disp_section.setSpacing(4)
         sec_disp = QLabel("DISPLAY MODE")
         sec_disp.setFont(make_qfont("section_header"))
         sec_disp.setStyleSheet(f"color: {c['accent']};")
-        disp_col.addWidget(sec_disp)
+        disp_section.addWidget(sec_disp)
         disp_desc = QLabel("F11 to toggle")
         disp_desc.setFont(make_qfont("btn_sm"))
         disp_desc.setStyleSheet(f"color: {c['muted']};")
-        disp_col.addWidget(disp_desc)
+        disp_section.addWidget(disp_desc)
 
         self._disp_group = QButtonGroup(self)
         for key, label in [("fullscreen", "Fullscreen"), ("windowed", "Windowed")]:
@@ -155,10 +166,10 @@ class SettingsScreen(BaseScreen):
                 (key == "windowed" and not is_fs)
             )
             self._disp_group.addButton(rb)
-            disp_col.addWidget(rb)
+            disp_section.addWidget(rb)
         self._disp_group.buttonClicked.connect(self._on_display_changed)
-        disp_col.addStretch()
-        top_row.addLayout(disp_col, 1)
+        disp_section.addStretch()
+        top_row.addLayout(disp_section, 1)
 
         il.addLayout(top_row)
 
@@ -217,7 +228,7 @@ class SettingsScreen(BaseScreen):
         self._text_edit.setPlainText(theme_manager.training_text)
         text_section.addWidget(self._text_edit)
 
-        text_wrapper.addLayout(text_section, 5)
+        text_wrapper.addLayout(text_section, 8)
         text_wrapper.addStretch(1)
         il.addLayout(text_wrapper)
 
