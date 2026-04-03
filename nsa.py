@@ -225,52 +225,73 @@ class NeuralSpeedAcademy:
         # Otherwise go back
         self.navigator.go_back()
 
-    def _handle_enter(self) -> None:
-        """Enter: click the continue/start button if visible."""
+    def _try_handle_enter(self) -> bool:
+        """Enter: click the continue/start button if visible.
+
+        Returns True if handled (event should be consumed).
+        """
+        # Don't intercept when a text input or button has focus
+        from PyQt6.QtWidgets import QTextEdit, QLineEdit, QPushButton
+        focus = self.app.focusWidget()
+        if isinstance(focus, (QTextEdit, QLineEdit, QPushButton)):
+            return False
+
         widget = self.stack.currentWidget()
         if not widget:
-            return
+            return False
 
-        # Don't intercept Enter when a text input has focus
-        from PyQt6.QtWidgets import QTextEdit, QLineEdit
-        focus = self.app.focusWidget()
-        if isinstance(focus, (QTextEdit, QLineEdit)):
-            return
-
-        # Look for a CONTINUE or START button on the current screen
-        from PyQt6.QtWidgets import QPushButton
         for btn in widget.findChildren(QPushButton):
             text = btn.text().upper()
             if text in ("CONTINUE", "CONTINUE TRAINING", "CREATE & START") and btn.isVisible():
                 btn.click()
-                return
+                return True
+        return False
 
-    def _handle_space(self) -> None:
-        """Space: pause/resume during exercises."""
-        # Don't intercept Space when a text input has focus
-        from PyQt6.QtWidgets import QTextEdit, QLineEdit
+    def _try_handle_space(self) -> bool:
+        """Space: pause/resume during exercises.
+
+        Returns True if handled (event should be consumed).
+        """
+        # Don't intercept when a text input or button has focus
+        from PyQt6.QtWidgets import QTextEdit, QLineEdit, QPushButton
         focus = self.app.focusWidget()
-        if isinstance(focus, (QTextEdit, QLineEdit)):
-            return
+        if isinstance(focus, (QTextEdit, QLineEdit, QPushButton)):
+            return False
 
         if self.navigator._current_name != "exercise":
-            return
+            return False
         widget = self.stack.currentWidget()
         if widget and hasattr(widget, '_toggle_pause'):
             widget._toggle_pause()
+            return True
+        return False
 
     def run(self) -> None:
-        # Global keyboard shortcuts
+        # Global keyboard shortcuts (only keys that never conflict with widgets)
         for key, handler in [
             ("F11", self._toggle_fullscreen),
             ("Escape", self._handle_escape),
-            ("Return", self._handle_enter),
-            ("Space", self._handle_space),
             ("Ctrl+Q", lambda: self.app.quit()),
         ]:
             s = QShortcut(QKeySequence(key), self.window)
             s.setContext(Qt.ShortcutContext.ApplicationShortcut)
             s.activated.connect(handler)
+
+        # Enter and Space handled via keyPressEvent to avoid
+        # stealing events from QLineEdit, QTextEdit, QPushButton
+        original_key_press = self.window.keyPressEvent
+
+        def _key_press(event):
+            key = event.key()
+            if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                if self._try_handle_enter():
+                    return
+            elif key == Qt.Key.Key_Space:
+                if self._try_handle_space():
+                    return
+            original_key_press(event)
+
+        self.window.keyPressEvent = _key_press
 
         self.navigator.navigate_to("main_menu")
         if theme_manager.fullscreen:
