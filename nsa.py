@@ -49,6 +49,11 @@ class NeuralSpeedAcademy:
         theme_manager.load()
         screen_metrics.init_from_screen()
 
+        # Global focus indicators for accessibility
+        from neural_speed_academy.theme import global_focus_css
+        self.app.setStyleSheet(global_focus_css())
+        theme_manager.on_change(lambda _: self.app.setStyleSheet(global_focus_css()))
+
         # Main window
         self.window = QMainWindow()
         self.window.setWindowTitle("Neural Speed Academy")
@@ -161,6 +166,14 @@ class NeuralSpeedAcademy:
 
     def _set_windowed(self) -> None:
         from PyQt6.QtWidgets import QApplication
+        from PyQt6.QtCore import Qt as QtCore_Qt
+        # Restore normal window flags (frame, resize handles, etc.)
+        self.window.setWindowFlags(
+            QtCore_Qt.WindowType.Window
+            | QtCore_Qt.WindowType.WindowCloseButtonHint
+            | QtCore_Qt.WindowType.WindowMinMaxButtonsHint
+            | QtCore_Qt.WindowType.WindowTitleHint
+        )
         self.window.setMaximumSize(16777215, 16777215)
         self.window.setMinimumSize(self._WINDOWED_MIN_W, self._WINDOWED_MIN_H)
         # Size to 75% of available screen, but at least the minimum
@@ -169,7 +182,6 @@ class NeuralSpeedAcademy:
             geo = screen.availableGeometry()
             w = max(int(geo.width() * 0.75), self._WINDOWED_MIN_W)
             h = max(int(geo.height() * 0.75), self._WINDOWED_MIN_H)
-            # Don't exceed available area
             w = min(w, geo.width() - 40)
             h = min(h, geo.height() - 40)
             self.window.resize(w, h)
