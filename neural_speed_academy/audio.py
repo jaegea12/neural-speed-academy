@@ -1,34 +1,32 @@
 """
 Audio feedback engine for Neural Speed Academy.
 
-Synthesizes short tones as in-memory WAV data.
-On Windows, plays via winsound.PlaySound (SND_MEMORY).
-On other platforms, falls back to QAudioSink.
+Uses sounddevice for low-latency cross-platform audio playback.
+Tones are synthesized as numpy-free float arrays and played non-blocking.
+Falls back to silent no-ops if sounddevice is unavailable.
 """
 from __future__ import annotations
 
-import io
+import array
 import math
-import platform
-import struct
-import threading
-import wave
 from typing import Optional
 
-_IS_WINDOWS = platform.system() == "Windows"
 _SAMPLE_RATE = 44100
 
-if _IS_WINDOWS:
-    import winsound
+try:
+    import sounddevice as sd
+    _HAS_AUDIO = True
+except ImportError:
+    _HAS_AUDIO = False
 
 
-# --- Tone synthesis (shared across platforms) ---
+# --- Tone synthesis ---
 
-def _generate_tone(freq: float, duration_ms: int, volume: float = 0.5) -> bytes:
-    """Generate a sine wave as signed 16-bit PCM samples."""
+def _sine(freq: float, duration_ms: int, volume: float, fade_ms: int = 8) -> array.array:
+    """Generate a sine wave as a float array."""
     n = int(_SAMPLE_RATE * duration_ms / 1000)
-    fade = int(_SAMPLE_RATE * 0.008)
-    samples = []
+    fade = int(_SAMPLE_RATE * fade_ms / 1000)
+    out = array.array("f")
     for i in range(n):
         t = i / _SAMPLE_RATE
         val = math.sin(2 * math.pi * freq * t) * volume
@@ -36,15 +34,15 @@ def _generate_tone(freq: float, duration_ms: int, volume: float = 0.5) -> bytes:
             val *= i / fade
         elif i > n - fade:
             val *= (n - i) / fade
-        samples.append(int(val * 32767))
-    return struct.pack(f"<{n}h", *samples)
+        out.append(val)
+    return out
 
 
-def _generate_sweep(f0: float, f1: float, duration_ms: int, volume: float = 0.5) -> bytes:
-    """Generate a frequency sweep as signed 16-bit PCM samples."""
+def _sweep(f0: float, f1: float, duration_ms: int, volume: float, fade_ms: int = 8) -> array.array:
+    """Generate a frequency sweep as a float array."""
     n = int(_SAMPLE_RATE * duration_ms / 1000)
-    fade = int(_SAMPLE_RATE * 0.008)
-    samples = []
+    fade = int(_SAMPLE_RATE * fade_ms / 1000)
+    out = array.array("f")
     for i in range(n):
         t = i / _SAMPLE_RATE
         f = f0 + (f1 - f0) * (i / n)
@@ -53,63 +51,44 @@ def _generate_sweep(f0: float, f1: float, duration_ms: int, volume: float = 0.5)
             val *= i / fade
         elif i > n - fade:
             val *= (n - i) / fade
-        samples.append(int(val * 32767))
-    return struct.pack(f"<{n}h", *samples)
+        out.append(val)
+    return out
 
 
-def _pcm_to_wav(pcm: bytes) -> bytes:
-    """Wrap raw PCM data in a WAV container."""
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as w:
-        w.setnchannels(1)
-        w.setsampwidth(2)
-        w.setframerate(_SAMPLE_RATE)
-        w.writeframes(pcm)
-    return buf.getvalue()
+def _silence(duration_ms: int) -> array.array:
+    """Generate silence."""
+    n = int(_SAMPLE_RATE * duration_ms / 1000)
+    return array.array("f", [0.0] * n)
 
 
-# Tone definitions: name -> (pcm_generator_func)
-_TONE_DEFS = {
-    "correct":    lambda vol: _generate_sweep(400, 600, 80, vol),
-    "incorrect":  lambda vol: _generate_sweep(400, 250, 120, vol),
-    "tick":       lambda vol: _generate_tone(800, 30, vol * 0.6),
-    "completion": lambda vol: (
-        _generate_tone(523.25, 100, vol)
-        + b"\x00\x00" * int(_SAMPLE_RATE * 0.03)
-        + _generate_tone(659.25, 140, vol)
+def _concat(*parts: array.array) -> array.array:
+    """Concatenate multiple float arrays."""
+    out = array.array("f")
+    for p in parts:
+        out.extend(p)
+    return out
+
+
+# Tone builders: volume -> float array
+_TONE_BUILDERS = {
+    "correct": lambda vol: _sweep(400, 600, 80, vol),
+    "incorrect": lambda vol: _sweep(400, 250, 120, vol),
+    "tick": lambda vol: _sine(800, 30, vol * 0.6),
+    "completion": lambda vol: _concat(
+        _sine(523.25, 100, vol),
+        _silence(30),
+        _sine(659.25, 140, vol),
     ),
 }
 
-# Non-Windows: try QAudioSink
-_HAS_QT_AUDIO = False
-if not _IS_WINDOWS:
-    try:
-        from PyQt6.QtMultimedia import QAudioFormat, QAudioSink, QAudio
-        from PyQt6.QtCore import QBuffer, QIODevice, QByteArray
-        _HAS_QT_AUDIO = True
-    except ImportError:
-        pass
-
 
 class AudioEngine:
-    """Plays synthesized audio cues with volume control."""
+    """Plays synthesized audio cues via sounddevice."""
 
     def __init__(self):
         self._enabled: bool = True
         self._volume: float = 0.5
-        self._cache: dict[str, bytes] = {}
-        # QAudioSink state (non-Windows)
-        self._sink: Optional[object] = None
-        self._buf: Optional[object] = None
-        self._ba: Optional[object] = None
-        self._format: Optional[object] = None
-
-        if _HAS_QT_AUDIO:
-            fmt = QAudioFormat()
-            fmt.setSampleRate(_SAMPLE_RATE)
-            fmt.setChannelCount(1)
-            fmt.setSampleFormat(QAudioFormat.SampleFormat.Int16)
-            self._format = fmt
+        self._cache: dict[str, array.array] = {}
 
     @property
     def enabled(self) -> bool:
@@ -129,67 +108,23 @@ class AudioEngine:
         self._cache.clear()
 
     def play(self, tone_name: str) -> None:
-        """Play a named tone. No-op if disabled or unavailable."""
-        if not self._enabled or tone_name not in _TONE_DEFS:
+        """Play a named tone. Non-blocking. No-op if disabled or unavailable."""
+        if not self._enabled or not _HAS_AUDIO:
+            return
+        if tone_name not in _TONE_BUILDERS:
             return
 
-        # Cache key includes volume so tones regenerate on volume change
-        cache_key = f"{tone_name}_{self._volume:.2f}"
-        if cache_key not in self._cache:
-            pcm = _TONE_DEFS[tone_name](self._volume)
-            if _IS_WINDOWS:
-                self._cache[cache_key] = _pcm_to_wav(pcm)
-            else:
-                self._cache[cache_key] = pcm
+        # Cache tones per volume level
+        key = f"{tone_name}_{self._volume:.2f}"
+        if key not in self._cache:
+            self._cache[key] = _TONE_BUILDERS[tone_name](self._volume)
 
-        data = self._cache[cache_key]
+        data = self._cache[key]
 
-        if _IS_WINDOWS:
-            self._play_windows(data)
-        elif _HAS_QT_AUDIO:
-            self._play_qt(data)
-
-    def _play_windows(self, wav_data: bytes) -> None:
-        """Play WAV data via winsound asynchronously."""
         try:
-            winsound.PlaySound(
-                wav_data,
-                winsound.SND_MEMORY | winsound.SND_ASYNC | winsound.SND_NODEFAULT,
-            )
+            sd.play(data, samplerate=_SAMPLE_RATE)
         except Exception:
-            pass
-
-    def _play_qt(self, pcm_data: bytes) -> None:
-        """Play raw PCM via QAudioSink."""
-        if not self._format:
-            return
-        try:
-            if self._sink is not None:
-                self._sink.stop()
-                self._sink = None
-            if self._buf is not None:
-                self._buf.close()
-                self._buf = None
-
-            ba = QByteArray(pcm_data)
-            buf = QBuffer()
-            buf.setData(ba)
-            if not buf.open(QIODevice.OpenModeFlag.ReadOnly):
-                return
-
-            sink = QAudioSink(self._format)
-            self._sink = sink
-            self._buf = buf
-            self._ba = ba
-
-            def _on_state(state):
-                if state == QAudio.State.IdleState:
-                    sink.stop()
-
-            sink.stateChanged.connect(_on_state)
-            sink.start(buf)
-        except Exception:
-            pass
+            pass  # audio failure is never fatal
 
 
 # Module-level singleton
