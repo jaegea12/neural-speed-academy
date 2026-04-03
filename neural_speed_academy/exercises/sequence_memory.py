@@ -105,10 +105,12 @@ class SequenceMemoryExercise(BaseExercise):
 
         # Exit button
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            f"border: 2px solid transparent; padding: 4px 8px; border-radius: 3px; }}"
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -200,10 +202,12 @@ class SequenceMemoryExercise(BaseExercise):
 
         # Exit button
         exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['alert']}; color: {c['text_on_card']}; "
-            f"border: none; padding: 4px 8px; border-radius: 3px; }}"
+            f"border: 2px solid transparent; padding: 4px 8px; border-radius: 3px; }}"
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         exit_btn.clicked.connect(self._stop)
@@ -251,7 +255,7 @@ class SequenceMemoryExercise(BaseExercise):
         undo_btn.setFont(make_qfont("btn_sm"))
         undo_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-            f"border: none; padding: 6px 20px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; }}"
             f"QPushButton:hover {{ background-color: {c['bg']}; }}"
         )
         undo_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -275,7 +279,7 @@ class SequenceMemoryExercise(BaseExercise):
             btn.setFont(make_qfont("btn_bold"))
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-                f"border: none; border-radius: 4px; }}"
+                f"border: 2px solid transparent; border-radius: 4px; }}"
                 f"QPushButton:hover {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
             )
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -303,7 +307,7 @@ class SequenceMemoryExercise(BaseExercise):
             btn.setFont(make_qfont("btn"))
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
-                f"border: none; border-radius: 4px; }}"
+                f"border: 2px solid transparent; border-radius: 4px; }}"
                 f"QPushButton:hover {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
             )
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -411,7 +415,7 @@ class SequenceMemoryExercise(BaseExercise):
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 8px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 8px 40px; border-radius: 4px; }}"
         )
         cont_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         cont_btn.clicked.connect(self._next_round)

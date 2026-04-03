@@ -91,11 +91,12 @@ class LoginScreen(BaseScreen):
                 del_btn.setFixedSize(32, 32)
                 del_btn.setStyleSheet(
                     f"QPushButton {{ background-color: transparent; "
-                    f"color: {c['muted']}; border: none; font-size: 14px; }}"
+                    f"color: {c['muted']}; border: 2px solid transparent; font-size: 14px; }}"
                     f"QPushButton:hover {{ color: {c['alert']}; }}"
                 )
                 del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 del_btn.setToolTip(f"Delete profile: {uname}")
+                del_btn.setAccessibleName(f"Delete profile {uname}")
                 del_btn.clicked.connect(
                     lambda checked, n=uname: self._confirm_delete(n)
                 )
@@ -160,7 +161,7 @@ class LoginScreen(BaseScreen):
             f"QMessageBox {{ background-color: {c['card']}; color: {c['fg']}; }}"
             f"QLabel {{ color: {c['fg']}; }}"
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
+            f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
         )
         msg.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
