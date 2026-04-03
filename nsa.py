@@ -36,6 +36,7 @@ from neural_speed_academy.exercises.chunking import ChunkingExercise
 from neural_speed_academy.exercises.pacer import PacerExercise
 from neural_speed_academy.exercises.schulte import SchulteExercise
 from neural_speed_academy.exercises.priming import PrimingExercise
+from neural_speed_academy.exercises.spaced_repetition import SpacedRepetitionExercise
 
 
 class NeuralSpeedAcademy:
@@ -151,6 +152,7 @@ class NeuralSpeedAcademy:
             "menu_split_attention": lambda: nav.navigate_to("split_attention_menu"),
             "menu_reaction_time": lambda: nav.navigate_to("reaction_time_menu"),
             "menu_slide_processing": lambda: nav.navigate_to("slide_processing_menu"),
+            "start_sr": lambda: nav.launch_exercise(SpacedRepetitionExercise),
             "show_paths": lambda: nav.navigate_to("paths"),
             "show_stats": lambda: nav.navigate_to("stats"),
         }

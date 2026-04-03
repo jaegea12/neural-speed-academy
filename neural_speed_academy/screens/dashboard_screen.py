@@ -99,6 +99,7 @@ class DashboardScreen(BaseScreen):
             ("Pacer & Quiz", self._cb("setup_pacer")),
             ("RSVP Reader", self._cb("setup_rsvp")),
             ("Chunking", self._cb("setup_chunking")),
+            ("Spaced Repetition", self._cb("start_sr")),
         ])
         cl.addLayout(grid)
         cl.addStretch()
