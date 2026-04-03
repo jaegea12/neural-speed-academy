@@ -369,6 +369,7 @@ class ThemeManager:
         self._profile = profile
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
+        self._font_scale: float = 1.0
         self._fullscreen: bool = True
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
@@ -394,6 +395,14 @@ class ThemeManager:
     def fov(self, value: str) -> None:
         if value in FOV_PRESETS:
             self._fov = value
+
+    @property
+    def font_scale(self) -> float:
+        return self._font_scale
+
+    @font_scale.setter
+    def font_scale(self, value: float) -> None:
+        self._font_scale = max(0.8, min(1.5, value))
 
     @property
     def fullscreen(self) -> bool:
@@ -449,6 +458,7 @@ class ThemeManager:
                 "profile": self._profile,
                 "training_text": self._training_text,
                 "fov": self._fov,
+                "font_scale": self._font_scale,
                 "fullscreen": self._fullscreen,
             }
             if self._schulte_grid_size is not None:
@@ -476,6 +486,8 @@ class ThemeManager:
             fov = data.get("fov", DEFAULT_FOV)
             if fov in FOV_PRESETS:
                 self._fov = fov
+            if "font_scale" in data:
+                self._font_scale = max(0.8, min(1.5, float(data["font_scale"])))
             if "fullscreen" in data:
                 self._fullscreen = bool(data["fullscreen"])
             sg = data.get("schulte_grid_size")
@@ -492,6 +504,7 @@ class ThemeManager:
         self.set_profile(DEFAULT_PROFILE)
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
+        self._font_scale = 1.0
         self.save()
 
     @staticmethod
@@ -631,7 +644,7 @@ def font_css(key: str) -> str:
     """Return QSS font-family, font-size, font-weight declarations."""
     spec = FONTS[key]
     family = spec[0]
-    size = spec[1]
+    size = int(spec[1] * theme_manager.font_scale)
     weight = "bold" if len(spec) > 2 and spec[2] == "bold" else "normal"
     return f'font-family: "{family}"; font-size: {size}pt; font-weight: {weight};'
 
@@ -640,7 +653,8 @@ def make_qfont(key: str):
     """Create a QFont from a FONTS key."""
     from PyQt6.QtGui import QFont
     spec = FONTS[key]
-    font = QFont(spec[0], spec[1])
+    size = int(spec[1] * theme_manager.font_scale)
+    font = QFont(spec[0], size)
     if len(spec) > 2 and spec[2] == "bold":
         font.setBold(True)
     return font
