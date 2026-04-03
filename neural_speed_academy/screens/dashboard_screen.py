@@ -7,7 +7,7 @@ from typing import Callable
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
-    QGridLayout, QProgressBar,
+    QGridLayout, QProgressBar, QScrollArea,
 )
 from PyQt6.QtCore import Qt
 
@@ -52,7 +52,19 @@ class DashboardScreen(BaseScreen):
         hl.addWidget(title)
         self._layout.addWidget(header)
 
-        # Main content
+        # Scrollable main content
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet(
+            f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
+            f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
+            f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
+            f"border-radius: 4px; min-height: 30px; }}"
+            f"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical "
+            f"{{ height: 0; }}"
+        )
+
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
@@ -80,7 +92,7 @@ class DashboardScreen(BaseScreen):
 
         # Exercise grid
         grid = QGridLayout()
-        grid.setSpacing(12)
+        grid.setSpacing(8)
 
         self._create_section(grid, "PERCEPTION", 0, [
             ("Flash Numbers", self._cb("menu_flash")),
@@ -104,7 +116,8 @@ class DashboardScreen(BaseScreen):
         cl.addLayout(grid)
         cl.addStretch()
 
-        self._layout.addWidget(content, 1)
+        scroll.setWidget(content)
+        self._layout.addWidget(scroll, 1)
 
     # ── User card ──
 
@@ -332,7 +345,9 @@ class DashboardScreen(BaseScreen):
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
             btn.setFixedWidth(self.BTN_WIDTH)
-            btn.setStyleSheet(btn_css(c["accent"], c["btn_text"]))
+            btn.setFixedHeight(38)
+            btn.setStyleSheet(btn_css(c["accent"], c["btn_text"],
+                                      padding="4px 12px"))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
             grid.addWidget(
