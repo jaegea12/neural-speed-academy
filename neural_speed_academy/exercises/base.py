@@ -190,6 +190,7 @@ class BaseExercise(QWidget):
                 )
                 is_pb = user.update_personal_best(
                     result.exercise_name, result.score, result.total,
+                    metadata=result.metadata,
                 )
                 self.navigator.save_user()
             except Exception as e:

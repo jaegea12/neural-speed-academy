@@ -224,22 +224,28 @@ class UserProfile:
             self.streak = 1
         self.last_login = today
 
-    def update_personal_best(self, exercise: str, score: int, total: int) -> bool:
+    def update_personal_best(
+        self, exercise: str, score: int, total: int,
+        metadata: dict | None = None,
+    ) -> bool:
         """Update personal best for an exercise if the new score is higher.
 
         Returns True if a new personal best was set.
         """
         if total == 0:
             return False
-        pct = round(score / total * 100, 1)
+        pct = min(round(score / total * 100, 1), 100.0)
         prev = self.personal_bests.get(exercise)
         if prev is None or pct > prev.get("pct", 0):
-            self.personal_bests[exercise] = {
+            entry = {
                 "score": score,
                 "total": total,
                 "pct": pct,
                 "date": datetime.now().strftime("%Y-%m-%d"),
             }
+            if metadata:
+                entry["metadata"] = metadata
+            self.personal_bests[exercise] = entry
             return True
         return False
 
