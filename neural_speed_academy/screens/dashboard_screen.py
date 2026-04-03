@@ -16,6 +16,13 @@ from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, sc
 
 
 class DashboardScreen(BaseScreen):
+    @property
+    def _btn_width(self) -> int:
+        win = self.window()
+        w = win.width() if win and win.width() > 100 else 900
+        # 3 columns: subtract margins (16*2) and spacing (8*2), divide by 3
+        return max(int((w - 48) / 3), 120)
+
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
         super().__init__(navigator, parent)
@@ -68,7 +75,7 @@ class DashboardScreen(BaseScreen):
         # Eye Priming — standalone warmup button above exercise grid
         c_priming = COLORS
         warmup_btn = QPushButton("EYE WARMUP")
-        warmup_btn.setMaximumWidth(300)
+        warmup_btn.setFixedWidth(self._btn_width)
         warmup_btn.setStyleSheet(
             btn_css(c_priming["priming"], c_priming["btn_text"],
                     padding="12px", font_key="btn_bold")
@@ -334,12 +341,16 @@ class DashboardScreen(BaseScreen):
 
         for i, (text, command) in enumerate(items):
             btn = QPushButton(text)
+            btn.setFixedWidth(self._btn_width)
             btn.setFixedHeight(38)
             btn.setStyleSheet(btn_css(c["accent"], c["btn_text"],
                                       padding="4px 12px"))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(command)
-            grid.addWidget(btn, i + 1, column)
+            grid.addWidget(
+                btn, i + 1, column,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
 
     def _cb(self, name: str) -> Callable:
         return self.exercise_callbacks.get(name, lambda: None)
