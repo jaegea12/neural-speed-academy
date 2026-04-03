@@ -287,9 +287,10 @@ class SequenceMemoryExercise(BaseExercise):
     def _build_word_buttons(self, c: dict) -> None:
         # Show only words from the sequence (exclude numbers in mixed mode)
         options = [w for w in self._sequence if not w.isdigit()]
-        # Add some distractors
+        # Add distractors — ensure at least 6 total choices
         distractors = [w for w in WORD_POOL if w not in options]
-        n_distractors = min(len(options), len(distractors))
+        n_distractors = max(6 - len(options), len(options))
+        n_distractors = min(n_distractors, len(distractors))
         options.extend(random.sample(distractors, n_distractors))
         random.shuffle(options)
 
