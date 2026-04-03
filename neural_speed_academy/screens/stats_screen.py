@@ -127,11 +127,7 @@ class StatsScreen(BaseScreen):
 
         user = self.navigator.get_user()
         if not user:
-            lbl = QLabel("No user logged in")
-            lbl.setFont(make_qfont("header"))
-            lbl.setStyleSheet(f"color: {c['alert']};")
-            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self._layout.addWidget(lbl, 1)
+            self.navigator.require_login("stats")
             return
 
         scroll, content, cl = make_scroll_area(self._layout)
