@@ -20,8 +20,8 @@ class DashboardScreen(BaseScreen):
     def _btn_width(self) -> int:
         win = self.window()
         w = win.width() if win and win.width() > 100 else 900
-        # 3 columns: subtract margins (16*2) and spacing (8*2), divide by 3
-        return max(int((w - 48) / 3), 120)
+        # 3 columns: subtract margins (40*2) and spacing, divide by 3, cap at 220
+        return min(max(int((w - 120) / 3.5), 120), 220)
 
     def __init__(self, navigator, exercise_callbacks: dict[str, Callable],
                  parent: QWidget | None = None):
@@ -63,7 +63,7 @@ class DashboardScreen(BaseScreen):
         content = QWidget()
         content.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(content)
-        cl.setContentsMargins(16, 12, 16, 12)
+        cl.setContentsMargins(40, 12, 40, 12)
         cl.setSpacing(8)
 
         self._build_user_card(cl)
