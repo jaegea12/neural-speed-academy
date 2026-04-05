@@ -187,7 +187,14 @@ class BaseMenuScreen(BaseScreen):
 
     def _tp_toggle_off(self) -> str:
         c = COLORS
-        return btn_css(c["card"], c["fg"], padding="6px 14px")
+        return (
+            f"QPushButton {{ background-color: {c['card']}; "
+            f"color: {c['fg']}; border: 2px solid {c['muted']}; "
+            f"padding: 6px 14px; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
+            f"QPushButton:focus {{ border-color: {c['accent']}; }}"
+        )
 
     def _tp_select_preset(self, idx: int) -> None:
         self._tp_selected_preset = idx
@@ -206,6 +213,10 @@ class BaseMenuScreen(BaseScreen):
         for key, value in preset_vals.items():
             if key in self._tp_param_buttons:
                 self._tp_select_param(key, value)
+        # Style any param buttons not covered by this preset
+        for header, param_key, options, default in self._tp_params:
+            if param_key not in preset_vals:
+                self._tp_select_param(param_key, self._tp_param_values[param_key])
 
     def _tp_select_param(self, key: str, value: object) -> None:
         self._tp_param_values[key] = value
