@@ -4,15 +4,14 @@ Menu screens for exercise selection.
 from __future__ import annotations
 
 import random
-from typing import Callable
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGridLayout,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
 )
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 
 
 class BaseMenuScreen(BaseScreen):
@@ -31,38 +30,42 @@ class BaseMenuScreen(BaseScreen):
             return "diff_advanced"
         return "diff_elite"
 
-    def _create_column_menu(
+    def _create_two_panel_menu(
         self,
         title: str,
         guide_key: str,
-        columns: list[tuple[str, list[tuple[str, Callable]]]],
-        btn_width: int | None = None,
+        exercise_cls,
+        *,
+        left_label: str,
+        presets: list[tuple[str, dict]],
+        params: list[tuple[str, str, list, object]],
+        default_preset: int = 0,
+        left_stretch: int = 1,
+        right_stretch: int = 1,
     ) -> None:
-        # Responsive button width: ~28% of screen per column, capped
-        if btn_width is None:
-            from PyQt6.QtWidgets import QApplication
-            screen = QApplication.primaryScreen()
-            if screen:
-                avail_w = screen.availableGeometry().width()
-                # In windowed mode use a smaller reference
-                win = self.window()
-                if win and not win.isFullScreen():
-                    avail_w = min(avail_w, win.width() or 1024)
-            else:
-                avail_w = 1024
-            n_cols = max(len(columns), 1)
-            # Leave margins (60px each side) and spacing between columns
-            usable = avail_w - 120 - (n_cols - 1) * 20
-            btn_width = min(int(usable / n_cols), 340)
-            btn_width = max(btn_width, 160)
+        """Build a two-panel config screen.
+
+        Args:
+            title: Screen title.
+            guide_key: Key for the guide dialog.
+            exercise_cls: Exercise class to launch.
+            left_label: Header for the left panel.
+            presets: List of (label, {param_key: value, ...}) tuples.
+                     Selecting a preset updates the right-panel defaults.
+            params: List of (header, param_key, options, default) tuples.
+                    Each option is a (label, value) pair.
+                    Displayed as a row of toggle buttons on the right panel.
+            default_preset: Index of the initially selected preset.
+            left_stretch: Stretch factor for the left panel.
+            right_stretch: Stretch factor for the right panel.
+        """
+        from neural_speed_academy.screens.base import make_scroll_area
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar()
 
-        container = QWidget()
-        container.setStyleSheet(f"background-color: {c['bg']};")
-        cl = QVBoxLayout(container)
+        scroll, container, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(30, 20, 30, 20)
         cl.setSpacing(10)
 
@@ -75,10 +78,9 @@ class BaseMenuScreen(BaseScreen):
         title_row.addWidget(lbl)
 
         guide_btn = QPushButton("GUIDE")
-        guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
-            f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: 2px solid transparent; padding: 6px 16px; border-radius: 4px;"
+            btn_css(c["accent"], c["btn_text"], padding="6px 16px",
+                    font_key="btn_sm")
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide(guide_key))
@@ -86,88 +88,142 @@ class BaseMenuScreen(BaseScreen):
         title_row.addStretch()
         cl.addLayout(title_row)
 
-        cl.addStretch()
+        cl.addSpacing(10)
 
-        grid = QGridLayout()
-        grid.setSpacing(10)
-        grid.setContentsMargins(20, 0, 20, 0)
+        # Two-column layout
+        columns = QHBoxLayout()
+        columns.setSpacing(40)
+        columns.setContentsMargins(20, 0, 20, 0)
 
-        # Headers
-        for idx, (header, _items) in enumerate(columns):
-            h = QLabel(header)
-            h.setFont(make_qfont("menu_header"))
-            h.setStyleSheet(f"color: {c['accent']};")
-            h.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            grid.addWidget(h, 0, idx)
+        # ── Left panel: presets ──
+        left = QVBoxLayout()
+        left.setSpacing(6)
 
-        max_len = max(len(items) for _, items in columns)
-        cutoff = max(int(max_len * 0.6), 3)
-        advanced_widgets: list[QPushButton] = []
+        left_hdr = QLabel(left_label)
+        left_hdr.setFont(make_qfont("menu_header"))
+        left_hdr.setStyleSheet(f"color: {c['accent']};")
+        left_hdr.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        left.addWidget(left_hdr)
 
-        for i in range(max_len):
-            for col_idx, (_header, items) in enumerate(columns):
-                if i < len(items):
-                    name, cmd = items[i]
-                    color_key = self._difficulty_color(i, len(items))
-                    btn = QPushButton(name)
-                    btn.setFixedWidth(btn_width)
-                    btn.setStyleSheet(
-                        btn_css(c[color_key], c["btn_text"],
-                                padding="10px", font_key="menu_btn")
-                    )
-                    btn.setCursor(Qt.CursorShape.PointingHandCursor)
-                    btn.clicked.connect(cmd)
-                    grid.addWidget(
-                        btn, i + 1, col_idx,
-                        alignment=Qt.AlignmentFlag.AlignCenter,
-                    )
-                    if i >= cutoff:
-                        advanced_widgets.append(btn)
-                        btn.setVisible(False)
+        self._tp_preset_buttons: list[QPushButton] = []
+        self._tp_presets = presets
+        self._tp_selected_preset = default_preset
 
-        cl.addLayout(grid)
-
-        if advanced_widgets:
-            cl.addSpacing(6)
-            self._adv_visible = False
-            toggle = QPushButton("\u25bc SHOW ADVANCED")
-            toggle.setStyleSheet(
-                btn_css(c["card"], c["fg"], padding="6px 16px",
-                        font_key="btn_sm")
+        for i, (preset_label, _preset_vals) in enumerate(presets):
+            color_key = self._difficulty_color(i, len(presets))
+            btn = QPushButton(preset_label)
+            btn.setFont(make_qfont("menu_btn"))
+            btn.setFixedHeight(38)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(
+                lambda _, idx=i: self._tp_select_preset(idx)
             )
-            toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+            left.addWidget(btn)
+            self._tp_preset_buttons.append(btn)
 
-            def _toggle():
-                self._adv_visible = not self._adv_visible
-                for w in advanced_widgets:
-                    w.setVisible(self._adv_visible)
-                toggle.setText(
-                    "\u25b2 HIDE ADVANCED" if self._adv_visible
-                    else "\u25bc SHOW ADVANCED"
+        left.addStretch()
+        columns.addLayout(left, left_stretch)
+
+        # ── Right panel: adjustable parameters ──
+        right = QVBoxLayout()
+        right.setSpacing(8)
+
+        self._tp_param_buttons: dict[str, dict] = {}
+        self._tp_param_values: dict[str, object] = {}
+        self._tp_params = params
+
+        for header, param_key, options, default in params:
+            hdr = QLabel(header)
+            hdr.setFont(make_qfont("menu_header"))
+            hdr.setStyleSheet(f"color: {c['accent']};")
+            hdr.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            right.addWidget(hdr)
+
+            row = QHBoxLayout()
+            row.setSpacing(6)
+            btns: dict = {}
+            for opt_label, opt_value in options:
+                btn = QPushButton(opt_label)
+                btn.setFont(make_qfont("btn_sm"))
+                btn.setFixedHeight(36)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                btn.clicked.connect(
+                    lambda _, k=param_key, v=opt_value: self._tp_select_param(k, v)
                 )
+                row.addWidget(btn)
+                btns[opt_value] = btn
+            right.addLayout(row)
+            right.addSpacing(4)
 
-            toggle.clicked.connect(_toggle)
-            cl.addWidget(toggle, alignment=Qt.AlignmentFlag.AlignCenter)
+            self._tp_param_buttons[param_key] = btns
+            self._tp_param_values[param_key] = default
 
-        cl.addStretch()
-        self._layout.addWidget(container, 1)
+        right.addSpacing(12)
 
-    def _create_grid_menu(
-        self,
-        title: str,
-        guide_key: str,
-        sets: list[tuple[str, Callable]],
-        col1_label: str = "FIXED / BASIC",
-        col2_label: str = "MIXED / ADVANCED",
-    ) -> None:
-        half = (len(sets) + 1) // 2
-        self._create_column_menu(
-            title, guide_key,
-            columns=[
-                (col1_label, sets[:half]),
-                (col2_label, sets[half:]),
-            ],
+        # START button
+        start_btn = QPushButton("START")
+        start_btn.setFont(make_qfont("btn_lg"))
+        start_btn.setStyleSheet(
+            btn_css(c["accent"], c["btn_text"], padding="12px 50px")
         )
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(
+            lambda: self._tp_launch(exercise_cls)
+        )
+        right.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        right.addStretch()
+        columns.addLayout(right, right_stretch)
+
+        cl.addLayout(columns)
+        cl.addStretch()
+
+        # Apply initial state
+        self._tp_select_preset(default_preset)
+
+    def _tp_toggle_on(self) -> str:
+        c = COLORS
+        return btn_css(c["accent"], c["btn_text"], padding="6px 14px")
+
+    def _tp_toggle_off(self) -> str:
+        c = COLORS
+        return btn_css(c["card"], c["fg"], padding="6px 14px")
+
+    def _tp_select_preset(self, idx: int) -> None:
+        self._tp_selected_preset = idx
+        c = COLORS
+        # Update left panel buttons
+        for i, btn in enumerate(self._tp_preset_buttons):
+            if i == idx:
+                btn.setStyleSheet(self._tp_toggle_on())
+            else:
+                color_key = self._difficulty_color(i, len(self._tp_preset_buttons))
+                btn.setStyleSheet(
+                    btn_css(c[color_key], c["btn_text"], padding="6px 14px")
+                )
+        # Apply preset defaults to right panel
+        _, preset_vals = self._tp_presets[idx]
+        for key, value in preset_vals.items():
+            if key in self._tp_param_buttons:
+                self._tp_select_param(key, value)
+
+    def _tp_select_param(self, key: str, value: object) -> None:
+        self._tp_param_values[key] = value
+        btns = self._tp_param_buttons.get(key, {})
+        for v, btn in btns.items():
+            if v == value:
+                btn.setStyleSheet(self._tp_toggle_on())
+            else:
+                btn.setStyleSheet(self._tp_toggle_off())
+
+    def _tp_launch(self, exercise_cls) -> None:
+        kwargs = dict(self._tp_param_values)
+        # Add any preset-only values not covered by param buttons
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        for key, value in preset_vals.items():
+            if key not in self._tp_param_buttons:
+                kwargs[key] = value
+        self.navigator.launch_exercise(exercise_cls, **kwargs)
 
 
 class FlashMenuScreen(BaseMenuScreen):
@@ -177,33 +233,57 @@ class FlashMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "FLASH NUMBERS", "flash", None,
+            left_label="DIGITS",
+            presets=[
+                ("1 Digit",   {"low": 1, "high": 1, "rounds": 10}),
+                ("2 Digits",  {"low": 2, "high": 2, "rounds": 10}),
+                ("3 Digits",  {"low": 3, "high": 3, "rounds": 10}),
+                ("4 Digits",  {"low": 4, "high": 4, "rounds": 12}),
+                ("5 Digits",  {"low": 5, "high": 5, "rounds": 12}),
+                ("6 Digits",  {"low": 6, "high": 6, "rounds": 15}),
+                ("7 Digits",  {"low": 7, "high": 7, "rounds": 15}),
+                ("8 Digits",  {"low": 8, "high": 8, "rounds": 15}),
+            ],
+            params=[
+                ("RANGE", "range_mode", [
+                    ("Fixed", "fixed"),
+                    ("Mix ±1", "mix1"),
+                    ("Mix ±2", "mix2"),
+                    ("Chaos", "chaos"),
+                ], "fixed"),
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("12", 12), ("15", 15), ("20", 20),
+                ], 10),
+            ],
+            default_preset=2,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.flash import FlashExercise
 
-        def run(low: int, high: int, rounds: int) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                FlashExercise, mode="flash_num", rounds=rounds,
-                level_func=lambda _: random.randint(low, high),
-            )
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        base_low = preset_vals["low"]
+        base_high = preset_vals["high"]
+        range_mode = self._tp_param_values.get("range_mode", "fixed")
+        rounds = self._tp_param_values.get("rounds", 10)
 
-        sets = [
-            ("Fixed: 1 Digit (Instant)", run(1, 1, 10)),
-            ("Fixed: 2 Digits", run(2, 2, 10)),
-            ("Fixed: 3 Digits", run(3, 3, 10)),
-            ("Fixed: 4 Digits", run(4, 4, 10)),
-            ("Fixed: 5 Digits", run(5, 5, 12)),
-            ("Fixed: 6 Digits", run(6, 6, 12)),
-            ("Fixed: 7 Digits", run(7, 7, 15)),
-            ("Fixed: 8 Digits", run(8, 8, 15)),
-            ("Mix: 2-3 Digits", run(2, 3, 10)),
-            ("Mix: 3-4 Digits", run(3, 4, 12)),
-            ("Mix: 3-5 Digits", run(3, 5, 12)),
-            ("Mix: 4-5 Digits", run(4, 5, 12)),
-            ("Mix: 4-6 Digits", run(4, 6, 15)),
-            ("Mix: 5-7 Digits", run(5, 7, 15)),
-            ("Mix: 6-8 Digits", run(6, 8, 15)),
-            ("Chaos: 1-10 Digits", run(1, 10, 20)),
-        ]
-        self._create_grid_menu("FLASH NUMBER SETS", "flash", sets)
+        if range_mode == "fixed":
+            low, high = base_low, base_high
+        elif range_mode == "mix1":
+            low = max(1, base_low - 1)
+            high = base_high + 1
+        elif range_mode == "mix2":
+            low = max(1, base_low - 2)
+            high = base_high + 2
+        else:  # chaos
+            low, high = 1, 10
+
+        self.navigator.launch_exercise(
+            FlashExercise, mode="flash_num", rounds=rounds,
+            level_func=lambda _: random.randint(low, high),
+        )
 
 
 class WordsMenuScreen(BaseMenuScreen):
@@ -213,19 +293,28 @@ class WordsMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "WORD DRILLS", "flash", None,
+            left_label="MODE",
+            presets=[
+                ("Ambiguous Words", {"mode": "flash_word"}),
+            ],
+            params=[
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("15", 15), ("20", 20), ("30", 30),
+                ], 10),
+            ],
+            default_preset=0,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.flash import FlashExercise
 
-        def run(rounds: int) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                FlashExercise, mode="flash_word", rounds=rounds,
-                level_func=lambda _: 0,
-            )
-
-        sets = [
-            ("Ambiguous Words (10 Rounds)", run(10)),
-            ("Quick Recognition (20 Rounds)", run(20)),
-        ]
-        self._create_grid_menu("WORD DRILLS", "flash", sets)
+        rounds = self._tp_param_values.get("rounds", 10)
+        self.navigator.launch_exercise(
+            FlashExercise, mode="flash_word", rounds=rounds,
+            level_func=lambda _: 0,
+        )
 
 
 class EyespanMenuScreen(BaseMenuScreen):
@@ -235,61 +324,86 @@ class EyespanMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "EYE-SPAN TRAINING", "eyespan", None,
+            left_label="DIGITS",
+            presets=[
+                ("1 Digit",  {"low": 1, "high": 1, "rounds": 10}),
+                ("2 Digits", {"low": 2, "high": 2, "rounds": 10}),
+                ("3 Digits", {"low": 3, "high": 3, "rounds": 12}),
+                ("4 Digits", {"low": 4, "high": 4, "rounds": 12}),
+                ("5 Digits", {"low": 5, "high": 5, "rounds": 15}),
+                ("6 Digits", {"low": 6, "high": 6, "rounds": 15}),
+            ],
+            params=[
+                ("DIRECTION", "direction", [
+                    ("Horizontal", "h"),
+                    ("Vertical", "v"),
+                    ("Mixed", "m"),
+                ], "h"),
+                ("WIDTH", "width", [
+                    ("Narrow 30%", 30),
+                    ("Medium 50%", 50),
+                    ("Wide 70%", 70),
+                    ("Max 90%", 90),
+                ], 50),
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("12", 12), ("15", 15), ("20", 20),
+                ], 10),
+            ],
+            default_preset=1,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.flash import FlashExercise
 
-        def run(mode: str, width: int, low: int, high: int,
-                rounds: int) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                FlashExercise, mode="eyespan", rounds=rounds,
-                level_func=lambda _: random.randint(low, high),
-                span_config={"mode": mode, "width": width},
-            )
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        low = preset_vals["low"]
+        high = preset_vals["high"]
+        direction = self._tp_param_values.get("direction", "h")
+        width = self._tp_param_values.get("width", 50)
+        rounds = self._tp_param_values.get("rounds", 10)
 
-        self._create_column_menu(
-            "EYE-SPAN TRAINING", "eyespan",
-            columns=[
-                ("HORIZONTAL SCAN", [
-                    ("1 Digit (Narrow 30%)", run("h", 30, 1, 1, 10)),
-                    ("1 Digit (Medium 50%)", run("h", 50, 1, 1, 10)),
-                    ("1 Digit (Wide 70%)", run("h", 70, 1, 1, 10)),
-                    ("2 Digits (Narrow 30%)", run("h", 30, 2, 2, 10)),
-                    ("2 Digits (Medium 50%)", run("h", 50, 2, 2, 10)),
-                    ("2 Digits (Wide 70%)", run("h", 70, 2, 2, 10)),
-                    ("3 Digits (Narrow 30%)", run("h", 30, 3, 3, 10)),
-                    ("3 Digits (Medium 50%)", run("h", 50, 3, 3, 12)),
-                    ("3 Digits (Wide 70%)", run("h", 70, 3, 3, 12)),
-                    ("4 Digits (Medium 50%)", run("h", 50, 4, 4, 12)),
-                    ("4 Digits (Wide 70%)", run("h", 70, 4, 4, 15)),
-                    ("Elite 4 Digits (Max 90%)", run("h", 90, 4, 4, 15)),
-                ]),
-                ("VERTICAL JUMP", [
-                    ("1 Digit (Narrow 30%)", run("v", 30, 1, 1, 10)),
-                    ("1 Digit (Medium 50%)", run("v", 50, 1, 1, 10)),
-                    ("1 Digit (Wide 70%)", run("v", 70, 1, 1, 10)),
-                    ("2 Digits (Narrow 30%)", run("v", 30, 2, 2, 10)),
-                    ("2 Digits (Medium 50%)", run("v", 50, 2, 2, 10)),
-                    ("2 Digits (Wide 70%)", run("v", 70, 2, 2, 10)),
-                    ("3 Digits (Narrow 30%)", run("v", 30, 3, 3, 10)),
-                    ("3 Digits (Medium 50%)", run("v", 50, 3, 3, 12)),
-                    ("3 Digits (Wide 70%)", run("v", 70, 3, 3, 12)),
-                    ("4 Digits (Medium 50%)", run("v", 50, 4, 4, 12)),
-                    ("Overlap 2-4 (Wide 80%)", run("v", 80, 2, 4, 15)),
-                    ("Elite 4-6 Digits (Max 90%)", run("v", 90, 4, 6, 20)),
-                ]),
-                ("DYNAMIC MIX", [
-                    ("1 Digit (Narrow 30%)", run("m", 30, 1, 1, 10)),
-                    ("1 Digit (Medium 50%)", run("m", 50, 1, 1, 10)),
-                    ("2 Digits (Medium 50%)", run("m", 50, 2, 2, 12)),
-                    ("2 Digits (Wide 70%)", run("m", 70, 2, 2, 12)),
-                    ("3 Digits (Medium 50%)", run("m", 50, 3, 3, 12)),
-                    ("3 Digits (Wide 70%)", run("m", 70, 3, 3, 12)),
-                    ("Overlap 2-3 (Medium 50%)", run("m", 50, 2, 3, 12)),
-                    ("Overlap 2-3 (Wide 60%)", run("m", 60, 2, 3, 12)),
-                    ("Overlap 3-5 (Wide 70%)", run("m", 70, 3, 5, 15)),
-                    ("Wide Range 2-6 (80%)", run("m", 80, 2, 6, 15)),
-                    ("Master Chaos 2-8 (90%)", run("m", 90, 2, 8, 20)),
-                ]),
+        self.navigator.launch_exercise(
+            FlashExercise, mode="eyespan", rounds=rounds,
+            level_func=lambda _: random.randint(low, high),
+            span_config={"mode": direction, "width": width},
+        )
+
+
+class SchulteMenuScreen(BaseMenuScreen):
+
+    def __init__(self, navigator, parent: QWidget | None = None):
+        super().__init__(navigator, parent)
+
+    def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "SCHULTE GRID", "schulte", None,
+            left_label="GRID SIZE",
+            presets=[
+                ("3×3  (9)",   {"grid_size": 3}),
+                ("4×4  (16)",  {"grid_size": 4}),
+                ("5×5  (25)",  {"grid_size": 5}),
+                ("6×6  (36)",  {"grid_size": 6}),
+                ("7×7  (49)",  {"grid_size": 7}),
             ],
+            params=[
+                ("CELL SIZE", "cell_idx", [
+                    ("Small", 0), ("Medium", 1), ("Large", 2), ("XL", 3),
+                ], 1),
+            ],
+            default_preset=2,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
+        from neural_speed_academy.exercises.schulte import SchulteExercise
+
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        grid_size = preset_vals["grid_size"]
+        cell_idx = self._tp_param_values.get("cell_idx", 1)
+
+        self.navigator.launch_exercise(
+            SchulteExercise, grid_size=grid_size, cell_idx=cell_idx,
         )
 
 
@@ -300,38 +414,50 @@ class PrimingMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "EYE PRIMING", "priming", None,
+            left_label="EXERCISE",
+            presets=[
+                ("Horizontal Saccades", {"mode": "saccade_h", "use_delay": True}),
+                ("Vertical Saccades",   {"mode": "saccade_v", "use_delay": True}),
+                ("Diagonal Saccades",   {"mode": "saccade_diag", "use_delay": True}),
+                ("Expanding Saccades",  {"mode": "saccade_expand", "use_delay": True}),
+                ("Pursuit: Line",       {"mode": "pursuit_line", "use_delay": False}),
+                ("Pursuit: Circle",     {"mode": "pursuit_circle", "use_delay": False}),
+                ("Pursuit: Figure-8",   {"mode": "pursuit_figure8", "use_delay": False}),
+            ],
+            params=[
+                ("SPEED", "speed", [
+                    ("Slow", "slow"), ("Fast", "fast"),
+                ], "slow"),
+                ("DURATION", "duration_s", [
+                    ("30s", 30.0), ("45s", 45.0), ("60s", 60.0),
+                ], 45.0),
+            ],
+            default_preset=0,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.priming import PrimingExercise
 
-        def run(mode: str, delay: int = 600, duration_s: float = 45.0,
-                cycles: int = 0) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                PrimingExercise, mode=mode, delay=delay,
-                duration_s=duration_s, cycles=cycles,
-            )
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        mode = preset_vals["mode"]
+        use_delay = preset_vals["use_delay"]
+        speed = self._tp_param_values.get("speed", "slow")
+        duration_s = self._tp_param_values.get("duration_s", 45.0)
 
-        self._create_column_menu(
-            "EYE PRIMING", "priming",
-            columns=[
-                ("SACCADES (JUMPS)", [
-                    ("Horizontal Saccades (Slow)", run("saccade_h", delay=700)),
-                    ("Horizontal Saccades (Fast)", run("saccade_h", delay=400)),
-                    ("Vertical Saccades (Slow)", run("saccade_v", delay=700)),
-                    ("Vertical Saccades (Fast)", run("saccade_v", delay=400)),
-                    ("Diagonal Saccades (Slow)", run("saccade_diag", delay=700)),
-                    ("Diagonal Saccades (Fast)", run("saccade_diag", delay=400)),
-                    ("Expanding Saccades (Slow)", run("saccade_expand", delay=700)),
-                    ("Expanding Saccades (Fast)", run("saccade_expand", delay=400)),
-                ]),
-                ("SMOOTH PURSUIT (TRACKING)", [
-                    ("Pursuit: Line (Slow)", run("pursuit_line", cycles=9)),
-                    ("Pursuit: Line (Fast)", run("pursuit_line", cycles=15)),
-                    ("Pursuit: Circle (Slow)", run("pursuit_circle", cycles=9)),
-                    ("Pursuit: Circle (Fast)", run("pursuit_circle", cycles=15)),
-                    ("Pursuit: Figure-8 (Slow)", run("pursuit_figure8", cycles=9)),
-                    ("Pursuit: Figure-8 (Fast)", run("pursuit_figure8", cycles=15)),
-                ]),
-            ],
-        )
+        if use_delay:
+            delay = 700 if speed == "slow" else 400
+            self.navigator.launch_exercise(
+                PrimingExercise, mode=mode, delay=delay,
+                duration_s=duration_s,
+            )
+        else:
+            cycles = 9 if speed == "slow" else 15
+            self.navigator.launch_exercise(
+                PrimingExercise, mode=mode, cycles=cycles,
+                duration_s=duration_s,
+            )
 
 
 class PeripheralFlashMenuScreen(BaseMenuScreen):
@@ -340,54 +466,48 @@ class PeripheralFlashMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "PERIPHERAL FLASH", "peripheral_flash", None,
+            left_label="DIFFICULTY",
+            presets=[
+                ("Beginner",     {"flash_ms": 100, "eccentricity": 30}),
+                ("Easy",         {"flash_ms": 100, "eccentricity": 50}),
+                ("Moderate",     {"flash_ms": 80,  "eccentricity": 50}),
+                ("Challenging",  {"flash_ms": 80,  "eccentricity": 70}),
+                ("Hard",         {"flash_ms": 60,  "eccentricity": 70}),
+                ("Expert",       {"flash_ms": 50,  "eccentricity": 80}),
+                ("Elite",        {"flash_ms": 50,  "eccentricity": 90}),
+            ],
+            params=[
+                ("TYPE", "stim_type", [
+                    ("Letters", "letters"),
+                    ("Numbers", "numbers"),
+                    ("Shapes", "shapes"),
+                ], "letters"),
+                ("FLASH TIME", "flash_ms", [
+                    ("100ms", 100), ("80ms", 80), ("60ms", 60), ("50ms", 50),
+                ], 100),
+                ("ECCENTRICITY", "eccentricity", [
+                    ("30%", 30), ("50%", 50), ("70%", 70),
+                    ("80%", 80), ("90%", 90),
+                ], 50),
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("15", 15), ("20", 20), ("25", 25),
+                ], 15),
+            ],
+            default_preset=1,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.peripheral_flash import (
             PeripheralFlashExercise,
         )
-
-        def run(stim_type: str, flash_ms: int = 300,
-                eccentricity: int = 50, rounds: int = 15) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                PeripheralFlashExercise, stim_type=stim_type,
-                flash_ms=flash_ms, eccentricity=eccentricity, rounds=rounds,
-            )
-
-        self._create_column_menu(
-            "PERIPHERAL FLASH", "peripheral_flash",
-            columns=[
-                ("LETTERS", [
-                    ("100ms \u00b7 30%", run("letters", 100, 30)),
-                    ("100ms \u00b7 50%", run("letters", 100, 50)),
-                    ("80ms \u00b7 50%", run("letters", 80, 50)),
-                    ("80ms \u00b7 70%", run("letters", 80, 70)),
-                    ("60ms \u00b7 70%", run("letters", 60, 70)),
-                    ("60ms \u00b7 80%", run("letters", 60, 80)),
-                    ("50ms \u00b7 70%", run("letters", 50, 70)),
-                    ("50ms \u00b7 80%", run("letters", 50, 80)),
-                    ("50ms \u00b7 90%", run("letters", 50, 90)),
-                ]),
-                ("NUMBERS", [
-                    ("100ms \u00b7 30%", run("numbers", 100, 30)),
-                    ("100ms \u00b7 50%", run("numbers", 100, 50)),
-                    ("80ms \u00b7 50%", run("numbers", 80, 50)),
-                    ("80ms \u00b7 70%", run("numbers", 80, 70)),
-                    ("60ms \u00b7 70%", run("numbers", 60, 70)),
-                    ("60ms \u00b7 80%", run("numbers", 60, 80)),
-                    ("50ms \u00b7 70%", run("numbers", 50, 70)),
-                    ("50ms \u00b7 80%", run("numbers", 50, 80)),
-                    ("50ms \u00b7 90%", run("numbers", 50, 90)),
-                ]),
-                ("SHAPES", [
-                    ("100ms \u00b7 30%", run("shapes", 100, 30)),
-                    ("100ms \u00b7 50%", run("shapes", 100, 50)),
-                    ("80ms \u00b7 50%", run("shapes", 80, 50)),
-                    ("80ms \u00b7 70%", run("shapes", 80, 70)),
-                    ("60ms \u00b7 70%", run("shapes", 60, 70)),
-                    ("60ms \u00b7 80%", run("shapes", 60, 80)),
-                    ("50ms \u00b7 70%", run("shapes", 50, 70)),
-                    ("50ms \u00b7 80%", run("shapes", 50, 80)),
-                    ("50ms \u00b7 90%", run("shapes", 50, 90)),
-                ]),
-            ],
+        self.navigator.launch_exercise(
+            PeripheralFlashExercise,
+            stim_type=self._tp_param_values.get("stim_type", "letters"),
+            flash_ms=self._tp_param_values.get("flash_ms", 100),
+            eccentricity=self._tp_param_values.get("eccentricity", 50),
+            rounds=self._tp_param_values.get("rounds", 15),
         )
 
 
@@ -397,50 +517,41 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "RAPID DECISION GRID", "rapid_decision", None,
+            left_label="GRID SIZE",
+            presets=[
+                ("3\u00d73",  {"grid_size": 3}),
+                ("4\u00d74",  {"grid_size": 4}),
+                ("5\u00d75",  {"grid_size": 5}),
+                ("6\u00d76",  {"grid_size": 6}),
+                ("7\u00d77",  {"grid_size": 7}),
+            ],
+            params=[
+                ("MODE", "mode", [
+                    ("Ascending", "ascending"),
+                    ("Descending", "descending"),
+                    ("Even Only", "even_only"),
+                    ("Odd Only", "odd_only"),
+                    ("Alternating", "alternating"),
+                ], "ascending"),
+                ("TIME LIMIT", "time_limit", [
+                    ("None", 0), ("60s", 60), ("45s", 45), ("30s", 30),
+                ], 0),
+            ],
+            default_preset=2,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.rapid_decision import (
             RapidDecisionGridExercise,
         )
-
-        def run(mode: str, grid_size: int = 5,
-                time_limit: int = 0) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                RapidDecisionGridExercise, mode=mode,
-                grid_size=grid_size, time_limit=time_limit,
-            )
-
-        self._create_column_menu(
-            "RAPID DECISION GRID", "rapid_decision",
-            columns=[
-                ("CLASSIC", [
-                    ("Ascending 3\u00d73", run("ascending", 3)),
-                    ("Ascending 5\u00d75", run("ascending", 5)),
-                    ("Descending 5\u00d75", run("descending", 5)),
-                    ("Ascending 6\u00d76", run("ascending", 6)),
-                    ("Descending 6\u00d76", run("descending", 6)),
-                    ("Ascending 7\u00d77", run("ascending", 7)),
-                    ("Descending 7\u00d77", run("descending", 7)),
-                ]),
-                ("FILTER", [
-                    ("Even Only 4\u00d74", run("even_only", 4)),
-                    ("Odd Only 4\u00d74", run("odd_only", 4)),
-                    ("Even Only 5\u00d75", run("even_only", 5)),
-                    ("Odd Only 5\u00d75", run("odd_only", 5)),
-                    ("Even Only 6\u00d76", run("even_only", 6)),
-                    ("Odd Only 6\u00d76", run("odd_only", 6)),
-                    ("Alternating 4\u00d74", run("alternating", 4)),
-                    ("Alternating 5\u00d75", run("alternating", 5)),
-                ]),
-                ("TIMED", [
-                    ("Ascending 60s", run("ascending", 5, 60)),
-                    ("Descending 60s", run("descending", 5, 60)),
-                    ("Ascending 45s", run("ascending", 5, 45)),
-                    ("Descending 45s", run("descending", 5, 45)),
-                    ("Even Only 60s", run("even_only", 5, 60)),
-                    ("Even Only 45s", run("even_only", 5, 45)),
-                    ("Alternating 60s", run("alternating", 5, 60)),
-                    ("Ascending 30s", run("ascending", 5, 30)),
-                ]),
-            ],
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        self.navigator.launch_exercise(
+            RapidDecisionGridExercise,
+            mode=self._tp_param_values.get("mode", "ascending"),
+            grid_size=preset_vals["grid_size"],
+            time_limit=self._tp_param_values.get("time_limit", 0),
         )
 
 
@@ -450,38 +561,43 @@ class MotMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "MULTIPLE OBJECT TRACKING", "mot", None,
+            left_label="TARGETS",
+            presets=[
+                ("2 Targets", {"targets": 2, "distractors": 4, "speed": 2}),
+                ("3 Targets", {"targets": 3, "distractors": 5, "speed": 3}),
+                ("4 Targets", {"targets": 4, "distractors": 6, "speed": 3}),
+                ("5 Targets", {"targets": 5, "distractors": 7, "speed": 4}),
+                ("6 Targets", {"targets": 6, "distractors": 8, "speed": 5}),
+            ],
+            params=[
+                ("SPEED", "speed", [
+                    ("2 (Slow)", 2), ("3", 3), ("4", 4),
+                    ("5 (Fast)", 5), ("6 (Sprint)", 6),
+                ], 3),
+                ("DURATION", "duration", [
+                    ("5s", 5), ("6s", 6), ("7s", 7),
+                    ("8s", 8), ("10s", 10),
+                ], 6),
+                ("ROUNDS", "rounds", [
+                    ("5", 5), ("7", 7), ("10", 10),
+                ], 5),
+            ],
+            default_preset=1,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.mot import MotExercise
 
-        def run(targets: int = 3, distractors: int = 5,
-                speed: int = 3, duration: int = 6,
-                rounds: int = 5) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                MotExercise, targets=targets, distractors=distractors,
-                speed=speed, duration=duration, rounds=rounds,
-            )
-
-        self._create_column_menu(
-            "MULTIPLE OBJECT TRACKING", "mot",
-            columns=[
-                ("BEGINNER", [
-                    ("2 targets \u00b7 speed 2 \u00b7 5s", run(2, 4, 2, 5)),
-                    ("2 targets \u00b7 speed 3 \u00b7 6s", run(2, 5, 3, 6)),
-                    ("3 targets \u00b7 speed 2 \u00b7 5s", run(3, 4, 2, 5)),
-                    ("3 targets \u00b7 speed 3 \u00b7 6s", run(3, 5, 3, 6)),
-                ]),
-                ("INTERMEDIATE", [
-                    ("3 targets \u00b7 speed 4 \u00b7 6s", run(3, 5, 4, 6)),
-                    ("4 targets \u00b7 speed 3 \u00b7 7s", run(4, 6, 3, 7)),
-                    ("4 targets \u00b7 speed 4 \u00b7 7s", run(4, 6, 4, 7)),
-                    ("4 targets \u00b7 speed 3 \u00b7 10s", run(4, 7, 3, 10)),
-                ]),
-                ("ADVANCED", [
-                    ("5 targets \u00b7 speed 3 \u00b7 8s", run(5, 7, 3, 8)),
-                    ("5 targets \u00b7 speed 5 \u00b7 8s", run(5, 8, 5, 8)),
-                    ("6 targets \u00b7 speed 4 \u00b7 8s", run(6, 8, 4, 8)),
-                    ("6 targets \u00b7 speed 6 \u00b7 10s", run(6, 10, 6, 10)),
-                ]),
-            ],
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        self.navigator.launch_exercise(
+            MotExercise,
+            targets=preset_vals["targets"],
+            distractors=preset_vals["distractors"],
+            speed=self._tp_param_values.get("speed", 3),
+            duration=self._tp_param_values.get("duration", 6),
+            rounds=self._tp_param_values.get("rounds", 5),
         )
 
 
@@ -513,7 +629,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         cl.setContentsMargins(30, 20, 30, 20)
         cl.setSpacing(10)
 
-        # Title row (matches _create_column_menu style)
+        # Title row
         title_row = QHBoxLayout()
         title_row.addStretch()
         title_lbl = QLabel("SLIDE PROCESSING")
@@ -800,43 +916,40 @@ class ReactionTimeMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "REACTION TIME", "reaction_time", None,
+            left_label="MODE",
+            presets=[
+                ("Simple",     {"mode": "simple",    "go_ratio": 1.0}),
+                ("Choice",     {"mode": "choice",    "go_ratio": 1.0}),
+                ("Go / No-Go", {"mode": "go_no_go",  "go_ratio": 0.7}),
+            ],
+            params=[
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("15", 15), ("20", 20),
+                    ("25", 25), ("30", 30),
+                ], 15),
+                ("GO RATIO (Go/No-Go)", "go_ratio", [
+                    ("70/30", 0.7), ("60/40", 0.6), ("50/50", 0.5),
+                ], 0.7),
+            ],
+            default_preset=0,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.reaction_time import (
             ReactionTimeExercise,
         )
-
-        def run(mode: str = "simple", rounds: int = 15,
-                go_ratio: float = 0.7) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                ReactionTimeExercise, mode=mode, rounds=rounds,
-                go_ratio=go_ratio,
-            )
-
-        self._create_column_menu(
-            "REACTION TIME", "reaction_time",
-            columns=[
-                ("SIMPLE", [
-                    ("10 Rounds", run("simple", 10)),
-                    ("15 Rounds", run("simple", 15)),
-                    ("20 Rounds", run("simple", 20)),
-                    ("25 Rounds", run("simple", 25)),
-                    ("30 Rounds", run("simple", 30)),
-                ]),
-                ("CHOICE", [
-                    ("10 Rounds", run("choice", 10)),
-                    ("15 Rounds", run("choice", 15)),
-                    ("20 Rounds", run("choice", 20)),
-                    ("25 Rounds", run("choice", 25)),
-                    ("30 Rounds", run("choice", 30)),
-                ]),
-                ("GO / NO-GO", [
-                    ("70/30 · 10 Rounds", run("go_no_go", 10, 0.7)),
-                    ("70/30 · 15 Rounds", run("go_no_go", 15, 0.7)),
-                    ("60/40 · 15 Rounds", run("go_no_go", 15, 0.6)),
-                    ("60/40 · 20 Rounds", run("go_no_go", 20, 0.6)),
-                    ("50/50 · 20 Rounds", run("go_no_go", 20, 0.5)),
-                    ("50/50 · 25 Rounds", run("go_no_go", 25, 0.5)),
-                ]),
-            ],
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        mode = preset_vals["mode"]
+        go_ratio = self._tp_param_values.get("go_ratio", 0.7)
+        if mode != "go_no_go":
+            go_ratio = 1.0
+        self.navigator.launch_exercise(
+            ReactionTimeExercise,
+            mode=mode,
+            rounds=self._tp_param_values.get("rounds", 15),
+            go_ratio=go_ratio,
         )
 
 
@@ -846,48 +959,42 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "SPLIT ATTENTION", "split_attention", None,
+            left_label="DIFFICULTY",
+            presets=[
+                ("Beginner",    {"center_ms": 150, "peripheral_ms": 120}),
+                ("Easy",        {"center_ms": 120, "peripheral_ms": 100}),
+                ("Moderate",    {"center_ms": 100, "peripheral_ms": 80}),
+                ("Challenging", {"center_ms": 80,  "peripheral_ms": 60}),
+                ("Hard",        {"center_ms": 60,  "peripheral_ms": 50}),
+                ("Expert",      {"center_ms": 50,  "peripheral_ms": 40}),
+                ("Elite",       {"center_ms": 40,  "peripheral_ms": 40}),
+            ],
+            params=[
+                ("MODE", "mode", [
+                    ("Sequential", "sequential"),
+                    ("Simultaneous", "simultaneous"),
+                    ("Rapid", "rapid"),
+                ], "sequential"),
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("15", 15), ("20", 20), ("25", 25),
+                ], 15),
+            ],
+            default_preset=1,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.split_attention import (
             SplitAttentionExercise,
         )
-
-        def run(mode: str = "sequential", center_ms: int = 400,
-                peripheral_ms: int = 300, rounds: int = 15) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                SplitAttentionExercise, mode=mode,
-                center_ms=center_ms, peripheral_ms=peripheral_ms,
-                rounds=rounds,
-            )
-
-        self._create_column_menu(
-            "SPLIT ATTENTION", "split_attention",
-            columns=[
-                ("SEQUENTIAL", [
-                    ("Word 150ms · Shape 120ms", run("sequential", 150, 120)),
-                    ("Word 120ms · Shape 100ms", run("sequential", 120, 100)),
-                    ("Word 100ms · Shape 80ms", run("sequential", 100, 80)),
-                    ("Word 80ms · Shape 60ms", run("sequential", 80, 60)),
-                    ("Word 60ms · Shape 50ms", run("sequential", 60, 50)),
-                    ("Word 50ms · Shape 40ms", run("sequential", 50, 40)),
-                    ("Word 40ms · Shape 40ms", run("sequential", 40, 40)),
-                ]),
-                ("SIMULTANEOUS", [
-                    ("Word 150ms · Shape 120ms", run("simultaneous", 150, 120)),
-                    ("Word 120ms · Shape 100ms", run("simultaneous", 120, 100)),
-                    ("Word 100ms · Shape 80ms", run("simultaneous", 100, 80)),
-                    ("Word 80ms · Shape 60ms", run("simultaneous", 80, 60)),
-                    ("Word 60ms · Shape 50ms", run("simultaneous", 60, 50)),
-                    ("Word 50ms · Shape 40ms", run("simultaneous", 50, 40)),
-                    ("Word 40ms · Shape 40ms", run("simultaneous", 40, 40)),
-                ]),
-                ("RAPID", [
-                    ("Word 120ms · Shape 100ms", run("rapid", 120, 100)),
-                    ("Word 100ms · Shape 80ms", run("rapid", 100, 80)),
-                    ("Word 80ms · Shape 60ms", run("rapid", 80, 60)),
-                    ("Word 60ms · Shape 50ms", run("rapid", 60, 50)),
-                    ("Word 50ms · Shape 40ms", run("rapid", 50, 40)),
-                    ("Word 40ms · Shape 40ms", run("rapid", 40, 40)),
-                ]),
-            ],
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        self.navigator.launch_exercise(
+            SplitAttentionExercise,
+            mode=self._tp_param_values.get("mode", "sequential"),
+            center_ms=preset_vals["center_ms"],
+            peripheral_ms=preset_vals["peripheral_ms"],
+            rounds=self._tp_param_values.get("rounds", 15),
         )
 
 
@@ -897,38 +1004,47 @@ class SequenceMemoryMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        self._create_two_panel_menu(
+            "SEQUENCE MEMORY", "sequence_memory", None,
+            left_label="LENGTH",
+            presets=[
+                ("3 Items", {"start_length": 3, "flash_ms": 1000}),
+                ("4 Items", {"start_length": 4, "flash_ms": 800}),
+                ("5 Items", {"start_length": 5, "flash_ms": 700}),
+                ("6 Items", {"start_length": 6, "flash_ms": 500}),
+                ("7+ Items", {"start_length": 7, "flash_ms": 400}),
+            ],
+            params=[
+                ("MODE", "mode", [
+                    ("Numbers", "numbers"),
+                    ("Words", "words"),
+                    ("Mixed", "mixed"),
+                ], "numbers"),
+                ("SPEED", "flash_ms", [
+                    ("Slow (1s)", 1000),
+                    ("Normal (800ms)", 800),
+                    ("Fast (500ms)", 500),
+                    ("Sprint (400ms)", 400),
+                ], 800),
+                ("ROUNDS", "rounds", [
+                    ("10", 10), ("12", 12), ("15", 15), ("20", 20),
+                ], 10),
+            ],
+            default_preset=1,
+        )
+
+    def _tp_launch(self, exercise_cls) -> None:
         from neural_speed_academy.exercises.sequence_memory import (
             SequenceMemoryExercise,
         )
 
-        def run(mode: str, start_length: int = 3,
-                flash_ms: int = 800, rounds: int = 10) -> Callable:
-            return lambda: self.navigator.launch_exercise(
-                SequenceMemoryExercise, mode=mode,
-                start_length=start_length, flash_ms=flash_ms, rounds=rounds,
-            )
+        _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        start_length = preset_vals["start_length"]
+        mode = self._tp_param_values.get("mode", "numbers")
+        flash_ms = self._tp_param_values.get("flash_ms", 800)
+        rounds = self._tp_param_values.get("rounds", 10)
 
-        self._create_column_menu(
-            "SEQUENCE MEMORY", "sequence_memory",
-            columns=[
-                ("NUMBERS", [
-                    ("3 Digits (Slow)", run("numbers", 3, 1000)),
-                    ("4 Digits", run("numbers", 4, 800)),
-                    ("5 Digits", run("numbers", 5, 700)),
-                    ("6 Digits (Fast)", run("numbers", 6, 500)),
-                    ("7+ Digits (Sprint)", run("numbers", 7, 400)),
-                ]),
-                ("WORDS", [
-                    ("3 Words (Slow)", run("words", 3, 1200)),
-                    ("4 Words", run("words", 4, 1000)),
-                    ("5 Words", run("words", 5, 800)),
-                    ("6 Words (Fast)", run("words", 6, 600)),
-                ]),
-                ("MIXED", [
-                    ("3 Items (Slow)", run("mixed", 3, 1000)),
-                    ("4 Items", run("mixed", 4, 800)),
-                    ("5 Items (Fast)", run("mixed", 5, 600)),
-                    ("6+ Items (Sprint)", run("mixed", 6, 400)),
-                ]),
-            ],
+        self.navigator.launch_exercise(
+            SequenceMemoryExercise, mode=mode,
+            start_length=start_length, flash_ms=flash_ms, rounds=rounds,
         )
