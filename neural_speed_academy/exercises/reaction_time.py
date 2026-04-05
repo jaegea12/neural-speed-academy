@@ -21,8 +21,8 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics
-from neural_speed_academy.config import REACTION_TIME_CONFIG, USER_DATA_CONFIG
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.config import REACTION_TIME_CONFIG
 
 
 class ReactionTimeExercise(BaseExercise):

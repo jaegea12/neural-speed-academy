@@ -4,7 +4,7 @@ use cases, and exercise descriptions.
 """
 from __future__ import annotations
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFrame
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QFrame
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area

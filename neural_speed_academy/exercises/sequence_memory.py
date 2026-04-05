@@ -17,10 +17,9 @@ from PyQt6.QtWidgets import (
     QGridLayout, QFrame,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, font_css, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import USER_DATA_CONFIG
 
 # Word pool for word/mixed modes — short, common, easy to distinguish
