@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG, FLASH_TIMING
 
 
@@ -70,21 +70,37 @@ class FlashExercise(BaseExercise):
 
         self._clear()
         self._running = True
-        self.add_nav_bar()
         self.current_round += 1
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
-        # Counter
+        # Minimal top bar
+        top = QHBoxLayout()
+        top.setContentsMargins(10, 6, 10, 2)
+
         cnt = QLabel(
             f"ROUND: {self.current_round}/{self.rounds_total}   |   "
             f"CORRECT: {self.correct_count}"
         )
         cnt.setFont(make_qfont("counter"))
         cnt.setStyleSheet(f"color: {c['accent']};")
-        cnt.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._layout.addWidget(cnt)
+        top.addWidget(cnt)
+
+        top.addStretch()
+
+        exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
+        exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setStyleSheet(
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
+        )
+        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_btn.clicked.connect(self._stop_exercise)
+        top.addWidget(exit_btn)
+        self._layout.addLayout(top)
 
         # Central area for flash content
         self._flash_area = QWidget()
