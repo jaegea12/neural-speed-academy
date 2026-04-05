@@ -212,6 +212,52 @@ INTRO_CONTENT = [
      "Claims of 1000+ WPM with full comprehension are not supported "
      "by peer-reviewed research. This program focuses on achievable, "
      "evidence-backed improvements."),
+
+    # ── Limitations & Transfer ──
+    ("section", "LIMITATIONS \u2014 WHAT THIS APP CANNOT DO",
+     "Neural Speed Academy trains component skills in isolation. "
+     "That training only becomes useful when you apply it to real "
+     "tasks. Important things to understand:\n\n"
+     "\u2022 Exercises are not a substitute for reading. Improving "
+     "your RSVP speed or peripheral span means nothing if you don't "
+     "practice reading actual books, articles, and documents.\n\n"
+     "\u2022 Speed without comprehension is not reading. If you can't "
+     "recall or explain what you read, you were scanning, not "
+     "reading. Always test yourself.\n\n"
+     "\u2022 Transfer is not automatic. Research shows that cognitive "
+     "training gains are strongest on tasks similar to the training. "
+     "Broader transfer (e.g., from Sequence Memory to exam "
+     "performance) requires deliberate effort to apply the skills.\n\n"
+     "\u2022 No app replaces professional help. If you have a diagnosed "
+     "reading disability, ADHD, or visual processing disorder, this "
+     "app can supplement \u2014 but not replace \u2014 guidance from a "
+     "qualified specialist."),
+
+    ("fact", None,
+     "A 2016 review (Simons et al., Psychological Science in the "
+     "Public Interest) found that cognitive training reliably improves "
+     "performance on trained tasks, but evidence for broad transfer "
+     "to everyday abilities remains limited. The most effective "
+     "approach combines targeted training with real-world practice."),
+
+    ("section", "HOW TO GET THE MOST OUT OF YOUR TRAINING",
+     "Combine app exercises with deliberate real-world practice:\n\n"
+     "\u2022 Train 15\u201320 minutes, then read for 20+ minutes. Apply "
+     "what you practiced \u2014 wider fixations, fewer regressions, "
+     "chunking phrases.\n\n"
+     "\u2022 Use active reading strategies. Before reading, skim "
+     "headings and structure. While reading, ask yourself questions. "
+     "After reading, summarize from memory.\n\n"
+     "\u2022 Take notes. Mind maps, margin annotations, or brief "
+     "summaries force you to process what you read. Speed without "
+     "retention is wasted effort.\n\n"
+     "\u2022 Vary your material. Practice with textbooks, news "
+     "articles, fiction, and technical documents. Each demands "
+     "different reading strategies.\n\n"
+     "\u2022 Track your real-world progress. Time yourself reading "
+     "a chapter, then test recall. Your app scores should correlate "
+     "with real improvements \u2014 if they don't, adjust your "
+     "approach."),
 ]
 
 
