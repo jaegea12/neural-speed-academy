@@ -261,6 +261,60 @@ class PacerExercise(BaseExercise):
         self._nlines_frame.setVisible(False)
         cl.addWidget(self._nlines_frame)
 
+        # Text size toggle
+        tsize_row = QHBoxLayout()
+        tsize_row.setContentsMargins(0, 0, 0, 0)
+        tsize_row.setSpacing(8)
+        tsize_row.addStretch()
+        tsize_lbl = QLabel("Text size:")
+        tsize_lbl.setFont(make_qfont("slider_label"))
+        tsize_lbl.setStyleSheet(f"color: {c['fg']};")
+        tsize_row.addWidget(tsize_lbl)
+
+        self._text_size_buttons: dict[str, QPushButton] = {}
+        self._text_size = "medium"
+        for key, label in [
+            ("small", "S"), ("medium", "M"), ("large", "L"),
+            ("xl", "XL"), ("xxl", "XXL"),
+        ]:
+            btn = QPushButton(label)
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedWidth(50)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(lambda _, k=key: self._select_text_size(k))
+            tsize_row.addWidget(btn)
+            self._text_size_buttons[key] = btn
+        self._select_text_size("medium")
+        tsize_row.addStretch()
+        cl.addLayout(tsize_row)
+
+        # Page width toggle
+        pwidth_row = QHBoxLayout()
+        pwidth_row.setContentsMargins(0, 0, 0, 0)
+        pwidth_row.setSpacing(8)
+        pwidth_row.addStretch()
+        pwidth_lbl = QLabel("Page width:")
+        pwidth_lbl.setFont(make_qfont("slider_label"))
+        pwidth_lbl.setStyleSheet(f"color: {c['fg']};")
+        pwidth_row.addWidget(pwidth_lbl)
+
+        self._page_width_buttons: dict[str, QPushButton] = {}
+        self._page_width_key = theme_manager.fov if theme_manager else "standard"
+        for key, label in [
+            ("narrow", "Narrow"), ("standard", "Standard"),
+            ("wide", "Wide"), ("full", "Full"),
+        ]:
+            btn = QPushButton(label)
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedWidth(80)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(lambda _, k=key: self._select_page_width(k))
+            pwidth_row.addWidget(btn)
+            self._page_width_buttons[key] = btn
+        self._select_page_width(self._page_width_key)
+        pwidth_row.addStretch()
+        cl.addLayout(pwidth_row)
+
         # Start button + hint
         cl.addSpacing(4)
         start_btn = QPushButton("START READING")
@@ -288,6 +342,41 @@ class PacerExercise(BaseExercise):
     def _on_mode_changed(self, btn: QRadioButton) -> None:
         mode = btn.property("mode_key")
         self._nlines_frame.setVisible(mode in ("multi", "zpattern"))
+
+    # Text size multipliers applied to the FOV font_size
+    _TEXT_SIZE_MULT = {
+        "small": 0.8, "medium": 1.0, "large": 1.25, "xl": 1.5, "xxl": 1.8,
+    }
+
+    def _select_text_size(self, key: str) -> None:
+        self._text_size = key
+        c = COLORS
+        for k, btn in self._text_size_buttons.items():
+            if k == key:
+                btn.setStyleSheet(btn_css(c["accent"], c["btn_text"], padding="4px"))
+            else:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background-color: {c['card']}; "
+                    f"color: {c['fg']}; border: 2px solid {c['muted']}; "
+                    f"padding: 4px; border-radius: 4px; }}"
+                    f"QPushButton:hover {{ background-color: {c['accent']}; "
+                    f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
+                )
+
+    def _select_page_width(self, key: str) -> None:
+        self._page_width_key = key
+        c = COLORS
+        for k, btn in self._page_width_buttons.items():
+            if k == key:
+                btn.setStyleSheet(btn_css(c["accent"], c["btn_text"], padding="4px"))
+            else:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background-color: {c['card']}; "
+                    f"color: {c['fg']}; border: 2px solid {c['muted']}; "
+                    f"padding: 4px; border-radius: 4px; }}"
+                    f"QPushButton:hover {{ background-color: {c['accent']}; "
+                    f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
+                )
 
     # ── Launch reading ──
 
@@ -359,11 +448,19 @@ class PacerExercise(BaseExercise):
         )
         self._layout.addWidget(self._progress_bar)
 
-        # Reader page — scaled to screen
-        fov = screen_metrics.fov_scaled()
-        page_w = fov["page_width"]
+        # Reader page — use selected page width and text size
+        from neural_speed_academy.theme import FOV_PRESETS
+        fov_preset = FOV_PRESETS.get(self._page_width_key, FOV_PRESETS["standard"])
+        page_w = screen_metrics.sw(fov_preset["page_width"])
         page_h = screen_metrics.reader_h
-        font_size = fov["font_size"]
+        base_font = screen_metrics.s(fov_preset["font_size"])
+        font_size = max(10, int(base_font * self._TEXT_SIZE_MULT.get(self._text_size, 1.0)))
+        fov = {
+            "page_width": page_w,
+            "pad_x": screen_metrics.sw(fov_preset["pad_x"]),
+            "pad_y": screen_metrics.sh(fov_preset["pad_y"]),
+            "font_size": font_size,
+        }
 
         self._reader = _HighlightReader()
         reader_font = QFont("Georgia", font_size)
@@ -473,10 +570,29 @@ class PacerExercise(BaseExercise):
         words_in_line = segment.split()
         if not words_in_line:
             return [(line_start, line_end, gs, ge)]
+
+        # Pre-balance: if last chunk would be a single orphan word,
+        # merge it into the previous chunk to keep reading flow smooth
+        n = len(words_in_line)
+        remainder = n % chunk_words if chunk_words > 0 else 0
+        if remainder == 1 and n > chunk_words:
+            # Build word groups with the last chunk absorbing the orphan
+            word_groups: list[list[str]] = []
+            for i in range(0, n, chunk_words):
+                word_groups.append(words_in_line[i : i + chunk_words])
+            if len(word_groups) >= 2:
+                orphan = word_groups.pop()
+                word_groups[-1].extend(orphan)
+        else:
+            word_groups = [
+                words_in_line[i : i + chunk_words]
+                for i in range(0, n, chunk_words)
+            ]
+
         chunks: list[tuple[int, int, int, int]] = []
         pos = line_start
-        for i in range(0, len(words_in_line), chunk_words):
-            group = " ".join(words_in_line[i : i + chunk_words])
+        for wg in word_groups:
+            group = " ".join(wg)
             idx = text.find(group, pos)
             if idx == -1:
                 idx = pos
