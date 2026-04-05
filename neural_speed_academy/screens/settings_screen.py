@@ -73,12 +73,14 @@ class SettingsScreen(BaseScreen):
             ("high_contrast", THEME_LABELS["high_contrast"]),
             ("mono", THEME_LABELS["mono"]),
             ("ember", THEME_LABELS["ember"]),
+            ("dark_blue", THEME_LABELS["dark_blue"]),
         ]
         light_profiles = [
             ("silver", THEME_LABELS["silver"]),
             ("soft_light", THEME_LABELS["soft_light"]),
             ("focus", THEME_LABELS["focus"]),
             ("light", THEME_LABELS["light"]),
+            ("light_blue", THEME_LABELS["light_blue"]),
         ]
 
         self._profile_group = QButtonGroup(self)
