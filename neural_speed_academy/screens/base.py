@@ -60,7 +60,7 @@ class BaseScreen(QWidget):
         bar_layout.setSpacing(6)
 
         nav_style = (
-            f"QPushButton {{ {font_css('btn_sm')} border: none; "
+            f"QPushButton {{ {font_css('btn_sm')} border: 2px solid transparent; "
             f"padding: 6px 16px; border-radius: 4px; }}"
         )
 
@@ -71,6 +71,8 @@ class BaseScreen(QWidget):
             action()
 
         back_btn = QPushButton("\u2190 Back")
+        back_btn.setAccessibleName("Go back")
+        back_btn.setToolTip("Go back (Escape)")
         back_btn.setStyleSheet(
             nav_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -128,7 +130,7 @@ def make_scroll_area(parent_layout: QVBoxLayout) -> tuple[QScrollArea, QWidget, 
         Qt.ScrollBarPolicy.ScrollBarAlwaysOff
     )
     scroll.setStyleSheet(
-        f"QScrollArea {{ background-color: {c['bg']}; border: none; }}"
+        f"QScrollArea {{ background-color: {c['bg']}; border: 2px solid transparent; }}"
         f"QScrollBar:vertical {{ background: {c['card']}; width: 8px; }}"
         f"QScrollBar::handle:vertical {{ background: {c['muted']}; "
         f"border-radius: 4px; min-height: 30px; }}"
@@ -219,7 +221,7 @@ def _show_guide_dialog(parent: QWidget, topic: str) -> None:
     close_btn.setFont(make_qfont("btn_bold"))
     close_btn.setStyleSheet(
         f"background-color: {c['accent']}; color: {c['btn_text']}; "
-        f"border: none; padding: 8px 30px; border-radius: 4px;"
+        f"border: 2px solid transparent; padding: 8px 30px; border-radius: 4px;"
     )
     close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
     close_btn.clicked.connect(dlg.accept)

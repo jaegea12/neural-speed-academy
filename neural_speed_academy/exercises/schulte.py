@@ -14,7 +14,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, screen_metrics, theme_manager
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics, theme_manager
 from neural_speed_academy.config import SCHULTE_CONFIG
 
 
@@ -62,7 +62,7 @@ class SchulteExercise(BaseExercise):
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
-            f"border: none; padding: 4px 12px; border-radius: 3px;"
+            f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
         guide_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         guide_btn.clicked.connect(lambda: self.show_guide("schulte"))
@@ -174,7 +174,7 @@ class SchulteExercise(BaseExercise):
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
             f"color: {c['btn_text']}; "
-            f"border: none; padding: 10px 40px; border-radius: 4px; }}"
+            f"border: 2px solid transparent; padding: 10px 40px; border-radius: 4px; }}"
         )
         start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         start_btn.clicked.connect(self._start_grid)
@@ -223,7 +223,6 @@ class SchulteExercise(BaseExercise):
 
         self._clear()
         self._running = True
-        self.add_nav_bar()
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
@@ -236,21 +235,36 @@ class SchulteExercise(BaseExercise):
 
         btn_size = self._cell_px(cell_idx)
 
-        # Stats
-        stats = QHBoxLayout()
-        stats.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Minimal top bar
+        top = QHBoxLayout()
+        top.setContentsMargins(10, 6, 10, 2)
 
         self._lbl_target = QLabel(f"FIND: {self.target}")
         self._lbl_target.setFont(make_qfont("grid_btn"))
         self._lbl_target.setStyleSheet(f"color: {c['fg']};")
-        stats.addWidget(self._lbl_target)
+        top.addWidget(self._lbl_target)
+
+        top.addStretch()
 
         self._lbl_score = QLabel(f"SCORE: {self.score}")
         self._lbl_score.setFont(make_qfont("grid_btn"))
         self._lbl_score.setStyleSheet(f"color: {c['accent']};")
-        stats.addWidget(self._lbl_score)
+        top.addWidget(self._lbl_score)
 
-        self._layout.addLayout(stats)
+        top.addStretch()
+
+        exit_btn = QPushButton("\u2716")
+        exit_btn.setAccessibleName("Close")
+        exit_btn.setToolTip("Close")
+        exit_btn.setFont(make_qfont("exit_btn"))
+        exit_btn.setStyleSheet(
+            btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
+                    radius=3, font_key="exit_btn")
+        )
+        exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exit_btn.clicked.connect(self._stop_exercise)
+        top.addWidget(exit_btn)
+        self._layout.addLayout(top)
 
         # Grid
         grid_widget = QWidget()
@@ -267,7 +281,7 @@ class SchulteExercise(BaseExercise):
                 btn.setFixedSize(btn_size, btn_size)
                 btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['grid_btn']}; "
-                    f"color: {c['grid_text']}; border: none; "
+                    f"color: {c['grid_text']}; border: 2px solid transparent; "
                     f"border-radius: 4px; }}"
                     f"QPushButton:hover {{ opacity: 0.9; }}"
                 )
@@ -286,7 +300,7 @@ class SchulteExercise(BaseExercise):
         if value == self.target:
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['grid_solved']}; "
-                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
             )
             button.setEnabled(False)
             self.target += 1
@@ -302,7 +316,7 @@ class SchulteExercise(BaseExercise):
             orig_style = button.styleSheet()
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['alert']}; "
-                f"color: {c['grid_text']}; border: none; border-radius: 4px; }}"
+                f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
             )
             self._after(200, lambda: button.setStyleSheet(orig_style))
 
