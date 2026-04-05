@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 
 
 class DashboardScreen(BaseScreen):

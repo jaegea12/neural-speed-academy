@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QKeySequence, QShortcut, QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import SR_CONFIG, SR_BUILTIN_DECKS, USER_DATA_CONFIG
 from neural_speed_academy.state import SRCard, SRDeck
 

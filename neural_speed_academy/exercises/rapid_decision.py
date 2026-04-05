@@ -23,7 +23,7 @@ from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics, theme_manager
-from neural_speed_academy.config import RAPID_DECISION_CONFIG, USER_DATA_CONFIG
+from neural_speed_academy.config import RAPID_DECISION_CONFIG
 
 
 class RapidDecisionGridExercise(BaseExercise):

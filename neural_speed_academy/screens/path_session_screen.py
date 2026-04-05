@@ -11,8 +11,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
-from neural_speed_academy.theme import COLORS, make_qfont, font_css
+from neural_speed_academy.screens.base import BaseScreen
+from neural_speed_academy.theme import COLORS, make_qfont
 from neural_speed_academy.config import TRAINING_PATHS
 from neural_speed_academy.state import PathProgress
 

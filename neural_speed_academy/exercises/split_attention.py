@@ -19,11 +19,11 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QSlider, QComboBox, QGridLayout,
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import (
     SPLIT_ATTENTION_CONFIG, WORD_PAIRS, USER_DATA_CONFIG,
 )
