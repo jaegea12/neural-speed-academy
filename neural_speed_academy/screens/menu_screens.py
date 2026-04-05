@@ -187,7 +187,14 @@ class BaseMenuScreen(BaseScreen):
 
     def _tp_toggle_off(self) -> str:
         c = COLORS
-        return btn_css(c["card"], c["fg"], padding="6px 14px")
+        return (
+            f"QPushButton {{ background-color: {c['card']}; "
+            f"color: {c['fg']}; border: 2px solid {c['muted']}; "
+            f"padding: 6px 14px; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
+            f"QPushButton:focus {{ border-color: {c['accent']}; }}"
+        )
 
     def _tp_select_preset(self, idx: int) -> None:
         self._tp_selected_preset = idx
