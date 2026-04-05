@@ -65,6 +65,7 @@ class SlideProcessingExercise(BaseExercise):
         self._total_slides = kwargs.get("slides", cfg["default_slides"])
         self._lines_per_slide = kwargs.get("lines", 6)
         self._category = kwargs.get("category", "mixed")
+        self._custom_slides: list = kwargs.get("custom_slides", [])
 
         # If launched from menu with specific params, skip config screen
         if "," in self._category or kwargs.get("skip_config", False):
@@ -229,12 +230,17 @@ class SlideProcessingExercise(BaseExercise):
         # Build slide pool from selected categories
         pool = []
         cats = self._category.split(",")
-        if "mixed" in cats:
-            for slides in SLIDE_LIBRARY.values():
-                pool.extend(slides)
-        else:
-            for cat in cats:
-                pool.extend(SLIDE_LIBRARY.get(cat.strip(), []))
+        if "custom_only" not in cats:
+            if "mixed" in cats:
+                for slides in SLIDE_LIBRARY.values():
+                    pool.extend(slides)
+            else:
+                for cat in cats:
+                    pool.extend(SLIDE_LIBRARY.get(cat.strip(), []))
+
+        # Add custom slides
+        if self._custom_slides:
+            pool.extend(self._custom_slides)
 
         if not pool:
             for slides in SLIDE_LIBRARY.values():

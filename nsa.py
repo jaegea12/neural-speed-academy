@@ -26,6 +26,7 @@ from neural_speed_academy.screens.menu_screens import (
     RapidDecisionMenuScreen, MotMenuScreen, SplitAttentionMenuScreen,
     ReactionTimeMenuScreen, SlideProcessingMenuScreen,
 )
+from neural_speed_academy.screens.slide_creator_screen import SlideCreatorScreen
 from neural_speed_academy.screens.paths_screen import PathSelectionScreen, CustomPathsScreen
 from neural_speed_academy.screens.path_session_screen import (
     PathSessionScreen, PathBuilderScreen,
@@ -150,6 +151,9 @@ class NeuralSpeedAcademy:
         nav.register_screen(
             "slide_processing_menu",
             lambda: SlideProcessingMenuScreen(nav))
+        nav.register_screen(
+            "slide_creator",
+            lambda: SlideCreatorScreen(nav))
 
     def _exercise_callbacks(self) -> dict:
         nav = self.navigator

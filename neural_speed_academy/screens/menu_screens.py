@@ -606,10 +606,13 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
     def __init__(self, navigator, parent: QWidget | None = None):
         super().__init__(navigator, parent)
         self._selected_categories: set[str] = set()
+        self._selected_custom: set[str] = set()  # filenames of selected custom sets
         self._selected_time: int = 10
         self._selected_slides: int = 5
         self._selected_lines: int = 6
         self._cat_buttons: dict[str, QPushButton] = {}
+        self._custom_buttons: dict[str, QPushButton] = {}  # filename -> btn
+        self._custom_sets: dict[str, object] = {}  # filename -> SlideSet
         self._time_buttons: dict[int, QPushButton] = {}
         self._slide_buttons: dict[int, QPushButton] = {}
         self._lines_buttons: dict[int, QPushButton] = {}
@@ -720,6 +723,47 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         sel_row.addStretch()
         left.addLayout(sel_row)
 
+        # ── Custom slide sets ──
+        from neural_speed_academy.repositories.slide_repository import (
+            SlideSetRepository,
+        )
+        repo = SlideSetRepository()
+        custom_sets = repo.list_sets()
+        if custom_sets:
+            left.addSpacing(8)
+            custom_header = QLabel("CUSTOM SETS")
+            custom_header.setFont(make_qfont("menu_header"))
+            custom_header.setStyleSheet(f"color: {c['accent']};")
+            custom_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            left.addWidget(custom_header)
+
+            for ss in custom_sets:
+                btn = QPushButton(f"{ss.name}  ({len(ss.slides)})")
+                btn.setFont(make_qfont("menu_btn"))
+                btn.setFixedHeight(40)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                btn.setStyleSheet(self._toggle_off_style())
+                btn.clicked.connect(
+                    lambda _, f=ss.filename: self._toggle_custom(f)
+                )
+                left.addWidget(btn)
+                self._custom_buttons[ss.filename] = btn
+                self._custom_sets[ss.filename] = ss
+
+        # Create / Edit slides button
+        left.addSpacing(6)
+        create_btn = QPushButton("CREATE / EDIT SLIDES")
+        create_btn.setFont(make_qfont("menu_btn"))
+        create_btn.setFixedHeight(40)
+        create_btn.setStyleSheet(
+            btn_css(c["muted"], c["bg"], padding="6px 14px")
+        )
+        create_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        create_btn.clicked.connect(
+            lambda: self.navigator.navigate_to("slide_creator")
+        )
+        left.addWidget(create_btn)
+
         left.addStretch()
 
         # Give left column stretch factor 2 (2/3 of space)
@@ -829,12 +873,19 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         self._select_lines(self._selected_lines)
         if self._selected_categories:
             for key in list(self._selected_categories):
-                self._cat_buttons[key].setStyleSheet(
-                    self._toggle_on_style()
-                )
-        else:
+                if key in self._cat_buttons:
+                    self._cat_buttons[key].setStyleSheet(
+                        self._toggle_on_style()
+                    )
+        elif not self._selected_custom:
             # First visit: default to first category
             self._toggle_category("science")
+        # Restore custom set selections
+        for fname in list(self._selected_custom):
+            if fname in self._custom_buttons:
+                self._custom_buttons[fname].setStyleSheet(
+                    self._toggle_on_style()
+                )
 
     def _toggle_on_style(self) -> str:
         c = COLORS
@@ -862,6 +913,14 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             self._selected_categories.add(key)
             self._cat_buttons[key].setStyleSheet(self._toggle_on_style())
 
+    def _toggle_custom(self, filename: str) -> None:
+        if filename in self._selected_custom:
+            self._selected_custom.discard(filename)
+            self._custom_buttons[filename].setStyleSheet(self._toggle_off_style())
+        else:
+            self._selected_custom.add(filename)
+            self._custom_buttons[filename].setStyleSheet(self._toggle_on_style())
+
     def _select_all_categories(self) -> None:
         for key, btn in self._cat_buttons.items():
             self._selected_categories.add(key)
@@ -870,6 +929,9 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
     def _clear_categories(self) -> None:
         for key, btn in self._cat_buttons.items():
             self._selected_categories.discard(key)
+            btn.setStyleSheet(self._toggle_off_style())
+        for fname, btn in self._custom_buttons.items():
+            self._selected_custom.discard(fname)
             btn.setStyleSheet(self._toggle_off_style())
 
     def _select_time(self, t: int) -> None:
@@ -898,16 +960,30 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
 
     def _launch(self, exercise_cls) -> None:
         cats = list(self._selected_categories)
-        if not cats:
+        if not cats and not self._selected_custom:
             cats = list(self._cat_buttons.keys())
-        # "mixed" with specific categories
-        self.navigator.launch_exercise(
-            exercise_cls,
-            category=",".join(cats),
-            display_s=self._selected_time,
-            slides=self._selected_slides,
-            lines=self._selected_lines,
-        )
+
+        # Collect custom slide tuples
+        custom_slides = []
+        for fname in self._selected_custom:
+            ss = self._custom_sets.get(fname)
+            if ss:
+                custom_slides.extend(ss.to_library_format())
+
+        kwargs = {
+            "display_s": self._selected_time,
+            "slides": self._selected_slides,
+            "lines": self._selected_lines,
+        }
+        if cats:
+            kwargs["category"] = ",".join(cats)
+        if custom_slides:
+            kwargs["custom_slides"] = custom_slides
+        if not cats and custom_slides:
+            kwargs["category"] = "custom_only"
+            kwargs["skip_config"] = True
+
+        self.navigator.launch_exercise(exercise_cls, **kwargs)
 
 
 class ReactionTimeMenuScreen(BaseMenuScreen):
