@@ -3,10 +3,13 @@ Main menu screen — the application entry point.
 """
 from __future__ import annotations
 
+import os
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox, QDialog,
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
@@ -26,6 +29,24 @@ class MainMenuScreen(BaseScreen):
 
         # ── Branding block ──
         cl.addStretch(2)
+
+        # App icon
+        icon_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "assets", "icon.png",
+        )
+        if os.path.exists(icon_path):
+            icon_lbl = QLabel()
+            pixmap = QPixmap(icon_path).scaled(
+                96, 96,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            icon_lbl.setPixmap(pixmap)
+            icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            icon_lbl.setStyleSheet("background: transparent;")
+            cl.addWidget(icon_lbl)
+            cl.addSpacing(10)
 
         title = QLabel("NEURAL SPEED\nACADEMY")
         title.setFont(make_qfont("title_lg"))
