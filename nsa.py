@@ -3,11 +3,12 @@ Neural Speed Academy — PyQt6 entry point.
 """
 from __future__ import annotations
 
+import os
 import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PyQt6.QtGui import QIcon, QKeySequence, QShortcut
 
 from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
@@ -43,6 +44,11 @@ class NeuralSpeedAcademy:
     def __init__(self):
         self.app = QApplication(sys.argv)
         self.app.setApplicationName("Neural Speed Academy")
+
+        # App icon (title bar, taskbar, Alt-Tab)
+        _icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.png")
+        if os.path.exists(_icon_path):
+            self.app.setWindowIcon(QIcon(_icon_path))
 
         # Load persisted app settings
         theme_manager.load()
