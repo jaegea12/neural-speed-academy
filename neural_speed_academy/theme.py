@@ -13,7 +13,7 @@ import os
 
 DARK_COLORS = {
     "bg": "#0f172a",
-    "card": "#1e293b",
+    "card": "#233044",
     "fg": "#e2e8f0",
     "accent": "#22c55e",
     "action": "#60a5fa",
@@ -40,7 +40,7 @@ DARK_COLORS = {
 
 LIGHT_COLORS = {
     "bg": "#f8fafc",
-    "card": "#e2e8f0",
+    "card": "#dbe1eb",
     "fg": "#1e293b",
     "accent": "#15803d",
     "action": "#2563eb",
@@ -97,7 +97,7 @@ SILVER_COLORS = {
 
 SOFT_LIGHT_COLORS = {
     "bg": "#faf7f2",
-    "card": "#ede9e3",
+    "card": "#e2ded7",
     "fg": "#3d3929",
     "accent": "#4a7a4e",
     "action": "#4a6a8a",
@@ -155,7 +155,7 @@ FOCUS_COLORS = {
     # reduce blue light exposure and visual fatigue. All text pairs exceed
     # WCAG AA 4.5:1 contrast ratio.
     "bg": "#f4ecd8",
-    "card": "#e8dfc8",
+    "card": "#ddd4be",
     "fg": "#2c2416",
     "accent": "#486828",
     "action": "#3a5e7a",
@@ -185,7 +185,7 @@ TWILIGHT_COLORS = {
     # Reduced blue emission for evening use while maintaining
     # readability. All primary text pairs exceed WCAG AA 4.5:1.
     "bg": "#2a2a30",
-    "card": "#383840",
+    "card": "#40404a",
     "fg": "#d4d0c8",
     "accent": "#7ab87a",
     "action": "#6a9ec4",
@@ -214,7 +214,7 @@ MONO_COLORS = {
     # Pure black/white/grey — zero color distraction.
     # Useful for users who find color overstimulating.
     "bg": "#121212",
-    "card": "#1e1e1e",
+    "card": "#2a2a2a",
     "fg": "#e0e0e0",
     "accent": "#ffffff",
     "action": "#b0b0b0",
@@ -242,7 +242,7 @@ MONO_COLORS = {
 EMBER_COLORS = {
     # Black and red — high energy, low blue light.
     "bg": "#0a0a0a",
-    "card": "#1a1010",
+    "card": "#2c1e1e",
     "fg": "#e0d0d0",
     "accent": "#cc3333",
     "action": "#cc6633",
