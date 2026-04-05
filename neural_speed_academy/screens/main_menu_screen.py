@@ -32,7 +32,8 @@ class MainMenuScreen(BaseScreen):
 
         # App icon
         icon_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "assets", "icon.png"
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "assets", "icon.png",
         )
         if os.path.exists(icon_path):
             icon_lbl = QLabel()
