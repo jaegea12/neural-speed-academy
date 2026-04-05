@@ -5,13 +5,13 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QRadioButton, QButtonGroup, QTextEdit, QComboBox, QFrame,
+    QRadioButton, QButtonGroup, QFrame,
     QMessageBox, QSlider,
 )
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
-from neural_speed_academy.config import TEXT_LIBRARY
+
 from neural_speed_academy.theme import (
     COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, btn_css,
     theme_manager,
@@ -258,40 +258,11 @@ class SettingsScreen(BaseScreen):
         text_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         text_section.addWidget(text_desc)
 
-        # Library selector
-        lib_row = QHBoxLayout()
-        lib_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lib_label = QLabel("Load from library:")
-        lib_label.setFont(make_qfont("btn_sm"))
-        lib_label.setStyleSheet(f"color: {c['fg']}; background: transparent;")
-        lib_row.addWidget(lib_label)
-
-        self._lib_combo = QComboBox()
-        self._lib_combo.setFont(make_qfont("btn_sm"))
-        self._lib_combo.setStyleSheet(
-            f"QComboBox {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; border: 2px solid transparent; "
-            f"padding: 4px 8px; border-radius: 3px; }}"
-            f"QComboBox:focus {{ border: 2px solid {c['accent']}; }}"
-            f"QComboBox::drop-down {{ border: none; }}"
-            f"QComboBox QAbstractItemView {{ background-color: {c['card']}; "
-            f"color: {c['text_on_card']}; "
-            f"selection-background-color: {c['accent']}; }}"
+        from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
+        self._text_lib = TextLibraryWidget(
+            self, editor_height=160, show_difficulty=True,
         )
-        self._lib_combo.addItem("")
-        for name in TEXT_LIBRARY:
-            self._lib_combo.addItem(name)
-        self._lib_combo.currentTextChanged.connect(self._load_library_text)
-        lib_row.addWidget(self._lib_combo)
-        text_section.addLayout(lib_row)
-
-        from neural_speed_academy.theme import input_css
-        self._text_edit = QTextEdit()
-        self._text_edit.setFont(make_qfont("body"))
-        self._text_edit.setStyleSheet(input_css(widget="QTextEdit"))
-        self._text_edit.setFixedHeight(160)
-        self._text_edit.setPlainText(theme_manager.training_text)
-        text_section.addWidget(self._text_edit)
+        text_section.addWidget(self._text_lib)
 
         text_wrapper.addLayout(text_section, 8)
         text_wrapper.addStretch(1)
@@ -371,8 +342,8 @@ class SettingsScreen(BaseScreen):
             return True
         if theme_manager.fullscreen != self._initial_fullscreen:
             return True
-        if hasattr(self, '_text_edit'):
-            current_text = self._text_edit.toPlainText().strip() or theme_manager.training_text
+        if hasattr(self, '_text_lib'):
+            current_text = self._text_lib.text().strip() or theme_manager.training_text
             if current_text != self._initial_text:
                 return True
         return False
@@ -411,11 +382,7 @@ class SettingsScreen(BaseScreen):
         else:
             return False
 
-    def _load_library_text(self, name: str) -> None:
-        entry = TEXT_LIBRARY.get(name)
-        if entry:
-            _difficulty, text = entry
-            self._text_edit.setPlainText(text)
+
 
     def _on_profile_changed(self, btn) -> None:
         profile = btn.property("profile_key")
@@ -444,7 +411,7 @@ class SettingsScreen(BaseScreen):
                 app._set_windowed()
 
     def _save(self) -> None:
-        theme_manager.training_text = self._text_edit.toPlainText()
+        theme_manager.training_text = self._text_lib.text()
         theme_manager.save()
         # Update snapshot so back-navigation won't warn again
         self._initial_profile = theme_manager.profile

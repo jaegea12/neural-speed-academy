@@ -335,6 +335,7 @@ FOV_PRESETS = {
     "standard": {"page_width": 620, "pad_x": 60, "pad_y": 50, "font_size": 16, "label": "Standard"},
     "wide":     {"page_width": 780, "pad_x": 70, "pad_y": 50, "font_size": 14, "label": "Wide (Advanced)"},
     "full":     {"page_width": 940, "pad_x": 80, "pad_y": 50, "font_size": 13, "label": "Full (Expert)"},
+    "ultra":    {"page_width": 1140, "pad_x": 90, "pad_y": 50, "font_size": 13, "label": "Ultra (Full Screen)"},
 }
 DEFAULT_TRAINING_TEXT = (
     "Speed reading is the process of rapidly recognizing and absorbing phrases "
@@ -373,6 +374,7 @@ class ThemeManager:
         self._fullscreen: bool = True
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
+        self._custom_texts: dict[str, str] = {}     # name -> text
         self._listeners: list = []
 
     @property
@@ -437,6 +439,21 @@ class ThemeManager:
         return FOV_PRESETS.get(self._fov, FOV_PRESETS[DEFAULT_FOV])
 
     @property
+    def custom_texts(self) -> dict[str, str]:
+        """User-saved custom texts (name -> text)."""
+        return dict(self._custom_texts)
+
+    def save_custom_text(self, name: str, text: str) -> None:
+        """Save a named custom text and persist to disk."""
+        self._custom_texts[name.strip()] = text.strip()
+        self.save()
+
+    def delete_custom_text(self, name: str) -> None:
+        """Delete a named custom text and persist to disk."""
+        self._custom_texts.pop(name, None)
+        self.save()
+
+    @property
     def colors(self) -> dict:
         return THEME_PROFILES.get(self._profile, DARK_COLORS)
 
@@ -465,6 +482,8 @@ class ThemeManager:
                 data["schulte_grid_size"] = self._schulte_grid_size
             if self._schulte_cell_idx is not None:
                 data["schulte_cell_idx"] = self._schulte_cell_idx
+            if self._custom_texts:
+                data["custom_texts"] = self._custom_texts
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except IOError:
@@ -496,6 +515,10 @@ class ThemeManager:
             sc = data.get("schulte_cell_idx")
             if sc is not None:
                 self._schulte_cell_idx = int(sc)
+            ct = data.get("custom_texts")
+            if isinstance(ct, dict):
+                self._custom_texts = {k: v for k, v in ct.items()
+                                      if isinstance(k, str) and isinstance(v, str)}
         except (IOError, json.JSONDecodeError, TypeError):
             pass
 
@@ -505,6 +528,7 @@ class ThemeManager:
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
         self._font_scale = 1.0
+        # Preserve custom texts across resets
         self.save()
 
     @staticmethod
