@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 
 
 class MainMenuScreen(BaseScreen):

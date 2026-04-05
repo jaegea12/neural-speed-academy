@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, input_css, theme_manager, screen_metrics, btn_css
+from neural_speed_academy.theme import COLORS, make_qfont, input_css, theme_manager, screen_metrics, btn_css
 from neural_speed_academy.config import RSVP_CONFIG, USER_DATA_CONFIG
 
 
