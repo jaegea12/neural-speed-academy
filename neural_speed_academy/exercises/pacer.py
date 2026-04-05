@@ -18,7 +18,7 @@ from PyQt6.QtGui import (
 )
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, theme_manager, screen_metrics
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
 from neural_speed_academy.exercises.recall import (
@@ -135,16 +135,10 @@ class PacerExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input — 60% screen width, 15 lines visible
-        self._text_input = QTextEdit()
-        self._text_input.setFont(make_qfont("pacer_text"))
-        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
-        fm = self._text_input.fontMetrics()
-        line_h = fm.lineSpacing()
-        self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(screen_metrics.text_input_w)
-        self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
+        # Text library + editor (shared widget)
+        from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
+        self._text_lib = TextLibraryWidget(self, show_difficulty=True)
+        cl.addWidget(self._text_lib, 0, Qt.AlignmentFlag.AlignCenter)
 
         # WPM: label + slider + value in one compact row
         wpm_row = QHBoxLayout()
@@ -292,7 +286,7 @@ class PacerExercise(BaseExercise):
     # ── Launch reading ──
 
     def _start_from_ui(self) -> None:
-        text = self._text_input.toPlainText()
+        text = self._text_lib.text()
         wpm = self._wpm_slider.value()
         mode = "single"
         for btn in self._mode_group.buttons():
@@ -377,12 +371,14 @@ class PacerExercise(BaseExercise):
         )
         self._reader.setFixedSize(page_w, page_h)
         self._reader.setReadOnly(True)
+        # Hide scrollbars visually but allow programmatic vertical scrolling
         self._reader.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         self._reader.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
+        self._reader.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
 
         # Set highlight color
         hl_color = QColor(c["highlight"])
@@ -587,6 +583,27 @@ class PacerExercise(BaseExercise):
 
         return QRect(x, y, w, h)
 
+    # ── Scrolling ──
+
+    def _scroll_with_lookahead(self, rect: QRect) -> None:
+        """Scroll the reader when the highlight approaches the bottom edge.
+
+        Triggers when the highlight bottom is within 3 line-heights of the
+        viewport bottom, scrolling just enough to keep the highlight
+        comfortably in view.
+        """
+        viewport_h = self._reader.viewport().height()
+        line_h = self._reader.fontMetrics().lineSpacing()
+        lookahead = 3 * line_h
+
+        # rect.bottom() is in viewport coords (accounts for current scroll)
+        threshold = viewport_h - lookahead
+        if rect.bottom() > threshold:
+            scrollbar = self._reader.verticalScrollBar()
+            # Scroll so the highlight sits one line-height below the top third
+            overshoot = rect.bottom() - threshold
+            scrollbar.setValue(scrollbar.value() + overshoot + line_h)
+
     # ── Pacer step ──
 
     def _pacer_step(self) -> None:
@@ -603,11 +620,9 @@ class PacerExercise(BaseExercise):
         rect = self._highlight_rect(start, end, gs, ge)
         self._reader.set_highlight(rect)
 
-        # Scroll so the highlighted area is visible
-        cursor = self._reader.textCursor()
-        cursor.setPosition(start)
-        self._reader.setTextCursor(cursor)
-        self._reader.ensureCursorVisible()
+        # Auto-scroll: start scrolling when highlight is within 3 lines
+        # of the viewport bottom edge
+        self._scroll_with_lookahead(rect)
 
         # Update progress bar
         pct = int(100 * (self._step_idx + 1) / len(self._steps))

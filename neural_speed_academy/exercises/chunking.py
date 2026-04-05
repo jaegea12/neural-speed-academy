@@ -4,14 +4,14 @@ Chunking exercise: flash multi-word phrases to train block reading.
 from __future__ import annotations
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QSlider, QMessageBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, theme_manager, screen_metrics
 from neural_speed_academy.config import CHUNKING_CONFIG, USER_DATA_CONFIG
 
 
@@ -71,16 +71,10 @@ class ChunkingExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input — 60% screen width, 15 lines visible
-        self._text_input = QTextEdit()
-        self._text_input.setFont(make_qfont("pacer_text"))
-        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
-        fm = self._text_input.fontMetrics()
-        line_h = fm.lineSpacing()
-        self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(screen_metrics.text_input_w)
-        self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
+        # Text library + editor (shared widget)
+        from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
+        self._text_lib = TextLibraryWidget(self, show_difficulty=True)
+        cl.addWidget(self._text_lib, 0, Qt.AlignmentFlag.AlignCenter)
 
         # Chunk size: label + slider + value in one row
         init_chunk = kwargs.get(
@@ -171,7 +165,7 @@ class ChunkingExercise(BaseExercise):
         self._layout.addWidget(container, 1)
 
     def _start_from_ui(self) -> None:
-        text = self._text_input.toPlainText()
+        text = self._text_lib.text()
         self._run_chunking(text, self._chunk_slider.value(), self._wpm_slider.value())
 
     def _build_chunks(self, text: str, size: int) -> list:
