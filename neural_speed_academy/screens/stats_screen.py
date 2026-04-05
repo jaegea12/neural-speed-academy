@@ -780,11 +780,39 @@ class StatsScreen(BaseScreen):
     # ── Export ──
 
     def _build_export(self, layout: QVBoxLayout, user) -> None:
+        from PyQt6.QtWidgets import QCheckBox
         c = COLORS
         header = QLabel("EXPORT DATA")
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
+
+        desc = QLabel(
+            "Export session history with exercise parameters, scores, "
+            "and timing data. CSV is Excel-compatible; JSON is for "
+            "programmatic analysis in R, SPSS, or Python."
+        )
+        desc.setFont(make_qfont("body"))
+        desc.setStyleSheet(f"color: {c['muted']};")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        layout.addSpacing(6)
+
+        # Anonymize checkbox
+        self._anon_check = QCheckBox("Anonymize (replace name with participant ID)")
+        self._anon_check.setFont(make_qfont("body"))
+        self._anon_check.setStyleSheet(
+            f"QCheckBox {{ color: {c['fg']}; spacing: 8px; }}"
+            f"QCheckBox::indicator {{ width: 18px; height: 18px; "
+            f"border: 2px solid {c['muted']}; border-radius: 3px; "
+            f"background: {c['card']}; }}"
+            f"QCheckBox::indicator:checked {{ background: {c['accent']}; "
+            f"border-color: {c['accent']}; }}"
+        )
+        layout.addWidget(self._anon_check)
+
+        layout.addSpacing(6)
 
         row = QHBoxLayout()
         row.setSpacing(8)
@@ -803,26 +831,54 @@ class StatsScreen(BaseScreen):
         row.addStretch()
         layout.addLayout(row)
 
+    def _export_name(self, user) -> str:
+        """Return display name or anonymized participant ID."""
+        if self._anon_check.isChecked():
+            import hashlib
+            h = hashlib.sha256(user.name.encode()).hexdigest()[:8]
+            return f"P-{h.upper()}"
+        return user.name
+
+    @staticmethod
+    def _collect_metadata_keys(history) -> list[str]:
+        """Gather all unique metadata keys across history entries."""
+        keys: dict[str, None] = {}
+        for entry in history:
+            if entry.metadata:
+                for k in entry.metadata:
+                    keys[k] = None
+        return list(keys)
+
     def _export_csv(self, user) -> None:
         if not user.history:
             QMessageBox.information(
                 self, "No Data", "No session history to export."
             )
             return
-        default_name = f"nsa_{user.name}_{datetime.now():%Y%m%d}.csv"
+        name = self._export_name(user)
+        default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.csv"
         path, _ = QFileDialog.getSaveFileName(
             self, "Export CSV", default_name, "CSV files (*.csv)"
         )
         if not path:
             return
         try:
+            meta_keys = self._collect_metadata_keys(user.history)
             with open(path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow(["Timestamp", "Exercise", "Result"])
+                # Header
+                writer.writerow(
+                    ["Participant", "Timestamp", "Exercise", "Result"]
+                    + [f"meta_{k}" for k in meta_keys]
+                )
                 for entry in user.history:
-                    writer.writerow([
-                        entry.timestamp, entry.exercise, entry.result,
-                    ])
+                    row = [name, entry.timestamp, entry.exercise, entry.result]
+                    for k in meta_keys:
+                        val = entry.metadata.get(k, "") if entry.metadata else ""
+                        row.append(val)
+                    writer.writerow(row)
+
+                # Personal bests sheet
                 if user.personal_bests:
                     writer.writerow([])
                     writer.writerow(["Personal Bests"])
@@ -834,9 +890,21 @@ class StatsScreen(BaseScreen):
                             exercise, data["score"], data["total"],
                             f"{data['pct']}%", data.get("date", ""),
                         ])
+
+                # Summary
+                writer.writerow([])
+                writer.writerow(["Summary"])
+                writer.writerow(["Participant", name])
+                writer.writerow(["Total XP", user.xp])
+                writer.writerow(["Level", user.xp // 1000 + 1])
+                writer.writerow(["Sessions", len(user.history)])
+                writer.writerow(["Exported", datetime.now().isoformat()])
+
             QMessageBox.information(
                 self, "Exported",
-                f"Data saved to:\n{os.path.basename(path)}",
+                f"Data saved to:\n{os.path.basename(path)}\n\n"
+                f"{len(user.history)} sessions, "
+                f"{len(meta_keys)} metadata fields.",
             )
         except OSError as e:
             QMessageBox.critical(
@@ -844,7 +912,8 @@ class StatsScreen(BaseScreen):
             )
 
     def _export_json(self, user) -> None:
-        default_name = f"nsa_{user.name}_{datetime.now():%Y%m%d}.json"
+        name = self._export_name(user)
+        default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.json"
         path, _ = QFileDialog.getSaveFileName(
             self, "Export JSON", default_name, "JSON files (*.json)"
         )
@@ -852,7 +921,7 @@ class StatsScreen(BaseScreen):
             return
         try:
             data = {
-                "name": user.name,
+                "participant": name,
                 "xp": user.xp,
                 "level": user.xp // 1000 + 1,
                 "streak": user.streak,
@@ -863,6 +932,7 @@ class StatsScreen(BaseScreen):
                         "timestamp": e.timestamp,
                         "exercise": e.exercise,
                         "result": e.result,
+                        "metadata": e.metadata if e.metadata else {},
                     }
                     for e in user.history
                 ],
@@ -872,7 +942,8 @@ class StatsScreen(BaseScreen):
                 json.dump(data, f, indent=2, ensure_ascii=False)
             QMessageBox.information(
                 self, "Exported",
-                f"Data saved to:\n{os.path.basename(path)}",
+                f"Data saved to:\n{os.path.basename(path)}\n\n"
+                f"{len(user.history)} sessions with full metadata.",
             )
         except OSError as e:
             QMessageBox.critical(
