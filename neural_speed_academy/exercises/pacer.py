@@ -481,9 +481,9 @@ class PacerExercise(BaseExercise):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
 
-        # Set highlight color
+        # Set highlight color — alpha 140 for visibility across all profiles
         hl_color = QColor(c["highlight"])
-        hl_color.setAlpha(80)
+        hl_color.setAlpha(140)
         self._reader.set_highlight_color(hl_color)
 
         joined = " ".join(words)
