@@ -213,6 +213,10 @@ class BaseMenuScreen(BaseScreen):
         for key, value in preset_vals.items():
             if key in self._tp_param_buttons:
                 self._tp_select_param(key, value)
+        # Style any param buttons not covered by this preset
+        for header, param_key, options, default in self._tp_params:
+            if param_key not in preset_vals:
+                self._tp_select_param(param_key, self._tp_param_values[param_key])
 
     def _tp_select_param(self, key: str, value: object) -> None:
         self._tp_param_values[key] = value
