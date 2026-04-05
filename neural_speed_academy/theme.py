@@ -267,6 +267,62 @@ EMBER_COLORS = {
     "diff_elite": "#ff4444",
 }
 
+DARK_BLUE_COLORS = {
+    # Deep navy background with bright blue accents.
+    "bg": "#0d1520",
+    "card": "#1c2a3d",
+    "fg": "#d8e4f0",
+    "accent": "#3b82f6",
+    "action": "#60a5fa",
+    "alert": "#f59e0b",
+    "highlight": "#38bdf8",
+    "priming": "#22d3ee",
+    "grid_btn": "#1e3350",
+    "grid_solved": "#1e3a5f",
+    "grid_text": "#d8e4f0",
+    "success": "#34d399",
+    "cross": "#4b6a8a",
+    # Semantic roles
+    "btn_text": "#0d1520",
+    "text_on_card": "#e8f0fa",
+    "muted": "#7a9abb",
+    "reader_bg": "#d8e4f0",
+    "reader_fg": "#0d1520",
+    # Difficulty tiers
+    "diff_beginner": "#34d399",
+    "diff_intermediate": "#60a5fa",
+    "diff_advanced": "#f59e0b",
+    "diff_elite": "#ef4444",
+}
+
+LIGHT_BLUE_COLORS = {
+    # Pale sky background with navy accents.
+    "bg": "#f0f5fc",
+    "card": "#d4e0f0",
+    "fg": "#1a2744",
+    "accent": "#1d4ed8",
+    "action": "#2563eb",
+    "alert": "#b45309",
+    "highlight": "#0ea5e9",
+    "priming": "#0891b2",
+    "grid_btn": "#bdd0e8",
+    "grid_solved": "#93c5fd",
+    "grid_text": "#1a2744",
+    "success": "#059669",
+    "cross": "#7c96b8",
+    # Semantic roles
+    "btn_text": "#ffffff",
+    "text_on_card": "#1a2744",
+    "muted": "#4a6080",
+    "reader_bg": "#ffffff",
+    "reader_fg": "#1a2744",
+    # Difficulty tiers
+    "diff_beginner": "#059669",
+    "diff_intermediate": "#2563eb",
+    "diff_advanced": "#b45309",
+    "diff_elite": "#dc2626",
+}
+
 THEME_PROFILES = {
     "dark": DARK_COLORS,
     "light": LIGHT_COLORS,
@@ -277,6 +333,8 @@ THEME_PROFILES = {
     "silver": SILVER_COLORS,
     "mono": MONO_COLORS,
     "ember": EMBER_COLORS,
+    "dark_blue": DARK_BLUE_COLORS,
+    "light_blue": LIGHT_BLUE_COLORS,
 }
 
 # Human-readable labels for the settings screen
@@ -290,6 +348,8 @@ THEME_LABELS = {
     "silver": "Silver",
     "mono": "Monochrome",
     "ember": "Ember (Black/Red)",
+    "dark_blue": "Dark Blue",
+    "light_blue": "Light Blue",
 }
 
 # --- Font Definitions ---
