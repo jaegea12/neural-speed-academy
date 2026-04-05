@@ -20,8 +20,8 @@ from neural_speed_academy.screens.dashboard_screen import DashboardScreen
 from neural_speed_academy.screens.stats_screen import StatsScreen
 from neural_speed_academy.screens.introduction_screen import IntroductionScreen
 from neural_speed_academy.screens.menu_screens import (
-    FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, PrimingMenuScreen,
-    SequenceMemoryMenuScreen, PeripheralFlashMenuScreen,
+    FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, SchulteMenuScreen,
+    PrimingMenuScreen, SequenceMemoryMenuScreen, PeripheralFlashMenuScreen,
     RapidDecisionMenuScreen, MotMenuScreen, SplitAttentionMenuScreen,
     ReactionTimeMenuScreen, SlideProcessingMenuScreen,
 )
@@ -34,7 +34,6 @@ from neural_speed_academy.exercises.flash import FlashExercise
 from neural_speed_academy.exercises.rsvp import RsvpExercise
 from neural_speed_academy.exercises.chunking import ChunkingExercise
 from neural_speed_academy.exercises.pacer import PacerExercise
-from neural_speed_academy.exercises.schulte import SchulteExercise
 from neural_speed_academy.exercises.priming import PrimingExercise
 from neural_speed_academy.exercises.spaced_repetition import SpacedRepetitionExercise
 
@@ -79,7 +78,6 @@ class NeuralSpeedAcademy:
         self.rsvp_exercise = RsvpExercise(self.navigator)
         self.chunking_exercise = ChunkingExercise(self.navigator)
         self.pacer_exercise = PacerExercise(self.navigator)
-        self.schulte_exercise = SchulteExercise(self.navigator)
         self.priming_exercise = PrimingExercise(self.navigator)
 
         # Register screens
@@ -120,6 +118,9 @@ class NeuralSpeedAcademy:
             "eyespan_menu",
             lambda: EyespanMenuScreen(nav, self.flash_exercise))
         nav.register_screen(
+            "schulte_menu",
+            lambda: SchulteMenuScreen(nav))
+        nav.register_screen(
             "priming_menu",
             lambda: PrimingMenuScreen(nav, self.priming_exercise))
         nav.register_screen(
@@ -151,7 +152,7 @@ class NeuralSpeedAcademy:
             "menu_words": lambda: nav.navigate_to("words_menu"),
             "menu_eyespan": lambda: nav.navigate_to("eyespan_menu"),
             "menu_priming": lambda: nav.navigate_to("priming_menu"),
-            "start_schulte": lambda: nav.launch_exercise(SchulteExercise),
+            "menu_schulte": lambda: nav.navigate_to("schulte_menu"),
             "setup_pacer": lambda: nav.launch_exercise(PacerExercise),
             "setup_rsvp": lambda: nav.launch_exercise(RsvpExercise),
             "setup_chunking": lambda: nav.launch_exercise(ChunkingExercise),

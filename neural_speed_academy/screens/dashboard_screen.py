@@ -88,7 +88,7 @@ class DashboardScreen(BaseScreen):
             ("Flash Numbers", self._cb("menu_flash")),
             ("Word Drills", self._cb("menu_words")),
             ("Eye-Span", self._cb("menu_eyespan")),
-            ("Schulte Grid", self._cb("start_schulte")),
+            ("Schulte Grid", self._cb("menu_schulte")),
             ("Peripheral Flash", self._cb("menu_peripheral_flash")),
         ])
         self._create_section(grid, "COGNITION", 1, [
