@@ -586,6 +586,13 @@ class ScreenMetrics:
         self._sx = self._w / self.REF_W
         self._sy = self._h / self.REF_H
 
+    def update_from_window(self, width: int, height: int) -> None:
+        """Update dimensions to match the actual window size."""
+        self._w = width
+        self._h = height
+        self._sx = self._w / self.REF_W
+        self._sy = self._h / self.REF_H
+
     @property
     def screen_w(self) -> int:
         return self._w
