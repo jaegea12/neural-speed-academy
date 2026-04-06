@@ -329,13 +329,13 @@ FONTS = {
 DEFAULT_PROFILE = "dark"
 DEFAULT_FOV = "standard"
 
-# FOV presets: (page_width, pad_x, pad_y, font_size)
+# FOV presets: pct = percentage of screen width, pad/font in reference pixels
 FOV_PRESETS = {
-    "narrow":   {"page_width": 480, "pad_x": 50, "pad_y": 45, "font_size": 18, "label": "Narrow (Beginner)"},
-    "standard": {"page_width": 620, "pad_x": 60, "pad_y": 50, "font_size": 16, "label": "Standard"},
-    "wide":     {"page_width": 780, "pad_x": 70, "pad_y": 50, "font_size": 14, "label": "Wide (Advanced)"},
-    "full":     {"page_width": 1140, "pad_x": 80, "pad_y": 50, "font_size": 13, "label": "Full (Expert)"},
-    "ultra":    {"page_width": 1632, "pad_x": 100, "pad_y": 50, "font_size": 13, "label": "Ultra (85% Screen)"},
+    "narrow":   {"pct": 0.30, "pad_x": 50, "pad_y": 45, "font_size": 18, "label": "Narrow (Beginner)"},
+    "standard": {"pct": 0.42, "pad_x": 60, "pad_y": 50, "font_size": 16, "label": "Standard"},
+    "wide":     {"pct": 0.55, "pad_x": 70, "pad_y": 50, "font_size": 15, "label": "Wide (Advanced)"},
+    "full":     {"pct": 0.70, "pad_x": 80, "pad_y": 50, "font_size": 14, "label": "Full (Expert)"},
+    "ultra":    {"pct": 0.85, "pad_x": 90, "pad_y": 50, "font_size": 13, "label": "Ultra (Full Screen)"},
 }
 DEFAULT_TRAINING_TEXT = (
     "Speed reading is the process of rapidly recognizing and absorbing phrases "
@@ -635,9 +635,9 @@ class ScreenMetrics:
 
     @property
     def reader_w(self) -> int:
-        """Pacer reader page width from FOV, scaled."""
+        """Pacer reader page width from FOV percentage."""
         fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
-        return self.sw(fov["page_width"])
+        return int(self._w * fov["pct"])
 
     @property
     def reader_h(self) -> int:
@@ -652,8 +652,9 @@ class ScreenMetrics:
     def fov_scaled(self) -> dict:
         """Return the active FOV preset with dimensions scaled to screen."""
         fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
+        page_w = int(self._w * fov["pct"])
         return {
-            "page_width": self.sw(fov["page_width"]),
+            "page_width": page_w,
             "pad_x": self.sw(fov["pad_x"]),
             "pad_y": self.sh(fov["pad_y"]),
             "font_size": max(10, self.s(fov["font_size"])),

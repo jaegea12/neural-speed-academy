@@ -461,7 +461,7 @@ class PacerExercise(BaseExercise):
         # Reader page — use selected page width and text size
         from neural_speed_academy.theme import FOV_PRESETS
         fov_preset = FOV_PRESETS.get(self._page_width_key, FOV_PRESETS["standard"])
-        page_w = screen_metrics.sw(fov_preset["page_width"])
+        page_w = int(screen_metrics.screen_w * fov_preset["pct"])
         page_h = screen_metrics.reader_h
         base_font = screen_metrics.s(fov_preset["font_size"])
         font_size = max(10, int(base_font * self._TEXT_SIZE_MULT.get(self._text_size, 1.0)))
