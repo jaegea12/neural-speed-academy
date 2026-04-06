@@ -303,11 +303,11 @@ class PacerExercise(BaseExercise):
 
         self._page_width_buttons: dict[str, QPushButton] = {}
         self._page_width_key = theme_manager.fov if theme_manager else "standard"
-        for key, label in [
-            ("narrow", "Narrow"), ("standard", "Standard"),
-            ("wide", "Wide"), ("full", "Full"),
-        ]:
-            btn = QPushButton(label)
+        from neural_speed_academy.theme import FOV_PRESETS
+        for key, preset in FOV_PRESETS.items():
+            # Use short label: first word of the preset label
+            short = preset["label"].split("(")[0].strip()
+            btn = QPushButton(short)
             btn.setFont(make_qfont("btn_sm"))
             btn.setFixedWidth(80)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
