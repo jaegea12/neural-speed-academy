@@ -16,7 +16,7 @@ from neural_speed_academy.theme import (
     COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, btn_css,
     theme_manager,
 )
-from neural_speed_academy.i18n import tr, available_locales
+from neural_speed_academy.i18n import tr
 
 
 def _radio_style(c: dict) -> str:
@@ -48,7 +48,6 @@ class SettingsScreen(BaseScreen):
             self._initial_fov = theme_manager.fov
             self._initial_fullscreen = theme_manager.fullscreen
             self._initial_text = theme_manager.training_text
-            self._initial_locale = theme_manager.locale
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(50, 20, 50, 20)
@@ -96,7 +95,7 @@ class SettingsScreen(BaseScreen):
 
         theme_cols = QHBoxLayout()
         theme_cols.setSpacing(30)
-        for col_label, profiles in [("Dark", dark_profiles), ("Light", light_profiles)]:
+        for col_label, profiles in [(tr("settings.dark"), dark_profiles), (tr("settings.light"), light_profiles)]:
             col = QVBoxLayout()
             col.setSpacing(3)
             header = QLabel(col_label)
@@ -157,7 +156,7 @@ class SettingsScreen(BaseScreen):
         disp_section.addWidget(disp_desc)
 
         self._disp_group = QButtonGroup(self)
-        for key, label in [("fullscreen", "Fullscreen"), ("windowed", "Windowed")]:
+        for key, label in [("fullscreen", tr("settings.fullscreen")), ("windowed", tr("settings.windowed"))]:
             rb = QRadioButton(label)
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
@@ -172,28 +171,6 @@ class SettingsScreen(BaseScreen):
         self._disp_group.buttonClicked.connect(self._on_display_changed)
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
-
-        # -- LANGUAGE section --
-        lang_section = QVBoxLayout()
-        lang_section.setSpacing(4)
-        sec_lang = QLabel(tr("settings.language"))
-        sec_lang.setFont(make_qfont("section_header"))
-        sec_lang.setStyleSheet(f"color: {c['accent']};")
-        lang_section.addWidget(sec_lang)
-
-        self._lang_group = QButtonGroup(self)
-        locales = available_locales()
-        for code, name in locales.items():
-            rb = QRadioButton(name)
-            rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(rb_style)
-            rb.setProperty("locale_key", code)
-            rb.setChecked(code == theme_manager.locale)
-            self._lang_group.addButton(rb)
-            lang_section.addWidget(rb)
-        self._lang_group.buttonClicked.connect(self._on_language_changed)
-        lang_section.addStretch()
-        top_row.addLayout(lang_section, 1)
 
         top_row.addStretch(1)
 
@@ -325,12 +302,12 @@ class SettingsScreen(BaseScreen):
         cl.addWidget(sec_keys)
 
         shortcuts = [
-            ("Esc", "Go back / Main menu / Quit"),
-            ("Enter", "Continue (training path, results)"),
-            ("Space", "Pause / Resume exercise"),
-            ("Ctrl+Enter", "Start exercise from config screen"),
-            ("Ctrl+Q", "Quit application"),
-            ("F11", "Toggle fullscreen"),
+            ("Esc", tr("settings.shortcut.esc")),
+            ("Enter", tr("settings.shortcut.enter")),
+            ("Space", tr("settings.shortcut.space")),
+            ("Ctrl+Enter", tr("settings.shortcut.ctrl_enter")),
+            ("Ctrl+Q", tr("settings.shortcut.ctrl_q")),
+            ("F11", tr("settings.shortcut.f11")),
         ]
         keys_wrapper = QHBoxLayout()
         keys_wrapper.addStretch(1)
@@ -369,8 +346,6 @@ class SettingsScreen(BaseScreen):
             return True
         if theme_manager.fullscreen != self._initial_fullscreen:
             return True
-        if theme_manager.locale != self._initial_locale:
-            return True
         if hasattr(self, '_text_lib'):
             current_text = self._text_lib.text().strip() or theme_manager.training_text
             if current_text != self._initial_text:
@@ -393,9 +368,9 @@ class SettingsScreen(BaseScreen):
             f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
             f"QPushButton:focus {{ border: 2px solid {c['fg']}; }}"
         )
-        save_btn = msg.addButton("Save", QMessageBox.ButtonRole.AcceptRole)
-        discard_btn = msg.addButton("Discard", QMessageBox.ButtonRole.DestructiveRole)
-        msg.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+        save_btn = msg.addButton(tr("settings.save"), QMessageBox.ButtonRole.AcceptRole)
+        discard_btn = msg.addButton(tr("settings.discard"), QMessageBox.ButtonRole.DestructiveRole)
+        msg.addButton(tr("settings.cancel"), QMessageBox.ButtonRole.RejectRole)
         msg.exec()
 
         clicked = msg.clickedButton()
@@ -407,7 +382,6 @@ class SettingsScreen(BaseScreen):
             theme_manager.set_profile(self._initial_profile)
             theme_manager.fov = self._initial_fov
             theme_manager.fullscreen = self._initial_fullscreen
-            theme_manager.locale = self._initial_locale
             return True
         else:
             return False
@@ -440,13 +414,6 @@ class SettingsScreen(BaseScreen):
             else:
                 app._set_windowed()
 
-    def _on_language_changed(self, btn) -> None:
-        code = btn.property("locale_key")
-        theme_manager.locale = code
-        theme_manager.save()
-        # Rebuild the screen to show translated labels
-        self.show_screen()
-
     def _save(self) -> None:
         theme_manager.training_text = self._text_lib.text()
         theme_manager.save()
@@ -455,7 +422,6 @@ class SettingsScreen(BaseScreen):
         self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
-        self._initial_locale = theme_manager.locale
 
     def _reset_defaults(self) -> None:
         theme_manager.reset_defaults()
@@ -464,5 +430,4 @@ class SettingsScreen(BaseScreen):
         self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
-        self._initial_locale = theme_manager.locale
         self.show_screen()

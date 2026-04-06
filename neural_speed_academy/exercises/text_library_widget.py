@@ -85,7 +85,7 @@ class TextLibraryWidget(QWidget):
             f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
 
-        save_btn = QPushButton(tr("text.library.widget.save_as_u2026"))
+        save_btn = QPushButton(tr("text.library.widget.save_as"))
         save_btn.setFont(make_qfont("btn_sm"))
         save_btn.setStyleSheet(btn_style)
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -189,7 +189,7 @@ class TextLibraryWidget(QWidget):
             difficulty, text = entry
             self._editor.setPlainText(text)
             if self._show_difficulty:
-                self._diff_label.setText(f"Difficulty: {difficulty}")
+                self._diff_label.setText(tr("text.library.widget.difficulty", level=difficulty))
                 self._diff_label.setVisible(True)
             else:
                 self._diff_label.setVisible(False)
@@ -209,7 +209,8 @@ class TextLibraryWidget(QWidget):
             prefill = current[len(_CUSTOM_PREFIX):]
 
         name, ok = QInputDialog.getText(
-            self, "Save Custom Text", "Name:", text=prefill,
+            self, tr("text.library.widget.save_custom_text"),
+            tr("text.library.widget.name_label"), text=prefill,
         )
         if not ok or not name.strip():
             return
@@ -218,8 +219,8 @@ class TextLibraryWidget(QWidget):
         # Prevent overwriting built-in texts
         if name in TEXT_LIBRARY:
             QMessageBox.warning(
-                self, "Reserved Name",
-                f'"{name}" is a built-in text. Choose a different name.',
+                self, tr("text.library.widget.reserved_name"),
+                tr("text.library.widget.reserved_name_msg", name=name),
             )
             return
 
@@ -238,8 +239,8 @@ class TextLibraryWidget(QWidget):
         real_name = current[len(_CUSTOM_PREFIX):]
 
         reply = QMessageBox.question(
-            self, "Delete Custom Text",
-            f'Delete "{real_name}"?',
+            self, tr("text.library.widget.delete_custom_text"),
+            tr("text.library.widget.delete_confirm", name=real_name),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:

@@ -128,21 +128,20 @@ class DashboardScreen(BaseScreen):
         cl = QHBoxLayout(card)
 
         level = user.xp // 1000 + 1
-        info = QLabel(
-            f"{user.name.upper()}   |   Level {level}   |   "
-            f"Streak: {user.streak} day{'s' if user.streak != 1 else ''}"
-        )
+        info = QLabel(tr("dashboard.user_info",
+            name=user.name.upper(), level=level,
+            streak=user.streak))
         info.setFont(make_qfont("btn_sm"))
         info.setStyleSheet(f"color: {c['text_on_card']};")
         cl.addWidget(info)
         cl.addStretch()
 
-        last_text = "No sessions yet"
+        last_text = tr("dashboard.no_sessions_yet")
         if user.history:
             last = user.history[0]
-            last_text = (
-                f"Last: {last.exercise} \u2014 {last.result} ({last.timestamp})"
-            )
+            last_text = tr("dashboard.last_session_info",
+                exercise=last.exercise, result=last.result,
+                timestamp=last.timestamp)
         last_lbl = QLabel(last_text)
         last_lbl.setFont(make_qfont("btn_sm"))
         last_lbl.setStyleSheet(f"color: {c['muted']};")
@@ -165,7 +164,7 @@ class DashboardScreen(BaseScreen):
         )
         bar_row.addWidget(progress)
 
-        xp_label = QLabel(f"{xp_in_level}/1000 XP to Level {level + 1}")
+        xp_label = QLabel(tr("stats.xp_to_next", current=xp_in_level, level=level + 1))
         xp_label.setFont(make_qfont("btn_sm"))
         xp_label.setStyleSheet(f"color: {c['muted']};")
         bar_row.addWidget(xp_label)

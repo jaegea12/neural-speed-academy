@@ -3,6 +3,8 @@ Exercise configurations and data for Neural Speed Academy.
 """
 from __future__ import annotations
 
+from neural_speed_academy.i18n import tr
+
 # Word pairs for ambiguous word recognition exercises
 WORD_PAIRS = [
     # Letter-swap / anagram confusables
@@ -38,348 +40,50 @@ WORD_PAIRS = [
     ("DISCRETE", "DISCREET"), ("ENSURE", "INSURE"),
 ]
 
-# Exercise guide texts
-EXERCISE_GUIDES = {
-    "flash": (
-        "FLASH PERCEPTION",
-        "HOW TO USE:\n"
-        "Begin with fixed digits (e.g., just '1 digit') to reduce anxiety. "
-        "Once comfortable, move to 'Overlapping' sets (e.g., 2-4 digits) to stop "
-        "your brain from predicting the length.\n\n"
-        "THE SCIENCE:\n"
-        "Tachistoscopic training (brief visual exposure) has been used since the "
-        "1800s to study perception. Research shows that the visual system can "
-        "process information in as little as 13 milliseconds (Potter et al., MIT, "
-        "2014). With practice, the brain learns to encode more information per "
-        "fixation by strengthening the ventral visual stream.\n\n"
-        "BENEFITS:\n"
-        "- Increases the number of characters recognized per eye fixation\n"
-        "- Trains iconic memory (ultra-short-term visual buffer)\n"
-        "- Reduces subvocalization by forcing faster-than-speech processing\n"
-        "- Improves digit span, a core measure of working memory capacity"
-    ),
-    "eyespan": (
-        "EYE-SPAN EXPANSION",
-        "HOW TO USE:\n"
-        "Horizontal: Trains width for reading lines.\n"
-        "Vertical: Trains 'Block Reading' (seeing multiple lines at once).\n"
-        "Mixed: Trains agility.\n"
-        "Focus only on the fixation cross (+) in the center.\n\n"
-        "THE SCIENCE:\n"
-        "The fovea (central 2 degrees of vision) provides sharp detail, but the "
-        "parafovea (extending to ~5 degrees) can identify words during reading. "
-        "Skilled readers extract useful information from a wider perceptual span: "
-        "about 14-15 characters to the right of fixation in English (Rayner, 1998). "
-        "Training peripheral recognition expands this effective span.\n\n"
-        "BENEFITS:\n"
-        "- Widens the perceptual span, reducing the number of fixations per line\n"
-        "- Trains parafoveal preview, allowing the brain to pre-process upcoming words\n"
-        "- Vertical mode develops block reading, useful for scanning documents\n"
-        "- Directly increases reading speed by covering more text per fixation"
-    ),
-    "schulte": (
-        "SCHULTE GRID",
-        "HOW TO USE:\n"
-        "Find numbers 1 through 25 in order. Keep your gaze fixed on the center "
-        "square and use peripheral vision to locate each number.\n"
-        "Score: +5 for correct click, -2 for wrong click.\n\n"
-        "THE SCIENCE:\n"
-        "Schulte tables were developed by German psychiatrist Walter Schulte to "
-        "measure and train visual attention. Studies in sports psychology show that "
-        "athletes who train with Schulte grids develop faster visual search times "
-        "and broader attentional fields (Appelbaum & Erickson, 2018). The exercise "
-        "engages both the dorsal attention network (spatial awareness) and the "
-        "ventral attention network (target detection).\n\n"
-        "BENEFITS:\n"
-        "- Expands peripheral awareness without moving the eyes\n"
-        "- Improves visual search speed and selective attention\n"
-        "- Strengthens the ability to suppress distractors\n"
-        "- Used by pilots and athletes to sharpen situational awareness"
-    ),
-    "pacer": (
-        "PACER FLOW",
-        "HOW TO USE:\n"
-        "Paste your reading material, set a target WPM, and follow the highlight. "
-        "Do not regress (look back). Let the pacer pull your eyes forward.\n\n"
-        "THE SCIENCE:\n"
-        "Regression (re-reading) accounts for 10-15% of all eye movements during "
-        "reading and is a major speed limiter (Rayner et al., 2012). A visual pacer "
-        "acts as an external metronome that suppresses regression and gradually "
-        "pushes reading rate above the comfort zone. This leverages the spacing "
-        "effect: slightly exceeding your current speed forces deeper encoding.\n\n"
-        "BENEFITS:\n"
-        "- Eliminates regression, the single largest source of wasted reading time\n"
-        "- Trains a steady, rhythmic eye movement pattern\n"
-        "- Gradually increases comfortable reading speed through progressive overload\n"
-        "- Improves focus and reduces mind-wandering during reading"
-    ),
-    "priming": (
-        "EYE PRIMING",
-        "HOW TO USE:\n"
-        "Follow the dot with your eyes only. Keep your head still.\n"
-        "SACCADE modes: the dot jumps between positions in structured patterns "
-        "(horizontal, vertical, diagonal, expanding). These train fast, accurate "
-        "eye jumps — the primary movement used in reading.\n"
-        "PURSUIT modes: the dot moves continuously along a path (line, circle, "
-        "figure-8). Track it smoothly without jumping ahead.\n\n"
-        "THE SCIENCE:\n"
-        "The eyes are controlled by six extraocular muscles per eye. Saccades "
-        "and smooth pursuit engage different neural circuits: the frontal eye "
-        "fields for voluntary saccades and the medial superior temporal area "
-        "for smooth pursuit (Krauzlis, 2004). Training both systems improves "
-        "oculomotor flexibility. Sports vision research shows that structured "
-        "saccadic training improves reaction time and visual search speed "
-        "(Appelbaum & Erickson, 2018).\n\n"
-        "BENEFITS:\n"
-        "- Warms up extraocular muscles to reduce eye strain during exercises\n"
-        "- Saccade patterns train the exact eye movements used in reading\n"
-        "- Smooth pursuit develops tracking accuracy and eye-hand coordination\n"
-        "- Expanding saccades progressively increase oculomotor range\n"
-        "- Reduces the risk of eye fatigue during extended training sessions"
-    ),
-    "rsvp": (
-        "RSVP (RAPID SERIAL VISUAL PRESENTATION)",
-        "HOW TO USE:\n"
-        "Paste your reading material or use the sample text. Set your target "
-        "WPM and press Start. Words appear one at a time at the center of the "
-        "screen. Keep your eyes fixed on the center — no eye movement needed.\n\n"
-        "THE SCIENCE:\n"
-        "RSVP eliminates the two biggest speed limiters in reading: saccadic "
-        "eye movements and regression. By presenting words at a fixed point, "
-        "the eyes stay still while the brain processes each word. Research by "
-        "Forster (1970) established RSVP as a standard paradigm in psycholinguistics. "
-        "At speeds above ~300 WPM, the brain is forced to abandon subvocalization "
-        "(internal speech) and process text visually, building a direct pathway "
-        "from visual input to comprehension.\n\n"
-        "BENEFITS:\n"
-        "- Eliminates eye movement overhead, isolating pure word processing speed\n"
-        "- Breaks the subvocalization habit by exceeding inner speech rate\n"
-        "- Trains rapid lexical access — recognizing words faster\n"
-        "- Builds comfort with higher reading speeds before applying them to "
-        "normal text\n"
-        "- Measurable: track your comfortable WPM over time"
-    ),
-    "chunking": (
-        "CHUNKING (PHRASE READING)",
-        "HOW TO USE:\n"
-        "Paste your text, choose how many words per chunk (2-6), set the display "
-        "speed, and press Start. Word groups flash at the center of the screen. "
-        "Read each group as a single unit of meaning.\n\n"
-        "THE SCIENCE:\n"
-        "Miller's Law (1956) established that working memory holds ~7 chunks of "
-        "information. By grouping words into meaningful phrases, you effectively "
-        "multiply the text processed per cognitive 'slot.' Skilled readers "
-        "naturally fixate on word groups rather than individual words — their "
-        "perceptual span covers 2-4 words per fixation (Rayner, 1998). Chunking "
-        "training accelerates this transition from word-by-word to phrase-level "
-        "reading.\n\n"
-        "BENEFITS:\n"
-        "- Trains the brain to process word groups as single units\n"
-        "- Directly reduces the number of fixations needed per line\n"
-        "- Builds the core skill that separates fast readers from slow ones\n"
-        "- Complements RSVP: RSVP trains speed, chunking trains breadth\n"
-        "- Improves reading comprehension by preserving phrase-level meaning"
-    ),
-    "sequence_memory": (
-        "SEQUENCE MEMORY",
-        "HOW TO USE:\n"
-        "A sequence of items (numbers, words, or both) flashes one at a time. "
-        "After the last item, reproduce the sequence in the correct order by "
-        "clicking the buttons. The sequence gets longer when you succeed and "
-        "shorter when you fail (staircase method).\n\n"
-        "THE SCIENCE:\n"
-        "Working memory capacity is one of the strongest predictors of reading "
-        "comprehension and general cognitive ability (Conway et al., 2005). "
-        "Sequence recall tasks engage the phonological loop and visuospatial "
-        "sketchpad — the two subsystems of Baddeley's working memory model. "
-        "Training with increasing sequence lengths pushes the capacity boundary, "
-        "and the staircase method keeps difficulty at the optimal challenge point "
-        "where learning is most efficient (Ericsson, 2006).\n\n"
-        "BENEFITS:\n"
-        "- Expands working memory span for reading and learning\n"
-        "- Trains ordered recall, which supports text comprehension\n"
-        "- Number mode builds digit span (used in cognitive assessments)\n"
-        "- Word mode strengthens verbal working memory\n"
-        "- Mixed mode trains cognitive flexibility and dual coding"
-    ),
-    "rapid_decision": (
-        "RAPID DECISION GRID",
-        "HOW TO USE:\n"
-        "A grid of numbers appears. Follow the rule for the selected mode:\n"
-        "- Ascending: classic 1\u21922\u21923... order\n"
-        "- Descending: start from the highest number\n"
-        "- Even Only: click only even numbers in ascending order\n"
-        "- Odd Only: click only odd numbers in ascending order\n"
-        "- Alternating Colors: red numbers ascending, blue descending, "
-        "alternate between them\n"
-        "- Timed modes add a countdown — finish before time runs out.\n\n"
-        "THE SCIENCE:\n"
-        "Adding rules to visual search tasks engages executive function and "
-        "the prefrontal cortex alongside the attention networks used in standard "
-        "Schulte grids. This dual demand — visual search plus rule application — "
-        "mirrors real-world decision-making under time pressure (Diamond, 2013). "
-        "Research on task-switching shows that practicing rule alternation improves "
-        "cognitive flexibility and reduces switch costs.\n\n"
-        "BENEFITS:\n"
-        "- Trains decision speed under cognitive load\n"
-        "- Improves task-switching and cognitive flexibility\n"
-        "- Strengthens inhibitory control (ignoring irrelevant numbers)\n"
-        "- Builds on Schulte grid skills with higher-order demands"
-    ),
-    "peripheral_flash": (
-        "PERIPHERAL FLASH",
-        "HOW TO USE:\n"
-        "Keep your eyes fixed on the center cross at all times. A stimulus "
-        "(letter, number, or shape) will flash briefly at the edge of the screen. "
-        "Identify what appeared without moving your eyes from the center.\n\n"
-        "THE SCIENCE:\n"
-        "Peripheral vision processes information through the magnocellular pathway, "
-        "which is faster but lower resolution than central (foveal) vision. Training "
-        "peripheral awareness expands the useful field of view (UFOV), a measure "
-        "strongly correlated with reading speed, driving safety, and athletic "
-        "performance (Ball et al., 1988). Professional athletes and esports players "
-        "consistently show wider UFOV than untrained individuals.\n\n"
-        "BENEFITS:\n"
-        "- Expands useful field of view for faster reading\n"
-        "- Trains stimulus detection without eye movement\n"
-        "- Improves situational awareness for sports and driving\n"
-        "- Strengthens the magnocellular visual pathway\n"
-        "- Difficulty scales via flash duration and eccentricity"
-    ),
-    "mot": (
-        "MULTIPLE OBJECT TRACKING",
-        "HOW TO USE:\n"
-        "Several dots appear on screen. Some are highlighted as targets. "
-        "Memorize which ones are targets, then all dots become identical and "
-        "start moving. Track the targets with your attention (not your eyes). "
-        "When movement stops, click the dots you believe were the targets. "
-        "Selected dots turn highlighted — feedback is only shown after all "
-        "selections are made: green = correct, orange = missed target, "
-        "red = wrong pick.\n\n"
-        "THE SCIENCE:\n"
-        "Multiple Object Tracking (MOT) was introduced by Pylyshyn & Storm (1988) "
-        "to study how the visual system tracks multiple moving objects simultaneously. "
-        "NeuroTracker, a commercial MOT system, is used by professional sports teams "
-        "(NFL, NHL, Premier League) and military organizations. Research shows MOT "
-        "training transfers to improved decision-making in dynamic environments "
-        "(Faubert & Sidebottom, 2012) and correlates with athletic performance.\n\n"
-        "BENEFITS:\n"
-        "- Trains sustained attention across multiple moving objects\n"
-        "- Improves dynamic visual acuity and spatial awareness\n"
-        "- Enhances performance in fast-paced sports and gaming\n"
-        "- Strengthens the dorsal attention network\n"
-        "- Difficulty scales via target count, speed, and duration"
-    ),
-    "split_attention": (
-        "SPLIT ATTENTION",
-        "HOW TO USE:\n"
-        "Two tasks happen each round. A word flashes in the center — remember it. "
-        "At the same time (or just after), a colored shape appears at the screen "
-        "edge. After both disappear you answer two questions: which word was shown, "
-        "and which shape appeared.\n\n"
-        "Sequential mode shows the center word first, then the peripheral shape. "
-        "Simultaneous mode shows both at once, demanding true divided attention.\n\n"
-        "THE SCIENCE:\n"
-        "Divided attention tasks measure the brain's ability to process multiple "
-        "information streams in parallel. Neuroimaging studies (Corbetta & Shulman, "
-        "2002) show that the dorsal and ventral attention networks must coordinate "
-        "when attention is split between central and peripheral targets. Training "
-        "this coordination improves multitasking performance and reduces attentional "
-        "bottleneck effects (Dux et al., 2009).\n\n"
-        "BENEFITS:\n"
-        "- Trains divided attention across central and peripheral vision\n"
-        "- Improves multitasking under time pressure\n"
-        "- Strengthens coordination between dorsal and ventral attention networks\n"
-        "- Transfers to real-world tasks like driving, sports, and monitoring\n"
-        "- Difficulty scales via flash duration and simultaneous vs. sequential mode"
-    ),
-    "reaction_time": (
-        "REACTION TIME",
-        "HOW TO USE:\n"
-        "Simple: A green circle appears after a random delay. Click or press "
-        "X as fast as you can. Responding before the stimulus appears counts "
-        "as 'too early' and the round is repeated.\n\n"
-        "Choice: A colored shape appears — press the matching number key "
-        "(1 = Green, 2 = Red, 3 = Blue, 4 = Yellow). "
-        "Press X to skip a round. Speed and accuracy both matter.\n\n"
-        "Go/No-Go: Green circle = click or X (Go). Red circle = don't react "
-        "(No-Go). Tests impulse control — false alarms on red count against you.\n\n"
-        "KEYBOARD:\n"
-        "X — respond (all modes)  |  1-4 — select color (choice mode)\n"
-        "Ctrl+Enter — start exercise from config screen\n\n"
-        "THE SCIENCE:\n"
-        "Simple reaction time averages 200-250ms in adults (Luce, 1986). "
-        "Choice reaction time increases logarithmically with the number of "
-        "alternatives (Hick's Law, 1952). Go/No-Go tasks engage the right "
-        "inferior frontal gyrus for response inhibition (Aron et al., 2004). "
-        "Regular training can reduce reaction times by 10-20% and improve "
-        "inhibitory control.\n\n"
-        "BENEFITS:\n"
-        "- Measures and improves processing speed\n"
-        "- Choice mode trains rapid decision-making under uncertainty\n"
-        "- Go/No-Go strengthens impulse control and response inhibition\n"
-        "- Results use median RT (resistant to outliers)\n"
-        "- Transfers to driving, sports, and gaming performance"
-    ),
-    "slide_processing": (
-        "SLIDE PROCESSING",
-        "HOW TO USE:\n"
-        "A text slide with facts, numbers, and details appears for a limited "
-        "time. Read and absorb as much as you can before it disappears. "
-        "Then answer 2-3 comprehension questions about specific details.\n\n"
-        "A countdown timer shows remaining display time. Focus on numbers, "
-        "names, and key facts — questions target specific details, not "
-        "general understanding.\n\n"
-        "THE SCIENCE:\n"
-        "Rapid information extraction is a core skill in speed reading. "
-        "Research by Rayner & Castelhano (2007) shows that trained readers "
-        "develop efficient scanning patterns that prioritize high-information "
-        "regions. The ability to extract key facts from briefly presented "
-        "material improves with practice and transfers to real-world tasks "
-        "like skimming reports, processing dashboards, and studying.\n\n"
-        "BENEFITS:\n"
-        "- Trains rapid extraction of key information\n"
-        "- Improves scanning efficiency and prioritization\n"
-        "- Builds working memory for structured data\n"
-        "- Difficulty scales via display time and content density\n"
-        "- Transfers to report reading, studying, and data analysis"
-    ),
-    "spaced_repetition": (
-        "SPACED REPETITION",
-        "HOW TO USE:\n"
-        "Select a deck and configure options on the right panel. "
-        "A reading phase shows all cards (front and back) so you can "
-        "familiarize yourself — skip it anytime with 'Skip to Review'. "
-        "During review, recall the answer, then press X or click "
-        "'Show Answer' to reveal it. Rate your recall: Again (forgot), "
-        "Hard, Good, or Easy. The system schedules the next review based "
-        "on your rating.\n\n"
-        "OPTIONS:\n"
-        "Normal / Reverse — Reverse shows the back and asks you to recall "
-        "the front.\n"
-        "Time Limit — Adds a countdown per card. The answer auto-reveals "
-        "when time runs out.\n"
-        "Session Size — Limits how many cards per session.\n\n"
-        "KEYBOARD:\n"
-        "X — reveal answer  |  1-4 — rate (Again/Hard/Good/Easy)\n"
-        "Arrow keys or A/D — navigate reading phase\n\n"
-        "THE SCIENCE:\n"
-        "Spaced repetition exploits the spacing effect (Ebbinghaus, 1885): "
-        "information is retained longer when reviews are spread over increasing "
-        "intervals. The SM-2 algorithm (Wozniak, 1990) adapts intervals based on "
-        "recall quality, keeping each card at the optimal review point just before "
-        "forgetting. This is the most efficient known method for long-term "
-        "memorization, used by medical students, language learners, and "
-        "competitive memory athletes.\n\n"
-        "BENEFITS:\n"
-        "- Maximizes retention with minimal review time\n"
-        "- Adapts to individual learning speed per card\n"
-        "- Builds durable long-term memory\n"
-        "- 10 built-in decks across vocabulary, science, history, and more\n"
-        "- Create custom decks for any subject\n"
-        "- Streak tracking rewards consistent recall"
-    ),
-}
+# Exercise guide texts — content lives in locales/*.json
+_GUIDE_KEYS = [
+    "flash",
+    "eyespan",
+    "schulte",
+    "pacer",
+    "priming",
+    "rsvp",
+    "chunking",
+    "sequence_memory",
+    "rapid_decision",
+    "peripheral_flash",
+    "mot",
+    "split_attention",
+    "reaction_time",
+    "slide_processing",
+    "spaced_repetition",
+]
+
+
+def get_exercise_guide(topic: str) -> tuple[str, str]:
+    """Return (title, body) for the given guide topic, translated."""
+    return (
+        tr(f"guide.{topic}.title"),
+        tr(f"guide.{topic}.body"),
+    )
+
+
+# Backward-compatible dict-like access
+class _GuideProxy(dict):
+    """Lazy dict that returns tr()-based guide content on access."""
+    def get(self, key, default=None):
+        if key in _GUIDE_KEYS:
+            return get_exercise_guide(key)
+        return default
+    def __getitem__(self, key):
+        if key in _GUIDE_KEYS:
+            return get_exercise_guide(key)
+        raise KeyError(key)
+    def __contains__(self, key):
+        return key in _GUIDE_KEYS
+
+
+EXERCISE_GUIDES = _GuideProxy()
 
 # Spaced Repetition configuration
 SR_CONFIG = {

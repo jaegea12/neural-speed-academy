@@ -266,10 +266,10 @@ class StatsScreen(BaseScreen):
         stats_row = QHBoxLayout()
         level = user.xp // 1000 + 1
         stats = [
-            ("TOTAL XP", str(user.xp), c["accent"]),
-            ("LEVEL", str(level), c["action"]),
-            ("STREAK", f"{user.streak} day{'s' if user.streak != 1 else ''}", c["highlight"]),
-            ("SESSIONS", str(len(user.history)), c["text_on_card"]),
+            (tr("stats.total_xp"), str(user.xp), c["accent"]),
+            (tr("stats.level"), str(level), c["action"]),
+            (tr("stats.streak"), tr("stats.streak_days", count=user.streak), c["highlight"]),
+            (tr("stats.sessions"), str(len(user.history)), c["text_on_card"]),
         ]
         for label, value, color in stats:
             cell = QVBoxLayout()
@@ -304,7 +304,7 @@ class StatsScreen(BaseScreen):
         )
         bar_row.addWidget(progress)
 
-        xp_label = QLabel(f"{xp_in_level}/1000 XP to Level {level + 1}")
+        xp_label = QLabel(tr("stats.xp_to_next", current=xp_in_level, level=level + 1))
         xp_label.setFont(make_qfont("btn_sm"))
         xp_label.setStyleSheet(f"color: {c['muted']};")
         bar_row.addWidget(xp_label)
@@ -346,9 +346,7 @@ class StatsScreen(BaseScreen):
         )
         total_days = (today - start).days + 1
         pct = round(recent_count / total_days * 100) if total_days else 0
-        summary = QLabel(
-            f"{recent_count} active days in the last 12 weeks ({pct}%)"
-        )
+        summary = QLabel(tr("stats.active_days", count=recent_count, pct=pct))
         summary.setFont(make_qfont("body"))
         summary.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(summary)
@@ -730,7 +728,7 @@ class StatsScreen(BaseScreen):
         header_row.addStretch()
 
         if user.history:
-            count_lbl = QLabel(f"{len(user.history)} sessions")
+            count_lbl = QLabel(tr("stats.session_count", count=len(user.history)))
             count_lbl.setFont(make_qfont("body"))
             count_lbl.setStyleSheet(f"color: {c['muted']};")
             header_row.addWidget(count_lbl)
@@ -788,11 +786,7 @@ class StatsScreen(BaseScreen):
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
 
-        desc = QLabel(
-            "Export session history with exercise parameters, scores, "
-            "and timing data. CSV is Excel-compatible; JSON is for "
-            "programmatic analysis in R, SPSS, or Python."
-        )
+        desc = QLabel(tr("stats.export_desc"))
         desc.setFont(make_qfont("body"))
         desc.setStyleSheet(f"color: {c['muted']};")
         desc.setWordWrap(True)
@@ -801,7 +795,7 @@ class StatsScreen(BaseScreen):
         layout.addSpacing(6)
 
         # Anonymize checkbox
-        self._anon_check = QCheckBox("Anonymize (replace name with participant ID)")
+        self._anon_check = QCheckBox(tr("stats.anonymize"))
         self._anon_check.setFont(make_qfont("body"))
         self._anon_check.setStyleSheet(
             f"QCheckBox {{ color: {c['fg']}; spacing: 8px; }}"
@@ -818,8 +812,8 @@ class StatsScreen(BaseScreen):
         row = QHBoxLayout()
         row.setSpacing(8)
         for text, cb in [
-            ("EXPORT CSV", lambda: self._export_csv(user)),
-            ("EXPORT JSON", lambda: self._export_json(user)),
+            (tr("stats.export_csv"), lambda: self._export_csv(user)),
+            (tr("stats.export_json"), lambda: self._export_json(user)),
         ]:
             btn = QPushButton(text)
             btn.setStyleSheet(
@@ -853,13 +847,13 @@ class StatsScreen(BaseScreen):
     def _export_csv(self, user) -> None:
         if not user.history:
             QMessageBox.information(
-                self, "No Data", "No session history to export."
+                self, tr("stats.no_data"), tr("stats.no_data_to_export")
             )
             return
         name = self._export_name(user)
         default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.csv"
         path, _ = QFileDialog.getSaveFileName(
-            self, "Export CSV", default_name, "CSV files (*.csv)"
+            self, tr("stats.export_csv"), default_name, "CSV files (*.csv)"
         )
         if not path:
             return
@@ -902,21 +896,22 @@ class StatsScreen(BaseScreen):
                 writer.writerow(["Exported", datetime.now().isoformat()])
 
             QMessageBox.information(
-                self, "Exported",
-                f"Data saved to:\n{os.path.basename(path)}\n\n"
-                f"{len(user.history)} sessions, "
-                f"{len(meta_keys)} metadata fields.",
+                self, tr("stats.exported"),
+                tr("stats.exported_msg",
+                   file=os.path.basename(path),
+                   sessions=len(user.history),
+                   fields=len(meta_keys)),
             )
         except OSError as e:
             QMessageBox.critical(
-                self, "Export Error", f"Could not save file:\n{e}"
+                self, tr("stats.export_error"), tr("stats.export_error_msg", error=e)
             )
 
     def _export_json(self, user) -> None:
         name = self._export_name(user)
         default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.json"
         path, _ = QFileDialog.getSaveFileName(
-            self, "Export JSON", default_name, "JSON files (*.json)"
+            self, tr("stats.export_json"), default_name, "JSON files (*.json)"
         )
         if not path:
             return
@@ -942,11 +937,12 @@ class StatsScreen(BaseScreen):
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             QMessageBox.information(
-                self, "Exported",
-                f"Data saved to:\n{os.path.basename(path)}\n\n"
-                f"{len(user.history)} sessions with full metadata.",
+                self, tr("stats.exported"),
+                tr("stats.exported_json_msg",
+                   file=os.path.basename(path),
+                   sessions=len(user.history)),
             )
         except OSError as e:
             QMessageBox.critical(
-                self, "Export Error", f"Could not save file:\n{e}"
+                self, tr("stats.export_error"), tr("stats.export_error_msg", error=e)
             )

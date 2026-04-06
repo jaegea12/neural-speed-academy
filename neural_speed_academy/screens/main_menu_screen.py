@@ -80,7 +80,7 @@ class MainMenuScreen(BaseScreen):
         buttons: list[tuple[str, str, str, object]] = []
 
         if logged_in:
-            welcome = QLabel(f"Welcome back, {user.name}")
+            welcome = QLabel(tr("main.menu.welcome_back", name=user.name))
             welcome.setFont(make_qfont("section_header"))
             welcome.setStyleSheet(f"color: {c['fg']};")
             welcome.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -88,28 +88,30 @@ class MainMenuScreen(BaseScreen):
             cl.addSpacing(12)
 
             buttons.append(
-                ("CONTINUE TRAINING", c["accent"], c["btn_text"],
+                (tr("main.menu.continue_training"), c["accent"], c["btn_text"],
                  lambda: self.navigator.to_dashboard()),
             )
             buttons.append(
-                ("SWITCH PROFILE", c["card"], c["text_on_card"],
+                (tr("main.menu.switch_profile"), c["card"], c["text_on_card"],
                  lambda: self.navigator.navigate_to("login")),
             )
         else:
             buttons.append(
-                ("LOGIN", c["accent"], c["btn_text"],
+                (tr("main.menu.login"), c["accent"], c["btn_text"],
                  lambda: self.navigator.navigate_to("login")),
             )
 
         buttons += [
-            ("TRAINING PATHS", c["accent"], c["btn_text"],
+            (tr("main.menu.training_paths"), c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("paths")),
-            ("INTRODUCTION", c["accent"], c["btn_text"],
+            (tr("main.menu.introduction"), c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("introduction")),
-            ("SETTINGS", c["muted"], c["bg"],
+            (tr("main.menu.language"), c["accent"], c["btn_text"],
+             lambda: self.navigator.navigate_to("language")),
+            (tr("main.menu.settings"), c["muted"], c["bg"],
              lambda: self.navigator.navigate_to("settings")),
-            ("INFORMATION", c["muted"], c["bg"], self._show_info),
-            ("QUIT", c["alert"], c["btn_text"], self._quit),
+            (tr("main.menu.information"), c["muted"], c["bg"], self._show_info),
+            (tr("main.menu.quit"), c["alert"], c["btn_text"], self._quit),
         ]
 
         for text, bg, fg, callback in buttons:
@@ -151,15 +153,7 @@ class MainMenuScreen(BaseScreen):
         title.setWordWrap(True)
         layout.addWidget(title)
 
-        body = QLabel(
-            "A desktop application for speed reading\n"
-            "and cognitive training.\n\n"
-            "15 exercises across three categories:\n"
-            "Perception \u2022 Cognition \u2022 Reading\n\n"
-            "16 training paths \u2022 9 color profiles\n"
-            "Progress tracking \u2022 CSV/JSON export\n"
-            "Per-user profiles \u2022 Adjustable font scale"
-        )
+        body = QLabel(tr("main.menu.info_body"))
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['text_on_card']};")
         body.setAlignment(Qt.AlignmentFlag.AlignCenter)
