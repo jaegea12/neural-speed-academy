@@ -23,6 +23,7 @@ class RsvpExercise(BaseExercise):
         self.words: list = []
         self.word_idx: int = 0
         self.wpm: int = 300
+        self._last_wpm: int | None = None
 
     @property
     def name(self) -> str:
@@ -76,7 +77,7 @@ class RsvpExercise(BaseExercise):
         cl.addWidget(self._text_lib)
 
         # WPM: label + slider + value in one row
-        initial_wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
+        initial_wpm = self._last_wpm or kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
         wpm_row = QHBoxLayout()
         wpm_row.setContentsMargins(0, 0, 0, 0)
         wpm_row.setSpacing(8)
@@ -135,6 +136,7 @@ class RsvpExercise(BaseExercise):
         theme_manager.training_text = text
         theme_manager.save()
         wpm = self._wpm_slider.value()
+        self._last_wpm = wpm
         self._run_rsvp(text, wpm)
 
     def _run_rsvp(self, text: str, wpm: int) -> None:

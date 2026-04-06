@@ -86,6 +86,11 @@ class PacerExercise(BaseExercise):
         self._n_lines: int = 3
         self._chunk_size: int = 3
         self._start_time: float = 0.0
+        # Preserved config state across stop/restart
+        self._last_wpm: int | None = None
+        self._last_mode: str | None = None
+        self._last_chunk: int | None = None
+        self._last_nlines: int | None = None
 
     @property
     def name(self) -> str:
@@ -154,11 +159,11 @@ class PacerExercise(BaseExercise):
         self._wpm_slider.setRange(
             PACER_CONFIG["min_wpm"], PACER_CONFIG["max_wpm"]
         )
-        self._wpm_slider.setValue(PACER_CONFIG["default_wpm"])
+        self._wpm_slider.setValue(self._last_wpm or PACER_CONFIG["default_wpm"])
         self._wpm_slider.setFixedWidth(300)
         self._wpm_slider.setStyleSheet(slider_groove)
 
-        self._wpm_display = QLabel(str(PACER_CONFIG["default_wpm"]))
+        self._wpm_display = QLabel(str(self._last_wpm or PACER_CONFIG["default_wpm"]))
         self._wpm_display.setFont(make_qfont("counter"))
         self._wpm_display.setStyleSheet(f"color: {c['accent']};")
         self._wpm_display.setFixedWidth(50)
@@ -187,7 +192,7 @@ class PacerExercise(BaseExercise):
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
             rb.setProperty("mode_key", key)
-            if key == "single":
+            if key == (self._last_mode or "single"):
                 rb.setChecked(True)
             self._mode_group.addButton(rb)
             mode_row.addWidget(rb)
@@ -205,13 +210,14 @@ class PacerExercise(BaseExercise):
         chunk_lbl.setStyleSheet(f"color: {c['fg']};")
         chunk_row.addWidget(chunk_lbl)
 
+        init_chunk = self._last_chunk or 3
         self._chunk_slider = QSlider(Qt.Orientation.Horizontal)
         self._chunk_slider.setRange(1, 10)
-        self._chunk_slider.setValue(3)
+        self._chunk_slider.setValue(init_chunk)
         self._chunk_slider.setFixedWidth(200)
         self._chunk_slider.setStyleSheet(slider_groove)
 
-        self._chunk_display = QLabel("3")
+        self._chunk_display = QLabel(str(init_chunk))
         self._chunk_display.setFont(make_qfont("counter"))
         self._chunk_display.setStyleSheet(f"color: {c['accent']};")
         self._chunk_display.setFixedWidth(30)
@@ -235,13 +241,14 @@ class PacerExercise(BaseExercise):
         nlines_lbl.setStyleSheet(f"color: {c['fg']};")
         nlines_row.addWidget(nlines_lbl)
 
+        init_nlines = self._last_nlines or 3
         self._nlines_slider = QSlider(Qt.Orientation.Horizontal)
         self._nlines_slider.setRange(2, 5)
-        self._nlines_slider.setValue(3)
+        self._nlines_slider.setValue(init_nlines)
         self._nlines_slider.setFixedWidth(150)
         self._nlines_slider.setStyleSheet(slider_groove)
 
-        self._nlines_display = QLabel("3")
+        self._nlines_display = QLabel(str(init_nlines))
         self._nlines_display.setFont(make_qfont("counter"))
         self._nlines_display.setStyleSheet(f"color: {c['accent']};")
         self._nlines_display.setFixedWidth(20)
@@ -252,7 +259,9 @@ class PacerExercise(BaseExercise):
         nlines_row.addWidget(self._nlines_display)
         nlines_row.addStretch()
 
-        self._nlines_frame.setVisible(False)
+        self._nlines_frame.setVisible(
+            (self._last_mode or "single") in ("multi", "zpattern")
+        )
         cl.addWidget(self._nlines_frame)
 
         # Text size toggle
@@ -400,6 +409,11 @@ class PacerExercise(BaseExercise):
                 break
         self._n_lines = self._nlines_slider.value()
         self._chunk_size = self._chunk_slider.value()
+        # Save config so stop/restart preserves settings
+        self._last_wpm = wpm
+        self._last_mode = mode
+        self._last_chunk = self._chunk_size
+        self._last_nlines = self._n_lines
         self._run_pacer(text, wpm, mode)
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:

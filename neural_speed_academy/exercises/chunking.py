@@ -24,6 +24,8 @@ class ChunkingExercise(BaseExercise):
         self.wpm: int = 250
         self.chunk_size: int = 3
         self._paused: bool = False
+        self._last_wpm: int | None = None
+        self._last_chunk: int | None = None
 
     @property
     def name(self) -> str:
@@ -77,7 +79,7 @@ class ChunkingExercise(BaseExercise):
         cl.addWidget(self._text_lib)
 
         # Chunk size: label + slider + value in one row
-        init_chunk = kwargs.get(
+        init_chunk = self._last_chunk or kwargs.get(
             "chunk_size", CHUNKING_CONFIG["default_chunk_size"]
         )
         chunk_row = QHBoxLayout()
@@ -111,7 +113,7 @@ class ChunkingExercise(BaseExercise):
         cl.addLayout(chunk_row)
 
         # WPM: label + slider + value in one row
-        init_wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+        init_wpm = self._last_wpm or kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
         wpm_row = QHBoxLayout()
         wpm_row.setContentsMargins(0, 0, 0, 0)
         wpm_row.setSpacing(8)
@@ -169,7 +171,9 @@ class ChunkingExercise(BaseExercise):
         # Persist so the text survives exercise re-entry
         theme_manager.training_text = text
         theme_manager.save()
-        self._run_chunking(text, self._chunk_slider.value(), self._wpm_slider.value())
+        self._last_chunk = self._chunk_slider.value()
+        self._last_wpm = self._wpm_slider.value()
+        self._run_chunking(text, self._last_chunk, self._last_wpm)
 
     def _build_chunks(self, text: str, size: int) -> list:
         words = text.split()
