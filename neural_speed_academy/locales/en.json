@@ -303,5 +303,6 @@
   "login.welcome": "Welcome back, {name}",
   "menu.welcome": "Welcome back, {name}",
   "slide.creator.remove_slide": "- SLIDE",
-  "slide.creator.questions": "Questions:"
+  "slide.creator.questions": "Questions:",
+  "settings.language": "LANGUAGE"
 }

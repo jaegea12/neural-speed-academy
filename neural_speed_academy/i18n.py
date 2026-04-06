@@ -37,6 +37,27 @@ def current_locale() -> str:
     return _current_locale
 
 
+def available_locales() -> dict[str, str]:
+    """Return a dict of locale_code -> display_name for all available catalogs."""
+    _LOCALE_NAMES = {
+        "en": "English",
+        "de": "Deutsch",
+        "fr": "Français",
+        "es": "Español",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "ja": "日本語",
+        "zh": "中文",
+        "ko": "한국어",
+    }
+    locales = {}
+    for f in sorted(_LOCALES_DIR.glob("*.json")):
+        code = f.stem
+        locales[code] = _LOCALE_NAMES.get(code, code)
+    return locales
+
+
 def tr(key: str, **kwargs) -> str:
     """Look up a translation by key, with optional format parameters.
 

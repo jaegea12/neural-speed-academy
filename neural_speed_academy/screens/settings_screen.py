@@ -16,7 +16,7 @@ from neural_speed_academy.theme import (
     COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, btn_css,
     theme_manager,
 )
-from neural_speed_academy.i18n import tr
+from neural_speed_academy.i18n import tr, available_locales
 
 
 def _radio_style(c: dict) -> str:
@@ -48,6 +48,7 @@ class SettingsScreen(BaseScreen):
             self._initial_fov = theme_manager.fov
             self._initial_fullscreen = theme_manager.fullscreen
             self._initial_text = theme_manager.training_text
+            self._initial_locale = theme_manager.locale
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(50, 20, 50, 20)
@@ -171,6 +172,29 @@ class SettingsScreen(BaseScreen):
         self._disp_group.buttonClicked.connect(self._on_display_changed)
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
+
+        # -- LANGUAGE section --
+        lang_section = QVBoxLayout()
+        lang_section.setSpacing(4)
+        sec_lang = QLabel(tr("settings.language"))
+        sec_lang.setFont(make_qfont("section_header"))
+        sec_lang.setStyleSheet(f"color: {c['accent']};")
+        lang_section.addWidget(sec_lang)
+
+        self._lang_group = QButtonGroup(self)
+        locales = available_locales()
+        for code, name in locales.items():
+            rb = QRadioButton(name)
+            rb.setFont(make_qfont("btn"))
+            rb.setStyleSheet(rb_style)
+            rb.setProperty("locale_key", code)
+            rb.setChecked(code == theme_manager.locale)
+            self._lang_group.addButton(rb)
+            lang_section.addWidget(rb)
+        self._lang_group.buttonClicked.connect(self._on_language_changed)
+        lang_section.addStretch()
+        top_row.addLayout(lang_section, 1)
+
         top_row.addStretch(1)
 
         cl.addLayout(top_row)
@@ -345,6 +369,8 @@ class SettingsScreen(BaseScreen):
             return True
         if theme_manager.fullscreen != self._initial_fullscreen:
             return True
+        if theme_manager.locale != self._initial_locale:
+            return True
         if hasattr(self, '_text_lib'):
             current_text = self._text_lib.text().strip() or theme_manager.training_text
             if current_text != self._initial_text:
@@ -381,6 +407,7 @@ class SettingsScreen(BaseScreen):
             theme_manager.set_profile(self._initial_profile)
             theme_manager.fov = self._initial_fov
             theme_manager.fullscreen = self._initial_fullscreen
+            theme_manager.locale = self._initial_locale
             return True
         else:
             return False
@@ -413,6 +440,13 @@ class SettingsScreen(BaseScreen):
             else:
                 app._set_windowed()
 
+    def _on_language_changed(self, btn) -> None:
+        code = btn.property("locale_key")
+        theme_manager.locale = code
+        theme_manager.save()
+        # Rebuild the screen to show translated labels
+        self.show_screen()
+
     def _save(self) -> None:
         theme_manager.training_text = self._text_lib.text()
         theme_manager.save()
@@ -421,6 +455,7 @@ class SettingsScreen(BaseScreen):
         self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
+        self._initial_locale = theme_manager.locale
 
     def _reset_defaults(self) -> None:
         theme_manager.reset_defaults()
@@ -429,4 +464,5 @@ class SettingsScreen(BaseScreen):
         self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
+        self._initial_locale = theme_manager.locale
         self.show_screen()
