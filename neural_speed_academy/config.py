@@ -1422,6 +1422,174 @@ TEXT_LIBRARY = {
     ),
 }
 
+TEXT_LIBRARY_DE = {
+    "Grundlagen des Schnelllesens": (
+        "Leicht",
+        "Schnelllesen ist die Fähigkeit, Texte deutlich schneller als der Durchschnitt "
+        "zu erfassen, ohne dabei das Verständnis zu verlieren. Die meisten Menschen lesen "
+        "mit einer Geschwindigkeit von etwa 200 bis 250 Wörtern pro Minute. Mit gezieltem "
+        "Training lässt sich diese Rate verdoppeln oder sogar verdreifachen. Der Schlüssel "
+        "liegt darin, wie unsere Augen und unser Gehirn zusammenarbeiten. Beim normalen "
+        "Lesen fixieren die Augen jedes einzelne Wort, oft sogar mehrfach. Geübte Leser "
+        "hingegen erfassen ganze Wortgruppen in einer einzigen Fixation. Sie nutzen den "
+        "Kontext und ihr Vorwissen, um Bedeutung schneller zu erschließen. Ein weiterer "
+        "Faktor ist die Subvokalisierung — das innere Mitsprechen beim Lesen. Diese "
+        "Gewohnheit begrenzt die Lesegeschwindigkeit auf das Tempo der gesprochenen "
+        "Sprache. Durch Training kann man lernen, Wörter direkt visuell zu verarbeiten, "
+        "ohne sie innerlich auszusprechen. Ebenso wichtig ist es, Regressionen zu "
+        "vermeiden — das unbewusste Zurückspringen zu bereits gelesenen Textstellen. "
+        "Ein Pacer hilft dabei, den Blick konsequent vorwärts zu führen. Das Ziel ist "
+        "nicht nur Geschwindigkeit, sondern ein effizienterer Leseprozess insgesamt."
+    ),
+    "Die Wissenschaft des Gedächtnisses": (
+        "Leicht",
+        "Unser Gedächtnis ist keine einzelne Funktion, sondern ein komplexes System "
+        "aus mehreren Komponenten. Das sensorische Gedächtnis hält Sinneseindrücke für "
+        "Bruchteile von Sekunden fest. Das Arbeitsgedächtnis — oft auch Kurzzeitgedächtnis "
+        "genannt — kann etwa sieben Informationseinheiten gleichzeitig verarbeiten und "
+        "behält sie für 20 bis 30 Sekunden. Das Langzeitgedächtnis speichert Informationen "
+        "potenziell unbegrenzt. Der Übergang vom Arbeits- ins Langzeitgedächtnis gelingt "
+        "am besten durch Wiederholung, emotionale Verknüpfung und aktive Verarbeitung. "
+        "Hermann Ebbinghaus entdeckte bereits 1885 die Vergessenskurve: Ohne Wiederholung "
+        "vergessen wir innerhalb einer Stunde etwa 50 Prozent des Gelernten. Die verteilte "
+        "Wiederholung — das Lernen in zunehmenden Abständen — ist die effektivste bekannte "
+        "Methode gegen dieses Vergessen. Auch Schlaf spielt eine entscheidende Rolle. "
+        "Während wir schlafen, konsolidiert das Gehirn Erinnerungen und überträgt sie "
+        "vom Hippocampus in den Neokortex. Wer nach dem Lernen ausreichend schläft, "
+        "behält deutlich mehr als jemand, der die Nacht durcharbeitet."
+    ),
+    "Konzentration und Fokus": (
+        "Leicht",
+        "Konzentration ist die Fähigkeit, die Aufmerksamkeit bewusst auf eine Aufgabe "
+        "zu richten und Ablenkungen auszublenden. In einer Welt voller Benachrichtigungen "
+        "und ständiger Erreichbarkeit wird diese Fähigkeit immer wertvoller — und immer "
+        "seltener. Studien zeigen, dass der durchschnittliche Büroangestellte alle drei "
+        "Minuten unterbrochen wird und bis zu 23 Minuten braucht, um wieder in den "
+        "Zustand tiefer Konzentration zurückzufinden. Dieser Zustand, den der Psychologe "
+        "Mihaly Csikszentmihalyi als Flow bezeichnet, ist der Schlüssel zu Höchstleistung. "
+        "Im Flow verschmelzen Handlung und Bewusstsein, die Zeit scheint stillzustehen, "
+        "und die Arbeit fühlt sich mühelos an. Flow entsteht, wenn die Anforderung einer "
+        "Aufgabe genau dem eigenen Können entspricht — weder zu leicht noch zu schwer. "
+        "Konzentration lässt sich trainieren wie ein Muskel. Kurze, regelmäßige Übungen "
+        "sind dabei wirksamer als seltene Marathonsitzungen. Schon 15 bis 20 Minuten "
+        "tägliches Training können die Aufmerksamkeitsspanne messbar verbessern."
+    ),
+    "Neuroplastizität und Lernen": (
+        "Mittel",
+        "Neuroplastizität bezeichnet die Fähigkeit des Gehirns, sich durch Erfahrung "
+        "und Training strukturell und funktionell zu verändern. Lange glaubte die "
+        "Wissenschaft, dass das Gehirn nach der Kindheit weitgehend unveränderlich sei. "
+        "Heute wissen wir, dass neuronale Netzwerke sich ein Leben lang anpassen können. "
+        "Wenn wir eine neue Fähigkeit erlernen, bilden sich neue synaptische Verbindungen. "
+        "Bei regelmäßiger Wiederholung werden diese Verbindungen stärker — ein Prozess, "
+        "den der Neurowissenschaftler Donald Hebb mit dem Prinzip zusammenfasste: Neuronen, "
+        "die gemeinsam feuern, vernetzen sich. Umgekehrt schwächen sich Verbindungen ab, "
+        "die nicht genutzt werden. Das Gehirn ist also kein statisches Organ, sondern ein "
+        "dynamisches System, das sich ständig an seine Anforderungen anpasst. Für das "
+        "Schnelllesen bedeutet das: Die visuellen und kognitiven Fähigkeiten, die schnelles "
+        "Lesen ermöglichen, lassen sich durch gezieltes Training aufbauen. Die Erweiterung "
+        "der Blickspanne, die Reduktion von Regressionen und die Beschleunigung der "
+        "Wortverarbeitung sind keine angeborenen Talente, sondern trainierbare Fertigkeiten. "
+        "Entscheidend ist die Regelmäßigkeit: Tägliche kurze Einheiten sind wirksamer als "
+        "gelegentliche intensive Sitzungen, weil sie dem Gehirn Zeit geben, die neuen "
+        "Verbindungen zu festigen."
+    ),
+    "Visuelle Wahrnehmung beim Lesen": (
+        "Mittel",
+        "Beim Lesen bewegen sich unsere Augen nicht gleichmäßig über den Text, sondern "
+        "in schnellen Sprüngen, sogenannten Sakkaden. Zwischen diesen Sprüngen verharren "
+        "die Augen für etwa 200 bis 250 Millisekunden auf einer Stelle — das sind die "
+        "Fixationen, in denen die eigentliche Informationsaufnahme stattfindet. Die "
+        "Wahrnehmungsspanne erstreckt sich dabei etwa 3 bis 4 Zeichen nach links und "
+        "14 bis 15 Zeichen nach rechts von der Fixation. Im Zentrum des Blickfelds, "
+        "der Fovea, werden Buchstaben und Wörter scharf erkannt. In der Parafovea — "
+        "dem Bereich direkt daneben — werden bereits vorbereitende Informationen über "
+        "das nächste Wort gewonnen: Wortlänge, Anfangsbuchstaben und teilweise sogar "
+        "Bedeutung. Geübte Leser nutzen diese parafoveale Vorschau besonders effektiv. "
+        "Sie benötigen weniger Fixationen pro Zeile und machen kürzere Fixationen. "
+        "Regressionen — Rücksprünge zu bereits gelesenen Wörtern — machen bei "
+        "ungeübten Lesern bis zu 15 Prozent aller Augenbewegungen aus. Training mit "
+        "einem visuellen Pacer kann diese Regressionen deutlich reduzieren und die "
+        "Lesegeschwindigkeit nachhaltig steigern."
+    ),
+    "Arbeitsgedächtnis und Leseverständnis": (
+        "Mittel",
+        "Das Arbeitsgedächtnis ist die kognitive Werkbank, auf der wir Informationen "
+        "kurzfristig halten und verarbeiten. Seine Kapazität ist begrenzt — George Miller "
+        "beschrieb 1956 die magische Zahl 7 plus minus 2 als typische Spanne. Beim Lesen "
+        "spielt das Arbeitsgedächtnis eine zentrale Rolle: Es hält den Anfang eines Satzes "
+        "im Bewusstsein, während die Augen das Ende erreichen. Es verknüpft Pronomen mit "
+        "ihren Bezugswörtern und integriert neue Informationen in das bestehende "
+        "Textverständnis. Forschung zeigt einen starken Zusammenhang zwischen "
+        "Arbeitsgedächtniskapazität und Leseverständnis. Menschen mit größerem "
+        "Arbeitsgedächtnis verstehen komplexe Texte besser, weil sie mehr Kontext "
+        "gleichzeitig verfügbar halten können. Die gute Nachricht: Das Arbeitsgedächtnis "
+        "lässt sich trainieren. Sequenz-Gedächtnis-Übungen, bei denen zunehmend lange "
+        "Folgen von Zahlen oder Wörtern reproduziert werden müssen, erweitern die "
+        "Kapazität messbar. Chunking — das Zusammenfassen einzelner Elemente zu "
+        "bedeutungsvollen Gruppen — ist eine weitere wirksame Strategie. Statt sich "
+        "sieben einzelne Ziffern zu merken, fasst man sie zu zwei oder drei Zahlengruppen "
+        "zusammen und erhöht so die effektive Speicherkapazität."
+    ),
+    "Die Kunst des aktiven Lesens": (
+        "Schwer",
+        "Aktives Lesen unterscheidet sich grundlegend vom passiven Aufnehmen von Text. "
+        "Während passive Leser ihre Augen über die Seite gleiten lassen und hoffen, dass "
+        "Informationen hängen bleiben, gehen aktive Leser strategisch vor. Sie stellen "
+        "vor dem Lesen Fragen an den Text, überfliegen zunächst die Struktur und aktivieren "
+        "ihr Vorwissen zum Thema. Während des Lesens markieren sie Schlüsselstellen, "
+        "formulieren Zusammenfassungen in eigenen Worten und stellen Verbindungen zu "
+        "bereits Bekanntem her. Nach dem Lesen überprüfen sie ihr Verständnis durch "
+        "Selbstbefragung. Diese Methode, bekannt als SQ3R (Survey, Question, Read, "
+        "Recite, Review), wurde bereits 1946 von Francis Robinson entwickelt und ist "
+        "bis heute eine der am besten erforschten Lesestrategien. Metaanalysen zeigen, "
+        "dass aktive Leser nicht nur mehr behalten, sondern den Stoff auch tiefer "
+        "verstehen und besser auf neue Situationen übertragen können. Der entscheidende "
+        "Unterschied liegt in der kognitiven Verarbeitungstiefe. Oberflächliches Lesen "
+        "aktiviert nur die phonologische Schleife — wir hören die Wörter innerlich. "
+        "Tiefes Lesen aktiviert zusätzlich semantische Netzwerke, episodisches Gedächtnis "
+        "und exekutive Funktionen. Je mehr Verarbeitungswege beteiligt sind, desto "
+        "dauerhafter und abrufbarer wird die gespeicherte Information."
+    ),
+    "Entscheidungsfindung unter Unsicherheit": (
+        "Schwer",
+        "Menschen treffen täglich Tausende von Entscheidungen, die meisten davon unbewusst. "
+        "Die Forschung von Daniel Kahneman und Amos Tversky hat gezeigt, dass unser "
+        "Entscheidungsverhalten systematisch von rationalen Modellen abweicht. Ihr "
+        "Zwei-Systeme-Modell unterscheidet zwischen System 1 — schnell, automatisch und "
+        "intuitiv — und System 2 — langsam, bewusst und analytisch. System 1 nutzt "
+        "Heuristiken, also mentale Abkürzungen, die in den meisten Situationen zu guten "
+        "Ergebnissen führen, aber auch systematische Verzerrungen erzeugen können. Der "
+        "Ankereffekt beispielsweise beschreibt unsere Tendenz, uns bei Schätzungen an "
+        "einem zuerst genannten Wert zu orientieren, selbst wenn dieser willkürlich ist. "
+        "Die Verfügbarkeitsheuristik lässt uns die Wahrscheinlichkeit von Ereignissen "
+        "überschätzen, die uns leicht in den Sinn kommen — etwa Flugzeugabstürze "
+        "gegenüber Autounfällen. Der Bestätigungsfehler führt dazu, dass wir bevorzugt "
+        "Informationen suchen und wahrnehmen, die unsere bestehenden Überzeugungen "
+        "bestätigen. Das Verständnis dieser kognitiven Verzerrungen ist der erste "
+        "Schritt, um bessere Entscheidungen zu treffen. Wer seine eigenen Denkmuster "
+        "kennt, kann bewusst System 2 aktivieren, wenn die Situation es erfordert."
+    ),
+    "Warum Lesen alles verändert": (
+        "Leicht",
+        "Lesen ist eine der wirkungsvollsten Gewohnheiten, die ein Mensch entwickeln kann. "
+        "Anders als passiver Medienkonsum verlangt Lesen aktive Beteiligung des Gehirns. "
+        "Sie konstruieren mentale Bilder, folgen Argumenten und bauen Verbindungen zwischen "
+        "Ideen auf. Dieser Prozess stärkt neuronale Pfade und verbessert kognitive "
+        "Funktionen auf eine Weise, die keine andere Aktivität replizieren kann. Studien "
+        "zeigen durchgehend, dass regelmäßige Leser einen größeren Wortschatz, stärkere "
+        "analytische Denkfähigkeiten und mehr Empathie besitzen. Das Lesen von Belletristik "
+        "ermöglicht es, die Welt aus verschiedenen Perspektiven zu erleben und emotionale "
+        "Intelligenz aufzubauen. Sachbücher akkumulieren Wissen über die Zeit. Jedes Buch "
+        "fügt einem mentalen Rahmenwerk hinzu, das das Lernen des Nächsten erleichtert. "
+        "Warren Buffett führt einen großen Teil seines Erfolgs darauf zurück, früh in "
+        "seiner Karriere 500 Seiten am Tag gelesen zu haben. Sie verstehen etwas "
+        "Grundlegendes: Lesen ist keine Freizeitbeschäftigung, sondern eine Investition. "
+        "Die Rendite dieser Investition ist ein schärferer Verstand, bessere Entscheidungen "
+        "und ein tieferes Verständnis der Welt."
+    ),
+}
+
 # Training paths
 # Each step: (exercise_type, label, params_dict)
 # exercise_type maps to a launcher in the path execution screen.

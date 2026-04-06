@@ -15,8 +15,8 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.theme import (
     COLORS, make_qfont, input_css, theme_manager, screen_metrics,
 )
-from neural_speed_academy.config import TEXT_LIBRARY
-from neural_speed_academy.i18n import tr
+from neural_speed_academy.config import TEXT_LIBRARY, TEXT_LIBRARY_DE
+from neural_speed_academy.i18n import tr, current_locale
 
 # Prefix for custom text entries in the dropdown
 _CUSTOM_PREFIX = "\u2605 "
@@ -148,10 +148,34 @@ class TextLibraryWidget(QWidget):
         self._combo.clear()
         self._combo.addItem("")
 
-        # Built-in texts
-        for name in TEXT_LIBRARY:
+        # Determine locale order: show active locale's texts first
+        locale = current_locale()
+        if locale == "de":
+            primary, primary_label = TEXT_LIBRARY_DE, "── Deutsch ──"
+            secondary, secondary_label = TEXT_LIBRARY, "── English ──"
+        else:
+            primary, primary_label = TEXT_LIBRARY, "── English ──"
+            secondary, secondary_label = TEXT_LIBRARY_DE, "── Deutsch ──"
+
+        # Primary language texts
+        self._combo.addItem(primary_label)
+        idx = self._combo.count() - 1
+        self._combo.model().item(idx).setEnabled(False)
+        for name in primary:
             if self._show_difficulty:
-                difficulty = TEXT_LIBRARY[name][0]
+                difficulty = primary[name][0]
+                self._combo.addItem(f"{name}  [{difficulty}]")
+            else:
+                self._combo.addItem(name)
+
+        # Secondary language texts
+        self._combo.insertSeparator(self._combo.count())
+        self._combo.addItem(secondary_label)
+        idx = self._combo.count() - 1
+        self._combo.model().item(idx).setEnabled(False)
+        for name in secondary:
+            if self._show_difficulty:
+                difficulty = secondary[name][0]
                 self._combo.addItem(f"{name}  [{difficulty}]")
             else:
                 self._combo.addItem(name)
@@ -171,6 +195,10 @@ class TextLibraryWidget(QWidget):
             self._diff_label.setVisible(False)
             return
 
+        # Skip separator labels
+        if display_name.startswith("──"):
+            return
+
         # Custom text
         if display_name.startswith(_CUSTOM_PREFIX):
             real_name = display_name[len(_CUSTOM_PREFIX):]
@@ -183,7 +211,7 @@ class TextLibraryWidget(QWidget):
 
         # Built-in text (strip difficulty suffix if present)
         lib_name = display_name.split("  [")[0]
-        entry = TEXT_LIBRARY.get(lib_name)
+        entry = TEXT_LIBRARY.get(lib_name) or TEXT_LIBRARY_DE.get(lib_name)
         self._del_btn.setVisible(False)
         if entry:
             difficulty, text = entry
@@ -217,7 +245,7 @@ class TextLibraryWidget(QWidget):
 
         name = name.strip()
         # Prevent overwriting built-in texts
-        if name in TEXT_LIBRARY:
+        if name in TEXT_LIBRARY or name in TEXT_LIBRARY_DE:
             QMessageBox.warning(
                 self, tr("text.library.widget.reserved_name"),
                 tr("text.library.widget.reserved_name_msg", name=name),
