@@ -71,7 +71,6 @@ class PacerExercise(BaseExercise):
     MODES = {
         "single": "Single-Line",
         "multi": "Multi-Line",
-        "zpattern": "Z-Pattern",
     }
 
     def __init__(self, navigator, parent: QWidget | None = None):
@@ -260,7 +259,7 @@ class PacerExercise(BaseExercise):
         nlines_row.addStretch()
 
         self._nlines_frame.setVisible(
-            (self._last_mode or "single") in ("multi", "zpattern")
+            (self._last_mode or "single") == "multi"
         )
         cl.addWidget(self._nlines_frame)
 
@@ -344,7 +343,7 @@ class PacerExercise(BaseExercise):
 
     def _on_mode_changed(self, btn: QRadioButton) -> None:
         mode = btn.property("mode_key")
-        self._nlines_frame.setVisible(mode in ("multi", "zpattern"))
+        self._nlines_frame.setVisible(mode == "multi")
 
     # Text size multipliers applied to the FOV font_size
     _TEXT_SIZE_MULT = {
@@ -529,7 +528,18 @@ class PacerExercise(BaseExercise):
         )
         self._step_idx = 0
 
-        avg_words = len(self._words) / max(len(self._steps), 1)
+        # In multi-line mode, steps only sweep the first line of each group
+        # but the reader processes all lines. Base the delay on the sweep
+        # line's words so the visual pace matches single-line at the same WPM.
+        if self._mode == "multi" and self._steps:
+            sweep_chars = sum(end - start for start, end, _, _ in self._steps)
+            sweep_text = " ".join(
+                joined[s:e] for s, e, _, _ in self._steps
+            )
+            sweep_words = len(sweep_text.split())
+            avg_words = max(sweep_words, 1) / max(len(self._steps), 1)
+        else:
+            avg_words = len(self._words) / max(len(self._steps), 1)
         self._delay = int(60000 / self._wpm_target * avg_words)
 
         self._start_time = time.monotonic()
@@ -635,8 +645,7 @@ class PacerExercise(BaseExercise):
             return self._steps_single(text)
         elif mode == "multi":
             return self._steps_multi(text)
-        elif mode == "zpattern":
-            return self._steps_zpattern(text)
+
         return [(0, len(text), 0, len(text))]
 
     def _steps_single(
@@ -670,30 +679,6 @@ class PacerExercise(BaseExercise):
             steps.extend(
                 self._chunk_line(text, first_ls, first_le, cs, gs, ge)
             )
-        return steps or [(0, len(text), 0, len(text))]
-
-    def _steps_zpattern(
-        self, text: str,
-    ) -> list[tuple[int, int, int, int]]:
-        """Z-pattern: 3 sweeps per n_lines group. Overlay height spans
-        the full group."""
-        lines = self._get_display_lines(text)
-        n = self._n_lines
-        if not lines:
-            return [(0, len(text), 0, len(text))]
-        steps: list[tuple[int, int, int, int]] = []
-        for i in range(0, len(lines), n):
-            group = lines[i : i + n]
-            gs = group[0][0]
-            ge = group[-1][1]
-            block_len = ge - gs
-            if block_len <= 0:
-                steps.append((gs, ge, gs, ge))
-                continue
-            seg = block_len // 3
-            steps.append((gs, gs + seg, gs, ge))
-            steps.append((gs + seg, gs + 2 * seg, gs, ge))
-            steps.append((gs + 2 * seg, ge, gs, ge))
         return steps or [(0, len(text), 0, len(text))]
 
     # ── Highlight positioning ──
