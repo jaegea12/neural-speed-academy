@@ -335,7 +335,7 @@ FOV_PRESETS = {
     "standard": {"pct": 0.42, "pad_x": 60, "pad_y": 50, "font_size": 16, "label": "Standard"},
     "wide":     {"pct": 0.55, "pad_x": 70, "pad_y": 50, "font_size": 15, "label": "Wide (Advanced)"},
     "full":     {"pct": 0.70, "pad_x": 80, "pad_y": 50, "font_size": 14, "label": "Full (Expert)"},
-    "ultra":    {"pct": 0.85, "pad_x": 90, "pad_y": 50, "font_size": 13, "label": "Ultra (Full Screen)"},
+    "ultra":    {"pct": 0.95, "pad_x": 90, "pad_y": 50, "font_size": 13, "label": "Ultra (Full Screen)"},
 }
 DEFAULT_TRAINING_TEXT = (
     "Speed reading is the process of rapidly recognizing and absorbing phrases "
@@ -635,9 +635,9 @@ class ScreenMetrics:
 
     @property
     def reader_w(self) -> int:
-        """Pacer reader page width from FOV percentage."""
+        """Pacer reader page width from FOV percentage, capped to screen."""
         fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
-        return int(self._w * fov["pct"])
+        return min(int(self._w * fov["pct"]), self._w - 40)
 
     @property
     def reader_h(self) -> int:
@@ -652,7 +652,7 @@ class ScreenMetrics:
     def fov_scaled(self) -> dict:
         """Return the active FOV preset with dimensions scaled to screen."""
         fov = theme_manager.fov_config if theme_manager else FOV_PRESETS["standard"]
-        page_w = int(self._w * fov["pct"])
+        page_w = min(int(self._w * fov["pct"]), self._w - 40)
         return {
             "page_width": page_w,
             "pad_x": self.sw(fov["pad_x"]),
