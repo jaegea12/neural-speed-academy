@@ -90,6 +90,8 @@ class PacerExercise(BaseExercise):
         self._last_mode: str | None = None
         self._last_chunk: int | None = None
         self._last_nlines: int | None = None
+        self._last_text_size: str | None = None
+        self._last_page_width: str | None = None
 
     @property
     def name(self) -> str:
@@ -274,7 +276,7 @@ class PacerExercise(BaseExercise):
         tsize_row.addWidget(tsize_lbl)
 
         self._text_size_buttons: dict[str, QPushButton] = {}
-        self._text_size = "medium"
+        self._text_size = self._last_text_size or "medium"
         for key, label in [
             ("small", "S"), ("medium", "M"), ("large", "L"),
             ("xl", "XL"), ("xxl", "XXL"),
@@ -286,7 +288,7 @@ class PacerExercise(BaseExercise):
             btn.clicked.connect(lambda _, k=key: self._select_text_size(k))
             tsize_row.addWidget(btn)
             self._text_size_buttons[key] = btn
-        self._select_text_size("medium")
+        self._select_text_size(self._last_text_size or "medium")
         tsize_row.addStretch()
         cl.addLayout(tsize_row)
 
@@ -301,7 +303,7 @@ class PacerExercise(BaseExercise):
         pwidth_row.addWidget(pwidth_lbl)
 
         self._page_width_buttons: dict[str, QPushButton] = {}
-        self._page_width_key = theme_manager.fov if theme_manager else "standard"
+        self._page_width_key = self._last_page_width or (theme_manager.fov if theme_manager else "standard")
         from neural_speed_academy.theme import FOV_PRESETS
         for key, preset in FOV_PRESETS.items():
             # Use short label: first word of the preset label
@@ -413,6 +415,8 @@ class PacerExercise(BaseExercise):
         self._last_mode = mode
         self._last_chunk = self._chunk_size
         self._last_nlines = self._n_lines
+        self._last_text_size = self._text_size
+        self._last_page_width = self._page_width_key
         self._run_pacer(text, wpm, mode)
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
