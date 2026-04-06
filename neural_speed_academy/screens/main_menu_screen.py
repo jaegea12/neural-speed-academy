@@ -13,6 +13,7 @@ from PyQt6.QtGui import QPixmap
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.i18n import tr
 
 
 class MainMenuScreen(BaseScreen):
@@ -48,7 +49,7 @@ class MainMenuScreen(BaseScreen):
             cl.addWidget(icon_lbl)
             cl.addSpacing(10)
 
-        title = QLabel("NEURAL SPEED\nACADEMY")
+        title = QLabel(tr("main.menu.neural_speed_nacademy"))
         title.setFont(make_qfont("title_lg"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -64,7 +65,7 @@ class MainMenuScreen(BaseScreen):
 
         cl.addSpacing(14)
 
-        tagline = QLabel("Let your brain process more information in less time")
+        tagline = QLabel(tr("main.menu.let_your_brain_process_more_in"))
         tagline.setFont(make_qfont("tagline"))
         tagline.setStyleSheet(f"color: {c['muted']};")
         tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -136,14 +137,14 @@ class MainMenuScreen(BaseScreen):
     def _show_info(self) -> None:
         c = COLORS
         dialog = QDialog(self)
-        dialog.setWindowTitle("About")
+        dialog.setWindowTitle(tr("main.menu.about"))
         dialog.setFixedSize(580, 380)
         dialog.setStyleSheet(f"background-color: {c['card']};")
 
         layout = QVBoxLayout(dialog)
         layout.setContentsMargins(40, 30, 40, 15)
 
-        title = QLabel("NEURAL SPEED ACADEMY")
+        title = QLabel(tr("login.neural_speed_academy"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -178,7 +179,7 @@ class MainMenuScreen(BaseScreen):
         credit.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(credit)
 
-        close_btn = QPushButton("CLOSE")
+        close_btn = QPushButton(tr("nav.close"))
         close_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="6px 20px")
         )
@@ -192,7 +193,7 @@ class MainMenuScreen(BaseScreen):
         c = COLORS
         msg = QMessageBox(self)
         msg.setWindowTitle("Quit")
-        msg.setText("Are you sure you want to quit?")
+        msg.setText(tr("main.menu.are_you_sure_you_want_to_quit"))
         msg.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )

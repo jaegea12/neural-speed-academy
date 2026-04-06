@@ -24,6 +24,7 @@ from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 from neural_speed_academy.exercises.recall import (
     build_recall_screen, build_recall_results,
 )
+from neural_speed_academy.i18n import tr
 
 
 # ── Helpers ──
@@ -123,7 +124,7 @@ class PacerExercise(BaseExercise):
         # Top row: guide + title
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -135,7 +136,7 @@ class PacerExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("PACER CONFIGURATION")
+        title = QLabel(tr("pacer.pacer_configuration"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -151,7 +152,7 @@ class PacerExercise(BaseExercise):
         wpm_row.setContentsMargins(0, 0, 0, 0)
         wpm_row.setSpacing(8)
         wpm_row.addStretch()
-        wpm_lbl = QLabel("Target WPM:")
+        wpm_lbl = QLabel(tr("chunking.target_wpm"))
         wpm_lbl.setFont(make_qfont("slider_label"))
         wpm_lbl.setStyleSheet(f"color: {c['fg']};")
         wpm_row.addWidget(wpm_lbl)
@@ -181,7 +182,7 @@ class PacerExercise(BaseExercise):
         mode_row.setContentsMargins(0, 0, 0, 0)
         mode_row.setSpacing(8)
         mode_row.addStretch()
-        mode_lbl = QLabel("Mode:")
+        mode_lbl = QLabel(tr("pacer.mode"))
         mode_lbl.setFont(make_qfont("slider_label"))
         mode_lbl.setStyleSheet(f"color: {c['fg']};")
         mode_row.addWidget(mode_lbl)
@@ -206,7 +207,7 @@ class PacerExercise(BaseExercise):
         chunk_row.setContentsMargins(0, 0, 0, 0)
         chunk_row.setSpacing(8)
         chunk_row.addStretch()
-        chunk_lbl = QLabel("Words/chunk:")
+        chunk_lbl = QLabel(tr("chunking.words_chunk"))
         chunk_lbl.setFont(make_qfont("slider_label"))
         chunk_lbl.setStyleSheet(f"color: {c['fg']};")
         chunk_row.addWidget(chunk_lbl)
@@ -237,7 +238,7 @@ class PacerExercise(BaseExercise):
         nlines_row.setContentsMargins(0, 0, 0, 0)
         nlines_row.setSpacing(8)
         nlines_row.addStretch()
-        nlines_lbl = QLabel("Lines/group:")
+        nlines_lbl = QLabel(tr("pacer.lines_group"))
         nlines_lbl.setFont(make_qfont("slider_label"))
         nlines_lbl.setStyleSheet(f"color: {c['fg']};")
         nlines_row.addWidget(nlines_lbl)
@@ -270,7 +271,7 @@ class PacerExercise(BaseExercise):
         tsize_row.setContentsMargins(0, 0, 0, 0)
         tsize_row.setSpacing(8)
         tsize_row.addStretch()
-        tsize_lbl = QLabel("Text size:")
+        tsize_lbl = QLabel(tr("pacer.text_size"))
         tsize_lbl.setFont(make_qfont("slider_label"))
         tsize_lbl.setStyleSheet(f"color: {c['fg']};")
         tsize_row.addWidget(tsize_lbl)
@@ -297,7 +298,7 @@ class PacerExercise(BaseExercise):
         pwidth_row.setContentsMargins(0, 0, 0, 0)
         pwidth_row.setSpacing(8)
         pwidth_row.addStretch()
-        pwidth_lbl = QLabel("Page width:")
+        pwidth_lbl = QLabel(tr("pacer.page_width"))
         pwidth_lbl.setFont(make_qfont("slider_label"))
         pwidth_lbl.setStyleSheet(f"color: {c['fg']};")
         pwidth_row.addWidget(pwidth_lbl)
@@ -321,7 +322,7 @@ class PacerExercise(BaseExercise):
 
         # Start button + hint
         cl.addSpacing(4)
-        start_btn = QPushButton("START READING")
+        start_btn = QPushButton(tr("pacer.start_reading"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
@@ -332,7 +333,7 @@ class PacerExercise(BaseExercise):
         start_btn.clicked.connect(self._start_from_ui)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        hint = QLabel("Ctrl+Enter to start")
+        hint = QLabel(tr("mot.ctrl_enter_to_start"))
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -442,9 +443,9 @@ class PacerExercise(BaseExercise):
         top_bar = QHBoxLayout()
         top_bar.setContentsMargins(10, 6, 10, 2)
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -455,7 +456,7 @@ class PacerExercise(BaseExercise):
         top_bar.addWidget(exit_btn)
         top_bar.addStretch()
 
-        self._wpm_label = QLabel(f"WPM: {wpm}")
+        self._wpm_label = QLabel(tr("pacer.wpm_display", wpm=wpm))
         self._wpm_label.setFont(make_qfont("counter"))
         self._wpm_label.setStyleSheet(f"color: {c['accent']};")
         top_bar.addWidget(self._wpm_label)
@@ -831,14 +832,14 @@ class PacerExercise(BaseExercise):
         cl.addWidget(details)
 
         if is_pb:
-            pb = QLabel("NEW PERSONAL BEST!")
+            pb = QLabel(tr("base.new_personal_best"))
             pb.setFont(make_qfont("btn_bold"))
             pb.setStyleSheet(f"color: {c['success']};")
             pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             cl.addWidget(pb)
 
         cl.addSpacing(10)
-        cont_btn = QPushButton("CONTINUE")
+        cont_btn = QPushButton(tr("base.continue"))
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "

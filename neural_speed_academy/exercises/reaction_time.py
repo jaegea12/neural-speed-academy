@@ -23,6 +23,7 @@ from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import REACTION_TIME_CONFIG
+from neural_speed_academy.i18n import tr
 
 
 class ReactionTimeExercise(BaseExercise):
@@ -83,7 +84,7 @@ class ReactionTimeExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -97,7 +98,7 @@ class ReactionTimeExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("REACTION TIME")
+        title = QLabel(tr("reaction.time.reaction_time"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -115,7 +116,7 @@ class ReactionTimeExercise(BaseExercise):
         # Mode selector
         mode_row = QHBoxLayout()
         mode_row.addStretch()
-        mode_lbl = QLabel("Mode:")
+        mode_lbl = QLabel(tr("pacer.mode"))
         mode_lbl.setFont(make_qfont("slider_label"))
         mode_lbl.setStyleSheet(f"color: {c['fg']};")
         mode_row.addWidget(mode_lbl)
@@ -140,7 +141,7 @@ class ReactionTimeExercise(BaseExercise):
         # Rounds
         rounds_row = QHBoxLayout()
         rounds_row.addStretch()
-        rounds_lbl = QLabel("Rounds:")
+        rounds_lbl = QLabel(tr("mot.rounds"))
         rounds_lbl.setFont(make_qfont("slider_label"))
         rounds_lbl.setStyleSheet(f"color: {c['fg']};")
         rounds_row.addWidget(rounds_lbl)
@@ -166,7 +167,7 @@ class ReactionTimeExercise(BaseExercise):
         cl.addSpacing(20)
 
         # Start button
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
@@ -210,16 +211,16 @@ class ReactionTimeExercise(BaseExercise):
         top = QHBoxLayout()
         top.setContentsMargins(10, 6, 10, 2)
 
-        self._progress_lbl = QLabel(f"Round 0/{self._total_rounds}")
+        self._progress_lbl = QLabel(tr("exercise.round_progress", current=0, total=self._total_rounds))
         self._progress_lbl.setFont(make_qfont("counter"))
         self._progress_lbl.setStyleSheet(f"color: {c['accent']};")
         top.addWidget(self._progress_lbl)
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
@@ -371,7 +372,7 @@ class ReactionTimeExercise(BaseExercise):
         self._instruction_lbl.hide()
 
         if self._mode == "simple":
-            self._stimulus_lbl.setText("\u25cf")
+            self._stimulus_lbl.setText(tr("reaction.time.u25cf"))
             self._stimulus_lbl.setStyleSheet(
                 "color: #2ecc71; background: transparent;"
             )
@@ -394,12 +395,12 @@ class ReactionTimeExercise(BaseExercise):
         else:  # go_no_go
             self._is_go_trial = random.random() < self._go_ratio
             if self._is_go_trial:
-                self._stimulus_lbl.setText("\u25cf")
+                self._stimulus_lbl.setText(tr("reaction.time.u25cf"))
                 self._stimulus_lbl.setStyleSheet(
                     "color: #2ecc71; background: transparent;"
                 )
             else:
-                self._stimulus_lbl.setText("\u25cf")
+                self._stimulus_lbl.setText(tr("reaction.time.u25cf"))
                 self._stimulus_lbl.setStyleSheet(
                     "color: #e74c3c; background: transparent;"
                 )
@@ -449,12 +450,12 @@ class ReactionTimeExercise(BaseExercise):
             self._too_early = True
             self._too_early_count += 1
             self._waiting_for_stimulus = False
-            self._stimulus_lbl.setText("\u26a0")
+            self._stimulus_lbl.setText(tr("reaction.time.u26a0"))
             self._stimulus_lbl.setStyleSheet(
                 f"color: {c['alert']}; background: transparent;"
             )
             self._stimulus_lbl.repaint()
-            self._feedback_lbl.setText("Too early! Wait for the stimulus.")
+            self._feedback_lbl.setText(tr("reaction.time.too_early_wait_for_the_stimulu"))
             self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
             self._input_locked = True
             # Repeat this round
@@ -526,17 +527,17 @@ class ReactionTimeExercise(BaseExercise):
             if self._is_go_trial:
                 # Missed a go trial
                 self._misses += 1
-                self._feedback_lbl.setText("\u2718 Too slow — missed!")
+                self._feedback_lbl.setText(tr("reaction.time.u2718_too_slow_missed"))
                 self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
             else:
                 # Correctly inhibited on no-go
                 self._correct += 1
-                self._feedback_lbl.setText("\u2714 Correct — no click needed")
+                self._feedback_lbl.setText(tr("reaction.time.u2714_correct_no_click_needed"))
                 self._feedback_lbl.setStyleSheet(f"color: {c['success']};")
         else:
             # Simple mode timeout
             self._misses += 1
-            self._feedback_lbl.setText("\u2718 Too slow!")
+            self._feedback_lbl.setText(tr("reaction.time.u2718_too_slow"))
             self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
 
         self._stimulus_lbl.hide()

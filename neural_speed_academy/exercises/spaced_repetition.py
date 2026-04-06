@@ -21,6 +21,7 @@ from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import SR_CONFIG, SR_BUILTIN_DECKS, USER_DATA_CONFIG
 from neural_speed_academy.state import SRCard, SRDeck
+from neural_speed_academy.i18n import tr
 
 
 class SpacedRepetitionExercise(BaseExercise):
@@ -71,12 +72,12 @@ class SpacedRepetitionExercise(BaseExercise):
         # Title row (matches other menus)
         title_row = QHBoxLayout()
         title_row.addStretch()
-        title_lbl = QLabel("SPACED REPETITION")
+        title_lbl = QLabel(tr("spaced.repetition.spaced_repetition"))
         title_lbl.setFont(make_qfont("header"))
         title_lbl.setStyleSheet(f"color: {c['fg']};")
         title_row.addWidget(title_lbl)
 
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -101,7 +102,7 @@ class SpacedRepetitionExercise(BaseExercise):
         left = QVBoxLayout()
         left.setSpacing(8)
 
-        deck_header = QLabel("DECKS")
+        deck_header = QLabel(tr("spaced.repetition.decks"))
         deck_header.setFont(make_qfont("menu_header"))
         deck_header.setStyleSheet(f"color: {c['accent']};")
         deck_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -162,17 +163,17 @@ class SpacedRepetitionExercise(BaseExercise):
                 )
                 dl.addWidget(review_btn)
             else:
-                done_lbl = QLabel("\u2714 All caught up")
+                done_lbl = QLabel(tr("spaced.repetition.u2714_all_caught_up"))
                 done_lbl.setFont(make_qfont("btn_sm"))
                 done_lbl.setStyleSheet(f"color: {c['success']};")
                 dl.addWidget(done_lbl)
 
             # Manage button (add cards, only for non-builtin)
             if not deck.builtin:
-                manage_btn = QPushButton("\u2795")
+                manage_btn = QPushButton(tr("spaced.repetition.u2795"))
                 manage_btn.setFont(make_qfont("btn_sm"))
-                manage_btn.setAccessibleName("Add cards")
-                manage_btn.setToolTip("Add cards")
+                manage_btn.setAccessibleName(tr("spaced.repetition.add_cards"))
+                manage_btn.setToolTip(tr("spaced.repetition.add_cards"))
                 manage_btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['accent']}; "
                     f"color: {c['btn_text']}; border: 2px solid transparent; "
@@ -197,7 +198,7 @@ class SpacedRepetitionExercise(BaseExercise):
         left.addWidget(scroll, 1)
 
         # New deck button
-        new_btn = QPushButton("+ NEW DECK")
+        new_btn = QPushButton(tr("spaced.repetition.new_deck"))
         new_btn.setFont(make_qfont("btn_bold"))
         new_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; "
@@ -216,27 +217,27 @@ class SpacedRepetitionExercise(BaseExercise):
         right = QVBoxLayout()
         right.setSpacing(8)
 
-        opt_header = QLabel("OPTIONS")
+        opt_header = QLabel(tr("spaced.repetition.options"))
         opt_header.setFont(make_qfont("menu_header"))
         opt_header.setStyleSheet(f"color: {c['accent']};")
         opt_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right.addWidget(opt_header)
 
         # Reverse mode toggle
-        rev_header = QLabel("MODE")
+        rev_header = QLabel(tr("spaced.repetition.mode"))
         rev_header.setFont(make_qfont("menu_header"))
         rev_header.setStyleSheet(f"color: {c['accent']};")
         rev_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right.addWidget(rev_header)
 
-        self._normal_btn = QPushButton("Normal")
+        self._normal_btn = QPushButton(tr("spaced.repetition.normal"))
         self._normal_btn.setFont(make_qfont("menu_btn"))
         self._normal_btn.setFixedHeight(40)
         self._normal_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._normal_btn.clicked.connect(lambda: self._set_reverse(False))
         right.addWidget(self._normal_btn)
 
-        self._reverse_btn = QPushButton("Reverse")
+        self._reverse_btn = QPushButton(tr("spaced.repetition.reverse"))
         self._reverse_btn.setFont(make_qfont("menu_btn"))
         self._reverse_btn.setFixedHeight(40)
         self._reverse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -246,7 +247,7 @@ class SpacedRepetitionExercise(BaseExercise):
         right.addSpacing(10)
 
         # Timer options
-        timer_header = QLabel("TIME LIMIT")
+        timer_header = QLabel(tr("spaced.repetition.time_limit"))
         timer_header.setFont(make_qfont("menu_header"))
         timer_header.setStyleSheet(f"color: {c['accent']};")
         timer_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -267,7 +268,7 @@ class SpacedRepetitionExercise(BaseExercise):
         right.addSpacing(10)
 
         # Session size
-        size_header = QLabel("SESSION SIZE")
+        size_header = QLabel(tr("spaced.repetition.session_size"))
         size_header.setFont(make_qfont("menu_header"))
         size_header.setStyleSheet(f"color: {c['accent']};")
         size_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -442,7 +443,7 @@ class SpacedRepetitionExercise(BaseExercise):
 
         top.addStretch()
 
-        skip_btn = QPushButton("SKIP TO REVIEW \u25b6")
+        skip_btn = QPushButton(tr("spaced.repetition.skip_to_review_u25b6"))
         skip_btn.setFont(make_qfont("btn_sm"))
         skip_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
@@ -455,9 +456,9 @@ class SpacedRepetitionExercise(BaseExercise):
         )
         top.addWidget(skip_btn)
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
@@ -472,7 +473,7 @@ class SpacedRepetitionExercise(BaseExercise):
         self._layout.addStretch()
 
         # Card display — front and back visible
-        front_label = QLabel("FRONT")
+        front_label = QLabel(tr("spaced.repetition.front"))
         front_label.setFont(make_qfont("btn_sm"))
         front_label.setStyleSheet(f"color: {c['muted']};")
         front_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -497,7 +498,7 @@ class SpacedRepetitionExercise(BaseExercise):
 
         self._layout.addSpacing(16)
 
-        back_label = QLabel("BACK")
+        back_label = QLabel(tr("spaced.repetition.back"))
         back_label.setFont(make_qfont("btn_sm"))
         back_label.setStyleSheet(f"color: {c['muted']};")
         back_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -518,7 +519,7 @@ class SpacedRepetitionExercise(BaseExercise):
         nav_row.addStretch()
 
         if self._reading_idx > 0:
-            prev_btn = QPushButton("\u2190 PREVIOUS")
+            prev_btn = QPushButton(tr("spaced.repetition.u2190_previous"))
             prev_btn.setFont(make_qfont("btn_bold"))
             prev_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; "
@@ -530,7 +531,7 @@ class SpacedRepetitionExercise(BaseExercise):
             nav_row.addWidget(prev_btn)
 
         if self._reading_idx < total - 1:
-            next_btn = QPushButton("NEXT \u2192")
+            next_btn = QPushButton(tr("spaced.repetition.next_u2192"))
             next_btn.setFont(make_qfont("btn_bold"))
             next_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['accent']}; "
@@ -541,7 +542,7 @@ class SpacedRepetitionExercise(BaseExercise):
             next_btn.clicked.connect(self._reading_next)
             nav_row.addWidget(next_btn)
         else:
-            start_btn = QPushButton("START REVIEW \u25b6")
+            start_btn = QPushButton(tr("spaced.repetition.start_review_u25b6"))
             start_btn.setFont(make_qfont("btn_bold"))
             start_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['success']}; "
@@ -687,9 +688,9 @@ class SpacedRepetitionExercise(BaseExercise):
             top.addWidget(mode_lbl)
             top.addSpacing(10)
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
@@ -704,7 +705,7 @@ class SpacedRepetitionExercise(BaseExercise):
         # Card prompt
         self._layout.addStretch()
 
-        hint_lbl = QLabel("Think of the answer, then reveal it")
+        hint_lbl = QLabel(tr("spaced.repetition.think_of_the_answer_then_revea"))
         hint_lbl.setFont(make_qfont("body"))
         hint_lbl.setStyleSheet(f"color: {c['muted']}; font-style: italic;")
         hint_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -725,7 +726,7 @@ class SpacedRepetitionExercise(BaseExercise):
         self._answer_area = QVBoxLayout()
         self._answer_area.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        show_btn = QPushButton("SHOW ANSWER")
+        show_btn = QPushButton(tr("spaced.repetition.show_answer"))
         show_btn.setFont(make_qfont("btn_lg"))
         show_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
@@ -738,7 +739,7 @@ class SpacedRepetitionExercise(BaseExercise):
             show_btn, alignment=Qt.AlignmentFlag.AlignCenter
         )
 
-        key_hint = QLabel("X to reveal  ·  1-4 to rate")
+        key_hint = QLabel(tr("spaced.repetition.x_to_reveal_1_4_to_rate"))
         key_hint.setFont(make_qfont("btn_sm"))
         key_hint.setStyleSheet(f"color: {c['muted']};")
         key_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -817,7 +818,7 @@ class SpacedRepetitionExercise(BaseExercise):
         self._answer_area.addSpacing(20)
 
         # Rating label
-        rate_lbl = QLabel("How well did you recall?")
+        rate_lbl = QLabel(tr("spaced.repetition.how_well_did_you_recall"))
         rate_lbl.setFont(make_qfont("body"))
         rate_lbl.setStyleSheet(f"color: {c['fg']};")
         rate_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -933,7 +934,7 @@ class SpacedRepetitionExercise(BaseExercise):
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.setSpacing(8)
 
-        title = QLabel("SESSION COMPLETE")
+        title = QLabel(tr("spaced.repetition.session_complete"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -941,7 +942,7 @@ class SpacedRepetitionExercise(BaseExercise):
 
         cl.addSpacing(10)
 
-        reviewed_lbl = QLabel(f"Cards reviewed: {total}")
+        reviewed_lbl = QLabel(tr("spaced.cards_reviewed", count=total))
         reviewed_lbl.setFont(make_qfont("header"))
         reviewed_lbl.setStyleSheet(f"color: {c['fg']};")
         reviewed_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -989,7 +990,7 @@ class SpacedRepetitionExercise(BaseExercise):
 
         cl.addSpacing(10)
 
-        cont_btn = QPushButton("CONTINUE")
+        cont_btn = QPushButton(tr("base.continue"))
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "

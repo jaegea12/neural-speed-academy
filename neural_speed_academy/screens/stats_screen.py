@@ -19,6 +19,7 @@ from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
+from neural_speed_academy.i18n import tr
 
 
 class _ConsistencyCalendar(QWidget):
@@ -235,7 +236,7 @@ class StatsScreen(BaseScreen):
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(60, 20, 60, 30)
 
-        title = QLabel("PERFORMANCE ANALYTICS")
+        title = QLabel(tr("stats.performance_analytics"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -316,7 +317,7 @@ class StatsScreen(BaseScreen):
 
     def _build_consistency(self, layout: QVBoxLayout, user) -> None:
         c = COLORS
-        header = QLabel("TRAINING CONSISTENCY")
+        header = QLabel(tr("stats.training_consistency"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -408,7 +409,7 @@ class StatsScreen(BaseScreen):
         if not user.personal_bests:
             return
         c = COLORS
-        header = QLabel("PERSONAL BESTS")
+        header = QLabel(tr("dashboard.personal_bests"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -460,7 +461,7 @@ class StatsScreen(BaseScreen):
             return
         c = COLORS
 
-        header = QLabel("INSIGHTS")
+        header = QLabel(tr("stats.insights"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -497,7 +498,7 @@ class StatsScreen(BaseScreen):
         avg = sum(ex_scores) / len(ex_scores)
         diff = last_pct - avg
 
-        last_lbl = QLabel("LAST SESSION")
+        last_lbl = QLabel(tr("stats.last_session"))
         last_lbl.setFont(make_qfont("btn_sm"))
         last_lbl.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(last_lbl)
@@ -532,7 +533,7 @@ class StatsScreen(BaseScreen):
             this_week = [p for d, _, p in scored if d >= week_ago]
             last_week = [p for d, _, p in scored if two_weeks <= d < week_ago]
 
-            short_lbl = QLabel("7-DAY TREND")
+            short_lbl = QLabel(tr("stats.7_day_trend"))
             short_lbl.setFont(make_qfont("btn_sm"))
             short_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(short_lbl)
@@ -559,7 +560,7 @@ class StatsScreen(BaseScreen):
             if len(dates) >= 7:
                 self._add_separator(cl, c)
 
-                long_lbl = QLabel("STRENGTHS & WEAKNESSES")
+                long_lbl = QLabel(tr("stats.strengths_weaknesses"))
                 long_lbl.setFont(make_qfont("btn_sm"))
                 long_lbl.setStyleSheet(f"color: {c['muted']};")
                 cl.addWidget(long_lbl)
@@ -633,7 +634,7 @@ class StatsScreen(BaseScreen):
             return
         c = COLORS
 
-        header = QLabel("PROGRESS")
+        header = QLabel(tr("stats.progress"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -722,7 +723,7 @@ class StatsScreen(BaseScreen):
 
         # Header row with export buttons inline
         header_row = QHBoxLayout()
-        header = QLabel("SESSION HISTORY")
+        header = QLabel(tr("stats.session_history"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         header_row.addWidget(header)
@@ -737,7 +738,7 @@ class StatsScreen(BaseScreen):
         layout.addLayout(header_row)
 
         if not user.history:
-            lbl = QLabel("No sessions yet. Start training!")
+            lbl = QLabel(tr("stats.no_sessions_yet_start_training"))
             lbl.setFont(make_qfont("body"))
             lbl.setStyleSheet(f"color: {c['muted']};")
             layout.addWidget(lbl)
@@ -782,7 +783,7 @@ class StatsScreen(BaseScreen):
     def _build_export(self, layout: QVBoxLayout, user) -> None:
         from PyQt6.QtWidgets import QCheckBox
         c = COLORS
-        header = QLabel("EXPORT DATA")
+        header = QLabel(tr("stats.export_data"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)

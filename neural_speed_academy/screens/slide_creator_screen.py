@@ -15,6 +15,7 @@ from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.repositories.slide_repository import (
     SlideSet, Slide, SlideQuestion, SlideSetRepository,
 )
+from neural_speed_academy.i18n import tr
 
 _repo = SlideSetRepository()
 
@@ -41,7 +42,7 @@ class SlideCreatorScreen(BaseScreen):
         left = QVBoxLayout()
         left.setSpacing(6)
 
-        header = QLabel("SLIDE SETS")
+        header = QLabel(tr("slide.creator.slide_sets"))
         header.setFont(make_qfont("menu_header"))
         header.setStyleSheet(f"color: {c['accent']};")
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -62,13 +63,13 @@ class SlideCreatorScreen(BaseScreen):
 
         btn_row = QHBoxLayout()
         btn_row.setSpacing(6)
-        new_btn = QPushButton("NEW SET")
+        new_btn = QPushButton(tr("slide.creator.new_set"))
         new_btn.setStyleSheet(btn_css(c["accent"], c["btn_text"], padding="6px 12px"))
         new_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         new_btn.clicked.connect(self._new_set)
         btn_row.addWidget(new_btn)
 
-        del_btn = QPushButton("DELETE")
+        del_btn = QPushButton(tr("text.library.widget.delete"))
         del_btn.setStyleSheet(btn_css(c["alert"], c["btn_text"], padding="6px 12px"))
         del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         del_btn.clicked.connect(self._delete_set)
@@ -77,13 +78,13 @@ class SlideCreatorScreen(BaseScreen):
 
         io_row = QHBoxLayout()
         io_row.setSpacing(6)
-        import_btn = QPushButton("IMPORT")
+        import_btn = QPushButton(tr("slide.creator.import"))
         import_btn.setStyleSheet(btn_css(c["card"], c["fg"], padding="6px 12px"))
         import_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         import_btn.clicked.connect(self._import_set)
         io_row.addWidget(import_btn)
 
-        export_btn = QPushButton("EXPORT")
+        export_btn = QPushButton(tr("slide.creator.export"))
         export_btn.setStyleSheet(btn_css(c["card"], c["fg"], padding="6px 12px"))
         export_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         export_btn.clicked.connect(self._export_set)
@@ -104,7 +105,7 @@ class SlideCreatorScreen(BaseScreen):
 
         # Set name
         name_row = QHBoxLayout()
-        name_lbl = QLabel("Set name:")
+        name_lbl = QLabel(tr("slide.creator.set_name"))
         name_lbl.setFont(make_qfont("body"))
         name_lbl.setStyleSheet(f"color: {c['fg']};")
         name_row.addWidget(name_lbl)
@@ -118,13 +119,13 @@ class SlideCreatorScreen(BaseScreen):
 
         # Slide list + add/remove
         slide_header_row = QHBoxLayout()
-        slide_lbl = QLabel("SLIDES")
+        slide_lbl = QLabel(tr("slide.creator.slides"))
         slide_lbl.setFont(make_qfont("menu_header"))
         slide_lbl.setStyleSheet(f"color: {c['accent']};")
         slide_header_row.addWidget(slide_lbl)
         slide_header_row.addStretch()
 
-        add_slide_btn = QPushButton("+ SLIDE")
+        add_slide_btn = QPushButton(tr("slide.creator.slide"))
         add_slide_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="4px 10px", font_key="btn_sm")
         )
@@ -132,7 +133,7 @@ class SlideCreatorScreen(BaseScreen):
         add_slide_btn.clicked.connect(self._add_slide)
         slide_header_row.addWidget(add_slide_btn)
 
-        rm_slide_btn = QPushButton("- SLIDE")
+        rm_slide_btn = QPushButton(tr("slide.creator.remove_slide"))
         rm_slide_btn.setStyleSheet(
             btn_css(c["alert"], c["btn_text"], padding="4px 10px", font_key="btn_sm")
         )
@@ -164,7 +165,7 @@ class SlideCreatorScreen(BaseScreen):
 
         # Slide title
         title_row = QHBoxLayout()
-        title_lbl = QLabel("Title:")
+        title_lbl = QLabel(tr("slide.creator.title"))
         title_lbl.setFont(make_qfont("body"))
         title_lbl.setStyleSheet(f"color: {c['text_on_card']};")
         title_row.addWidget(title_lbl)
@@ -177,7 +178,7 @@ class SlideCreatorScreen(BaseScreen):
         detail.addLayout(title_row)
 
         # Bullets
-        bullets_lbl = QLabel("Bullet points (one per line):")
+        bullets_lbl = QLabel(tr("slide.creator.bullet_points_one_per_line"))
         bullets_lbl.setFont(make_qfont("body"))
         bullets_lbl.setStyleSheet(f"color: {c['text_on_card']};")
         detail.addWidget(bullets_lbl)
@@ -196,13 +197,13 @@ class SlideCreatorScreen(BaseScreen):
 
         # Questions section
         q_header_row = QHBoxLayout()
-        q_lbl = QLabel("Questions:")
+        q_lbl = QLabel(tr("slide.creator.questions"))
         q_lbl.setFont(make_qfont("body"))
         q_lbl.setStyleSheet(f"color: {c['text_on_card']};")
         q_header_row.addWidget(q_lbl)
         q_header_row.addStretch()
 
-        add_q_btn = QPushButton("+ QUESTION")
+        add_q_btn = QPushButton(tr("slide.creator.question"))
         add_q_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="3px 8px", font_key="btn_sm")
         )
@@ -221,7 +222,7 @@ class SlideCreatorScreen(BaseScreen):
         # Save button
         save_row = QHBoxLayout()
         save_row.addStretch()
-        save_btn = QPushButton("SAVE SET")
+        save_btn = QPushButton(tr("slide.creator.save_set"))
         save_btn.setFont(make_qfont("btn_lg"))
         save_btn.setStyleSheet(
             btn_css(c["success"], c["btn_text"], padding="10px 40px")
@@ -543,7 +544,7 @@ class SlideCreatorScreen(BaseScreen):
             return
         name = self._name_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, "Missing Name", "Please enter a name for the slide set.")
+            QMessageBox.warning(self, tr("slide.creator.missing_name"), tr("slide.creator.please_enter_a_name_for_the_sl"))
             return
         self._current_set.name = name
 

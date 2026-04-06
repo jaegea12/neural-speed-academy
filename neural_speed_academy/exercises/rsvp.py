@@ -14,6 +14,7 @@ from PyQt6.QtGui import QKeySequence, QShortcut
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, theme_manager, screen_metrics, btn_css
 from neural_speed_academy.config import RSVP_CONFIG, USER_DATA_CONFIG
+from neural_speed_academy.i18n import tr
 
 
 class RsvpExercise(BaseExercise):
@@ -53,7 +54,7 @@ class RsvpExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -65,7 +66,7 @@ class RsvpExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("RSVP CONFIGURATION")
+        title = QLabel(tr("rsvp.rsvp_configuration"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -82,7 +83,7 @@ class RsvpExercise(BaseExercise):
         wpm_row.setContentsMargins(0, 0, 0, 0)
         wpm_row.setSpacing(8)
         wpm_row.addStretch()
-        wpm_lbl = QLabel("Target WPM:")
+        wpm_lbl = QLabel(tr("chunking.target_wpm"))
         wpm_lbl.setFont(make_qfont("slider_label"))
         wpm_lbl.setStyleSheet(f"color: {c['fg']};")
         wpm_row.addWidget(wpm_lbl)
@@ -109,7 +110,7 @@ class RsvpExercise(BaseExercise):
 
         # Start button
         cl.addSpacing(4)
-        start_btn = QPushButton("START RSVP")
+        start_btn = QPushButton(tr("rsvp.start_rsvp"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
@@ -120,7 +121,7 @@ class RsvpExercise(BaseExercise):
         start_btn.clicked.connect(self._start_from_ui)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        hint = QLabel("Ctrl+Enter to start")
+        hint = QLabel(tr("mot.ctrl_enter_to_start"))
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -142,7 +143,7 @@ class RsvpExercise(BaseExercise):
     def _run_rsvp(self, text: str, wpm: int) -> None:
         self.words = text.split()
         if not self.words:
-            QMessageBox.information(self, "No Text", "Please enter some text before starting.")
+            QMessageBox.information(self, tr("chunking.no_text"), tr("chunking.please_enter_some_text_before_"))
             return
 
         self.wpm = wpm
@@ -156,9 +157,9 @@ class RsvpExercise(BaseExercise):
         self.setStyleSheet(f"background-color: {c['bg']};")
 
         # Exit button
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -169,7 +170,7 @@ class RsvpExercise(BaseExercise):
         self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
 
         # Progress
-        self._lbl_progress = QLabel(f"0% | {wpm} WPM")
+        self._lbl_progress = QLabel(tr("rsvp.progress", pct=0, wpm=wpm))
         self._lbl_progress.setFont(make_qfont("counter"))
         self._lbl_progress.setStyleSheet(f"color: {c['accent']};")
         self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -266,14 +267,14 @@ class RsvpExercise(BaseExercise):
         cl.addWidget(details)
 
         if is_pb:
-            pb = QLabel("NEW PERSONAL BEST!")
+            pb = QLabel(tr("base.new_personal_best"))
             pb.setFont(make_qfont("btn_bold"))
             pb.setStyleSheet(f"color: {c['highlight']};")
             pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             cl.addWidget(pb)
 
         cl.addSpacing(10)
-        cont_btn = QPushButton("CONTINUE")
+        cont_btn = QPushButton(tr("base.continue"))
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "

@@ -435,6 +435,7 @@ class ThemeManager:
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
         self._custom_texts: dict[str, str] = {}     # name -> text
+        self._locale: str = "en"
         self._listeners: list = []
 
     @property
@@ -499,6 +500,16 @@ class ThemeManager:
         return FOV_PRESETS.get(self._fov, FOV_PRESETS[DEFAULT_FOV])
 
     @property
+    def locale(self) -> str:
+        return self._locale
+
+    @locale.setter
+    def locale(self, value: str) -> None:
+        self._locale = value
+        from neural_speed_academy.i18n import load_locale
+        load_locale(value)
+
+    @property
     def custom_texts(self) -> dict[str, str]:
         """User-saved custom texts (name -> text)."""
         return dict(self._custom_texts)
@@ -537,6 +548,7 @@ class ThemeManager:
                 "fov": self._fov,
                 "font_scale": self._font_scale,
                 "fullscreen": self._fullscreen,
+                "locale": self._locale,
             }
             if self._schulte_grid_size is not None:
                 data["schulte_grid_size"] = self._schulte_grid_size
@@ -579,6 +591,11 @@ class ThemeManager:
             if isinstance(ct, dict):
                 self._custom_texts = {k: v for k, v in ct.items()
                                       if isinstance(k, str) and isinstance(v, str)}
+            locale = data.get("locale", "en")
+            if isinstance(locale, str) and len(locale) >= 2:
+                self._locale = locale
+                from neural_speed_academy.i18n import load_locale
+                load_locale(locale)
         except (IOError, json.JSONDecodeError, TypeError):
             pass
 

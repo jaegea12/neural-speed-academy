@@ -11,6 +11,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.exercises.base import BaseExercise
 from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.i18n import tr
 
 MODE_LABELS = {
     "saccade_h": "HORIZONTAL SACCADES",
@@ -57,7 +58,7 @@ class PrimingExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -73,7 +74,7 @@ class PrimingExercise(BaseExercise):
         self._lbl_mode.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._layout.addWidget(self._lbl_mode)
 
-        self._lbl_progress = QLabel("0%")
+        self._lbl_progress = QLabel(tr("priming.0"))
         self._lbl_progress.setFont(make_qfont("section_header"))
         self._lbl_progress.setStyleSheet(f"color: {c['fg']};")
         self._lbl_progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -209,19 +210,19 @@ class PrimingExercise(BaseExercise):
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title = QLabel("WARMUP COMPLETE")
+        title = QLabel(tr("priming.warmup_complete"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        body = QLabel("Eyes primed and ready for training.")
+        body = QLabel(tr("priming.eyes_primed_and_ready_for_trai"))
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['fg']};")
         body.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(body)
 
-        cont_btn = QPushButton("CONTINUE")
+        cont_btn = QPushButton(tr("base.continue"))
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "

@@ -16,6 +16,7 @@ from neural_speed_academy.theme import (
     COLORS, make_qfont, input_css, theme_manager, screen_metrics,
 )
 from neural_speed_academy.config import TEXT_LIBRARY
+from neural_speed_academy.i18n import tr
 
 # Prefix for custom text entries in the dropdown
 _CUSTOM_PREFIX = "\u2605 "
@@ -55,7 +56,7 @@ class TextLibraryWidget(QWidget):
         row.setSpacing(8)
         row.addStretch()
 
-        lbl = QLabel("Text Library:")
+        lbl = QLabel(tr("text.library.widget.text_library"))
         lbl.setFont(make_qfont("slider_label"))
         lbl.setStyleSheet(f"color: {c['fg']}; background: transparent;")
         row.addWidget(lbl)
@@ -84,14 +85,14 @@ class TextLibraryWidget(QWidget):
             f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
 
-        save_btn = QPushButton("SAVE AS\u2026")
+        save_btn = QPushButton(tr("text.library.widget.save_as_u2026"))
         save_btn.setFont(make_qfont("btn_sm"))
         save_btn.setStyleSheet(btn_style)
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self._save_custom)
         row.addWidget(save_btn)
 
-        self._del_btn = QPushButton("DELETE")
+        self._del_btn = QPushButton(tr("text.library.widget.delete"))
         self._del_btn.setFont(make_qfont("btn_sm"))
         self._del_btn.setStyleSheet(
             f"background-color: {c['card']}; color: {c['alert']}; "
@@ -198,7 +199,7 @@ class TextLibraryWidget(QWidget):
     def _save_custom(self) -> None:
         text = self._editor.toPlainText().strip()
         if not text:
-            QMessageBox.information(self, "Empty", "Enter some text first.")
+            QMessageBox.information(self, tr("text.library.widget.empty"), tr("text.library.widget.enter_some_text_first"))
             return
 
         # Pre-fill with current custom name if one is selected

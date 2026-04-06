@@ -13,6 +13,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.i18n import tr
 
 
 class DashboardScreen(BaseScreen):
@@ -32,7 +33,7 @@ class DashboardScreen(BaseScreen):
         header.setStyleSheet(f"background-color: {c['card']};")
         header.setFixedHeight(60)
         hl = QHBoxLayout(header)
-        title = QLabel("TRAINING HUB")
+        title = QLabel(tr("dashboard.training_hub"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['text_on_card']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -69,7 +70,7 @@ class DashboardScreen(BaseScreen):
 
         # Eye Priming — standalone warmup button above exercise grid
         c_priming = COLORS
-        warmup_btn = QPushButton("EYE WARMUP")
+        warmup_btn = QPushButton(tr("dashboard.eye_warmup"))
         warmup_btn.setMaximumWidth(250)
         warmup_btn.setStyleSheet(
             btn_css(c_priming["priming"], c_priming["btn_text"],
@@ -185,13 +186,13 @@ class DashboardScreen(BaseScreen):
         )
         bl = QHBoxLayout(banner)
 
-        welcome = QLabel("Welcome! New to speed reading?")
+        welcome = QLabel(tr("dashboard.welcome_new_to_speed_reading"))
         welcome.setFont(make_qfont("btn_bold"))
         welcome.setStyleSheet(f"color: {c['btn_text']};")
         bl.addWidget(welcome)
         bl.addStretch()
 
-        start_btn = QPushButton("START FOUNDATION PATH")
+        start_btn = QPushButton(tr("dashboard.start_foundation_path"))
         start_btn.setStyleSheet(
             btn_css(c["btn_text"], c["accent"], padding="4px 12px", radius=3)
         )
@@ -239,7 +240,7 @@ class DashboardScreen(BaseScreen):
         bar.addStretch()
 
         # Right: exit actions
-        menu_btn = QPushButton("Main Menu")
+        menu_btn = QPushButton(tr("nav.main_menu"))
         menu_btn.setStyleSheet(exit_style)
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         menu_btn.clicked.connect(
@@ -247,7 +248,7 @@ class DashboardScreen(BaseScreen):
         )
         bar.addWidget(menu_btn)
 
-        logout_btn = QPushButton("Logout")
+        logout_btn = QPushButton(tr("dashboard.logout"))
         logout_btn.setStyleSheet(exit_style)
         logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         logout_btn.clicked.connect(self.navigator.logout)
@@ -295,7 +296,7 @@ class DashboardScreen(BaseScreen):
             return
         c = COLORS
 
-        header = QLabel("PERSONAL BESTS")
+        header = QLabel(tr("dashboard.personal_bests"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['muted']};")
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)

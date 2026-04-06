@@ -12,6 +12,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.i18n import tr
 
 
 class BaseMenuScreen(BaseScreen):
@@ -77,7 +78,7 @@ class BaseMenuScreen(BaseScreen):
         lbl.setStyleSheet(f"color: {c['fg']};")
         title_row.addWidget(lbl)
 
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="6px 16px",
                     font_key="btn_sm")
@@ -161,7 +162,7 @@ class BaseMenuScreen(BaseScreen):
         right.addSpacing(12)
 
         # START button
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="12px 50px")
@@ -646,12 +647,12 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         # Title row
         title_row = QHBoxLayout()
         title_row.addStretch()
-        title_lbl = QLabel("SLIDE PROCESSING")
+        title_lbl = QLabel(tr("slide.processing.slide_processing"))
         title_lbl.setFont(make_qfont("header"))
         title_lbl.setStyleSheet(f"color: {c['fg']};")
         title_row.addWidget(title_lbl)
 
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -676,7 +677,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         left = QVBoxLayout()
         left.setSpacing(8)
 
-        cat_header = QLabel("CATEGORIES")
+        cat_header = QLabel(tr("menus.categories"))
         cat_header.setFont(make_qfont("menu_header"))
         cat_header.setStyleSheet(f"color: {c['accent']};")
         cat_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -708,7 +709,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         # Select All / Clear — centered, compact
         sel_row = QHBoxLayout()
         sel_row.addStretch()
-        sel_all = QPushButton("Select All")
+        sel_all = QPushButton(tr("menus.select_all"))
         sel_all.setFont(make_qfont("btn_sm"))
         sel_all.setStyleSheet(
             f"color: {c['accent']}; background: transparent; "
@@ -722,7 +723,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         sep_lbl.setStyleSheet(f"color: {c['muted']};")
         sel_row.addWidget(sep_lbl)
 
-        sel_clear = QPushButton("Clear")
+        sel_clear = QPushButton(tr("menus.clear"))
         sel_clear.setFont(make_qfont("btn_sm"))
         sel_clear.setStyleSheet(
             f"color: {c['muted']}; background: transparent; "
@@ -742,7 +743,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         custom_sets = repo.list_sets()
         if custom_sets:
             left.addSpacing(8)
-            custom_header = QLabel("CUSTOM SETS")
+            custom_header = QLabel(tr("menus.custom_sets"))
             custom_header.setFont(make_qfont("menu_header"))
             custom_header.setStyleSheet(f"color: {c['accent']};")
             custom_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -763,7 +764,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
 
         # Create / Edit slides button
         left.addSpacing(6)
-        create_btn = QPushButton("CREATE / EDIT SLIDES")
+        create_btn = QPushButton(tr("menus.create_edit_slides"))
         create_btn.setFont(make_qfont("menu_btn"))
         create_btn.setFixedHeight(40)
         create_btn.setStyleSheet(
@@ -785,7 +786,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         right.setSpacing(8)
 
         # Display time
-        time_header = QLabel("DISPLAY TIME")
+        time_header = QLabel(tr("menus.display_time"))
         time_header.setFont(make_qfont("menu_header"))
         time_header.setStyleSheet(f"color: {c['accent']};")
         time_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -807,7 +808,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         right.addSpacing(10)
 
         # Slides per session
-        slides_header = QLabel("SLIDES PER SESSION")
+        slides_header = QLabel(tr("menus.slides_per_session"))
         slides_header.setFont(make_qfont("menu_header"))
         slides_header.setStyleSheet(f"color: {c['accent']};")
         slides_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -832,7 +833,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         right.addSpacing(10)
 
         # Lines per slide
-        lines_header = QLabel("LINES PER SLIDE")
+        lines_header = QLabel(tr("menus.lines_per_slide"))
         lines_header.setFont(make_qfont("menu_header"))
         lines_header.setStyleSheet(f"color: {c['accent']};")
         lines_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -857,7 +858,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         right.addSpacing(20)
 
         # START button — at bottom of right column
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "

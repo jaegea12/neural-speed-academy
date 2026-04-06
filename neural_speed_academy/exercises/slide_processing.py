@@ -22,6 +22,7 @@ from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import (
     SLIDE_PROCESSING_CONFIG, SLIDE_LIBRARY, USER_DATA_CONFIG,
 )
+from neural_speed_academy.i18n import tr
 
 
 class SlideProcessingExercise(BaseExercise):
@@ -83,7 +84,7 @@ class SlideProcessingExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -97,7 +98,7 @@ class SlideProcessingExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("SLIDE PROCESSING")
+        title = QLabel(tr("slide.processing.slide_processing"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -115,7 +116,7 @@ class SlideProcessingExercise(BaseExercise):
         # Category selector
         cat_row = QHBoxLayout()
         cat_row.addStretch()
-        cat_lbl = QLabel("Category:")
+        cat_lbl = QLabel(tr("slide.processing.category"))
         cat_lbl.setFont(make_qfont("slider_label"))
         cat_lbl.setStyleSheet(f"color: {c['fg']};")
         cat_row.addWidget(cat_lbl)
@@ -148,7 +149,7 @@ class SlideProcessingExercise(BaseExercise):
         # Display time
         time_row = QHBoxLayout()
         time_row.addStretch()
-        time_lbl = QLabel("Display time (s):")
+        time_lbl = QLabel(tr("slide.processing.display_time_s"))
         time_lbl.setFont(make_qfont("slider_label"))
         time_lbl.setStyleSheet(f"color: {c['fg']};")
         time_row.addWidget(time_lbl)
@@ -174,7 +175,7 @@ class SlideProcessingExercise(BaseExercise):
         # Number of slides
         slides_row = QHBoxLayout()
         slides_row.addStretch()
-        slides_lbl = QLabel("Slides:")
+        slides_lbl = QLabel(tr("slide.processing.slides"))
         slides_lbl.setFont(make_qfont("slider_label"))
         slides_lbl.setStyleSheet(f"color: {c['fg']};")
         slides_row.addWidget(slides_lbl)
@@ -200,7 +201,7 @@ class SlideProcessingExercise(BaseExercise):
         cl.addSpacing(20)
 
         # Start button
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
@@ -400,9 +401,9 @@ class SlideProcessingExercise(BaseExercise):
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
@@ -522,9 +523,9 @@ class SlideProcessingExercise(BaseExercise):
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         exit_btn.setStyleSheet(
@@ -618,7 +619,7 @@ class SlideProcessingExercise(BaseExercise):
         self._layout.addStretch()
 
         if is_correct:
-            fb = QLabel("\u2714  Correct!")
+            fb = QLabel(tr("slide.processing.u2714_correct"))
             fb.setStyleSheet(f"color: {c['success']};")
         else:
             questions = self._current_questions

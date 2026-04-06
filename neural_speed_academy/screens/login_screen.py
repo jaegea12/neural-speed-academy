@@ -14,6 +14,7 @@ from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css
 from PyQt6.QtWidgets import QHBoxLayout
 
 import hashlib
+from neural_speed_academy.i18n import tr
 
 
 def _hash_pw(password: str) -> str:
@@ -29,7 +30,7 @@ class LoginScreen(BaseScreen):
         # Back button at top-left
         top_bar = QHBoxLayout()
         top_bar.setContentsMargins(12, 8, 12, 0)
-        back_btn = QPushButton("\u2190 BACK")
+        back_btn = QPushButton(tr("login.u2190_back"))
         back_btn.setStyleSheet(
             btn_css(c["card"], c["fg"], padding="6px 16px", font_key="btn_sm")
         )
@@ -45,7 +46,7 @@ class LoginScreen(BaseScreen):
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.setSpacing(8)
 
-        title = QLabel("NEURAL SPEED ACADEMY")
+        title = QLabel(tr("login.neural_speed_academy"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['fg']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -55,7 +56,7 @@ class LoginScreen(BaseScreen):
         # Existing users
         users = self.navigator.user_repo.list_users()
         if users:
-            sel_label = QLabel("SELECT PROFILE")
+            sel_label = QLabel(tr("login.select_profile"))
             sel_label.setFont(make_qfont("section_header"))
             sel_label.setStyleSheet(f"color: {c['accent']};")
             sel_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -87,7 +88,7 @@ class LoginScreen(BaseScreen):
                 )
                 row_layout.addWidget(login_btn)
 
-                del_btn = QPushButton("\u2716")
+                del_btn = QPushButton(tr("chunking.u2716"))
                 del_btn.setFixedSize(32, 32)
                 del_btn.setStyleSheet(
                     f"QPushButton {{ background-color: transparent; "
@@ -112,7 +113,7 @@ class LoginScreen(BaseScreen):
             cl.addSpacing(10)
             cl.addWidget(sep, alignment=Qt.AlignmentFlag.AlignCenter)
 
-            new_label = QLabel("OR CREATE NEW")
+            new_label = QLabel(tr("login.or_create_new"))
             new_label.setFont(make_qfont("section_header"))
             new_label.setStyleSheet(f"color: {c['accent']};")
             new_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -141,7 +142,7 @@ class LoginScreen(BaseScreen):
 
         cl.addSpacing(10)
 
-        start_btn = QPushButton("CREATE & START")
+        start_btn = QPushButton(tr("login.create_start"))
         start_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="10px 30px")
         )
@@ -155,7 +156,7 @@ class LoginScreen(BaseScreen):
         """Ask for confirmation before deleting a profile."""
         c = COLORS
         msg = QMessageBox(self)
-        msg.setWindowTitle("Delete Profile")
+        msg.setWindowTitle(tr("login.delete_profile"))
         msg.setText(f"Delete profile \"{name}\"?\n\nAll progress, history, and XP will be lost.")
         msg.setStyleSheet(
             f"QMessageBox {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -219,13 +220,13 @@ class LoginScreen(BaseScreen):
                 self.navigator.set_user(profile)
                 self.navigator.complete_login()
             else:
-                lbl.setText("Wrong password. Try again.")
+                lbl.setText(tr("login.wrong_password_try_again"))
                 lbl.setStyleSheet(f"color: {c['alert']};")
                 pw_field.clear()
 
         pw_field.returnPressed.connect(try_login)
 
-        ok_btn = QPushButton("LOGIN")
+        ok_btn = QPushButton(tr("login.login"))
         ok_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="6px 20px")
         )

@@ -13,6 +13,7 @@ from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import TRAINING_PATHS, TRAINING_PATH_CATEGORIES
 from neural_speed_academy.state import PathProgress
+from neural_speed_academy.i18n import tr
 
 
 class PathSelectionScreen(BaseScreen):
@@ -34,13 +35,13 @@ class PathSelectionScreen(BaseScreen):
         main_layout.setContentsMargins(30, 15, 30, 15)
         main_layout.setSpacing(10)
 
-        title = QLabel("TRAINING PATHS")
+        title = QLabel(tr("paths.training_paths"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['fg']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(title)
 
-        sub = QLabel("Structured programs that combine exercises for specific goals")
+        sub = QLabel(tr("paths.structured_programs_that_combi"))
         sub.setFont(make_qfont("sub"))
         sub.setStyleSheet(f"color: {c['muted']};")
         sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -88,7 +89,7 @@ class PathSelectionScreen(BaseScreen):
         btn_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
         btn_row.setSpacing(12)
 
-        custom_btn = QPushButton("MY CUSTOM PATHS")
+        custom_btn = QPushButton(tr("paths.my_custom_paths"))
         custom_btn.setStyleSheet(
             btn_css(c["action"], c["btn_text"], padding="8px 20px")
         )
@@ -98,7 +99,7 @@ class PathSelectionScreen(BaseScreen):
         )
         btn_row.addWidget(custom_btn)
 
-        create_btn = QPushButton("+ CREATE NEW")
+        create_btn = QPushButton(tr("paths.create_new"))
         create_btn.setStyleSheet(
             btn_css(c["card"], c["fg"], padding="8px 20px")
         )
@@ -153,7 +154,7 @@ class PathSelectionScreen(BaseScreen):
         c = COLORS
 
         if not paths:
-            empty = QLabel("No paths in this category yet")
+            empty = QLabel(tr("paths.no_paths_in_this_category_yet"))
             empty.setFont(make_qfont("body"))
             empty.setStyleSheet(f"color: {c['muted']};")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -286,7 +287,7 @@ class CustomPathsScreen(BaseScreen):
         cl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         cl.setContentsMargins(40, 15, 40, 15)
 
-        title = QLabel("MY CUSTOM PATHS")
+        title = QLabel(tr("paths.my_custom_paths"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -295,7 +296,7 @@ class CustomPathsScreen(BaseScreen):
 
         user = self.navigator.get_user()
         if not user or not user.custom_paths:
-            empty = QLabel("No custom paths yet.\nCreate one from the Training Paths screen.")
+            empty = QLabel(tr("paths.no_custom_paths_yet_ncreate_on"))
             empty.setFont(make_qfont("body"))
             empty.setStyleSheet(f"color: {c['muted']};")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -310,7 +311,7 @@ class CustomPathsScreen(BaseScreen):
             cl.addLayout(grid)
 
         cl.addSpacing(10)
-        create_btn = QPushButton("+ CREATE NEW PATH")
+        create_btn = QPushButton(tr("paths.create_new_path"))
         create_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="6px 20px")
         )
@@ -341,7 +342,7 @@ class CustomPathsScreen(BaseScreen):
         info.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(info)
 
-        btn = QPushButton("START")
+        btn = QPushButton(tr("mot.start"))
         btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="4px", radius=3,
                     font_key="btn_sm")

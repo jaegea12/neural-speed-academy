@@ -9,6 +9,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.i18n import tr
 
 
 # Entry types: "section" (header + body), "fact" (highlighted callout)
@@ -271,7 +272,7 @@ class IntroductionScreen(BaseScreen):
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(60, 20, 60, 30)
 
-        title = QLabel("INTRODUCTION")
+        title = QLabel(tr("introduction.introduction"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -307,7 +308,7 @@ class IntroductionScreen(BaseScreen):
                 card_layout = QVBoxLayout(card)
                 card_layout.setContentsMargins(0, 0, 0, 0)
 
-                did_you_know = QLabel("DID YOU KNOW?")
+                did_you_know = QLabel(tr("introduction.did_you_know"))
                 did_you_know.setFont(make_qfont("btn_sm"))
                 did_you_know.setStyleSheet(f"color: {c['accent']};")
                 card_layout.addWidget(did_you_know)

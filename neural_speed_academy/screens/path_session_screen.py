@@ -15,6 +15,7 @@ from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont
 from neural_speed_academy.config import TRAINING_PATHS
 from neural_speed_academy.state import PathProgress
+from neural_speed_academy.i18n import tr
 
 
 class PathSessionScreen(BaseScreen):
@@ -76,7 +77,7 @@ class PathSessionScreen(BaseScreen):
         )
         cl.addWidget(progress, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        step_lbl = QLabel(f"Step {current + 1} of {len(steps)}")
+        step_lbl = QLabel(tr("paths.step_progress", current=current + 1, total=len(steps)))
         step_lbl.setFont(make_qfont("counter"))
         step_lbl.setStyleSheet(f"color: {c['fg']};")
         step_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -116,7 +117,7 @@ class PathSessionScreen(BaseScreen):
         nav_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         if current > 0:
-            prev_btn = QPushButton("\u2190 PREVIOUS STEP")
+            prev_btn = QPushButton(tr("path.session.u2190_previous_step"))
             prev_btn.setFont(make_qfont("btn_sm"))
             prev_btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
@@ -128,7 +129,7 @@ class PathSessionScreen(BaseScreen):
             )
             nav_row.addWidget(prev_btn)
 
-        skip_btn = QPushButton("SKIP THIS STEP \u2192")
+        skip_btn = QPushButton(tr("path.session.skip_this_step_u2192"))
         skip_btn.setFont(make_qfont("btn_sm"))
         skip_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
@@ -237,7 +238,7 @@ class PathSessionScreen(BaseScreen):
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.setSpacing(8)
 
-        title = QLabel("PATH COMPLETE")
+        title = QLabel(tr("path.session.path_complete"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -249,7 +250,7 @@ class PathSessionScreen(BaseScreen):
         name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(name)
 
-        check = QLabel("\u2713")
+        check = QLabel(tr("path.session.u2713"))
         check.setStyleSheet(f"color: {c['success']}; font-size: 48pt;")
         check.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(check)
@@ -427,7 +428,7 @@ class PathBuilderScreen(BaseScreen):
         cl = QVBoxLayout(container)
         cl.setContentsMargins(40, 10, 40, 10)
 
-        title = QLabel("CREATE CUSTOM PATH")
+        title = QLabel(tr("path.session.create_custom_path"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -435,7 +436,7 @@ class PathBuilderScreen(BaseScreen):
 
         # Name entry
         name_row = QHBoxLayout()
-        name_lbl = QLabel("Path Name:")
+        name_lbl = QLabel(tr("path.session.path_name"))
         name_lbl.setFont(make_qfont("btn_bold"))
         name_lbl.setStyleSheet(f"color: {c['fg']};")
         name_row.addWidget(name_lbl)
@@ -454,7 +455,7 @@ class PathBuilderScreen(BaseScreen):
 
         # Left: catalog
         left = QVBoxLayout()
-        cat_title = QLabel("EXERCISE CATALOG")
+        cat_title = QLabel(tr("path.session.exercise_catalog"))
         cat_title.setFont(make_qfont("section_header"))
         cat_title.setStyleSheet(f"color: {c['fg']};")
         left.addWidget(cat_title)
@@ -495,7 +496,7 @@ class PathBuilderScreen(BaseScreen):
 
         # Right: steps
         right = QVBoxLayout()
-        steps_title = QLabel("YOUR PATH")
+        steps_title = QLabel(tr("path.session.your_path"))
         steps_title.setFont(make_qfont("section_header"))
         steps_title.setStyleSheet(f"color: {c['fg']};")
         right.addWidget(steps_title)
@@ -514,7 +515,7 @@ class PathBuilderScreen(BaseScreen):
         btn_row = QHBoxLayout()
         btn_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        save_btn = QPushButton("SAVE PATH")
+        save_btn = QPushButton(tr("path.session.save_path"))
         save_btn.setFont(make_qfont("btn_bold"))
         save_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -524,7 +525,7 @@ class PathBuilderScreen(BaseScreen):
         save_btn.clicked.connect(self._save_path)
         btn_row.addWidget(save_btn)
 
-        cancel_btn = QPushButton("CANCEL")
+        cancel_btn = QPushButton(tr("path.session.cancel"))
         cancel_btn.setFont(make_qfont("btn_bold"))
         cancel_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
@@ -555,7 +556,7 @@ class PathBuilderScreen(BaseScreen):
                 w.deleteLater()
 
         if not self._steps:
-            empty = QLabel("Add exercises from the catalog\nto build your path.")
+            empty = QLabel(tr("path.session.add_exercises_from_the_catalog"))
             empty.setFont(make_qfont("body"))
             empty.setStyleSheet(f"color: {c['muted']};")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -575,7 +576,7 @@ class PathBuilderScreen(BaseScreen):
             lbl.setStyleSheet(f"color: {c['fg']};")
             row.addWidget(lbl, 1)
 
-            rm = QPushButton("\u2717")
+            rm = QPushButton(tr("path.session.u2717"))
             rm.setFont(make_qfont("btn_sm"))
             rm.setStyleSheet(
                 f"QPushButton {{ color: {c['alert']}; background: transparent; "
@@ -597,10 +598,10 @@ class PathBuilderScreen(BaseScreen):
             return
         name = self._name_entry.text().strip()
         if not name:
-            QMessageBox.information(self, "Name Required", "Please enter a name for your path.")
+            QMessageBox.information(self, tr("path.session.name_required"), tr("path.session.please_enter_a_name_for_your_p"))
             return
         if not self._steps:
-            QMessageBox.information(self, "No Exercises", "Add at least one exercise to your path.")
+            QMessageBox.information(self, tr("path.session.no_exercises"), tr("path.session.add_at_least_one_exercise_to_y"))
             return
 
         path_id = f"custom_{name.lower().replace(' ', '_')}"

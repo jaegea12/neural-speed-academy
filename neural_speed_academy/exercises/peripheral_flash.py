@@ -20,6 +20,7 @@ from PyQt6.QtGui import QFont, QKeySequence, QShortcut
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import PERIPHERAL_FLASH_CONFIG, USER_DATA_CONFIG
+from neural_speed_academy.i18n import tr
 
 
 # Positions as (x_frac, y_frac) relative to the arena center.
@@ -81,7 +82,7 @@ class PeripheralFlashExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -95,7 +96,7 @@ class PeripheralFlashExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("PERIPHERAL FLASH")
+        title = QLabel(tr("peripheral.flash.peripheral_flash"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -113,7 +114,7 @@ class PeripheralFlashExercise(BaseExercise):
         # Stimulus type
         type_row = QHBoxLayout()
         type_row.addStretch()
-        type_lbl = QLabel("Stimulus:")
+        type_lbl = QLabel(tr("peripheral.flash.stimulus"))
         type_lbl.setFont(make_qfont("slider_label"))
         type_lbl.setStyleSheet(f"color: {c['fg']};")
         type_row.addWidget(type_lbl)
@@ -138,7 +139,7 @@ class PeripheralFlashExercise(BaseExercise):
         # Flash duration
         flash_row = QHBoxLayout()
         flash_row.addStretch()
-        flash_lbl = QLabel("Flash (ms):")
+        flash_lbl = QLabel(tr("peripheral.flash.flash_ms"))
         flash_lbl.setFont(make_qfont("slider_label"))
         flash_lbl.setStyleSheet(f"color: {c['fg']};")
         flash_row.addWidget(flash_lbl)
@@ -164,7 +165,7 @@ class PeripheralFlashExercise(BaseExercise):
         # Eccentricity
         ecc_row = QHBoxLayout()
         ecc_row.addStretch()
-        ecc_lbl = QLabel("Eccentricity (%):")
+        ecc_lbl = QLabel(tr("peripheral.flash.eccentricity"))
         ecc_lbl.setFont(make_qfont("slider_label"))
         ecc_lbl.setStyleSheet(f"color: {c['fg']};")
         ecc_row.addWidget(ecc_lbl)
@@ -192,7 +193,7 @@ class PeripheralFlashExercise(BaseExercise):
         # Rounds
         rounds_row = QHBoxLayout()
         rounds_row.addStretch()
-        rounds_lbl = QLabel("Rounds:")
+        rounds_lbl = QLabel(tr("mot.rounds"))
         rounds_lbl.setFont(make_qfont("slider_label"))
         rounds_lbl.setStyleSheet(f"color: {c['fg']};")
         rounds_row.addWidget(rounds_lbl)
@@ -217,7 +218,7 @@ class PeripheralFlashExercise(BaseExercise):
 
         # Start button
         cl.addSpacing(10)
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
@@ -228,7 +229,7 @@ class PeripheralFlashExercise(BaseExercise):
         start_btn.clicked.connect(self._start_from_ui)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        hint = QLabel("Ctrl+Enter to start")
+        hint = QLabel(tr("mot.ctrl_enter_to_start"))
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -268,23 +269,23 @@ class PeripheralFlashExercise(BaseExercise):
         top = QHBoxLayout()
         top.setContentsMargins(10, 6, 10, 2)
 
-        self._progress_lbl = QLabel(f"Round 0/{self._total_rounds}")
+        self._progress_lbl = QLabel(tr("exercise.round_progress", current=0, total=self._total_rounds))
         self._progress_lbl.setFont(make_qfont("counter"))
         self._progress_lbl.setStyleSheet(f"color: {c['accent']};")
         top.addWidget(self._progress_lbl)
 
         top.addStretch()
 
-        self._score_lbl = QLabel("Score: 0")
+        self._score_lbl = QLabel(tr("peripheral.flash.score_0"))
         self._score_lbl.setFont(make_qfont("counter"))
         self._score_lbl.setStyleSheet(f"color: {c['fg']};")
         top.addWidget(self._score_lbl)
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -501,7 +502,7 @@ class PeripheralFlashExercise(BaseExercise):
 
         if chosen == self._current_answer:
             self._correct += 1
-            self._feedback_lbl.setText("\u2714 Correct!")
+            self._feedback_lbl.setText(tr("peripheral.flash.u2714_correct"))
             self._feedback_lbl.setStyleSheet(f"color: {c['success']};")
         else:
             expected = self._current_answer
