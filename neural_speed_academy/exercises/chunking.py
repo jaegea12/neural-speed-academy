@@ -74,7 +74,7 @@ class ChunkingExercise(BaseExercise):
         # Text library + editor (shared widget)
         from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
         self._text_lib = TextLibraryWidget(self, show_difficulty=True)
-        cl.addWidget(self._text_lib, 0, Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._text_lib)
 
         # Chunk size: label + slider + value in one row
         init_chunk = kwargs.get(
@@ -166,6 +166,9 @@ class ChunkingExercise(BaseExercise):
 
     def _start_from_ui(self) -> None:
         text = self._text_lib.text()
+        # Persist so the text survives exercise re-entry
+        theme_manager.training_text = text
+        theme_manager.save()
         self._run_chunking(text, self._chunk_slider.value(), self._wpm_slider.value())
 
     def _build_chunks(self, text: str, size: int) -> list:

@@ -138,7 +138,7 @@ class PacerExercise(BaseExercise):
         # Text library + editor (shared widget)
         from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
         self._text_lib = TextLibraryWidget(self, show_difficulty=True)
-        cl.addWidget(self._text_lib, 0, Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._text_lib)
 
         # WPM: label + slider + value in one compact row
         wpm_row = QHBoxLayout()
@@ -376,6 +376,9 @@ class PacerExercise(BaseExercise):
 
     def _start_from_ui(self) -> None:
         text = self._text_lib.text()
+        # Persist so the text survives exercise re-entry
+        theme_manager.training_text = text
+        theme_manager.save()
         wpm = self._wpm_slider.value()
         mode = "single"
         for btn in self._mode_group.buttons():

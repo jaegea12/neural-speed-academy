@@ -73,7 +73,7 @@ class RsvpExercise(BaseExercise):
         # Text library + editor (shared widget)
         from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
         self._text_lib = TextLibraryWidget(self, show_difficulty=True)
-        cl.addWidget(self._text_lib, 0, Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(self._text_lib)
 
         # WPM: label + slider + value in one row
         initial_wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
@@ -131,6 +131,9 @@ class RsvpExercise(BaseExercise):
 
     def _start_from_ui(self) -> None:
         text = self._text_lib.text()
+        # Persist so the text survives exercise re-entry
+        theme_manager.training_text = text
+        theme_manager.save()
         wpm = self._wpm_slider.value()
         self._run_rsvp(text, wpm)
 
