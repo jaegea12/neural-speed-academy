@@ -241,8 +241,8 @@ def build_recall_screen(
     quiz_input = QTextEdit()
     quiz_input.setFont(make_qfont("pacer_text"))
     quiz_input.setStyleSheet(input_css(widget="QTextEdit"))
-    quiz_input.setFixedHeight(150)
-    quiz_input.setMaximumWidth(screen_metrics.text_input_w)
+    quiz_input.setFixedHeight(200)
+    quiz_input.setFixedWidth(min(screen_metrics.reader_w, screen_metrics.text_input_w))
     cl.addWidget(quiz_input, alignment=Qt.AlignmentFlag.AlignCenter)
 
     def _score():

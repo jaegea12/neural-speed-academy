@@ -4,14 +4,14 @@ Chunking exercise: flash multi-word phrases to train block reading.
 from __future__ import annotations
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QSlider, QMessageBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, theme_manager, screen_metrics
 from neural_speed_academy.config import CHUNKING_CONFIG, USER_DATA_CONFIG
 
 
@@ -24,6 +24,8 @@ class ChunkingExercise(BaseExercise):
         self.wpm: int = 250
         self.chunk_size: int = 3
         self._paused: bool = False
+        self._last_wpm: int | None = None
+        self._last_chunk: int | None = None
 
     @property
     def name(self) -> str:
@@ -71,19 +73,13 @@ class ChunkingExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input — 60% screen width, 15 lines visible
-        self._text_input = QTextEdit()
-        self._text_input.setFont(make_qfont("pacer_text"))
-        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
-        fm = self._text_input.fontMetrics()
-        line_h = fm.lineSpacing()
-        self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(screen_metrics.text_input_w)
-        self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
+        # Text library + editor (shared widget)
+        from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
+        self._text_lib = TextLibraryWidget(self, show_difficulty=True)
+        cl.addWidget(self._text_lib)
 
         # Chunk size: label + slider + value in one row
-        init_chunk = kwargs.get(
+        init_chunk = self._last_chunk or kwargs.get(
             "chunk_size", CHUNKING_CONFIG["default_chunk_size"]
         )
         chunk_row = QHBoxLayout()
@@ -117,7 +113,7 @@ class ChunkingExercise(BaseExercise):
         cl.addLayout(chunk_row)
 
         # WPM: label + slider + value in one row
-        init_wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+        init_wpm = self._last_wpm or kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
         wpm_row = QHBoxLayout()
         wpm_row.setContentsMargins(0, 0, 0, 0)
         wpm_row.setSpacing(8)
@@ -171,8 +167,13 @@ class ChunkingExercise(BaseExercise):
         self._layout.addWidget(container, 1)
 
     def _start_from_ui(self) -> None:
-        text = self._text_input.toPlainText()
-        self._run_chunking(text, self._chunk_slider.value(), self._wpm_slider.value())
+        text = self._text_lib.text()
+        # Persist so the text survives exercise re-entry
+        theme_manager.training_text = text
+        theme_manager.save()
+        self._last_chunk = self._chunk_slider.value()
+        self._last_wpm = self._wpm_slider.value()
+        self._run_chunking(text, self._last_chunk, self._last_wpm)
 
     def _build_chunks(self, text: str, size: int) -> list:
         words = text.split()
@@ -276,7 +277,13 @@ class ChunkingExercise(BaseExercise):
 
     def _stop(self) -> None:
         self._running = False
-        self.navigator.finish_exercise()
+        for t in self._timers:
+            t.stop()
+        self._timers.clear()
+        self.start()
+
+    def _stop_exercise(self) -> None:
+        self._stop()
 
     def _complete_exercise(self) -> None:
         self._running = False
