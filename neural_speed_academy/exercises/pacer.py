@@ -18,7 +18,7 @@ from PyQt6.QtGui import (
 )
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, input_css, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, theme_manager, screen_metrics
 from neural_speed_academy.config import PACER_CONFIG, USER_DATA_CONFIG
 
 from neural_speed_academy.exercises.recall import (
@@ -71,7 +71,6 @@ class PacerExercise(BaseExercise):
     MODES = {
         "single": "Single-Line",
         "multi": "Multi-Line",
-        "zpattern": "Z-Pattern",
     }
 
     def __init__(self, navigator, parent: QWidget | None = None):
@@ -86,6 +85,13 @@ class PacerExercise(BaseExercise):
         self._n_lines: int = 3
         self._chunk_size: int = 3
         self._start_time: float = 0.0
+        # Preserved config state across stop/restart
+        self._last_wpm: int | None = None
+        self._last_mode: str | None = None
+        self._last_chunk: int | None = None
+        self._last_nlines: int | None = None
+        self._last_text_size: str | None = None
+        self._last_page_width: str | None = None
 
     @property
     def name(self) -> str:
@@ -135,16 +141,10 @@ class PacerExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input — 60% screen width, 15 lines visible
-        self._text_input = QTextEdit()
-        self._text_input.setFont(make_qfont("pacer_text"))
-        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
-        fm = self._text_input.fontMetrics()
-        line_h = fm.lineSpacing()
-        self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(screen_metrics.text_input_w)
-        self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
+        # Text library + editor (shared widget)
+        from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
+        self._text_lib = TextLibraryWidget(self, show_difficulty=True)
+        cl.addWidget(self._text_lib)
 
         # WPM: label + slider + value in one compact row
         wpm_row = QHBoxLayout()
@@ -160,11 +160,11 @@ class PacerExercise(BaseExercise):
         self._wpm_slider.setRange(
             PACER_CONFIG["min_wpm"], PACER_CONFIG["max_wpm"]
         )
-        self._wpm_slider.setValue(PACER_CONFIG["default_wpm"])
+        self._wpm_slider.setValue(self._last_wpm or PACER_CONFIG["default_wpm"])
         self._wpm_slider.setFixedWidth(300)
         self._wpm_slider.setStyleSheet(slider_groove)
 
-        self._wpm_display = QLabel(str(PACER_CONFIG["default_wpm"]))
+        self._wpm_display = QLabel(str(self._last_wpm or PACER_CONFIG["default_wpm"]))
         self._wpm_display.setFont(make_qfont("counter"))
         self._wpm_display.setStyleSheet(f"color: {c['accent']};")
         self._wpm_display.setFixedWidth(50)
@@ -193,7 +193,7 @@ class PacerExercise(BaseExercise):
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
             rb.setProperty("mode_key", key)
-            if key == "single":
+            if key == (self._last_mode or "single"):
                 rb.setChecked(True)
             self._mode_group.addButton(rb)
             mode_row.addWidget(rb)
@@ -211,13 +211,14 @@ class PacerExercise(BaseExercise):
         chunk_lbl.setStyleSheet(f"color: {c['fg']};")
         chunk_row.addWidget(chunk_lbl)
 
+        init_chunk = self._last_chunk or 3
         self._chunk_slider = QSlider(Qt.Orientation.Horizontal)
         self._chunk_slider.setRange(1, 10)
-        self._chunk_slider.setValue(3)
+        self._chunk_slider.setValue(init_chunk)
         self._chunk_slider.setFixedWidth(200)
         self._chunk_slider.setStyleSheet(slider_groove)
 
-        self._chunk_display = QLabel("3")
+        self._chunk_display = QLabel(str(init_chunk))
         self._chunk_display.setFont(make_qfont("counter"))
         self._chunk_display.setStyleSheet(f"color: {c['accent']};")
         self._chunk_display.setFixedWidth(30)
@@ -241,13 +242,14 @@ class PacerExercise(BaseExercise):
         nlines_lbl.setStyleSheet(f"color: {c['fg']};")
         nlines_row.addWidget(nlines_lbl)
 
+        init_nlines = self._last_nlines or 3
         self._nlines_slider = QSlider(Qt.Orientation.Horizontal)
         self._nlines_slider.setRange(2, 5)
-        self._nlines_slider.setValue(3)
+        self._nlines_slider.setValue(init_nlines)
         self._nlines_slider.setFixedWidth(150)
         self._nlines_slider.setStyleSheet(slider_groove)
 
-        self._nlines_display = QLabel("3")
+        self._nlines_display = QLabel(str(init_nlines))
         self._nlines_display.setFont(make_qfont("counter"))
         self._nlines_display.setStyleSheet(f"color: {c['accent']};")
         self._nlines_display.setFixedWidth(20)
@@ -258,8 +260,64 @@ class PacerExercise(BaseExercise):
         nlines_row.addWidget(self._nlines_display)
         nlines_row.addStretch()
 
-        self._nlines_frame.setVisible(False)
+        self._nlines_frame.setVisible(
+            (self._last_mode or "single") == "multi"
+        )
         cl.addWidget(self._nlines_frame)
+
+        # Text size toggle
+        tsize_row = QHBoxLayout()
+        tsize_row.setContentsMargins(0, 0, 0, 0)
+        tsize_row.setSpacing(8)
+        tsize_row.addStretch()
+        tsize_lbl = QLabel("Text size:")
+        tsize_lbl.setFont(make_qfont("slider_label"))
+        tsize_lbl.setStyleSheet(f"color: {c['fg']};")
+        tsize_row.addWidget(tsize_lbl)
+
+        self._text_size_buttons: dict[str, QPushButton] = {}
+        self._text_size = self._last_text_size or "medium"
+        for key, label in [
+            ("small", "S"), ("medium", "M"), ("large", "L"),
+            ("xl", "XL"), ("xxl", "XXL"),
+        ]:
+            btn = QPushButton(label)
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedWidth(50)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(lambda _, k=key: self._select_text_size(k))
+            tsize_row.addWidget(btn)
+            self._text_size_buttons[key] = btn
+        self._select_text_size(self._last_text_size or "medium")
+        tsize_row.addStretch()
+        cl.addLayout(tsize_row)
+
+        # Page width toggle
+        pwidth_row = QHBoxLayout()
+        pwidth_row.setContentsMargins(0, 0, 0, 0)
+        pwidth_row.setSpacing(8)
+        pwidth_row.addStretch()
+        pwidth_lbl = QLabel("Page width:")
+        pwidth_lbl.setFont(make_qfont("slider_label"))
+        pwidth_lbl.setStyleSheet(f"color: {c['fg']};")
+        pwidth_row.addWidget(pwidth_lbl)
+
+        self._page_width_buttons: dict[str, QPushButton] = {}
+        self._page_width_key = self._last_page_width or (theme_manager.fov if theme_manager else "standard")
+        from neural_speed_academy.theme import FOV_PRESETS
+        for key, preset in FOV_PRESETS.items():
+            # Use short label: first word of the preset label
+            short = preset["label"].split("(")[0].strip()
+            btn = QPushButton(short)
+            btn.setFont(make_qfont("btn_sm"))
+            btn.setFixedWidth(80)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.clicked.connect(lambda _, k=key: self._select_page_width(k))
+            pwidth_row.addWidget(btn)
+            self._page_width_buttons[key] = btn
+        self._select_page_width(self._page_width_key)
+        pwidth_row.addStretch()
+        cl.addLayout(pwidth_row)
 
         # Start button + hint
         cl.addSpacing(4)
@@ -287,12 +345,63 @@ class PacerExercise(BaseExercise):
 
     def _on_mode_changed(self, btn: QRadioButton) -> None:
         mode = btn.property("mode_key")
-        self._nlines_frame.setVisible(mode in ("multi", "zpattern"))
+        self._nlines_frame.setVisible(mode == "multi")
+
+    # Text size multipliers applied to the FOV font_size
+    _TEXT_SIZE_MULT = {
+        "small": 0.8, "medium": 1.0, "large": 1.25, "xl": 1.5, "xxl": 1.8,
+    }
+
+    def _select_text_size(self, key: str) -> None:
+        self._text_size = key
+        c = COLORS
+        for k, btn in self._text_size_buttons.items():
+            if k == key:
+                btn.setStyleSheet(btn_css(c["accent"], c["btn_text"], padding="4px"))
+            else:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background-color: {c['card']}; "
+                    f"color: {c['fg']}; border: 2px solid {c['muted']}; "
+                    f"padding: 4px; border-radius: 4px; }}"
+                    f"QPushButton:hover {{ background-color: {c['accent']}; "
+                    f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
+                )
+
+    def _select_page_width(self, key: str) -> None:
+        self._page_width_key = key
+        c = COLORS
+        for k, btn in self._page_width_buttons.items():
+            if k == key:
+                btn.setStyleSheet(btn_css(c["accent"], c["btn_text"], padding="4px"))
+            else:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background-color: {c['card']}; "
+                    f"color: {c['fg']}; border: 2px solid {c['muted']}; "
+                    f"padding: 4px; border-radius: 4px; }}"
+                    f"QPushButton:hover {{ background-color: {c['accent']}; "
+                    f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
+                )
+
+    # ── Stop / return to config ──
+
+    def _return_to_config(self) -> None:
+        """Stop the running pacer and return to the config screen."""
+        self._running = False
+        for t in self._timers:
+            t.stop()
+        self._timers.clear()
+        self.start()
+
+    def _stop_exercise(self) -> None:
+        self._return_to_config()
 
     # ── Launch reading ──
 
     def _start_from_ui(self) -> None:
-        text = self._text_input.toPlainText()
+        text = self._text_lib.text()
+        # Persist so the text survives exercise re-entry
+        theme_manager.training_text = text
+        theme_manager.save()
         wpm = self._wpm_slider.value()
         mode = "single"
         for btn in self._mode_group.buttons():
@@ -301,6 +410,13 @@ class PacerExercise(BaseExercise):
                 break
         self._n_lines = self._nlines_slider.value()
         self._chunk_size = self._chunk_slider.value()
+        # Save config so stop/restart preserves settings
+        self._last_wpm = wpm
+        self._last_mode = mode
+        self._last_chunk = self._chunk_size
+        self._last_nlines = self._n_lines
+        self._last_text_size = self._text_size
+        self._last_page_width = self._page_width_key
         self._run_pacer(text, wpm, mode)
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
@@ -335,7 +451,7 @@ class PacerExercise(BaseExercise):
                     radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        exit_btn.clicked.connect(self.navigator.finish_exercise)
+        exit_btn.clicked.connect(self._return_to_config)
         top_bar.addWidget(exit_btn)
         top_bar.addStretch()
 
@@ -359,11 +475,19 @@ class PacerExercise(BaseExercise):
         )
         self._layout.addWidget(self._progress_bar)
 
-        # Reader page — scaled to screen
-        fov = screen_metrics.fov_scaled()
-        page_w = fov["page_width"]
+        # Reader page — use selected page width and text size
+        from neural_speed_academy.theme import FOV_PRESETS
+        fov_preset = FOV_PRESETS.get(self._page_width_key, FOV_PRESETS["standard"])
+        page_w = min(int(screen_metrics.screen_w * fov_preset["pct"]), screen_metrics.screen_w - 40)
         page_h = screen_metrics.reader_h
-        font_size = fov["font_size"]
+        base_font = screen_metrics.s(fov_preset["font_size"])
+        font_size = max(10, int(base_font * self._TEXT_SIZE_MULT.get(self._text_size, 1.0)))
+        fov = {
+            "page_width": page_w,
+            "pad_x": screen_metrics.sw(fov_preset["pad_x"]),
+            "pad_y": screen_metrics.sh(fov_preset["pad_y"]),
+            "font_size": font_size,
+        }
 
         self._reader = _HighlightReader()
         reader_font = QFont("Georgia", font_size)
@@ -377,16 +501,18 @@ class PacerExercise(BaseExercise):
         )
         self._reader.setFixedSize(page_w, page_h)
         self._reader.setReadOnly(True)
+        # Hide scrollbars visually but allow programmatic vertical scrolling
         self._reader.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         self._reader.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
+        self._reader.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
 
-        # Set highlight color
+        # Set highlight color — alpha 140 for visibility across all profiles
         hl_color = QColor(c["highlight"])
-        hl_color.setAlpha(80)
+        hl_color.setAlpha(140)
         self._reader.set_highlight_color(hl_color)
 
         joined = " ".join(words)
@@ -406,7 +532,18 @@ class PacerExercise(BaseExercise):
         )
         self._step_idx = 0
 
-        avg_words = len(self._words) / max(len(self._steps), 1)
+        # In multi-line mode, steps only sweep the first line of each group
+        # but the reader processes all lines. Base the delay on the sweep
+        # line's words so the visual pace matches single-line at the same WPM.
+        if self._mode == "multi" and self._steps:
+            sweep_chars = sum(end - start for start, end, _, _ in self._steps)
+            sweep_text = " ".join(
+                joined[s:e] for s, e, _, _ in self._steps
+            )
+            sweep_words = len(sweep_text.split())
+            avg_words = max(sweep_words, 1) / max(len(self._steps), 1)
+        else:
+            avg_words = len(self._words) / max(len(self._steps), 1)
         self._delay = int(60000 / self._wpm_target * avg_words)
 
         self._start_time = time.monotonic()
@@ -473,10 +610,29 @@ class PacerExercise(BaseExercise):
         words_in_line = segment.split()
         if not words_in_line:
             return [(line_start, line_end, gs, ge)]
+
+        # Pre-balance: if last chunk would be a single orphan word,
+        # merge it into the previous chunk to keep reading flow smooth
+        n = len(words_in_line)
+        remainder = n % chunk_words if chunk_words > 0 else 0
+        if remainder == 1 and n > chunk_words:
+            # Build word groups with the last chunk absorbing the orphan
+            word_groups: list[list[str]] = []
+            for i in range(0, n, chunk_words):
+                word_groups.append(words_in_line[i : i + chunk_words])
+            if len(word_groups) >= 2:
+                orphan = word_groups.pop()
+                word_groups[-1].extend(orphan)
+        else:
+            word_groups = [
+                words_in_line[i : i + chunk_words]
+                for i in range(0, n, chunk_words)
+            ]
+
         chunks: list[tuple[int, int, int, int]] = []
         pos = line_start
-        for i in range(0, len(words_in_line), chunk_words):
-            group = " ".join(words_in_line[i : i + chunk_words])
+        for wg in word_groups:
+            group = " ".join(wg)
             idx = text.find(group, pos)
             if idx == -1:
                 idx = pos
@@ -493,8 +649,7 @@ class PacerExercise(BaseExercise):
             return self._steps_single(text)
         elif mode == "multi":
             return self._steps_multi(text)
-        elif mode == "zpattern":
-            return self._steps_zpattern(text)
+
         return [(0, len(text), 0, len(text))]
 
     def _steps_single(
@@ -530,30 +685,6 @@ class PacerExercise(BaseExercise):
             )
         return steps or [(0, len(text), 0, len(text))]
 
-    def _steps_zpattern(
-        self, text: str,
-    ) -> list[tuple[int, int, int, int]]:
-        """Z-pattern: 3 sweeps per n_lines group. Overlay height spans
-        the full group."""
-        lines = self._get_display_lines(text)
-        n = self._n_lines
-        if not lines:
-            return [(0, len(text), 0, len(text))]
-        steps: list[tuple[int, int, int, int]] = []
-        for i in range(0, len(lines), n):
-            group = lines[i : i + n]
-            gs = group[0][0]
-            ge = group[-1][1]
-            block_len = ge - gs
-            if block_len <= 0:
-                steps.append((gs, ge, gs, ge))
-                continue
-            seg = block_len // 3
-            steps.append((gs, gs + seg, gs, ge))
-            steps.append((gs + seg, gs + 2 * seg, gs, ge))
-            steps.append((gs + 2 * seg, ge, gs, ge))
-        return steps or [(0, len(text), 0, len(text))]
-
     # ── Highlight positioning ──
 
     def _highlight_rect(
@@ -587,6 +718,27 @@ class PacerExercise(BaseExercise):
 
         return QRect(x, y, w, h)
 
+    # ── Scrolling ──
+
+    def _scroll_with_lookahead(self, rect: QRect) -> None:
+        """Scroll the reader when the highlight approaches the bottom edge.
+
+        Triggers when the highlight bottom is within 3 line-heights of the
+        viewport bottom, scrolling just enough to keep the highlight
+        comfortably in view.
+        """
+        viewport_h = self._reader.viewport().height()
+        line_h = self._reader.fontMetrics().lineSpacing()
+        lookahead = 3 * line_h
+
+        # rect.bottom() is in viewport coords (accounts for current scroll)
+        threshold = viewport_h - lookahead
+        if rect.bottom() > threshold:
+            scrollbar = self._reader.verticalScrollBar()
+            # Scroll so the highlight sits one line-height below the top third
+            overshoot = rect.bottom() - threshold
+            scrollbar.setValue(scrollbar.value() + overshoot + line_h)
+
     # ── Pacer step ──
 
     def _pacer_step(self) -> None:
@@ -603,11 +755,9 @@ class PacerExercise(BaseExercise):
         rect = self._highlight_rect(start, end, gs, ge)
         self._reader.set_highlight(rect)
 
-        # Scroll so the highlighted area is visible
-        cursor = self._reader.textCursor()
-        cursor.setPosition(start)
-        self._reader.setTextCursor(cursor)
-        self._reader.ensureCursorVisible()
+        # Auto-scroll: start scrolling when highlight is within 3 lines
+        # of the viewport bottom edge
+        self._scroll_with_lookahead(rect)
 
         # Update progress bar
         pct = int(100 * (self._step_idx + 1) / len(self._steps))

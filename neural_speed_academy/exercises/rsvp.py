@@ -6,13 +6,13 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTextEdit, QSlider, QMessageBox,
+    QSlider, QMessageBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
-from neural_speed_academy.theme import COLORS, make_qfont, input_css, theme_manager, screen_metrics, btn_css
+from neural_speed_academy.theme import COLORS, make_qfont, theme_manager, screen_metrics, btn_css
 from neural_speed_academy.config import RSVP_CONFIG, USER_DATA_CONFIG
 
 
@@ -23,6 +23,7 @@ class RsvpExercise(BaseExercise):
         self.words: list = []
         self.word_idx: int = 0
         self.wpm: int = 300
+        self._last_wpm: int | None = None
 
     @property
     def name(self) -> str:
@@ -70,19 +71,13 @@ class RsvpExercise(BaseExercise):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        # Text input — 60% screen width, 15 lines visible
-        self._text_input = QTextEdit()
-        self._text_input.setFont(make_qfont("pacer_text"))
-        self._text_input.setStyleSheet(input_css(widget="QTextEdit"))
-        fm = self._text_input.fontMetrics()
-        line_h = fm.lineSpacing()
-        self._text_input.setFixedHeight(line_h * 15 + 20)
-        self._text_input.setFixedWidth(screen_metrics.text_input_w)
-        self._text_input.setPlainText(theme_manager.training_text)
-        cl.addWidget(self._text_input, 0, Qt.AlignmentFlag.AlignCenter)
+        # Text library + editor (shared widget)
+        from neural_speed_academy.exercises.text_library_widget import TextLibraryWidget
+        self._text_lib = TextLibraryWidget(self, show_difficulty=True)
+        cl.addWidget(self._text_lib)
 
         # WPM: label + slider + value in one row
-        initial_wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
+        initial_wpm = self._last_wpm or kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
         wpm_row = QHBoxLayout()
         wpm_row.setContentsMargins(0, 0, 0, 0)
         wpm_row.setSpacing(8)
@@ -136,8 +131,12 @@ class RsvpExercise(BaseExercise):
         self._layout.addWidget(container, 1)
 
     def _start_from_ui(self) -> None:
-        text = self._text_input.toPlainText()
+        text = self._text_lib.text()
+        # Persist so the text survives exercise re-entry
+        theme_manager.training_text = text
+        theme_manager.save()
         wpm = self._wpm_slider.value()
+        self._last_wpm = wpm
         self._run_rsvp(text, wpm)
 
     def _run_rsvp(self, text: str, wpm: int) -> None:
@@ -200,7 +199,13 @@ class RsvpExercise(BaseExercise):
 
     def _stop(self) -> None:
         self._running = False
-        self.navigator.finish_exercise()
+        for t in self._timers:
+            t.stop()
+        self._timers.clear()
+        self.start()
+
+    def _stop_exercise(self) -> None:
+        self._stop()
 
     def _complete_exercise(self) -> None:
         self._running = False

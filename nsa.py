@@ -204,6 +204,8 @@ class NeuralSpeedAcademy:
         else:
             self.window.resize(self._WINDOWED_MIN_W, self._WINDOWED_MIN_H)
         self.window.showNormal()
+        # Update screen metrics to match window size
+        screen_metrics.update_from_window(self.window.width(), self.window.height())
         # Center on screen
         if screen:
             geo = screen.availableGeometry()
@@ -217,6 +219,8 @@ class NeuralSpeedAcademy:
         self.window.setMinimumSize(0, 0)
         self.window.setMaximumSize(16777215, 16777215)
         self.window.showFullScreen()
+        # Update screen metrics to match full screen
+        screen_metrics.init_from_screen()
 
     def _toggle_fullscreen(self) -> None:
         if self.window.isFullScreen():
