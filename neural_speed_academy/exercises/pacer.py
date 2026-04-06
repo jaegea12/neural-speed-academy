@@ -372,6 +372,19 @@ class PacerExercise(BaseExercise):
                     f"color: {c['btn_text']}; border-color: {c['accent']}; }}"
                 )
 
+    # ── Stop / return to config ──
+
+    def _return_to_config(self) -> None:
+        """Stop the running pacer and return to the config screen."""
+        self._running = False
+        for t in self._timers:
+            t.stop()
+        self._timers.clear()
+        self.start()
+
+    def _stop_exercise(self) -> None:
+        self._return_to_config()
+
     # ── Launch reading ──
 
     def _start_from_ui(self) -> None:
@@ -421,7 +434,7 @@ class PacerExercise(BaseExercise):
                     radius=3, font_key="exit_btn")
         )
         exit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        exit_btn.clicked.connect(self.navigator.finish_exercise)
+        exit_btn.clicked.connect(self._return_to_config)
         top_bar.addWidget(exit_btn)
         top_bar.addStretch()
 

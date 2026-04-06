@@ -273,7 +273,13 @@ class ChunkingExercise(BaseExercise):
 
     def _stop(self) -> None:
         self._running = False
-        self.navigator.finish_exercise()
+        for t in self._timers:
+            t.stop()
+        self._timers.clear()
+        self.start()
+
+    def _stop_exercise(self) -> None:
+        self._stop()
 
     def _complete_exercise(self) -> None:
         self._running = False

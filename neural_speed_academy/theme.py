@@ -334,8 +334,8 @@ FOV_PRESETS = {
     "narrow":   {"page_width": 480, "pad_x": 50, "pad_y": 45, "font_size": 18, "label": "Narrow (Beginner)"},
     "standard": {"page_width": 620, "pad_x": 60, "pad_y": 50, "font_size": 16, "label": "Standard"},
     "wide":     {"page_width": 780, "pad_x": 70, "pad_y": 50, "font_size": 14, "label": "Wide (Advanced)"},
-    "full":     {"page_width": 940, "pad_x": 80, "pad_y": 50, "font_size": 13, "label": "Full (Expert)"},
-    "ultra":    {"page_width": 1140, "pad_x": 90, "pad_y": 50, "font_size": 13, "label": "Ultra (Full Screen)"},
+    "full":     {"page_width": 1140, "pad_x": 80, "pad_y": 50, "font_size": 13, "label": "Full (Expert)"},
+    "ultra":    {"page_width": 1632, "pad_x": 100, "pad_y": 50, "font_size": 13, "label": "Ultra (85% Screen)"},
 }
 DEFAULT_TRAINING_TEXT = (
     "Speed reading is the process of rapidly recognizing and absorbing phrases "
@@ -364,7 +364,7 @@ class ThemeManager:
     """
 
     # Map FOV keys to default Schulte cell size indices
-    _FOV_TO_CELL = {"narrow": 0, "standard": 1, "wide": 2, "full": 3}
+    _FOV_TO_CELL = {"narrow": 0, "standard": 1, "wide": 2, "full": 3, "ultra": 3}
 
     def __init__(self, profile: str = DEFAULT_PROFILE):
         self._profile = profile
@@ -629,7 +629,7 @@ class ScreenMetrics:
     @property
     def schulte_cell(self) -> int:
         """Schulte grid cell size scaled to screen."""
-        fov_cells = {"narrow": 90, "standard": 110, "wide": 120, "full": 130}
+        fov_cells = {"narrow": 90, "standard": 110, "wide": 120, "full": 130, "ultra": 140}
         fov = theme_manager.fov if theme_manager else "standard"
         return self.s(fov_cells.get(fov, 110))
 
