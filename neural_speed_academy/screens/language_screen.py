@@ -1,31 +1,16 @@
 """
-Language selection screen with flag indicators.
+Language selection screen.
 """
 from __future__ import annotations
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
 )
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css, theme_manager
-from neural_speed_academy.i18n import tr, available_locales, load_locale
-
-
-# Flag emoji + native name for each supported locale
-_LOCALE_FLAGS: dict[str, str] = {
-    "en": "\U0001f1ec\U0001f1e7",  # 🇬🇧
-    "de": "\U0001f1e9\U0001f1ea",  # 🇩🇪
-    "fr": "\U0001f1eb\U0001f1f7",  # 🇫🇷
-    "es": "\U0001f1ea\U0001f1f8",  # 🇪🇸
-    "it": "\U0001f1ee\U0001f1f9",  # 🇮🇹
-    "pt": "\U0001f1e7\U0001f1f7",  # 🇧🇷
-    "nl": "\U0001f1f3\U0001f1f1",  # 🇳🇱
-    "ja": "\U0001f1ef\U0001f1f5",  # 🇯🇵
-    "zh": "\U0001f1e8\U0001f1f3",  # 🇨🇳
-    "ko": "\U0001f1f0\U0001f1f7",  # 🇰🇷
-}
+from neural_speed_academy.theme import COLORS, make_qfont, theme_manager
+from neural_speed_academy.i18n import tr, available_locales
 
 
 class LanguageScreen(BaseScreen):
@@ -64,32 +49,52 @@ class LanguageScreen(BaseScreen):
         locales = available_locales()
 
         for code, name in locales.items():
-            flag = _LOCALE_FLAGS.get(code, "")
             is_active = code == current
 
             btn_frame = QFrame()
             btn_frame.setFixedWidth(360)
-            btn_frame.setStyleSheet(
-                f"background-color: {c['card'] if is_active else 'transparent'}; "
-                f"border: 2px solid {c['accent'] if is_active else 'transparent'}; "
-                f"border-radius: 8px; padding: 4px;"
-            )
+            if is_active:
+                btn_frame.setStyleSheet(
+                    f"background-color: {c['card']}; "
+                    f"border: 2px solid {c['accent']}; "
+                    f"border-radius: 8px;"
+                )
+            else:
+                btn_frame.setStyleSheet(
+                    f"background-color: transparent; "
+                    f"border: 2px solid {c['muted']}; "
+                    f"border-radius: 8px;"
+                )
+
             row = QHBoxLayout(btn_frame)
             row.setContentsMargins(16, 10, 16, 10)
             row.setSpacing(16)
 
-            flag_lbl = QLabel(flag)
-            flag_lbl.setFont(make_qfont("title_lg"))
-            flag_lbl.setStyleSheet("background: transparent;")
-            flag_lbl.setFixedWidth(48)
-            flag_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            row.addWidget(flag_lbl)
+            # Language code badge (e.g. "DE", "EN")
+            badge = QLabel(code.upper())
+            badge.setFont(make_qfont("btn_bold"))
+            badge.setFixedSize(44, 32)
+            badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            if is_active:
+                badge.setStyleSheet(
+                    f"background-color: {c['accent']}; "
+                    f"color: {c['btn_text']}; "
+                    f"border: none; border-radius: 4px;"
+                )
+            else:
+                badge.setStyleSheet(
+                    f"background-color: {c['muted']}; "
+                    f"color: {c['bg']}; "
+                    f"border: none; border-radius: 4px;"
+                )
+            row.addWidget(badge)
 
+            # Language name
             name_lbl = QLabel(name)
             name_lbl.setFont(make_qfont("section_header" if is_active else "btn"))
             name_lbl.setStyleSheet(
                 f"color: {c['accent'] if is_active else c['fg']}; "
-                f"background: transparent;"
+                f"background: transparent; border: none;"
             )
             row.addWidget(name_lbl)
 
@@ -99,12 +104,11 @@ class LanguageScreen(BaseScreen):
                 check = QLabel("\u2713")
                 check.setFont(make_qfont("section_header"))
                 check.setStyleSheet(
-                    f"color: {c['accent']}; background: transparent;"
+                    f"color: {c['accent']}; background: transparent; border: none;"
                 )
                 row.addWidget(check)
 
             btn_frame.setCursor(Qt.CursorShape.PointingHandCursor)
-            # Use mousePressEvent via an event filter
             btn_frame.mousePressEvent = self._make_select_handler(code)
 
             cl.addWidget(btn_frame, alignment=Qt.AlignmentFlag.AlignCenter)
