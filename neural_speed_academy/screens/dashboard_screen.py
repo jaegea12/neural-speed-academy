@@ -85,26 +85,26 @@ class DashboardScreen(BaseScreen):
         grid = QGridLayout()
         grid.setSpacing(8)
 
-        self._create_section(grid, "PERCEPTION", 0, [
-            ("Flash Numbers", self._cb("menu_flash")),
-            ("Word Drills", self._cb("menu_words")),
-            ("Eye-Span", self._cb("menu_eyespan")),
-            ("Schulte Grid", self._cb("menu_schulte")),
-            ("Peripheral Flash", self._cb("menu_peripheral_flash")),
+        self._create_section(grid, tr("dashboard.cat.perception"), 0, [
+            (tr("dashboard.ex.flash_numbers"), self._cb("menu_flash")),
+            (tr("dashboard.ex.word_drills"), self._cb("menu_words")),
+            (tr("dashboard.ex.eyespan"), self._cb("menu_eyespan")),
+            (tr("dashboard.ex.schulte"), self._cb("menu_schulte")),
+            (tr("dashboard.ex.peripheral_flash"), self._cb("menu_peripheral_flash")),
         ])
-        self._create_section(grid, "COGNITION", 1, [
-            ("Sequence Memory", self._cb("menu_sequence_memory")),
-            ("Rapid Decision", self._cb("menu_rapid_decision")),
-            ("Object Tracking", self._cb("menu_mot")),
-            ("Split Attention", self._cb("menu_split_attention")),
-            ("Reaction Time", self._cb("menu_reaction_time")),
+        self._create_section(grid, tr("dashboard.cat.cognition"), 1, [
+            (tr("dashboard.ex.sequence_memory"), self._cb("menu_sequence_memory")),
+            (tr("dashboard.ex.rapid_decision"), self._cb("menu_rapid_decision")),
+            (tr("dashboard.ex.mot"), self._cb("menu_mot")),
+            (tr("dashboard.ex.split_attention"), self._cb("menu_split_attention")),
+            (tr("dashboard.ex.reaction_time"), self._cb("menu_reaction_time")),
         ])
-        self._create_section(grid, "READING", 2, [
-            ("Pacer & Quiz", self._cb("setup_pacer")),
-            ("RSVP Reader", self._cb("setup_rsvp")),
-            ("Chunking", self._cb("setup_chunking")),
-            ("Spaced Repetition", self._cb("start_sr")),
-            ("Slide Processing", self._cb("menu_slide_processing")),
+        self._create_section(grid, tr("dashboard.cat.reading"), 2, [
+            (tr("dashboard.ex.pacer"), self._cb("setup_pacer")),
+            (tr("dashboard.ex.rsvp"), self._cb("setup_rsvp")),
+            (tr("dashboard.ex.chunking"), self._cb("setup_chunking")),
+            (tr("dashboard.ex.spaced_repetition"), self._cb("start_sr")),
+            (tr("dashboard.ex.slide_processing"), self._cb("menu_slide_processing")),
         ])
         cl.addLayout(grid)
         cl.addStretch()
@@ -227,8 +227,8 @@ class DashboardScreen(BaseScreen):
 
         # Left: forward navigation
         for label, cb_name in [
-            ("Training Paths", "show_paths"),
-            ("Stats & History", "show_stats"),
+            (tr("dashboard.nav.training_paths"), "show_paths"),
+            (tr("dashboard.nav.stats_history"), "show_stats"),
         ]:
             btn = QPushButton(label)
             btn.setStyleSheet(action_style)
@@ -276,7 +276,7 @@ class DashboardScreen(BaseScreen):
         c = COLORS
         _, step_label, _ = steps[pp.current_step]
         btn = QPushButton(
-            f"CONTINUE: {path_data['name']} \u2014 {step_label}"
+            tr("dashboard.continue_path", path=path_data['name'], step=step_label)
         )
         btn.setStyleSheet(
             btn_css(c["success"], c["btn_text"], padding="10px")
