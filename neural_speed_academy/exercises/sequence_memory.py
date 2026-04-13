@@ -444,7 +444,7 @@ class SequenceMemoryExercise(BaseExercise):
         is_pb = self.complete(result)
         self.show_result_screen(
             result, is_personal_best=is_pb,
-            details=f"Max sequence length: {self.max_reached}",
+            details=tr("result.max_sequence", length=self.max_reached),
         )
 
     def _stop(self) -> None:

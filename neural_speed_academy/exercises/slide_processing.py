@@ -667,12 +667,12 @@ class SlideProcessingExercise(BaseExercise):
             result,
             is_personal_best=is_pb,
             details=(
-                f"Category: {self._category}  |  "
-                f"Display: {self._display_s}s  |  "
-                f"Slides: {len(self._slides)}  |  "
-                f"Lines: {self._lines_per_slide}\n"
-                f"Questions: {self._correct}/{total_q}  |  "
-                f"Accuracy: {accuracy_pct}%"
+                f"{tr('result.category', cat=self._category)}  |  "
+                f"{tr('result.display_time', s=self._display_s)}  |  "
+                f"{tr('result.slides', count=len(self._slides))}  |  "
+                f"{tr('result.lines', count=self._lines_per_slide)}\n"
+                f"{tr('result.questions', correct=self._correct, total=total_q)}  |  "
+                f"{tr('result.accuracy', pct=accuracy_pct)}"
             ),
         )
 

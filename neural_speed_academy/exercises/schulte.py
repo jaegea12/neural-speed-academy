@@ -171,5 +171,5 @@ class SchulteExercise(BaseExercise):
         )
         is_pb = self.complete(result)
         self.show_result_screen(
-            result, is_personal_best=is_pb, details="Grid cleared!"
+            result, is_personal_best=is_pb, details=tr("result.grid_cleared")
         )

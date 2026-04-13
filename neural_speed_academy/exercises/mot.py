@@ -667,10 +667,10 @@ class MotExercise(BaseExercise):
             result,
             is_personal_best=is_pb,
             details=(
-                f"Targets: {self._num_targets}  |  "
-                f"Distractors: {self._num_distractors}  |  "
-                f"Speed: {self._speed}\n"
-                f"Accuracy: {pct}%"
+                f"{tr('result.targets', count=self._num_targets)}  |  "
+                f"{tr('result.distractors', count=self._num_distractors)}  |  "
+                f"{tr('result.speed', speed=self._speed)}\n"
+                f"{tr('result.accuracy', pct=pct)}"
             ),
         )
 

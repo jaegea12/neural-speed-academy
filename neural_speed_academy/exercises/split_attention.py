@@ -718,12 +718,12 @@ class SplitAttentionExercise(BaseExercise):
             result,
             is_personal_best=is_pb,
             details=(
-                f"Mode: {self._mode}  |  "
-                f"Word flash: {self._center_ms}ms  |  "
-                f"Shape flash: {self._peripheral_ms}ms\n"
-                f"Word accuracy: {center_pct}%  |  "
-                f"Shape accuracy: {periph_pct}%\n"
-                f"Combined: {combined_pct}%"
+                f"{tr('result.mode', mode=self._mode)}  |  "
+                f"{tr('result.word_flash', ms=self._center_ms)}  |  "
+                f"{tr('result.shape_flash', ms=self._peripheral_ms)}\n"
+                f"{tr('result.word_accuracy', pct=center_pct)}  |  "
+                f"{tr('result.shape_accuracy', pct=periph_pct)}\n"
+                f"{tr('result.combined', pct=combined_pct)}"
             ),
         )
 

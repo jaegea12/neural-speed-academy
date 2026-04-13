@@ -615,11 +615,11 @@ class RapidDecisionGridExercise(BaseExercise):
         )
         is_pb = self.complete(result)
 
-        status = "Time's up!" if timed_out else "Grid cleared!"
+        status = tr("result.times_up") if timed_out else tr("result.grid_cleared")
         mode_label = dict(self.MODES).get(self._mode, self._mode)
         details = (
-            f"Mode: {mode_label}\n"
-            f"Completed: {completed}/{total_targets} targets in {elapsed}s\n"
+            f"{tr('result.mode', mode=mode_label)}\n"
+            f"{tr('result.completed', done=completed, total=total_targets, time=elapsed)}\n"
             f"{status}"
         )
         self.show_result_screen(result, is_personal_best=is_pb, details=details)

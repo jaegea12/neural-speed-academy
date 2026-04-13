@@ -550,10 +550,10 @@ class PeripheralFlashExercise(BaseExercise):
             result,
             is_personal_best=is_pb,
             details=(
-                f"Stimulus: {self._stim_type}  |  "
-                f"Flash: {self._flash_ms}ms  |  "
-                f"Eccentricity: {self._eccentricity}%\n"
-                f"Accuracy: {pct}%"
+                f"{tr('result.stimulus', type=self._stim_type)}  |  "
+                f"{tr('result.flash_ms', ms=self._flash_ms)}  |  "
+                f"{tr('result.eccentricity', pct=self._eccentricity)}\n"
+                f"{tr('result.accuracy', pct=pct)}"
             ),
         )
 

@@ -598,34 +598,36 @@ class ReactionTimeExercise(BaseExercise):
         is_pb = self.complete(result)
 
         # Build details string
+        rt_line = (
+            f"{tr('result.median_rt', ms=f'{median_rt:.0f}')}  |  "
+            f"{tr('result.best_rt', ms=f'{best_rt:.0f}')}  |  "
+            f"{tr('result.worst_rt', ms=f'{worst_rt:.0f}')}"
+        )
         if self._mode == "go_no_go":
             details = (
-                f"Mode: Go/No-Go  |  Rounds: {total}\n"
-                f"Median RT: {median_rt:.0f} ms  |  "
-                f"Best: {best_rt:.0f} ms  |  "
-                f"Worst: {worst_rt:.0f} ms\n"
-                f"Correct: {self._correct}  |  "
-                f"False alarms: {self._false_alarms}  |  "
-                f"Misses: {self._misses}"
+                f"{tr('result.mode', mode=tr('result.mode.go_nogo'))}  |  "
+                f"{tr('result.rounds', rounds=total)}\n"
+                f"{rt_line}\n"
+                f"{tr('result.correct', count=self._correct)}  |  "
+                f"{tr('result.false_alarms', count=self._false_alarms)}  |  "
+                f"{tr('result.misses', count=self._misses)}"
             )
         elif self._mode == "choice":
             details = (
-                f"Mode: Choice (4 colors)  |  Rounds: {total}\n"
-                f"Median RT: {median_rt:.0f} ms  |  "
-                f"Best: {best_rt:.0f} ms  |  "
-                f"Worst: {worst_rt:.0f} ms\n"
-                f"Accuracy: {accuracy_pct}%"
+                f"{tr('result.mode', mode=tr('result.mode.choice'))}  |  "
+                f"{tr('result.rounds', rounds=total)}\n"
+                f"{rt_line}\n"
+                f"{tr('result.accuracy', pct=accuracy_pct)}"
             )
         else:
             details = (
-                f"Mode: Simple  |  Rounds: {total}\n"
-                f"Median RT: {median_rt:.0f} ms  |  "
-                f"Best: {best_rt:.0f} ms  |  "
-                f"Worst: {worst_rt:.0f} ms"
+                f"{tr('result.mode', mode=tr('result.mode.simple'))}  |  "
+                f"{tr('result.rounds', rounds=total)}\n"
+                f"{rt_line}"
             )
 
         if self._too_early_count > 0:
-            details += f"\nToo early: {self._too_early_count}"
+            details += f"\n{tr('result.too_early', count=self._too_early_count)}"
 
         self.show_result_screen(
             result,
