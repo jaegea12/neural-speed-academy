@@ -54,8 +54,16 @@ class PathSelectionScreen(BaseScreen):
         tab_row.setSpacing(6)
         tab_row.addStretch()
         self._cat_buttons = {}
+        _cat_tr = {
+            "daily": "paths.cat.daily",
+            "reading": "paths.cat.reading",
+            "cognitive": "paths.cat.cognitive",
+            "visual": "paths.cat.visual",
+            "info": "paths.cat.info",
+        }
         for cat_key, cat_label in TRAINING_PATH_CATEGORIES:
-            btn = QPushButton(cat_label)
+            display = tr(_cat_tr[cat_key]) if cat_key in _cat_tr else cat_label
+            btn = QPushButton(display)
             btn.setFont(make_qfont("btn_bold"))
             btn.setFixedHeight(38)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)

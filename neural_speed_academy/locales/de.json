@@ -420,5 +420,21 @@
   "dashboard.last_session_info": "Letzte: {exercise} — {result} ({timestamp})",
   "exercise.results": "ERGEBNISSE",
   "exercise.continue": "WEITER",
-  "exercise.new_pb": "NEUER PERSÖNLICHER REKORD!"
+  "exercise.new_pb": "NEUER PERSÖNLICHER REKORD!",
+  "menu.flash_numbers": "BLITZ-ZAHLEN",
+  "menu.word_drills": "WORT-ÜBUNGEN",
+  "menu.eyespan_training": "BLICKSPANNE-TRAINING",
+  "menu.schulte_grid": "SCHULTE-RASTER",
+  "menu.eye_priming": "AUGEN-PRIMING",
+  "menu.peripheral_flash": "PERIPHERER BLITZ",
+  "menu.rapid_decision": "SCHNELLE ENTSCHEIDUNG",
+  "menu.mot": "MULTIPLE OBJEKTVERFOLGUNG",
+  "menu.reaction_time": "REAKTIONSZEIT",
+  "menu.split_attention": "GETEILTE AUFMERKSAMKEIT",
+  "menu.sequence_memory": "SEQUENZ-GEDÄCHTNIS",
+  "paths.cat.daily": "Tägliche Routinen",
+  "paths.cat.reading": "Schnelllesen",
+  "paths.cat.cognitive": "Kognitive Leistung",
+  "paths.cat.visual": "Visuelle Verarbeitung",
+  "paths.cat.info": "Informationsverarbeitung"
 }

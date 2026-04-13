@@ -246,7 +246,7 @@ class FlashMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "FLASH NUMBERS", "flash", None,
+            tr("menu.flash_numbers"), "flash", None,
             left_label="DIGITS",
             presets=[
                 ("1 Digit",   {"low": 1, "high": 1, "rounds": 10}),
@@ -306,7 +306,7 @@ class WordsMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "WORD DRILLS", "flash", None,
+            tr("menu.word_drills"), "flash", None,
             left_label="MODE",
             presets=[
                 ("Ambiguous Words", {"mode": "flash_word"}),
@@ -337,7 +337,7 @@ class EyespanMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "EYE-SPAN TRAINING", "eyespan", None,
+            tr("menu.eyespan_training"), "eyespan", None,
             left_label="DIGITS",
             presets=[
                 ("1 Digit",  {"low": 1, "high": 1, "rounds": 10}),
@@ -390,7 +390,7 @@ class SchulteMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "SCHULTE GRID", "schulte", None,
+            tr("menu.schulte_grid"), "schulte", None,
             left_label="GRID SIZE",
             presets=[
                 ("3×3  (9)",   {"grid_size": 3}),
@@ -427,7 +427,7 @@ class PrimingMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "EYE PRIMING", "priming", None,
+            tr("menu.eye_priming"), "priming", None,
             left_label="EXERCISE",
             presets=[
                 ("Horizontal Saccades", {"mode": "saccade_h", "use_delay": True}),
@@ -479,7 +479,7 @@ class PeripheralFlashMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "PERIPHERAL FLASH", "peripheral_flash", None,
+            tr("menu.peripheral_flash"), "peripheral_flash", None,
             left_label="DIFFICULTY",
             presets=[
                 ("Beginner",     {"flash_ms": 100, "eccentricity": 30}),
@@ -530,7 +530,7 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "RAPID DECISION GRID", "rapid_decision", None,
+            tr("menu.rapid_decision"), "rapid_decision", None,
             left_label="GRID SIZE",
             presets=[
                 ("3\u00d73",  {"grid_size": 3}),
@@ -574,7 +574,7 @@ class MotMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "MULTIPLE OBJECT TRACKING", "mot", None,
+            tr("menu.mot"), "mot", None,
             left_label="TARGETS",
             presets=[
                 ("2 Targets", {"targets": 2, "distractors": 4, "speed": 2}),
@@ -1005,7 +1005,7 @@ class ReactionTimeMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "REACTION TIME", "reaction_time", None,
+            tr("menu.reaction_time"), "reaction_time", None,
             left_label="MODE",
             presets=[
                 ("Simple",     {"mode": "simple",    "go_ratio": 1.0}),
@@ -1048,7 +1048,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "SPLIT ATTENTION", "split_attention", None,
+            tr("menu.split_attention"), "split_attention", None,
             left_label="DIFFICULTY",
             presets=[
                 ("Beginner",    {"center_ms": 150, "peripheral_ms": 120}),
@@ -1093,7 +1093,7 @@ class SequenceMemoryMenuScreen(BaseMenuScreen):
 
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
-            "SEQUENCE MEMORY", "sequence_memory", None,
+            tr("menu.sequence_memory"), "sequence_memory", None,
             left_label="LENGTH",
             presets=[
                 ("3 Items", {"start_length": 3, "flash_ms": 1000}),

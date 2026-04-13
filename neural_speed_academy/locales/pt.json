@@ -420,5 +420,21 @@
   "dashboard.last_session_info": "Última: {exercise} — {result} ({timestamp})",
   "exercise.results": "RESULTADOS",
   "exercise.continue": "CONTINUAR",
-  "exercise.new_pb": "NOVO RECORDE PESSOAL!"
+  "exercise.new_pb": "NOVO RECORDE PESSOAL!",
+  "menu.flash_numbers": "FLASH NUMÉRICO",
+  "menu.word_drills": "EXERCÍCIOS DE PALAVRAS",
+  "menu.eyespan_training": "TREINO DE CAMPO VISUAL",
+  "menu.schulte_grid": "GRELHA DE SCHULTE",
+  "menu.eye_priming": "PRIMING OCULAR",
+  "menu.peripheral_flash": "FLASH PERIFÉRICO",
+  "menu.rapid_decision": "GRELHA DE DECISÃO RÁPIDA",
+  "menu.mot": "RASTREAMENTO DE OBJETOS MÚLTIPLOS",
+  "menu.reaction_time": "TEMPO DE REAÇÃO",
+  "menu.split_attention": "ATENÇÃO DIVIDIDA",
+  "menu.sequence_memory": "MEMÓRIA SEQUENCIAL",
+  "paths.cat.daily": "Rotinas Diárias",
+  "paths.cat.reading": "Leitura Rápida",
+  "paths.cat.cognitive": "Desempenho Cognitivo",
+  "paths.cat.visual": "Processamento Visual",
+  "paths.cat.info": "Processamento de Informação"
 }

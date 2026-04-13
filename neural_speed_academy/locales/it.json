@@ -420,5 +420,21 @@
   "dashboard.last_session_info": "Ultima: {exercise} — {result} ({timestamp})",
   "exercise.results": "RISULTATI",
   "exercise.continue": "CONTINUA",
-  "exercise.new_pb": "NUOVO RECORD PERSONALE!"
+  "exercise.new_pb": "NUOVO RECORD PERSONALE!",
+  "menu.flash_numbers": "FLASH NUMERICO",
+  "menu.word_drills": "ESERCIZI DI PAROLE",
+  "menu.eyespan_training": "ALLENAMENTO CAMPO VISIVO",
+  "menu.schulte_grid": "GRIGLIA DI SCHULTE",
+  "menu.eye_priming": "PRIMING OCULARE",
+  "menu.peripheral_flash": "FLASH PERIFERICO",
+  "menu.rapid_decision": "GRIGLIA DECISIONE RAPIDA",
+  "menu.mot": "TRACCIAMENTO OGGETTI MULTIPLI",
+  "menu.reaction_time": "TEMPO DI REAZIONE",
+  "menu.split_attention": "ATTENZIONE DIVISA",
+  "menu.sequence_memory": "MEMORIA SEQUENZIALE",
+  "paths.cat.daily": "Routine Quotidiane",
+  "paths.cat.reading": "Lettura Veloce",
+  "paths.cat.cognitive": "Prestazioni Cognitive",
+  "paths.cat.visual": "Elaborazione Visiva",
+  "paths.cat.info": "Elaborazione delle Informazioni"
 }

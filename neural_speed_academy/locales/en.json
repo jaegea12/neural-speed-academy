@@ -420,5 +420,21 @@
   "dashboard.last_session_info": "Last: {exercise} — {result} ({timestamp})",
   "exercise.results": "RESULTS",
   "exercise.continue": "CONTINUE",
-  "exercise.new_pb": "NEW PERSONAL BEST!"
+  "exercise.new_pb": "NEW PERSONAL BEST!",
+  "menu.flash_numbers": "FLASH NUMBERS",
+  "menu.word_drills": "WORD DRILLS",
+  "menu.eyespan_training": "EYE-SPAN TRAINING",
+  "menu.schulte_grid": "SCHULTE GRID",
+  "menu.eye_priming": "EYE PRIMING",
+  "menu.peripheral_flash": "PERIPHERAL FLASH",
+  "menu.rapid_decision": "RAPID DECISION GRID",
+  "menu.mot": "MULTIPLE OBJECT TRACKING",
+  "menu.reaction_time": "REACTION TIME",
+  "menu.split_attention": "SPLIT ATTENTION",
+  "menu.sequence_memory": "SEQUENCE MEMORY",
+  "paths.cat.daily": "Daily Routines",
+  "paths.cat.reading": "Speed Reading",
+  "paths.cat.cognitive": "Cognitive Performance",
+  "paths.cat.visual": "Visual Processing",
+  "paths.cat.info": "Information Processing"
 }
