@@ -15,8 +15,15 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.theme import (
     COLORS, make_qfont, input_css, theme_manager, screen_metrics,
 )
-from neural_speed_academy.config import TEXT_LIBRARY, TEXT_LIBRARY_DE
+from neural_speed_academy.config import TEXT_LIBRARY, TEXT_LIBRARY_DE, TEXT_LIBRARY_FR
 from neural_speed_academy.i18n import tr, current_locale
+
+# All text libraries keyed by locale code
+_TEXT_LIBRARIES = {
+    "en": (TEXT_LIBRARY, "English"),
+    "de": (TEXT_LIBRARY_DE, "Deutsch"),
+    "fr": (TEXT_LIBRARY_FR, "Français"),
+}
 
 # Prefix for custom text entries in the dropdown
 _CUSTOM_PREFIX = "\u2605 "
@@ -148,37 +155,27 @@ class TextLibraryWidget(QWidget):
         self._combo.clear()
         self._combo.addItem("")
 
-        # Determine locale order: show active locale's texts first
+        # Show active locale's texts first, then others
         locale = current_locale()
-        if locale == "de":
-            primary, primary_label = TEXT_LIBRARY_DE, "── Deutsch ──"
-            secondary, secondary_label = TEXT_LIBRARY, "── English ──"
-        else:
-            primary, primary_label = TEXT_LIBRARY, "── English ──"
-            secondary, secondary_label = TEXT_LIBRARY_DE, "── Deutsch ──"
+        ordered = []
+        if locale in _TEXT_LIBRARIES:
+            ordered.append((locale, *_TEXT_LIBRARIES[locale]))
+        for code, (lib, label) in _TEXT_LIBRARIES.items():
+            if code != locale:
+                ordered.append((code, lib, label))
 
-        # Primary language texts
-        self._combo.addItem(primary_label)
-        idx = self._combo.count() - 1
-        self._combo.model().item(idx).setEnabled(False)
-        for name in primary:
-            if self._show_difficulty:
-                difficulty = primary[name][0]
-                self._combo.addItem(f"{name}  [{difficulty}]")
-            else:
-                self._combo.addItem(name)
-
-        # Secondary language texts
-        self._combo.insertSeparator(self._combo.count())
-        self._combo.addItem(secondary_label)
-        idx = self._combo.count() - 1
-        self._combo.model().item(idx).setEnabled(False)
-        for name in secondary:
-            if self._show_difficulty:
-                difficulty = secondary[name][0]
-                self._combo.addItem(f"{name}  [{difficulty}]")
-            else:
-                self._combo.addItem(name)
+        for i, (code, lib, label) in enumerate(ordered):
+            if i > 0:
+                self._combo.insertSeparator(self._combo.count())
+            header = f"── {label} ──"
+            self._combo.addItem(header)
+            self._combo.model().item(self._combo.count() - 1).setEnabled(False)
+            for name in lib:
+                if self._show_difficulty:
+                    difficulty = lib[name][0]
+                    self._combo.addItem(f"{name}  [{difficulty}]")
+                else:
+                    self._combo.addItem(name)
 
         # Custom texts
         custom = theme_manager.custom_texts
@@ -211,7 +208,11 @@ class TextLibraryWidget(QWidget):
 
         # Built-in text (strip difficulty suffix if present)
         lib_name = display_name.split("  [")[0]
-        entry = TEXT_LIBRARY.get(lib_name) or TEXT_LIBRARY_DE.get(lib_name)
+        entry = None
+        for _code, (lib, _label) in _TEXT_LIBRARIES.items():
+            entry = lib.get(lib_name)
+            if entry:
+                break
         self._del_btn.setVisible(False)
         if entry:
             difficulty, text = entry
@@ -245,7 +246,7 @@ class TextLibraryWidget(QWidget):
 
         name = name.strip()
         # Prevent overwriting built-in texts
-        if name in TEXT_LIBRARY or name in TEXT_LIBRARY_DE:
+        if any(name in lib for _code, (lib, _label) in _TEXT_LIBRARIES.items()):
             QMessageBox.warning(
                 self, tr("text.library.widget.reserved_name"),
                 tr("text.library.widget.reserved_name_msg", name=name),

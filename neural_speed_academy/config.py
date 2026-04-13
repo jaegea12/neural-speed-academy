@@ -1590,6 +1590,179 @@ TEXT_LIBRARY_DE = {
     ),
 }
 
+TEXT_LIBRARY_FR = {
+    "Les bases de la lecture rapide": (
+        "Facile",
+        "La lecture rapide est la capacité de lire des textes nettement plus vite que "
+        "la moyenne sans perdre en compréhension. La plupart des gens lisent à une "
+        "vitesse d'environ 200 à 250 mots par minute. Avec un entraînement ciblé, "
+        "ce rythme peut être doublé, voire triplé. La clé réside dans la façon dont "
+        "nos yeux et notre cerveau collaborent. Lors d'une lecture normale, les yeux "
+        "se fixent sur chaque mot individuellement, parfois même plusieurs fois. Les "
+        "lecteurs entraînés, en revanche, saisissent des groupes entiers de mots en "
+        "une seule fixation. Ils utilisent le contexte et leurs connaissances préalables "
+        "pour accéder au sens plus rapidement. Un autre facteur est la subvocalisation "
+        "— cette habitude de prononcer intérieurement les mots pendant la lecture. "
+        "Cette habitude limite la vitesse de lecture au rythme de la parole. Par "
+        "l'entraînement, on peut apprendre à traiter les mots directement de manière "
+        "visuelle, sans les prononcer intérieurement. Il est tout aussi important "
+        "d'éviter les régressions — ces retours inconscients vers des passages déjà "
+        "lus. Un pacer aide à maintenir le regard résolument vers l'avant. L'objectif "
+        "n'est pas seulement la vitesse, mais un processus de lecture globalement "
+        "plus efficace."
+    ),
+    "La science de la mémoire": (
+        "Facile",
+        "Notre mémoire n'est pas une fonction unique, mais un système complexe composé "
+        "de plusieurs composantes. La mémoire sensorielle retient les impressions des "
+        "sens pendant des fractions de seconde. La mémoire de travail — souvent appelée "
+        "mémoire à court terme — peut traiter environ sept unités d'information "
+        "simultanément et les conserver pendant 20 à 30 secondes. La mémoire à long "
+        "terme stocke les informations de manière potentiellement illimitée. Le passage "
+        "de la mémoire de travail à la mémoire à long terme réussit le mieux par la "
+        "répétition, l'association émotionnelle et le traitement actif. Hermann "
+        "Ebbinghaus a découvert dès 1885 la courbe de l'oubli : sans répétition, nous "
+        "oublions environ 50 pour cent de ce que nous avons appris en une heure. La "
+        "répétition espacée — apprendre à intervalles croissants — est la méthode la "
+        "plus efficace connue contre cet oubli. Le sommeil joue également un rôle "
+        "décisif. Pendant que nous dormons, le cerveau consolide les souvenirs et les "
+        "transfère de l'hippocampe vers le néocortex. Celui qui dort suffisamment après "
+        "avoir appris retient nettement plus que celui qui travaille toute la nuit."
+    ),
+    "Concentration et attention": (
+        "Facile",
+        "La concentration est la capacité de diriger consciemment son attention sur une "
+        "tâche et de filtrer les distractions. Dans un monde de notifications constantes "
+        "et de disponibilité permanente, cette capacité devient de plus en plus précieuse "
+        "— et de plus en plus rare. Des études montrent que l'employé de bureau moyen "
+        "est interrompu toutes les trois minutes et a besoin de jusqu'à 23 minutes pour "
+        "retrouver un état de concentration profonde. Cet état, que le psychologue "
+        "Mihaly Csikszentmihalyi appelle le flow, est la clé de la performance optimale. "
+        "Dans le flow, action et conscience fusionnent, le temps semble s'arrêter et "
+        "le travail paraît sans effort. Le flow survient lorsque l'exigence d'une tâche "
+        "correspond exactement à nos compétences — ni trop facile, ni trop difficile. "
+        "La concentration se travaille comme un muscle. Des exercices courts et réguliers "
+        "sont plus efficaces que de rares sessions marathon. Seulement 15 à 20 minutes "
+        "d'entraînement quotidien peuvent améliorer de manière mesurable la capacité "
+        "d'attention."
+    ),
+    "Neuroplasticité et apprentissage": (
+        "Moyen",
+        "La neuroplasticité désigne la capacité du cerveau à se modifier structurellement "
+        "et fonctionnellement par l'expérience et l'entraînement. Pendant longtemps, la "
+        "science a cru que le cerveau était largement immuable après l'enfance. "
+        "Aujourd'hui, nous savons que les réseaux neuronaux peuvent s'adapter tout au "
+        "long de la vie. Lorsque nous apprenons une nouvelle compétence, de nouvelles "
+        "connexions synaptiques se forment. Avec une répétition régulière, ces connexions "
+        "se renforcent — un processus que le neuroscientifique Donald Hebb a résumé par "
+        "le principe : les neurones qui s'activent ensemble se connectent ensemble. "
+        "Inversement, les connexions non utilisées s'affaiblissent. Le cerveau n'est "
+        "donc pas un organe statique, mais un système dynamique qui s'adapte constamment "
+        "à ses exigences. Pour la lecture rapide, cela signifie que les compétences "
+        "visuelles et cognitives qui permettent une lecture rapide peuvent être "
+        "développées par un entraînement ciblé. L'élargissement du champ visuel, la "
+        "réduction des régressions et l'accélération du traitement des mots ne sont "
+        "pas des talents innés, mais des compétences entraînables. La régularité est "
+        "déterminante : de courtes sessions quotidiennes sont plus efficaces que des "
+        "sessions intensives occasionnelles."
+    ),
+    "La perception visuelle en lecture": (
+        "Moyen",
+        "Pendant la lecture, nos yeux ne se déplacent pas de manière uniforme sur le "
+        "texte, mais par sauts rapides appelés saccades. Entre ces sauts, les yeux "
+        "se fixent pendant environ 200 à 250 millisecondes sur un point — ce sont les "
+        "fixations, pendant lesquelles l'absorption réelle d'information a lieu. "
+        "L'empan perceptif s'étend sur environ 3 à 4 caractères à gauche et 14 à 15 "
+        "caractères à droite de la fixation. Au centre du champ visuel, la fovéa, les "
+        "lettres et les mots sont reconnus nettement. Dans la parafovéa — la zone "
+        "directement adjacente — des informations préparatoires sur le mot suivant "
+        "sont déjà recueillies : longueur du mot, premières lettres et parfois même "
+        "le sens. Les lecteurs entraînés utilisent cette prévisualisation parafovéale "
+        "de manière particulièrement efficace. Ils nécessitent moins de fixations par "
+        "ligne et font des fixations plus courtes. Les régressions — retours vers des "
+        "mots déjà lus — représentent jusqu'à 15 pour cent de tous les mouvements "
+        "oculaires chez les lecteurs non entraînés. L'entraînement avec un pacer "
+        "visuel peut réduire significativement ces régressions et augmenter durablement "
+        "la vitesse de lecture."
+    ),
+    "Mémoire de travail et compréhension": (
+        "Moyen",
+        "La mémoire de travail est l'établi cognitif sur lequel nous maintenons et "
+        "traitons temporairement les informations. Sa capacité est limitée — George "
+        "Miller a décrit en 1956 le nombre magique 7 plus ou moins 2 comme empan "
+        "typique. En lecture, la mémoire de travail joue un rôle central : elle "
+        "maintient le début d'une phrase en conscience pendant que les yeux atteignent "
+        "la fin. Elle relie les pronoms à leurs référents et intègre les nouvelles "
+        "informations dans la compréhension existante du texte. La recherche montre "
+        "une forte corrélation entre la capacité de mémoire de travail et la "
+        "compréhension en lecture. Les personnes ayant une mémoire de travail plus "
+        "grande comprennent mieux les textes complexes car elles peuvent maintenir "
+        "plus de contexte simultanément. La bonne nouvelle : la mémoire de travail "
+        "peut être entraînée. Les exercices de mémoire séquentielle, où des séquences "
+        "de plus en plus longues de nombres ou de mots doivent être reproduites, "
+        "élargissent la capacité de manière mesurable. Le chunking — le regroupement "
+        "d'éléments individuels en groupes significatifs — est une autre stratégie "
+        "efficace."
+    ),
+    "L'art de la lecture active": (
+        "Difficile",
+        "La lecture active se distingue fondamentalement de l'absorption passive de "
+        "texte. Alors que les lecteurs passifs laissent leurs yeux glisser sur la page "
+        "en espérant que les informations restent, les lecteurs actifs procèdent de "
+        "manière stratégique. Ils posent des questions au texte avant de lire, "
+        "survolent d'abord la structure et activent leurs connaissances préalables "
+        "sur le sujet. Pendant la lecture, ils marquent les passages clés, formulent "
+        "des résumés dans leurs propres mots et établissent des liens avec ce qu'ils "
+        "connaissent déjà. Après la lecture, ils vérifient leur compréhension par "
+        "l'auto-questionnement. Cette méthode, connue sous le nom de SQ3R (Survey, "
+        "Question, Read, Recite, Review), a été développée en 1946 par Francis Robinson "
+        "et reste l'une des stratégies de lecture les mieux étudiées. Les méta-analyses "
+        "montrent que les lecteurs actifs retiennent non seulement plus, mais comprennent "
+        "aussi le contenu plus profondément et le transfèrent mieux à de nouvelles "
+        "situations. La différence décisive réside dans la profondeur du traitement "
+        "cognitif. La lecture superficielle n'active que la boucle phonologique — nous "
+        "entendons les mots intérieurement. La lecture profonde active en plus les "
+        "réseaux sémantiques, la mémoire épisodique et les fonctions exécutives."
+    ),
+    "La prise de décision sous incertitude": (
+        "Difficile",
+        "Les êtres humains prennent des milliers de décisions chaque jour, la plupart "
+        "inconsciemment. Les recherches de Daniel Kahneman et Amos Tversky ont montré "
+        "que notre comportement décisionnel s'écarte systématiquement des modèles "
+        "rationnels. Leur modèle à deux systèmes distingue le Système 1 — rapide, "
+        "automatique et intuitif — du Système 2 — lent, conscient et analytique. "
+        "Le Système 1 utilise des heuristiques, des raccourcis mentaux qui mènent à "
+        "de bons résultats dans la plupart des situations, mais peuvent aussi produire "
+        "des biais systématiques. L'effet d'ancrage, par exemple, décrit notre tendance "
+        "à nous orienter vers une première valeur mentionnée lors d'estimations, même "
+        "si cette valeur est arbitraire. L'heuristique de disponibilité nous fait "
+        "surestimer la probabilité d'événements qui nous viennent facilement à l'esprit "
+        "— comme les accidents d'avion par rapport aux accidents de voiture. Le biais "
+        "de confirmation nous pousse à chercher et percevoir préférentiellement les "
+        "informations qui confirment nos croyances existantes. Comprendre ces biais "
+        "cognitifs est le premier pas vers de meilleures décisions."
+    ),
+    "Pourquoi la lecture change tout": (
+        "Facile",
+        "La lecture est l'une des habitudes les plus puissantes qu'une personne puisse "
+        "développer. Contrairement à la consommation passive de médias, la lecture exige "
+        "une participation active du cerveau. Vous construisez des images mentales, "
+        "suivez des arguments et établissez des connexions entre les idées. Ce processus "
+        "renforce les voies neuronales et améliore les fonctions cognitives d'une manière "
+        "qu'aucune autre activité ne peut reproduire. Les études montrent de manière "
+        "constante que les lecteurs réguliers possèdent un vocabulaire plus riche, des "
+        "capacités de réflexion analytique plus fortes et davantage d'empathie. La "
+        "lecture de fiction permet de vivre le monde depuis différentes perspectives et "
+        "de développer l'intelligence émotionnelle. Les ouvrages documentaires accumulent "
+        "le savoir au fil du temps. Chaque livre ajoute à un cadre mental qui facilite "
+        "l'apprentissage du suivant. Warren Buffett attribue une grande partie de son "
+        "succès au fait d'avoir lu 500 pages par jour au début de sa carrière. Ils "
+        "comprennent quelque chose de fondamental : la lecture n'est pas un loisir, "
+        "mais un investissement. Le rendement de cet investissement est un esprit plus "
+        "affûté, de meilleures décisions et une compréhension plus profonde du monde."
+    ),
+}
+
 # Training paths
 # Each step: (exercise_type, label, params_dict)
 # exercise_type maps to a launcher in the path execution screen.
