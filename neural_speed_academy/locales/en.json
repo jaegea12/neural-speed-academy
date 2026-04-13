@@ -417,5 +417,8 @@
   "stats.export_error_msg": "Could not save file:\n{error}",
   "dashboard.user_info": "{name}   |   Level {level}   |   Streak: {streak} day(s)",
   "dashboard.no_sessions_yet": "No sessions yet",
-  "dashboard.last_session_info": "Last: {exercise} — {result} ({timestamp})"
+  "dashboard.last_session_info": "Last: {exercise} — {result} ({timestamp})",
+  "exercise.results": "RESULTS",
+  "exercise.continue": "CONTINUE",
+  "exercise.new_pb": "NEW PERSONAL BEST!"
 }

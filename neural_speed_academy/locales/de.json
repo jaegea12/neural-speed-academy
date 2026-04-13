@@ -417,5 +417,8 @@
   "stats.export_error_msg": "Datei konnte nicht gespeichert werden:\n{error}",
   "dashboard.user_info": "{name}   |   Level {level}   |   Serie: {streak} Tag(e)",
   "dashboard.no_sessions_yet": "Noch keine Sitzungen",
-  "dashboard.last_session_info": "Letzte: {exercise} — {result} ({timestamp})"
+  "dashboard.last_session_info": "Letzte: {exercise} — {result} ({timestamp})",
+  "exercise.results": "ERGEBNISSE",
+  "exercise.continue": "WEITER",
+  "exercise.new_pb": "NEUER PERSÖNLICHER REKORD!"
 }
