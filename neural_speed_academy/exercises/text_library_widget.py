@@ -15,7 +15,10 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.theme import (
     COLORS, make_qfont, input_css, theme_manager, screen_metrics,
 )
-from neural_speed_academy.config import TEXT_LIBRARY, TEXT_LIBRARY_DE, TEXT_LIBRARY_FR
+from neural_speed_academy.config import (
+    TEXT_LIBRARY, TEXT_LIBRARY_DE, TEXT_LIBRARY_FR,
+    TEXT_LIBRARY_ES, TEXT_LIBRARY_IT, TEXT_LIBRARY_PT,
+)
 from neural_speed_academy.i18n import tr, current_locale
 
 # All text libraries keyed by locale code
@@ -23,6 +26,9 @@ _TEXT_LIBRARIES = {
     "en": (TEXT_LIBRARY, "English"),
     "de": (TEXT_LIBRARY_DE, "Deutsch"),
     "fr": (TEXT_LIBRARY_FR, "Français"),
+    "es": (TEXT_LIBRARY_ES, "Español"),
+    "it": (TEXT_LIBRARY_IT, "Italiano"),
+    "pt": (TEXT_LIBRARY_PT, "Português"),
 }
 
 # Prefix for custom text entries in the dropdown

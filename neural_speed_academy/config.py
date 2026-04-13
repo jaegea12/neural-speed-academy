@@ -1763,6 +1763,459 @@ TEXT_LIBRARY_FR = {
     ),
 }
 
+TEXT_LIBRARY_ES = {
+    "Fundamentos de la lectura rápida": (
+        "Fácil",
+        "La lectura rápida consiste en procesar textos a una velocidad considerablemente "
+        "superior a la media sin sacrificar la comprensión. La mayoría de las personas "
+        "leen entre 200 y 250 palabras por minuto. Con un entrenamiento adecuado, esa "
+        "cifra puede duplicarse o incluso triplicarse. La clave está en la coordinación "
+        "entre los ojos y el cerebro. Durante la lectura convencional, los ojos se "
+        "detienen en cada palabra de forma individual, a veces más de una vez. Los "
+        "lectores entrenados, en cambio, captan grupos enteros de palabras en una sola "
+        "fijación. Utilizan el contexto y sus conocimientos previos para acceder al "
+        "significado con mayor rapidez. Otro factor determinante es la subvocalización, "
+        "esa costumbre de pronunciar mentalmente cada palabra mientras se lee. Este "
+        "hábito limita la velocidad de lectura al ritmo del habla. Mediante la práctica, "
+        "es posible aprender a procesar las palabras de forma puramente visual, sin "
+        "necesidad de articularlas internamente. Igualmente importante es evitar las "
+        "regresiones, esos retornos involuntarios a pasajes ya leídos. Un marcador de "
+        "ritmo ayuda a mantener la mirada avanzando de forma constante. El objetivo no "
+        "es solo la velocidad, sino un proceso de lectura globalmente más eficiente."
+    ),
+    "La ciencia de la memoria": (
+        "Fácil",
+        "La memoria no es una función única, sino un sistema complejo formado por varios "
+        "componentes. La memoria sensorial retiene las impresiones de los sentidos durante "
+        "fracciones de segundo. La memoria de trabajo, a menudo llamada memoria a corto "
+        "plazo, puede manejar aproximadamente siete unidades de información de forma "
+        "simultánea y conservarlas entre 20 y 30 segundos. La memoria a largo plazo, por "
+        "su parte, almacena información de manera prácticamente ilimitada. La transferencia "
+        "de datos de la memoria de trabajo a la memoria a largo plazo se produce mediante "
+        "la repetición, la asociación emocional y la elaboración activa. Las técnicas "
+        "mnemotécnicas aprovechan estos mecanismos creando vínculos artificiales entre la "
+        "información nueva y los conocimientos ya almacenados. El palacio de la memoria, "
+        "por ejemplo, asocia datos con ubicaciones espaciales conocidas. La repetición "
+        "espaciada distribuye las sesiones de repaso a intervalos crecientes, lo que "
+        "fortalece las conexiones neuronales de forma más eficaz que el estudio intensivo "
+        "concentrado en una sola sesión."
+    ),
+    "Concentración y enfoque": (
+        "Fácil",
+        "La capacidad de concentración es un recurso limitado que se agota con el uso "
+        "continuado. Investigaciones en neurociencia han demostrado que la atención "
+        "sostenida depende de la corteza prefrontal, una región del cerebro que consume "
+        "grandes cantidades de glucosa y oxígeno. Cuando esta zona se fatiga, la "
+        "concentración disminuye y aumenta la susceptibilidad a las distracciones. La "
+        "técnica Pomodoro, que alterna bloques de trabajo de 25 minutos con pausas breves, "
+        "se basa en este principio. Las pausas permiten que la corteza prefrontal se "
+        "recupere. El entorno también desempeña un papel fundamental. Cada notificación, "
+        "cada interrupción, obliga al cerebro a realizar un costoso cambio de contexto. "
+        "Estudios muestran que tras una interrupción se necesitan hasta 23 minutos para "
+        "recuperar el nivel de concentración anterior. Por eso, crear un entorno libre de "
+        "distracciones es tan importante como entrenar la propia capacidad de enfoque. "
+        "La meditación y los ejercicios de atención plena fortalecen las redes neuronales "
+        "responsables del control atencional."
+    ),
+    "Neuroplasticidad y aprendizaje": (
+        "Medio",
+        "El cerebro humano no es una estructura fija, sino un órgano extraordinariamente "
+        "adaptable que se reorganiza constantemente en respuesta a la experiencia. Este "
+        "fenómeno, conocido como neuroplasticidad, constituye la base biológica del "
+        "aprendizaje. Cada vez que adquirimos una nueva habilidad o un nuevo conocimiento, "
+        "se forman nuevas conexiones sinápticas o se refuerzan las existentes. La "
+        "repetición consolida estas conexiones, haciendo que los circuitos neuronales "
+        "implicados se activen con mayor facilidad y rapidez. Este proceso explica por "
+        "qué la práctica deliberada es tan eficaz. No se trata simplemente de repetir "
+        "una tarea, sino de hacerlo con atención consciente, retroalimentación inmediata "
+        "y un nivel de dificultad progresivamente creciente. La neuroplasticidad también "
+        "explica por qué los hábitos son tan poderosos. Las conductas repetidas crean "
+        "caminos neuronales que se automatizan con el tiempo, liberando recursos "
+        "cognitivos para tareas más complejas. El entrenamiento de lectura rápida "
+        "aprovecha directamente estos mecanismos, transformando procesos que inicialmente "
+        "requieren esfuerzo consciente en habilidades automáticas."
+    ),
+    "Percepción visual en la lectura": (
+        "Medio",
+        "El proceso de lectura implica una interacción compleja entre la percepción "
+        "visual, la atención y los procesos cognitivos superiores. Cuando un lector fija "
+        "la mirada en una palabra, el sistema visual extrae información de una región "
+        "denominada campo perceptivo, que se extiende aproximadamente 3 o 4 caracteres "
+        "a la izquierda y 14 o 15 caracteres a la derecha del punto de fijación. Dentro "
+        "de este campo, la identificación detallada de letras y palabras ocurre en la "
+        "región foveal, que abarca unos 2 grados de ángulo visual. El procesamiento "
+        "parafoveal proporciona información preliminar sobre las palabras siguientes, "
+        "incluyendo su longitud, las letras iniciales y, en ocasiones, información "
+        "fonológica o semántica parcial. Los movimientos sacádicos, que abarcan "
+        "típicamente entre 7 y 9 caracteres, sirven para llevar nuevo texto a la visión "
+        "foveal. La duración de las fijaciones, que promedia entre 200 y 250 milisegundos, "
+        "refleja el tiempo necesario para el acceso léxico y la integración de la palabra "
+        "fijada en la representación continua de la oración."
+    ),
+    "Memoria de trabajo y comprensión lectora": (
+        "Medio",
+        "La memoria de trabajo es el sistema cognitivo que mantiene y manipula información "
+        "de forma temporal mientras realizamos tareas complejas como la lectura. Su "
+        "capacidad es limitada, generalmente a entre cuatro y siete elementos simultáneos, "
+        "lo que tiene implicaciones directas para la comprensión de textos. Cuando leemos "
+        "una oración larga, la memoria de trabajo debe retener las primeras palabras "
+        "mientras procesa las siguientes, construyendo progresivamente el significado "
+        "global. Si la carga excede su capacidad, la comprensión se deteriora. Los "
+        "lectores expertos desarrollan estrategias para gestionar esta limitación. La "
+        "agrupación semántica, por ejemplo, permite condensar múltiples elementos en "
+        "unidades significativas más amplias. La automatización del reconocimiento de "
+        "palabras libera recursos de la memoria de trabajo para dedicarlos a la "
+        "comprensión. Por eso, el vocabulario amplio y la fluidez lectora son predictores "
+        "tan fiables de la comprensión. Cuanto menos esfuerzo se dedica a decodificar "
+        "palabras individuales, más recursos quedan disponibles para integrar ideas, "
+        "hacer inferencias y construir una representación coherente del texto."
+    ),
+    "El arte de la lectura activa": (
+        "Difícil",
+        "La lectura activa se distingue de la lectura pasiva por el grado de implicación "
+        "cognitiva del lector. Mientras que el lector pasivo recorre el texto de forma "
+        "lineal, absorbiendo información sin cuestionarla, el lector activo mantiene un "
+        "diálogo constante con el material. Formula preguntas antes de comenzar cada "
+        "sección, genera predicciones sobre el contenido, evalúa la solidez de los "
+        "argumentos y conecta las ideas nuevas con sus conocimientos previos. Esta "
+        "aproximación transforma la lectura de un acto receptivo en un proceso "
+        "constructivo. Las investigaciones en psicología educativa demuestran que la "
+        "lectura activa mejora significativamente tanto la comprensión como la retención "
+        "a largo plazo. Técnicas como el subrayado selectivo, la anotación marginal y "
+        "la elaboración de resúmenes obligan al cerebro a procesar la información a un "
+        "nivel más profundo. El método SQ3R — explorar, preguntar, leer, recitar y "
+        "revisar — sistematiza este enfoque. Cada paso añade una capa adicional de "
+        "procesamiento que fortalece la huella mnémica. La paradoja es que la lectura "
+        "activa, aunque inicialmente más lenta, produce un aprendizaje más eficiente "
+        "porque reduce la necesidad de releer."
+    ),
+    "Toma de decisiones bajo incertidumbre": (
+        "Difícil",
+        "La teoría del proceso dual postula que la cognición humana opera a través de "
+        "dos sistemas fundamentalmente distintos. El Sistema 1 se caracteriza por un "
+        "procesamiento automático, rápido y sin esfuerzo que opera por debajo del umbral "
+        "de la conciencia. Se basa en heurísticas, memoria asociativa y reconocimiento "
+        "de patrones para generar juicios y decisiones rápidas. El Sistema 2, por el "
+        "contrario, es deliberado, lento y exigente, requiere atención consciente y "
+        "recursos de la memoria de trabajo. Se activa cuando nos enfrentamos a situaciones "
+        "novedosas, realizamos cálculos complejos o necesitamos anular las respuestas "
+        "automáticas del Sistema 1. La investigación de Kahneman y Tversky demostró que "
+        "el procesamiento del Sistema 1, aunque generalmente adaptativo, puede conducir "
+        "a sesgos sistemáticos y errores de juicio. Entre estos sesgos cognitivos se "
+        "encuentran el anclaje, la heurística de disponibilidad, la representatividad y "
+        "los efectos de encuadre. Comprender cuándo y cómo se activa cada sistema "
+        "permite diseñar intervenciones que mejoren la toma de decisiones."
+    ),
+    "Por qué la lectura lo cambia todo": (
+        "Fácil",
+        "La lectura es uno de los hábitos más transformadores que una persona puede "
+        "desarrollar. A diferencia del consumo pasivo de medios, leer exige una "
+        "participación activa del cerebro. Se construyen imágenes mentales, se siguen "
+        "argumentos y se establecen conexiones entre ideas. Este proceso fortalece las "
+        "vías neuronales y mejora la función cognitiva de maneras que ninguna otra "
+        "actividad puede replicar. Los estudios demuestran consistentemente que los "
+        "lectores habituales poseen vocabularios más amplios, habilidades analíticas más "
+        "sólidas y mayor empatía. La lectura de ficción, en particular, permite "
+        "experimentar el mundo desde perspectivas diferentes, construyendo una "
+        "inteligencia emocional que se transfiere directamente a las relaciones de la "
+        "vida real. La lectura de no ficción acumula conocimiento con el tiempo. Cada "
+        "libro leído añade un marco mental que facilita el aprendizaje del siguiente. "
+        "Warren Buffett atribuye gran parte de su éxito a leer 500 páginas al día al "
+        "inicio de su carrera. Bill Gates lee unos 50 libros al año. Ambos comprenden "
+        "algo fundamental: la lectura no es un lujo, es una inversión cuyo rendimiento "
+        "es una mente más aguda y una comprensión más profunda del mundo."
+    ),
+}
+
+TEXT_LIBRARY_IT = {
+    "Fondamenti della lettura veloce": (
+        "Facile",
+        "La lettura veloce consiste nell'elaborare testi a una velocità considerevolmente "
+        "superiore alla media senza sacrificare la comprensione. La maggior parte delle persone "
+        "legge tra le 200 e le 250 parole al minuto. Con un allenamento mirato, questa cifra "
+        "può essere raddoppiata o addirittura triplicata. La chiave sta nella coordinazione "
+        "tra occhi e cervello. Durante la lettura convenzionale, gli occhi si fermano su ogni "
+        "parola singolarmente, a volte più di una volta. I lettori allenati, invece, colgono "
+        "interi gruppi di parole in una singola fissazione. Utilizzano il contesto e le "
+        "conoscenze pregresse per accedere al significato con maggiore rapidità. Un altro "
+        "fattore determinante è la subvocalizzazione, quell'abitudine di pronunciare "
+        "mentalmente ogni parola durante la lettura. Questa abitudine limita la velocità di "
+        "lettura al ritmo del parlato. Attraverso la pratica, è possibile imparare a elaborare "
+        "le parole in modo puramente visivo, senza bisogno di articolarle internamente. "
+        "Altrettanto importante è evitare le regressioni, quei ritorni involontari a passaggi "
+        "già letti. Un marcatore di ritmo aiuta a mantenere lo sguardo in costante avanzamento."
+    ),
+    "La scienza della memoria": (
+        "Facile",
+        "La memoria non è una funzione unica, ma un sistema complesso formato da diverse "
+        "componenti. La memoria sensoriale trattiene le impressioni dei sensi per frazioni di "
+        "secondo. La memoria di lavoro, spesso chiamata memoria a breve termine, può gestire "
+        "circa sette unità di informazione simultaneamente e conservarle per 20-30 secondi. "
+        "La memoria a lungo termine, invece, immagazzina informazioni in modo praticamente "
+        "illimitato. Il trasferimento dei dati dalla memoria di lavoro a quella a lungo termine "
+        "avviene attraverso la ripetizione, l'associazione emotiva e l'elaborazione attiva. Le "
+        "tecniche mnemoniche sfruttano questi meccanismi creando collegamenti artificiali tra "
+        "le nuove informazioni e le conoscenze già archiviate. Il palazzo della memoria, ad "
+        "esempio, associa i dati a luoghi spaziali conosciuti. La ripetizione spaziata "
+        "distribuisce le sessioni di ripasso a intervalli crescenti, rafforzando le connessioni "
+        "neurali in modo più efficace rispetto allo studio intensivo concentrato in un'unica "
+        "sessione."
+    ),
+    "Concentrazione e attenzione": (
+        "Facile",
+        "La capacità di concentrazione è una risorsa limitata che si esaurisce con l'uso "
+        "prolungato. Le ricerche in neuroscienze hanno dimostrato che l'attenzione sostenuta "
+        "dipende dalla corteccia prefrontale, una regione del cervello che consuma grandi "
+        "quantità di glucosio e ossigeno. Quando questa zona si affatica, la concentrazione "
+        "diminuisce e aumenta la suscettibilità alle distrazioni. La tecnica del Pomodoro, "
+        "che alterna blocchi di lavoro di 25 minuti con pause brevi, si basa su questo "
+        "principio. Le pause permettono alla corteccia prefrontale di recuperare. Anche "
+        "l'ambiente gioca un ruolo fondamentale. Ogni notifica, ogni interruzione, costringe "
+        "il cervello a effettuare un costoso cambio di contesto. Gli studi mostrano che dopo "
+        "un'interruzione servono fino a 23 minuti per recuperare il livello di concentrazione "
+        "precedente. Per questo, creare un ambiente privo di distrazioni è tanto importante "
+        "quanto allenare la propria capacità di focalizzazione."
+    ),
+    "Neuroplasticità e apprendimento": (
+        "Medio",
+        "Il cervello umano non è una struttura fissa, ma un organo straordinariamente "
+        "adattabile che si riorganizza costantemente in risposta all'esperienza. Questo "
+        "fenomeno, noto come neuroplasticità, costituisce la base biologica dell'apprendimento. "
+        "Ogni volta che acquisiamo una nuova abilità o una nuova conoscenza, si formano nuove "
+        "connessioni sinaptiche o si rafforzano quelle esistenti. La ripetizione consolida "
+        "queste connessioni, facendo sì che i circuiti neurali coinvolti si attivino con "
+        "maggiore facilità e rapidità. Questo processo spiega perché la pratica deliberata è "
+        "così efficace. Non si tratta semplicemente di ripetere un compito, ma di farlo con "
+        "attenzione consapevole, feedback immediato e un livello di difficoltà progressivamente "
+        "crescente. La neuroplasticità spiega anche perché le abitudini sono così potenti. I "
+        "comportamenti ripetuti creano percorsi neurali che si automatizzano nel tempo, "
+        "liberando risorse cognitive per compiti più complessi."
+    ),
+    "Percezione visiva nella lettura": (
+        "Medio",
+        "Il processo di lettura implica un'interazione complessa tra percezione visiva, "
+        "attenzione e processi cognitivi superiori. Quando un lettore fissa lo sguardo su una "
+        "parola, il sistema visivo estrae informazioni da una regione denominata campo "
+        "percettivo, che si estende per circa 3-4 caratteri a sinistra e 14-15 caratteri a "
+        "destra del punto di fissazione. All'interno di questo campo, l'identificazione "
+        "dettagliata di lettere e parole avviene nella regione foveale, che sottende circa 2 "
+        "gradi di angolo visivo. L'elaborazione parafoveale fornisce informazioni preliminari "
+        "sulle parole successive, inclusa la loro lunghezza, le lettere iniziali e talvolta "
+        "informazioni fonologiche o semantiche parziali. I movimenti saccadici, che coprono "
+        "tipicamente 7-9 caratteri, servono a portare nuovo testo nella visione foveale. La "
+        "durata delle fissazioni, che in media è di 200-250 millisecondi, riflette il tempo "
+        "necessario per l'accesso lessicale."
+    ),
+    "Memoria di lavoro e comprensione": (
+        "Medio",
+        "La memoria di lavoro è il sistema cognitivo che mantiene e manipola informazioni in "
+        "modo temporaneo mentre svolgiamo compiti complessi come la lettura. La sua capacità è "
+        "limitata, generalmente a quattro-sette elementi simultanei, il che ha implicazioni "
+        "dirette per la comprensione dei testi. Quando leggiamo una frase lunga, la memoria di "
+        "lavoro deve trattenere le prime parole mentre elabora le successive, costruendo "
+        "progressivamente il significato globale. Se il carico supera la sua capacità, la "
+        "comprensione si deteriora. I lettori esperti sviluppano strategie per gestire questa "
+        "limitazione. Il raggruppamento semantico, ad esempio, permette di condensare più "
+        "elementi in unità significative più ampie. L'automatizzazione del riconoscimento delle "
+        "parole libera risorse della memoria di lavoro da dedicare alla comprensione. Per "
+        "questo, un vocabolario ampio e la fluidità nella lettura sono predittori così "
+        "affidabili della comprensione."
+    ),
+    "L'arte della lettura attiva": (
+        "Difficile",
+        "La lettura attiva si distingue dalla lettura passiva per il grado di coinvolgimento "
+        "cognitivo del lettore. Mentre il lettore passivo percorre il testo in modo lineare, "
+        "assorbendo informazioni senza metterle in discussione, il lettore attivo mantiene un "
+        "dialogo costante con il materiale. Formula domande prima di iniziare ogni sezione, "
+        "genera previsioni sul contenuto, valuta la solidità degli argomenti e collega le nuove "
+        "idee alle conoscenze pregresse. Questo approccio trasforma la lettura da un atto "
+        "ricettivo in un processo costruttivo. Le ricerche in psicologia dell'educazione "
+        "dimostrano che la lettura attiva migliora significativamente sia la comprensione che "
+        "la ritenzione a lungo termine. Tecniche come la sottolineatura selettiva, le "
+        "annotazioni a margine e l'elaborazione di riassunti costringono il cervello a "
+        "elaborare le informazioni a un livello più profondo. Il paradosso è che la lettura "
+        "attiva, sebbene inizialmente più lenta, produce un apprendimento più efficiente."
+    ),
+    "Processo decisionale sotto incertezza": (
+        "Difficile",
+        "La teoria del processo duale postula che la cognizione umana opera attraverso due "
+        "sistemi fondamentalmente distinti. Il Sistema 1 si caratterizza per un'elaborazione "
+        "automatica, rapida e senza sforzo che opera al di sotto della soglia della coscienza. "
+        "Si basa su euristiche, memoria associativa e riconoscimento di pattern per generare "
+        "giudizi e decisioni rapide. Il Sistema 2, al contrario, è deliberato, lento e "
+        "impegnativo, richiede attenzione consapevole e risorse della memoria di lavoro. Si "
+        "attiva quando ci troviamo di fronte a situazioni nuove, eseguiamo calcoli complessi o "
+        "dobbiamo annullare le risposte automatiche del Sistema 1. La ricerca di Kahneman e "
+        "Tversky ha dimostrato che l'elaborazione del Sistema 1, sebbene generalmente "
+        "adattativa, può portare a bias sistematici ed errori di giudizio. Tra questi bias "
+        "cognitivi troviamo l'ancoraggio, l'euristica della disponibilità, la "
+        "rappresentatività e gli effetti di framing."
+    ),
+    "Perché la lettura cambia tutto": (
+        "Facile",
+        "La lettura è una delle abitudini più trasformative che una persona possa sviluppare. "
+        "A differenza del consumo passivo di media, leggere richiede una partecipazione attiva "
+        "del cervello. Si costruiscono immagini mentali, si seguono argomentazioni e si "
+        "stabiliscono connessioni tra idee. Questo processo rafforza le vie neurali e migliora "
+        "la funzione cognitiva in modi che nessun'altra attività può replicare. Gli studi "
+        "dimostrano costantemente che i lettori abituali possiedono vocabolari più ampi, "
+        "capacità analitiche più solide e maggiore empatia. La lettura di narrativa, in "
+        "particolare, permette di sperimentare il mondo da prospettive diverse, costruendo "
+        "un'intelligenza emotiva che si trasferisce direttamente alle relazioni della vita "
+        "reale. La lettura di saggistica accumula conoscenza nel tempo. Ogni libro letto "
+        "aggiunge un quadro mentale che facilita l'apprendimento successivo. Warren Buffett "
+        "attribuisce gran parte del suo successo alla lettura di 500 pagine al giorno "
+        "all'inizio della sua carriera. Entrambi comprendono qualcosa di fondamentale: la "
+        "lettura non è un lusso, è un investimento."
+    ),
+}
+
+TEXT_LIBRARY_PT = {
+    "Fundamentos da leitura rápida": (
+        "Fácil",
+        "A leitura rápida consiste em processar textos a uma velocidade consideravelmente "
+        "superior à média sem sacrificar a compreensão. A maioria das pessoas lê entre 200 "
+        "e 250 palavras por minuto. Com treino adequado, esse número pode ser duplicado ou "
+        "até triplicado. A chave está na coordenação entre os olhos e o cérebro. Durante a "
+        "leitura convencional, os olhos fixam-se em cada palavra individualmente, por vezes "
+        "mais do que uma vez. Os leitores treinados, pelo contrário, captam grupos inteiros "
+        "de palavras numa única fixação. Utilizam o contexto e os conhecimentos prévios para "
+        "aceder ao significado com maior rapidez. Outro fator determinante é a subvocalização, "
+        "o hábito de pronunciar mentalmente cada palavra durante a leitura. Este hábito limita "
+        "a velocidade de leitura ao ritmo da fala. Através da prática, é possível aprender a "
+        "processar as palavras de forma puramente visual, sem necessidade de as articular "
+        "internamente. Igualmente importante é evitar as regressões, esses retornos "
+        "involuntários a passagens já lidas. Um marcador de ritmo ajuda a manter o olhar "
+        "em avanço constante."
+    ),
+    "A ciência da memória": (
+        "Fácil",
+        "A memória não é uma função única, mas um sistema complexo formado por várias "
+        "componentes. A memória sensorial retém as impressões dos sentidos durante frações "
+        "de segundo. A memória de trabalho, frequentemente chamada memória de curto prazo, "
+        "pode gerir aproximadamente sete unidades de informação em simultâneo e conservá-las "
+        "durante 20 a 30 segundos. A memória de longo prazo, por sua vez, armazena informação "
+        "de forma praticamente ilimitada. A transferência de dados da memória de trabalho para "
+        "a memória de longo prazo ocorre através da repetição, da associação emocional e da "
+        "elaboração ativa. As técnicas mnemónicas aproveitam estes mecanismos criando ligações "
+        "artificiais entre a informação nova e os conhecimentos já armazenados. O palácio da "
+        "memória, por exemplo, associa dados a localizações espaciais conhecidas. A repetição "
+        "espaçada distribui as sessões de revisão a intervalos crescentes, fortalecendo as "
+        "conexões neurais de forma mais eficaz do que o estudo intensivo concentrado numa "
+        "única sessão."
+    ),
+    "Concentração e foco": (
+        "Fácil",
+        "A capacidade de concentração é um recurso limitado que se esgota com o uso continuado. "
+        "Investigações em neurociência demonstraram que a atenção sustentada depende do córtex "
+        "pré-frontal, uma região do cérebro que consome grandes quantidades de glucose e "
+        "oxigénio. Quando esta zona se fatiga, a concentração diminui e aumenta a "
+        "suscetibilidade às distrações. A técnica Pomodoro, que alterna blocos de trabalho de "
+        "25 minutos com pausas breves, baseia-se neste princípio. As pausas permitem que o "
+        "córtex pré-frontal recupere. O ambiente também desempenha um papel fundamental. Cada "
+        "notificação, cada interrupção, obriga o cérebro a realizar uma custosa mudança de "
+        "contexto. Estudos mostram que após uma interrupção são necessários até 23 minutos "
+        "para recuperar o nível de concentração anterior. Por isso, criar um ambiente livre "
+        "de distrações é tão importante como treinar a própria capacidade de foco. A meditação "
+        "e os exercícios de atenção plena fortalecem as redes neurais responsáveis pelo "
+        "controlo atencional."
+    ),
+    "Neuroplasticidade e aprendizagem": (
+        "Médio",
+        "O cérebro humano não é uma estrutura fixa, mas um órgão extraordinariamente adaptável "
+        "que se reorganiza constantemente em resposta à experiência. Este fenómeno, conhecido "
+        "como neuroplasticidade, constitui a base biológica da aprendizagem. Cada vez que "
+        "adquirimos uma nova competência ou um novo conhecimento, formam-se novas conexões "
+        "sinápticas ou reforçam-se as existentes. A repetição consolida estas conexões, "
+        "fazendo com que os circuitos neurais envolvidos se ativem com maior facilidade e "
+        "rapidez. Este processo explica por que a prática deliberada é tão eficaz. Não se "
+        "trata simplesmente de repetir uma tarefa, mas de o fazer com atenção consciente, "
+        "feedback imediato e um nível de dificuldade progressivamente crescente. A "
+        "neuroplasticidade também explica por que os hábitos são tão poderosos. Os "
+        "comportamentos repetidos criam caminhos neurais que se automatizam com o tempo, "
+        "libertando recursos cognitivos para tarefas mais complexas."
+    ),
+    "Perceção visual na leitura": (
+        "Médio",
+        "O processo de leitura implica uma interação complexa entre a perceção visual, a "
+        "atenção e os processos cognitivos superiores. Quando um leitor fixa o olhar numa "
+        "palavra, o sistema visual extrai informação de uma região denominada campo percetivo, "
+        "que se estende por aproximadamente 3 a 4 caracteres à esquerda e 14 a 15 caracteres "
+        "à direita do ponto de fixação. Dentro deste campo, a identificação detalhada de "
+        "letras e palavras ocorre na região foveal, que subentende cerca de 2 graus de ângulo "
+        "visual. O processamento parafoveal fornece informação preliminar sobre as palavras "
+        "seguintes, incluindo o seu comprimento, as letras iniciais e, por vezes, informação "
+        "fonológica ou semântica parcial. Os movimentos sacádicos, que abrangem tipicamente "
+        "7 a 9 caracteres, servem para trazer novo texto para a visão foveal. A duração das "
+        "fixações, que em média é de 200 a 250 milissegundos, reflete o tempo necessário para "
+        "o acesso lexical e a integração da palavra na representação contínua da frase."
+    ),
+    "Memória de trabalho e compreensão leitora": (
+        "Médio",
+        "A memória de trabalho é o sistema cognitivo que mantém e manipula informação de forma "
+        "temporária enquanto realizamos tarefas complexas como a leitura. A sua capacidade é "
+        "limitada, geralmente a quatro a sete elementos simultâneos, o que tem implicações "
+        "diretas para a compreensão de textos. Quando lemos uma frase longa, a memória de "
+        "trabalho deve reter as primeiras palavras enquanto processa as seguintes, construindo "
+        "progressivamente o significado global. Se a carga exceder a sua capacidade, a "
+        "compreensão deteriora-se. Os leitores experientes desenvolvem estratégias para gerir "
+        "esta limitação. O agrupamento semântico, por exemplo, permite condensar múltiplos "
+        "elementos em unidades significativas mais amplas. A automatização do reconhecimento "
+        "de palavras liberta recursos da memória de trabalho para dedicar à compreensão. Por "
+        "isso, o vocabulário amplo e a fluência leitora são preditores tão fiáveis da "
+        "compreensão."
+    ),
+    "A arte da leitura ativa": (
+        "Difícil",
+        "A leitura ativa distingue-se da leitura passiva pelo grau de envolvimento cognitivo "
+        "do leitor. Enquanto o leitor passivo percorre o texto de forma linear, absorvendo "
+        "informação sem a questionar, o leitor ativo mantém um diálogo constante com o "
+        "material. Formula perguntas antes de começar cada secção, gera previsões sobre o "
+        "conteúdo, avalia a solidez dos argumentos e liga as novas ideias aos conhecimentos "
+        "prévios. Esta abordagem transforma a leitura de um ato recetivo num processo "
+        "construtivo. As investigações em psicologia educacional demonstram que a leitura "
+        "ativa melhora significativamente tanto a compreensão como a retenção a longo prazo. "
+        "Técnicas como o sublinhado seletivo, a anotação marginal e a elaboração de resumos "
+        "obrigam o cérebro a processar a informação a um nível mais profundo. O método SQ3R "
+        "— explorar, perguntar, ler, recitar e rever — sistematiza esta abordagem. O paradoxo "
+        "é que a leitura ativa, embora inicialmente mais lenta, produz uma aprendizagem mais "
+        "eficiente porque reduz a necessidade de reler."
+    ),
+    "Tomada de decisão sob incerteza": (
+        "Difícil",
+        "A teoria do processo dual postula que a cognição humana opera através de dois sistemas "
+        "fundamentalmente distintos. O Sistema 1 caracteriza-se por um processamento automático, "
+        "rápido e sem esforço que opera abaixo do limiar da consciência. Baseia-se em "
+        "heurísticas, memória associativa e reconhecimento de padrões para gerar juízos e "
+        "decisões rápidas. O Sistema 2, pelo contrário, é deliberado, lento e exigente, "
+        "requerendo atenção consciente e recursos da memória de trabalho. Ativa-se quando nos "
+        "deparamos com situações novas, realizamos cálculos complexos ou precisamos de anular "
+        "as respostas automáticas do Sistema 1. A investigação de Kahneman e Tversky demonstrou "
+        "que o processamento do Sistema 1, embora geralmente adaptativo, pode conduzir a vieses "
+        "sistemáticos e erros de julgamento. Entre estes vieses cognitivos encontram-se a "
+        "ancoragem, a heurística da disponibilidade, a representatividade e os efeitos de "
+        "enquadramento."
+    ),
+    "Porque é que a leitura muda tudo": (
+        "Fácil",
+        "A leitura é um dos hábitos mais transformadores que uma pessoa pode desenvolver. Ao "
+        "contrário do consumo passivo de media, ler exige uma participação ativa do cérebro. "
+        "Constroem-se imagens mentais, seguem-se argumentos e estabelecem-se conexões entre "
+        "ideias. Este processo fortalece as vias neurais e melhora a função cognitiva de "
+        "formas que nenhuma outra atividade pode replicar. Os estudos demonstram "
+        "consistentemente que os leitores habituais possuem vocabulários mais amplos, "
+        "capacidades analíticas mais sólidas e maior empatia. A leitura de ficção, em "
+        "particular, permite experimentar o mundo a partir de perspetivas diferentes, "
+        "construindo uma inteligência emocional que se transfere diretamente para as relações "
+        "da vida real. A leitura de não-ficção acumula conhecimento ao longo do tempo. Cada "
+        "livro lido acrescenta um quadro mental que facilita a aprendizagem seguinte. Warren "
+        "Buffett atribui grande parte do seu sucesso à leitura de 500 páginas por dia no "
+        "início da sua carreira. Ambos compreendem algo fundamental: a leitura não é um luxo, "
+        "é um investimento cujo retorno é uma mente mais afiada e uma compreensão mais "
+        "profunda do mundo."
+    ),
+}
+
 # Training paths
 # Each step: (exercise_type, label, params_dict)
 # exercise_type maps to a launcher in the path execution screen.
