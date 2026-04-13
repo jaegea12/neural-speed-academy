@@ -469,13 +469,18 @@ class PathBuilderScreen(BaseScreen):
         cat_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         for ex_type, group_name, variants in EXERCISE_CATALOG:
-            grp = QLabel(group_name)
+            cat_key = f"catalog.{ex_type}"
+            display_name = tr(cat_key)
+            # Fall back to original name if key not in catalog
+            if display_name == cat_key:
+                display_name = group_name
+            grp = QLabel(display_name)
             grp.setFont(make_qfont("btn_bold"))
             grp.setStyleSheet(f"color: {c['accent']};")
             cat_layout.addWidget(grp)
 
             for variant_name, params in variants:
-                label = f"{group_name}: {variant_name}"
+                label = f"{display_name}: {variant_name}"
                 btn = QPushButton(f"  + {variant_name}")
                 btn.setFont(make_qfont("body"))
                 btn.setStyleSheet(

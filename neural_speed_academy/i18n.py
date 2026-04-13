@@ -58,6 +58,18 @@ def available_locales() -> dict[str, str]:
     return locales
 
 
+def exercise_display_name(stored_name: str) -> str:
+    """Translate a stored exercise identifier to a localized display name.
+
+    Stored names (e.g. 'FLASH_NUM', 'REACTION TIME') are internal IDs
+    that never change. This maps them to user-facing translated names.
+    Falls back to the stored name if no mapping exists.
+    """
+    key = f"exercise.display.{stored_name}"
+    translated = _catalog.get(key)
+    return translated if translated is not None else stored_name
+
+
 def tr(key: str, **kwargs) -> str:
     """Look up a translation by key, with optional format parameters.
 

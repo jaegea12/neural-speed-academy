@@ -13,7 +13,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
-from neural_speed_academy.i18n import tr
+from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class DashboardScreen(BaseScreen):
@@ -140,8 +140,8 @@ class DashboardScreen(BaseScreen):
         if user.history:
             last = user.history[0]
             last_text = tr("dashboard.last_session_info",
-                exercise=last.exercise, result=last.result,
-                timestamp=last.timestamp)
+                exercise=exercise_display_name(last.exercise),
+                result=last.result, timestamp=last.timestamp)
         last_lbl = QLabel(last_text)
         last_lbl.setFont(make_qfont("btn_sm"))
         last_lbl.setStyleSheet(f"color: {c['muted']};")
@@ -316,7 +316,7 @@ class DashboardScreen(BaseScreen):
             cl.setContentsMargins(10, 6, 10, 6)
             cl.setSpacing(8)
 
-            name_lbl = QLabel(exercise)
+            name_lbl = QLabel(exercise_display_name(exercise))
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)

@@ -19,7 +19,7 @@ from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
-from neural_speed_academy.i18n import tr
+from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class _ConsistencyCalendar(QWidget):
@@ -428,7 +428,7 @@ class StatsScreen(BaseScreen):
             cl.setSpacing(2)
 
             # Exercise name
-            name_lbl = QLabel(exercise)
+            name_lbl = QLabel(exercise_display_name(exercise))
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)
@@ -585,7 +585,7 @@ class StatsScreen(BaseScreen):
                         tag.setFont(make_qfont("btn_sm"))
                         tag.setStyleSheet(f"color: {c['muted']};")
                         cell_l.addWidget(tag)
-                        val = QLabel(f"{ex}  ({avgs[ex]:.0f}%)")
+                        val = QLabel(f"{exercise_display_name(ex)}  ({avgs[ex]:.0f}%)")
                         val.setFont(make_qfont("btn_bold"))
                         val.setStyleSheet(f"color: {color};")
                         cell_l.addWidget(val)
@@ -664,7 +664,8 @@ class StatsScreen(BaseScreen):
         for ex_name in exercises:
             if first_key is None:
                 first_key = ex_name
-            btn = QPushButton(ex_name)
+            btn = QPushButton(exercise_display_name(ex_name))
+            btn.setProperty("exercise_key", ex_name)
             btn.setStyleSheet(
                 btn_css(c["card"], c["text_on_card"],
                         padding="4px 10px", font_key="btn_sm")
@@ -689,7 +690,7 @@ class StatsScreen(BaseScreen):
 
         # Update button styles — highlight active
         for btn in self._chart_buttons:
-            if btn.text() == exercise_name:
+            if btn.property("exercise_key") == exercise_name:
                 btn.setStyleSheet(
                     btn_css(c["accent"], c["btn_text"],
                             padding="4px 10px", font_key="btn_sm")
@@ -711,7 +712,7 @@ class StatsScreen(BaseScreen):
         if not data:
             return
 
-        chart = _ProgressChart(exercise_name, data)
+        chart = _ProgressChart(exercise_display_name(exercise_name), data)
         self._chart_container.addWidget(chart)
 
     # ── History table ──
@@ -769,7 +770,7 @@ class StatsScreen(BaseScreen):
 
         for i, entry in enumerate(user.history):
             table.setItem(i, 0, QTableWidgetItem(entry.timestamp))
-            table.setItem(i, 1, QTableWidgetItem(entry.exercise))
+            table.setItem(i, 1, QTableWidgetItem(exercise_display_name(entry.exercise)))
             table.setItem(i, 2, QTableWidgetItem(entry.result))
 
         table.setMinimumHeight(300)
