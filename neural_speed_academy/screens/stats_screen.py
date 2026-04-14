@@ -26,6 +26,8 @@ class _ConsistencyCalendar(QWidget):
     """GitHub-style heatmap showing training activity over the last 12 weeks."""
 
     WEEKS = 12
+    CELL = 14
+    GAP = 3
 
     def __init__(
         self, active_dates: set[str],
@@ -33,7 +35,10 @@ class _ConsistencyCalendar(QWidget):
     ):
         super().__init__(parent)
         self._active = active_dates  # set of "YYYY-MM-DD" strings
-        self.setFixedHeight(160)
+        total_w = self.WEEKS * (self.CELL + self.GAP) + 40
+        total_h = 7 * (self.CELL + self.GAP) + 25
+        self.setFixedHeight(total_h)
+        self.setMinimumWidth(total_w)
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
@@ -43,47 +48,34 @@ class _ConsistencyCalendar(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        w = self.width()
-        label_w = 32   # space for day-of-week labels
-        month_h = 20   # space for month labels at top
-        right_pad = 10
+        cell, gap = self.CELL, self.GAP
+        label_w = 30
+        month_h = 18
 
-        # Compute cell size dynamically to fill available width
-        avail_w = w - label_w - right_pad
-        step = max(4, avail_w // self.WEEKS)
-        gap = max(2, step // 6)
-        cell = step - gap
-
-        # Compute date grid: 12 weeks ending today
         today = datetime.now().date()
         start = today - timedelta(days=today.weekday()) - timedelta(weeks=self.WEEKS - 1)
 
-        # Draw month labels
+        # Month labels
         painter.setPen(QColor(c["muted"]))
-        font = QFont("Segoe UI", 9)
-        painter.setFont(font)
+        painter.setFont(QFont("Segoe UI", 8))
         prev_month = -1
         for week in range(self.WEEKS):
             day = start + timedelta(weeks=week)
             if day.month != prev_month:
-                x = label_w + week * step
-                painter.drawText(x, 14, day.strftime("%b"))
+                x = label_w + week * (cell + gap)
+                painter.drawText(x, 12, day.strftime("%b"))
                 prev_month = day.month
 
-        # Draw day-of-week labels (all 7 days)
-        day_labels = ["M", "T", "W", "T", "F", "S", "S"]
-        small_font = QFont("Segoe UI", 8)
-        painter.setFont(small_font)
-        painter.setPen(QColor(c["muted"]))
-        for dow, label in enumerate(day_labels):
-            y = month_h + dow * step + cell - 1
+        # Day-of-week labels
+        day_labels = {0: "M", 2: "W", 4: "F"}
+        for dow, label in day_labels.items():
+            y = month_h + dow * (cell + gap) + cell - 2
             painter.drawText(2, y, label)
 
-        # Colours
+        # Cell colours
         empty_color = QColor(c["card"])
-        # Subtle border for empty cells to show the grid
         border_color = QColor(c["muted"])
-        border_color.setAlpha(60)
+        border_color.setAlpha(80)
         active_color = QColor(c["accent"])
 
         for week in range(self.WEEKS):
@@ -91,8 +83,8 @@ class _ConsistencyCalendar(QWidget):
                 day = start + timedelta(weeks=week, days=dow)
                 if day > today:
                     continue
-                x = label_w + week * step
-                y = month_h + dow * step
+                x = label_w + week * (cell + gap)
+                y = month_h + dow * (cell + gap)
 
                 day_str = day.strftime("%Y-%m-%d")
                 if day_str in self._active:
@@ -102,7 +94,7 @@ class _ConsistencyCalendar(QWidget):
                     painter.setBrush(empty_color)
                     painter.setPen(QPen(border_color, 1))
 
-                painter.drawRoundedRect(x, y, cell, cell, 3, 3)
+                painter.drawRoundedRect(x, y, cell, cell, 2, 2)
 
         painter.end()
 
