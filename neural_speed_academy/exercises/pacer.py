@@ -118,7 +118,7 @@ class PacerExercise(BaseExercise):
             self._last_chunk = self._chunk_size
             self._last_nlines = self._n_lines
             text = theme_manager.training_text or ""
-            self._run_pacer(text, wpm, mode)
+            self._show_countdown(lambda: self._run_pacer(text, wpm, mode))
             return
 
         self.add_nav_bar(show_stop=False)
@@ -433,7 +433,7 @@ class PacerExercise(BaseExercise):
         self._last_nlines = self._n_lines
         self._last_text_size = self._text_size
         self._last_page_width = self._page_width_key
-        self._run_pacer(text, wpm, mode)
+        self._show_countdown(lambda: self._run_pacer(text, wpm, mode))
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
         words = text.split()

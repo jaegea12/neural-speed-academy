@@ -88,7 +88,7 @@ class SplitAttentionExercise(BaseExercise):
             self._round = 0
             self._center_correct = 0
             self._periph_correct = 0
-            self._build_arena()
+            self._show_countdown(self._build_arena)
             return
 
         self.add_nav_bar()
@@ -269,7 +269,7 @@ class SplitAttentionExercise(BaseExercise):
         self._round = 0
         self._center_correct = 0
         self._periph_correct = 0
-        self._build_arena()
+        self._show_countdown(self._build_arena)
 
     # ── Arena ──
 

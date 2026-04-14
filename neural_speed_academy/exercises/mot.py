@@ -317,7 +317,7 @@ class MotExercise(BaseExercise):
             self._current_round = 0
             self._total_correct = 0
             self._total_possible = 0
-            self._run_round()
+            self._show_countdown(self._run_round)
             return
 
         self.add_nav_bar(show_stop=False)
@@ -525,7 +525,7 @@ class MotExercise(BaseExercise):
         self._current_round = 0
         self._total_correct = 0
         self._total_possible = 0
-        self._run_round()
+        self._show_countdown(self._run_round)
 
     # ── Round loop ──
 

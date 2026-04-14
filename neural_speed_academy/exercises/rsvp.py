@@ -42,7 +42,7 @@ class RsvpExercise(BaseExercise):
             wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
             text = theme_manager.training_text or ""
             self._last_wpm = wpm
-            self._run_rsvp(text, wpm)
+            self._show_countdown(lambda: self._run_rsvp(text, wpm))
             return
 
         self.add_nav_bar(show_stop=False)
@@ -147,7 +147,7 @@ class RsvpExercise(BaseExercise):
         theme_manager.save()
         wpm = self._wpm_slider.value()
         self._last_wpm = wpm
-        self._run_rsvp(text, wpm)
+        self._show_countdown(lambda: self._run_rsvp(text, wpm))
 
     def _run_rsvp(self, text: str, wpm: int) -> None:
         self.words = text.split()

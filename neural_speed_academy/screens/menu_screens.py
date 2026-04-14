@@ -200,12 +200,23 @@ class BaseMenuScreen(BaseScreen):
     def _tp_select_preset(self, idx: int) -> None:
         self._tp_selected_preset = idx
         c = COLORS
+        total = len(self._tp_preset_buttons)
         # Update left panel buttons
         for i, btn in enumerate(self._tp_preset_buttons):
+            color_key = self._difficulty_color(i, total)
+            base_color = c[color_key]
             if i == idx:
-                btn.setStyleSheet(self._tp_toggle_on())
+                # Selected: lighter shade of own difficulty color + contrasting border
+                from neural_speed_academy.theme import _color_shift
+                light = _color_shift(base_color, 45)
+                btn.setStyleSheet(
+                    f"QPushButton {{ background-color: {light}; "
+                    f"color: {c['btn_text']}; "
+                    f"border: 3px solid {c['fg']}; "
+                    f"padding: 6px 14px; border-radius: 4px; "
+                    f"font-weight: bold; }}"
+                )
             else:
-                color_key = self._difficulty_color(i, len(self._tp_preset_buttons))
                 btn.setStyleSheet(
                     btn_css(c[color_key], c["btn_text"], padding="6px 14px")
                 )

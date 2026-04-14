@@ -48,7 +48,9 @@ class ChunkingExercise(BaseExercise):
             text = theme_manager.training_text or ""
             self._last_chunk = chunk_size
             self._last_wpm = wpm
-            self._run_chunking(text, chunk_size, wpm)
+            self._show_countdown(
+                lambda: self._run_chunking(text, chunk_size, wpm)
+            )
             return
 
         self.add_nav_bar(show_stop=False)
@@ -187,7 +189,9 @@ class ChunkingExercise(BaseExercise):
         theme_manager.save()
         self._last_chunk = self._chunk_slider.value()
         self._last_wpm = self._wpm_slider.value()
-        self._run_chunking(text, self._last_chunk, self._last_wpm)
+        self._show_countdown(
+            lambda: self._run_chunking(text, self._last_chunk, self._last_wpm)
+        )
 
     def _build_chunks(self, text: str, size: int) -> list:
         words = text.split()

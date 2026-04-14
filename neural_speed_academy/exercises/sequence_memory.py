@@ -64,7 +64,7 @@ class SequenceMemoryExercise(BaseExercise):
         self.max_rounds = rounds
         self.correct_count = 0
         self._flash_ms = flash_ms
-        self._next_round()
+        self._show_countdown(self._next_round)
 
     # ── Round flow ──
 

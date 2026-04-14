@@ -521,5 +521,6 @@
   "result.mode.ascending": "Ascendente (1→2→3…)",
   "result.mode.go_nogo": "Ir/Não-Ir",
   "result.mode.choice": "Escolha (4 cores)",
-  "result.mode.simple": "Simples"
+  "result.mode.simple": "Simples",
+  "exercise.get_ready": "Prepare-se"
 }

@@ -74,7 +74,7 @@ class PeripheralFlashExercise(BaseExercise):
 
         # Skip config screen when launched from preset menu
         if kwargs:
-            self._run_exercise()
+            self._show_countdown(self._run_exercise)
             return
 
         self.add_nav_bar(show_stop=False)
@@ -258,7 +258,7 @@ class PeripheralFlashExercise(BaseExercise):
         self._flash_ms = self._flash_slider.value()
         self._eccentricity = self._ecc_slider.value()
         self._total_rounds = self._rounds_slider.value()
-        self._run_exercise()
+        self._show_countdown(self._run_exercise)
 
     # ── Exercise loop ──
 

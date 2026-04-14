@@ -82,7 +82,7 @@ class ReactionTimeExercise(BaseExercise):
             self._false_alarms = 0
             self._misses = 0
             self._too_early_count = 0
-            self._build_arena()
+            self._show_countdown(self._build_arena)
             return
 
         self.add_nav_bar()
@@ -208,7 +208,7 @@ class ReactionTimeExercise(BaseExercise):
         self._false_alarms = 0
         self._misses = 0
         self._too_early_count = 0
-        self._build_arena()
+        self._show_countdown(self._build_arena)
 
     # ── Arena ──
 

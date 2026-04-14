@@ -81,7 +81,7 @@ class RapidDecisionGridExercise(BaseExercise):
 
         # Skip config screen when launched from preset menu
         if kwargs:
-            self._run_grid()
+            self._show_countdown(self._run_grid)
             return
 
         self.add_nav_bar(show_stop=False)
@@ -285,7 +285,7 @@ class RapidDecisionGridExercise(BaseExercise):
         self._mode = self._mode_combo.currentData()
         self._grid_size = self._size_slider.value()
         self._time_limit = self._time_combo.currentData()
-        self._run_grid()
+        self._show_countdown(self._run_grid)
 
     # ── Grid screen ──
 
