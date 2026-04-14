@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
     QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QMessageBox,
-    QSizePolicy, QGridLayout, QProgressBar,
+    QSizePolicy, QGridLayout, QProgressBar, QScrollArea,
 )
 from PyQt6.QtCore import Qt, QRectF, QPointF
 from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath
@@ -23,43 +23,62 @@ from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class _ConsistencyCalendar(QWidget):
-    """GitHub-style heatmap showing training activity over the last 52 weeks."""
+    """GitHub-style heatmap that grows with the user's training history.
 
-    WEEKS = 52
+    Shows from the user's first training date (or current month if new)
+    up to today.  Horizontally scrollable when the history exceeds the
+    visible width.
+    """
+
     CELL = 12
     GAP = 2
-    MONTH_GAP = 6  # extra horizontal space between months
+    MONTH_GAP = 8  # extra horizontal space between months
 
     def __init__(
         self, active_dates: set[str],
+        first_date: str | None = None,
         parent: QWidget | None = None,
     ):
         super().__init__(parent)
         self._active = active_dates  # set of "YYYY-MM-DD" strings
-        total_h = 7 * (self.CELL + self.GAP) + 25
-        self.setFixedHeight(total_h)
-        self.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
-        )
 
-    def _week_x_positions(self, label_w: int) -> list[int]:
-        """Compute x position for each week, inserting gaps at month boundaries."""
-        cell, gap = self.CELL, self.GAP
         today = datetime.now().date()
-        start = today - timedelta(days=today.weekday()) - timedelta(weeks=self.WEEKS - 1)
 
-        positions = []
-        x = label_w
-        for week in range(self.WEEKS):
-            # Insert extra gap when a new month starts
+        # Determine start: first day of the month of the earliest session,
+        # or first day of the current month for new users.
+        if first_date:
+            try:
+                earliest = datetime.strptime(first_date, "%Y-%m-%d").date()
+            except ValueError:
+                earliest = today
+        else:
+            earliest = today
+        self._start = earliest.replace(day=1)
+        # Align to Monday of that week
+        self._start -= timedelta(days=self._start.weekday())
+
+        self._today = today
+        self._num_weeks = ((today - self._start).days // 7) + 1
+
+        # Compute total width
+        self._week_xs: list[int] = []
+        self._compute_positions()
+
+        total_w = (self._week_xs[-1] if self._week_xs else 0) + self.CELL + 10
+        total_h = 7 * (self.CELL + self.GAP) + 24
+        self.setFixedSize(max(total_w, 200), total_h)
+
+    def _compute_positions(self) -> None:
+        cell, gap = self.CELL, self.GAP
+        x = 0
+        for week in range(self._num_weeks):
             if week > 0:
-                prev_day = start + timedelta(weeks=week - 1)
-                curr_day = start + timedelta(weeks=week)
+                prev_day = self._start + timedelta(weeks=week - 1)
+                curr_day = self._start + timedelta(weeks=week)
                 if curr_day.month != prev_day.month:
                     x += self.MONTH_GAP
-            positions.append(x)
+            self._week_xs.append(x)
             x += cell + gap
-        return positions
 
     def paintEvent(self, event) -> None:
         c = COLORS
@@ -67,29 +86,21 @@ class _ConsistencyCalendar(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         cell, gap = self.CELL, self.GAP
-        label_w = 24
-        month_h = 18
-
-        today = datetime.now().date()
-        start = today - timedelta(days=today.weekday()) - timedelta(weeks=self.WEEKS - 1)
-
-        week_x = self._week_x_positions(label_w)
+        month_h = 16
 
         # Month labels
         painter.setPen(QColor(c["muted"]))
         painter.setFont(QFont("Segoe UI", 7))
         prev_month = -1
-        for week in range(self.WEEKS):
-            day = start + timedelta(weeks=week)
+        for week in range(self._num_weeks):
+            day = self._start + timedelta(weeks=week)
             if day.month != prev_month:
-                painter.drawText(week_x[week], 11, day.strftime("%b"))
+                label = day.strftime("%b")
+                # Show year on January or on the very first label
+                if day.month == 1 or week == 0:
+                    label = day.strftime("%b '%y")
+                painter.drawText(self._week_xs[week], 11, label)
                 prev_month = day.month
-
-        # Day-of-week labels
-        day_labels = {0: "M", 2: "W", 4: "F"}
-        for dow, label in day_labels.items():
-            y = month_h + dow * (cell + gap) + cell - 2
-            painter.drawText(1, y, label)
 
         # Cell colours
         bg_color = QColor(c["bg"])
@@ -97,12 +108,12 @@ class _ConsistencyCalendar(QWidget):
         border_color.setAlpha(50)
         active_color = QColor(c["accent"])
 
-        for week in range(self.WEEKS):
+        for week in range(self._num_weeks):
             for dow in range(7):
-                day = start + timedelta(weeks=week, days=dow)
-                if day > today:
+                day = self._start + timedelta(weeks=week, days=dow)
+                if day > self._today:
                     continue
-                x = week_x[week]
+                x = self._week_xs[week]
                 y = month_h + dow * (cell + gap)
 
                 day_str = day.strftime("%Y-%m-%d")
@@ -341,11 +352,13 @@ class StatsScreen(BaseScreen):
 
         # Extract unique training dates from history
         active_dates: set[str] = set()
+        first_date: str | None = None
         for entry in user.history:
-            # Timestamps are "YYYY-MM-DD HH:MM"
             date_part = entry.timestamp[:10]
             if len(date_part) == 10:
                 active_dates.add(date_part)
+                if first_date is None or date_part < first_date:
+                    first_date = date_part
 
         card = QFrame()
         card.setStyleSheet(
@@ -355,22 +368,66 @@ class StatsScreen(BaseScreen):
         cl = QVBoxLayout(card)
 
         # Summary line
-        today = datetime.now().date()
-        start = today - timedelta(weeks=52)
-        recent_count = sum(
-            1 for d in active_dates
-            if d >= start.strftime("%Y-%m-%d")
-        )
-        total_days = (today - start).days + 1
-        pct = round(recent_count / total_days * 100) if total_days else 0
-        summary = QLabel(tr("stats.active_days_year", count=recent_count, pct=pct))
+        total_count = len(active_dates)
+        summary = QLabel(tr("stats.active_days_total", count=total_count))
         summary.setFont(make_qfont("body"))
         summary.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(summary)
         cl.addSpacing(4)
 
-        calendar = _ConsistencyCalendar(active_dates)
-        cl.addWidget(calendar)
+        # Day-of-week labels (fixed) + scrollable calendar
+        row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(0)
+
+        # Fixed day labels column
+        cell, gap = _ConsistencyCalendar.CELL, _ConsistencyCalendar.GAP
+        day_col = QWidget()
+        day_col.setFixedWidth(22)
+        day_col.setFixedHeight(7 * (cell + gap) + 16)
+        day_col.setStyleSheet(f"background-color: {c['card']};")
+        day_labels_layout = QVBoxLayout(day_col)
+        day_labels_layout.setContentsMargins(0, 16, 2, 0)
+        day_labels_layout.setSpacing(0)
+        for label in ["M", "T", "W", "T", "F", "S", "S"]:
+            lbl = QLabel(label)
+            lbl.setFont(QFont("Segoe UI", 7))
+            lbl.setStyleSheet(f"color: {c['muted']};")
+            lbl.setFixedHeight(cell + gap)
+            lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
+            day_labels_layout.addWidget(lbl)
+        day_labels_layout.addStretch()
+        row.addWidget(day_col)
+
+        # Scrollable calendar
+        calendar = _ConsistencyCalendar(active_dates, first_date)
+        scroll = QScrollArea()
+        scroll.setWidget(calendar)
+        scroll.setWidgetResizable(False)
+        scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        scroll.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        scroll.setFixedHeight(calendar.height() + 14)
+        scroll.setStyleSheet(
+            f"QScrollArea {{ background-color: {c['card']}; border: none; }}"
+            f"QScrollBar:horizontal {{ height: 8px; "
+            f"background: {c['card']}; border-radius: 4px; }}"
+            f"QScrollBar::handle:horizontal {{ background: {c['muted']}; "
+            f"border-radius: 4px; min-width: 30px; }}"
+            f"QScrollBar::add-line:horizontal, "
+            f"QScrollBar::sub-line:horizontal {{ width: 0; }}"
+        )
+        # Scroll to the right (most recent) after layout is computed
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(0, lambda: scroll.horizontalScrollBar().setValue(
+            scroll.horizontalScrollBar().maximum()
+        ))
+        row.addWidget(scroll, 1)
+
+        cl.addLayout(row)
 
         layout.addWidget(card)
         layout.addSpacing(15)

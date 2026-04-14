@@ -523,5 +523,6 @@
   "result.mode.choice": "Scelta (4 colori)",
   "result.mode.simple": "Semplice",
   "exercise.get_ready": "Preparati",
-  "stats.active_days_year": "{count} giorni attivi nell’ultimo anno ({pct}%)"
+  "stats.active_days_year": "{count} giorni attivi nell’ultimo anno ({pct}%)",
+  "stats.active_days_total": "{count} giorni attivi in totale"
 }
