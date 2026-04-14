@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import random
+from neural_speed_academy.i18n import tr
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ class SplitAttentionExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -106,7 +107,7 @@ class SplitAttentionExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("SPLIT ATTENTION")
+        title = QLabel(tr("split.attention.split_attention"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -124,7 +125,7 @@ class SplitAttentionExercise(BaseExercise):
         # Mode selector
         mode_row = QHBoxLayout()
         mode_row.addStretch()
-        mode_lbl = QLabel("Mode:")
+        mode_lbl = QLabel(tr("pacer.mode"))
         mode_lbl.setFont(make_qfont("slider_label"))
         mode_lbl.setStyleSheet(f"color: {c['fg']};")
         mode_row.addWidget(mode_lbl)
@@ -151,7 +152,7 @@ class SplitAttentionExercise(BaseExercise):
         # Center flash duration
         center_row = QHBoxLayout()
         center_row.addStretch()
-        center_lbl = QLabel("Word flash (ms):")
+        center_lbl = QLabel(tr("split.attention.word_flash_ms"))
         center_lbl.setFont(make_qfont("slider_label"))
         center_lbl.setStyleSheet(f"color: {c['fg']};")
         center_row.addWidget(center_lbl)
@@ -179,7 +180,7 @@ class SplitAttentionExercise(BaseExercise):
         # Peripheral flash duration
         periph_row = QHBoxLayout()
         periph_row.addStretch()
-        periph_lbl = QLabel("Shape flash (ms):")
+        periph_lbl = QLabel(tr("split.attention.shape_flash_ms"))
         periph_lbl.setFont(make_qfont("slider_label"))
         periph_lbl.setStyleSheet(f"color: {c['fg']};")
         periph_row.addWidget(periph_lbl)
@@ -207,7 +208,7 @@ class SplitAttentionExercise(BaseExercise):
         # Rounds
         rounds_row = QHBoxLayout()
         rounds_row.addStretch()
-        rounds_lbl = QLabel("Rounds:")
+        rounds_lbl = QLabel(tr("mot.rounds"))
         rounds_lbl.setFont(make_qfont("slider_label"))
         rounds_lbl.setStyleSheet(f"color: {c['fg']};")
         rounds_row.addWidget(rounds_lbl)
@@ -235,7 +236,7 @@ class SplitAttentionExercise(BaseExercise):
         cl.addSpacing(20)
 
         # Start button
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; "
@@ -274,23 +275,23 @@ class SplitAttentionExercise(BaseExercise):
         top = QHBoxLayout()
         top.setContentsMargins(10, 6, 10, 2)
 
-        self._progress_lbl = QLabel(f"Round 0/{self._total_rounds}")
+        self._progress_lbl = QLabel(tr("exercise.round_progress", current=0, total=self._total_rounds))
         self._progress_lbl.setFont(make_qfont("counter"))
         self._progress_lbl.setStyleSheet(f"color: {c['accent']};")
         top.addWidget(self._progress_lbl)
 
         top.addStretch()
 
-        self._score_lbl = QLabel("Center: 0  |  Peripheral: 0")
+        self._score_lbl = QLabel(tr("split.attention.center_0_peripheral_0"))
         self._score_lbl.setFont(make_qfont("counter"))
         self._score_lbl.setStyleSheet(f"color: {c['fg']};")
         top.addWidget(self._score_lbl)
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -530,7 +531,7 @@ class SplitAttentionExercise(BaseExercise):
         self._answer_container.show()
         self._clear_answer_area()
 
-        prompt = QLabel("Which word was shown?")
+        prompt = QLabel(tr("split.attention.which_word_was_shown"))
         prompt.setFont(make_qfont("body"))
         prompt.setStyleSheet(f"color: {c['fg']};")
         prompt.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -587,7 +588,7 @@ class SplitAttentionExercise(BaseExercise):
         cfg = SPLIT_ATTENTION_CONFIG
         self._clear_answer_area()
 
-        prompt = QLabel("Which shape appeared at the edge?")
+        prompt = QLabel(tr("split.attention.which_shape_appeared_at_the_ed"))
         prompt.setFont(make_qfont("body"))
         prompt.setStyleSheet(f"color: {c['fg']};")
         prompt.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -717,12 +718,12 @@ class SplitAttentionExercise(BaseExercise):
             result,
             is_personal_best=is_pb,
             details=(
-                f"Mode: {self._mode}  |  "
-                f"Word flash: {self._center_ms}ms  |  "
-                f"Shape flash: {self._peripheral_ms}ms\n"
-                f"Word accuracy: {center_pct}%  |  "
-                f"Shape accuracy: {periph_pct}%\n"
-                f"Combined: {combined_pct}%"
+                f"{tr('result.mode', mode=self._mode)}  |  "
+                f"{tr('result.word_flash', ms=self._center_ms)}  |  "
+                f"{tr('result.shape_flash', ms=self._peripheral_ms)}\n"
+                f"{tr('result.word_accuracy', pct=center_pct)}  |  "
+                f"{tr('result.shape_accuracy', pct=periph_pct)}\n"
+                f"{tr('result.combined', pct=combined_pct)}"
             ),
         )
 

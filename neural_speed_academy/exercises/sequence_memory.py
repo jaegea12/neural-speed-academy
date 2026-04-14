@@ -21,6 +21,7 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import USER_DATA_CONFIG
+from neural_speed_academy.i18n import tr
 
 # Word pool for word/mixed modes — short, common, easy to distinguish
 WORD_POOL = [
@@ -103,9 +104,9 @@ class SequenceMemoryExercise(BaseExercise):
         self.setStyleSheet(f"background-color: {c['bg']};")
 
         # Exit button
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -128,7 +129,7 @@ class SequenceMemoryExercise(BaseExercise):
         self._layout.addStretch()
 
         # Instruction
-        inst = QLabel("MEMORIZE")
+        inst = QLabel(tr("sequence.memory.memorize"))
         inst.setFont(make_qfont("section_header"))
         inst.setStyleSheet(f"color: {c['accent']};")
         inst.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -200,9 +201,9 @@ class SequenceMemoryExercise(BaseExercise):
         self.setStyleSheet(f"background-color: {c['bg']};")
 
         # Exit button
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -213,7 +214,7 @@ class SequenceMemoryExercise(BaseExercise):
         self._layout.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignRight)
 
         # Instruction
-        inst = QLabel("RECALL THE SEQUENCE")
+        inst = QLabel(tr("sequence.memory.recall_the_sequence"))
         inst.setFont(make_qfont("section_header"))
         inst.setStyleSheet(f"color: {c['accent']};")
         inst.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -250,7 +251,7 @@ class SequenceMemoryExercise(BaseExercise):
         self._layout.addSpacing(10)
 
         # Undo button
-        undo_btn = QPushButton("UNDO")
+        undo_btn = QPushButton(tr("sequence.memory.undo"))
         undo_btn.setFont(make_qfont("btn_sm"))
         undo_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
@@ -369,23 +370,23 @@ class SequenceMemoryExercise(BaseExercise):
         self._layout.addStretch()
 
         if correct:
-            icon = QLabel("\u2714")
+            icon = QLabel(tr("sequence.memory.u2714"))
             icon.setFont(make_qfont("flash"))
             icon.setStyleSheet(f"color: {c['success']};")
             icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self._layout.addWidget(icon)
 
-            msg = QLabel("CORRECT")
+            msg = QLabel(tr("sequence.memory.correct"))
             msg.setFont(make_qfont("header"))
             msg.setStyleSheet(f"color: {c['success']};")
         else:
-            icon = QLabel("\u2718")
+            icon = QLabel(tr("sequence.memory.u2718"))
             icon.setFont(make_qfont("flash"))
             icon.setStyleSheet(f"color: {c['alert']};")
             icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self._layout.addWidget(icon)
 
-            msg = QLabel("INCORRECT")
+            msg = QLabel(tr("sequence.memory.incorrect"))
             msg.setFont(make_qfont("header"))
             msg.setStyleSheet(f"color: {c['alert']};")
 
@@ -394,7 +395,7 @@ class SequenceMemoryExercise(BaseExercise):
 
         # Show the correct sequence
         seq_text = "  ".join(self._sequence)
-        answer = QLabel(f"Sequence: {seq_text}")
+        answer = QLabel(tr("sequence.sequence_display", seq=seq_text))
         answer.setFont(make_qfont("body"))
         answer.setStyleSheet(f"color: {c['fg']};")
         answer.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -410,7 +411,7 @@ class SequenceMemoryExercise(BaseExercise):
 
         self._layout.addSpacing(20)
 
-        cont_btn = QPushButton("CONTINUE")
+        cont_btn = QPushButton(tr("base.continue"))
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -443,7 +444,7 @@ class SequenceMemoryExercise(BaseExercise):
         is_pb = self.complete(result)
         self.show_result_screen(
             result, is_personal_best=is_pb,
-            details=f"Max sequence length: {self.max_reached}",
+            details=tr("result.max_sequence", length=self.max_reached),
         )
 
     def _stop(self) -> None:

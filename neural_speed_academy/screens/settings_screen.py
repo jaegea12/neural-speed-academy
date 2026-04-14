@@ -16,6 +16,7 @@ from neural_speed_academy.theme import (
     COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, btn_css,
     theme_manager,
 )
+from neural_speed_academy.i18n import tr
 
 
 def _radio_style(c: dict) -> str:
@@ -52,7 +53,7 @@ class SettingsScreen(BaseScreen):
         cl.setContentsMargins(50, 20, 50, 20)
         cl.setSpacing(6)
 
-        title = QLabel("SETTINGS")
+        title = QLabel(tr("settings.settings"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['fg']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -87,14 +88,14 @@ class SettingsScreen(BaseScreen):
 
         profile_section = QVBoxLayout()
         profile_section.setSpacing(4)
-        sec1 = QLabel("COLOR PROFILE")
+        sec1 = QLabel(tr("settings.color_profile"))
         sec1.setFont(make_qfont("section_header"))
         sec1.setStyleSheet(f"color: {c['accent']};")
         profile_section.addWidget(sec1)
 
         theme_cols = QHBoxLayout()
         theme_cols.setSpacing(30)
-        for col_label, profiles in [("Dark", dark_profiles), ("Light", light_profiles)]:
+        for col_label, profiles in [(tr("settings.dark"), dark_profiles), (tr("settings.light"), light_profiles)]:
             col = QVBoxLayout()
             col.setSpacing(3)
             header = QLabel(col_label)
@@ -119,11 +120,11 @@ class SettingsScreen(BaseScreen):
         # -- FIELD OF VIEW section --
         fov_section = QVBoxLayout()
         fov_section.setSpacing(4)
-        sec2 = QLabel("FIELD OF VIEW")
+        sec2 = QLabel(tr("settings.field_of_view"))
         sec2.setFont(make_qfont("section_header"))
         sec2.setStyleSheet(f"color: {c['accent']};")
         fov_section.addWidget(sec2)
-        fov_desc = QLabel("Pacer page width & font")
+        fov_desc = QLabel(tr("settings.pacer_page_width_font"))
         fov_desc.setFont(make_qfont("btn_sm"))
         fov_desc.setStyleSheet(f"color: {c['muted']};")
         fov_section.addWidget(fov_desc)
@@ -145,17 +146,17 @@ class SettingsScreen(BaseScreen):
         # -- DISPLAY MODE section --
         disp_section = QVBoxLayout()
         disp_section.setSpacing(4)
-        sec_disp = QLabel("DISPLAY MODE")
+        sec_disp = QLabel(tr("settings.display_mode"))
         sec_disp.setFont(make_qfont("section_header"))
         sec_disp.setStyleSheet(f"color: {c['accent']};")
         disp_section.addWidget(sec_disp)
-        disp_desc = QLabel("F11 to toggle")
+        disp_desc = QLabel(tr("settings.f11_to_toggle"))
         disp_desc.setFont(make_qfont("btn_sm"))
         disp_desc.setStyleSheet(f"color: {c['muted']};")
         disp_section.addWidget(disp_desc)
 
         self._disp_group = QButtonGroup(self)
-        for key, label in [("fullscreen", "Fullscreen"), ("windowed", "Windowed")]:
+        for key, label in [("fullscreen", tr("settings.fullscreen")), ("windowed", tr("settings.windowed"))]:
             rb = QRadioButton(label)
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
@@ -170,6 +171,7 @@ class SettingsScreen(BaseScreen):
         self._disp_group.buttonClicked.connect(self._on_display_changed)
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
+
         top_row.addStretch(1)
 
         cl.addLayout(top_row)
@@ -182,7 +184,7 @@ class SettingsScreen(BaseScreen):
 
         scale_section = QVBoxLayout()
         scale_section.setSpacing(4)
-        sec_font = QLabel("FONT SIZE")
+        sec_font = QLabel(tr("settings.font_size"))
         sec_font.setFont(make_qfont("section_header"))
         sec_font.setStyleSheet(f"color: {c['accent']};")
         scale_section.addWidget(sec_font)
@@ -248,13 +250,13 @@ class SettingsScreen(BaseScreen):
         text_section = QVBoxLayout()
         text_section.setSpacing(6)
 
-        sec3 = QLabel("TRAINING TEXT")
+        sec3 = QLabel(tr("settings.training_text"))
         sec3.setFont(make_qfont("section_header"))
         sec3.setStyleSheet(f"color: {c['accent']};")
         sec3.setAlignment(Qt.AlignmentFlag.AlignCenter)
         text_section.addWidget(sec3)
 
-        text_desc = QLabel("Used as the default text for Pacer, RSVP, and Chunking exercises")
+        text_desc = QLabel(tr("settings.used_as_the_default_text_for_p"))
         text_desc.setFont(make_qfont("body"))
         text_desc.setStyleSheet(f"color: {c['muted']};")
         text_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -276,13 +278,13 @@ class SettingsScreen(BaseScreen):
         btn_row = QHBoxLayout()
         btn_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        save_btn = QPushButton("SAVE")
+        save_btn = QPushButton(tr("settings.save"))
         save_btn.setStyleSheet(btn_css(c["accent"], c["btn_text"], padding="8px 30px"))
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self._save)
         btn_row.addWidget(save_btn)
 
-        reset_btn = QPushButton("DEFAULT SETTINGS")
+        reset_btn = QPushButton(tr("settings.default_settings"))
         reset_btn.setStyleSheet(btn_css(c["card"], c["fg"], padding="8px 30px"))
         reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         reset_btn.clicked.connect(self._reset_defaults)
@@ -293,19 +295,19 @@ class SettingsScreen(BaseScreen):
         cl.addSpacing(20)
 
         # --- Keyboard Shortcuts Reference ---
-        sec_keys = QLabel("KEYBOARD SHORTCUTS")
+        sec_keys = QLabel(tr("settings.keyboard_shortcuts"))
         sec_keys.setFont(make_qfont("section_header"))
         sec_keys.setStyleSheet(f"color: {c['accent']};")
         sec_keys.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(sec_keys)
 
         shortcuts = [
-            ("Esc", "Go back / Main menu / Quit"),
-            ("Enter", "Continue (training path, results)"),
-            ("Space", "Pause / Resume exercise"),
-            ("Ctrl+Enter", "Start exercise from config screen"),
-            ("Ctrl+Q", "Quit application"),
-            ("F11", "Toggle fullscreen"),
+            ("Esc", tr("settings.shortcut.esc")),
+            ("Enter", tr("settings.shortcut.enter")),
+            ("Space", tr("settings.shortcut.space")),
+            ("Ctrl+Enter", tr("settings.shortcut.ctrl_enter")),
+            ("Ctrl+Q", tr("settings.shortcut.ctrl_q")),
+            ("F11", tr("settings.shortcut.f11")),
         ]
         keys_wrapper = QHBoxLayout()
         keys_wrapper.addStretch(1)
@@ -357,8 +359,8 @@ class SettingsScreen(BaseScreen):
 
         c = COLORS
         msg = QMessageBox(self)
-        msg.setWindowTitle("Unsaved Changes")
-        msg.setText("You have unsaved changes. Do you want to save before leaving?")
+        msg.setWindowTitle(tr("settings.unsaved_changes"))
+        msg.setText(tr("settings.you_have_unsaved_changes_do_yo"))
         msg.setStyleSheet(
             f"QMessageBox {{ background-color: {c['card']}; color: {c['fg']}; }}"
             f"QLabel {{ color: {c['fg']}; }}"
@@ -366,9 +368,9 @@ class SettingsScreen(BaseScreen):
             f"border: 2px solid transparent; padding: 6px 20px; border-radius: 4px; min-width: 80px; }}"
             f"QPushButton:focus {{ border: 2px solid {c['fg']}; }}"
         )
-        save_btn = msg.addButton("Save", QMessageBox.ButtonRole.AcceptRole)
-        discard_btn = msg.addButton("Discard", QMessageBox.ButtonRole.DestructiveRole)
-        msg.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+        save_btn = msg.addButton(tr("settings.save"), QMessageBox.ButtonRole.AcceptRole)
+        discard_btn = msg.addButton(tr("settings.discard"), QMessageBox.ButtonRole.DestructiveRole)
+        msg.addButton(tr("settings.cancel"), QMessageBox.ButtonRole.RejectRole)
         msg.exec()
 
         clicked = msg.clickedButton()

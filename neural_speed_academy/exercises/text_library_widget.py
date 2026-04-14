@@ -15,7 +15,21 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.theme import (
     COLORS, make_qfont, input_css, theme_manager, screen_metrics,
 )
-from neural_speed_academy.config import TEXT_LIBRARY
+from neural_speed_academy.config import (
+    TEXT_LIBRARY, TEXT_LIBRARY_DE, TEXT_LIBRARY_FR,
+    TEXT_LIBRARY_ES, TEXT_LIBRARY_IT, TEXT_LIBRARY_PT,
+)
+from neural_speed_academy.i18n import tr, current_locale
+
+# All text libraries keyed by locale code
+_TEXT_LIBRARIES = {
+    "en": (TEXT_LIBRARY, "English"),
+    "de": (TEXT_LIBRARY_DE, "Deutsch"),
+    "fr": (TEXT_LIBRARY_FR, "Français"),
+    "es": (TEXT_LIBRARY_ES, "Español"),
+    "it": (TEXT_LIBRARY_IT, "Italiano"),
+    "pt": (TEXT_LIBRARY_PT, "Português"),
+}
 
 # Prefix for custom text entries in the dropdown
 _CUSTOM_PREFIX = "\u2605 "
@@ -55,7 +69,7 @@ class TextLibraryWidget(QWidget):
         row.setSpacing(8)
         row.addStretch()
 
-        lbl = QLabel("Text Library:")
+        lbl = QLabel(tr("text.library.widget.text_library"))
         lbl.setFont(make_qfont("slider_label"))
         lbl.setStyleSheet(f"color: {c['fg']}; background: transparent;")
         row.addWidget(lbl)
@@ -84,14 +98,14 @@ class TextLibraryWidget(QWidget):
             f"border: 2px solid transparent; padding: 4px 12px; border-radius: 3px;"
         )
 
-        save_btn = QPushButton("SAVE AS\u2026")
+        save_btn = QPushButton(tr("text.library.widget.save_as"))
         save_btn.setFont(make_qfont("btn_sm"))
         save_btn.setStyleSheet(btn_style)
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self._save_custom)
         row.addWidget(save_btn)
 
-        self._del_btn = QPushButton("DELETE")
+        self._del_btn = QPushButton(tr("text.library.widget.delete"))
         self._del_btn.setFont(make_qfont("btn_sm"))
         self._del_btn.setStyleSheet(
             f"background-color: {c['card']}; color: {c['alert']}; "
@@ -147,13 +161,27 @@ class TextLibraryWidget(QWidget):
         self._combo.clear()
         self._combo.addItem("")
 
-        # Built-in texts
-        for name in TEXT_LIBRARY:
-            if self._show_difficulty:
-                difficulty = TEXT_LIBRARY[name][0]
-                self._combo.addItem(f"{name}  [{difficulty}]")
-            else:
-                self._combo.addItem(name)
+        # Show active locale's texts first, then others
+        locale = current_locale()
+        ordered = []
+        if locale in _TEXT_LIBRARIES:
+            ordered.append((locale, *_TEXT_LIBRARIES[locale]))
+        for code, (lib, label) in _TEXT_LIBRARIES.items():
+            if code != locale:
+                ordered.append((code, lib, label))
+
+        for i, (code, lib, label) in enumerate(ordered):
+            if i > 0:
+                self._combo.insertSeparator(self._combo.count())
+            header = f"── {label} ──"
+            self._combo.addItem(header)
+            self._combo.model().item(self._combo.count() - 1).setEnabled(False)
+            for name in lib:
+                if self._show_difficulty:
+                    difficulty = lib[name][0]
+                    self._combo.addItem(f"{name}  [{difficulty}]")
+                else:
+                    self._combo.addItem(name)
 
         # Custom texts
         custom = theme_manager.custom_texts
@@ -170,6 +198,10 @@ class TextLibraryWidget(QWidget):
             self._diff_label.setVisible(False)
             return
 
+        # Skip separator labels
+        if display_name.startswith("──"):
+            return
+
         # Custom text
         if display_name.startswith(_CUSTOM_PREFIX):
             real_name = display_name[len(_CUSTOM_PREFIX):]
@@ -182,13 +214,17 @@ class TextLibraryWidget(QWidget):
 
         # Built-in text (strip difficulty suffix if present)
         lib_name = display_name.split("  [")[0]
-        entry = TEXT_LIBRARY.get(lib_name)
+        entry = None
+        for _code, (lib, _label) in _TEXT_LIBRARIES.items():
+            entry = lib.get(lib_name)
+            if entry:
+                break
         self._del_btn.setVisible(False)
         if entry:
             difficulty, text = entry
             self._editor.setPlainText(text)
             if self._show_difficulty:
-                self._diff_label.setText(f"Difficulty: {difficulty}")
+                self._diff_label.setText(tr("text.library.widget.difficulty", level=difficulty))
                 self._diff_label.setVisible(True)
             else:
                 self._diff_label.setVisible(False)
@@ -198,7 +234,7 @@ class TextLibraryWidget(QWidget):
     def _save_custom(self) -> None:
         text = self._editor.toPlainText().strip()
         if not text:
-            QMessageBox.information(self, "Empty", "Enter some text first.")
+            QMessageBox.information(self, tr("text.library.widget.empty"), tr("text.library.widget.enter_some_text_first"))
             return
 
         # Pre-fill with current custom name if one is selected
@@ -208,17 +244,18 @@ class TextLibraryWidget(QWidget):
             prefill = current[len(_CUSTOM_PREFIX):]
 
         name, ok = QInputDialog.getText(
-            self, "Save Custom Text", "Name:", text=prefill,
+            self, tr("text.library.widget.save_custom_text"),
+            tr("text.library.widget.name_label"), text=prefill,
         )
         if not ok or not name.strip():
             return
 
         name = name.strip()
         # Prevent overwriting built-in texts
-        if name in TEXT_LIBRARY:
+        if any(name in lib for _code, (lib, _label) in _TEXT_LIBRARIES.items()):
             QMessageBox.warning(
-                self, "Reserved Name",
-                f'"{name}" is a built-in text. Choose a different name.',
+                self, tr("text.library.widget.reserved_name"),
+                tr("text.library.widget.reserved_name_msg", name=name),
             )
             return
 
@@ -237,8 +274,8 @@ class TextLibraryWidget(QWidget):
         real_name = current[len(_CUSTOM_PREFIX):]
 
         reply = QMessageBox.question(
-            self, "Delete Custom Text",
-            f'Delete "{real_name}"?',
+            self, tr("text.library.widget.delete_custom_text"),
+            tr("text.library.widget.delete_confirm", name=real_name),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:

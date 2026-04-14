@@ -19,6 +19,7 @@ from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
+from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class _ConsistencyCalendar(QWidget):
@@ -235,7 +236,7 @@ class StatsScreen(BaseScreen):
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(60, 20, 60, 30)
 
-        title = QLabel("PERFORMANCE ANALYTICS")
+        title = QLabel(tr("stats.performance_analytics"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -265,10 +266,10 @@ class StatsScreen(BaseScreen):
         stats_row = QHBoxLayout()
         level = user.xp // 1000 + 1
         stats = [
-            ("TOTAL XP", str(user.xp), c["accent"]),
-            ("LEVEL", str(level), c["action"]),
-            ("STREAK", f"{user.streak} day{'s' if user.streak != 1 else ''}", c["highlight"]),
-            ("SESSIONS", str(len(user.history)), c["text_on_card"]),
+            (tr("stats.total_xp"), str(user.xp), c["accent"]),
+            (tr("stats.level"), str(level), c["action"]),
+            (tr("stats.streak"), tr("stats.streak_days", count=user.streak), c["highlight"]),
+            (tr("stats.sessions"), str(len(user.history)), c["text_on_card"]),
         ]
         for label, value, color in stats:
             cell = QVBoxLayout()
@@ -303,7 +304,7 @@ class StatsScreen(BaseScreen):
         )
         bar_row.addWidget(progress)
 
-        xp_label = QLabel(f"{xp_in_level}/1000 XP to Level {level + 1}")
+        xp_label = QLabel(tr("stats.xp_to_next", current=xp_in_level, level=level + 1))
         xp_label.setFont(make_qfont("btn_sm"))
         xp_label.setStyleSheet(f"color: {c['muted']};")
         bar_row.addWidget(xp_label)
@@ -316,7 +317,7 @@ class StatsScreen(BaseScreen):
 
     def _build_consistency(self, layout: QVBoxLayout, user) -> None:
         c = COLORS
-        header = QLabel("TRAINING CONSISTENCY")
+        header = QLabel(tr("stats.training_consistency"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -345,9 +346,7 @@ class StatsScreen(BaseScreen):
         )
         total_days = (today - start).days + 1
         pct = round(recent_count / total_days * 100) if total_days else 0
-        summary = QLabel(
-            f"{recent_count} active days in the last 12 weeks ({pct}%)"
-        )
+        summary = QLabel(tr("stats.active_days", count=recent_count, pct=pct))
         summary.setFont(make_qfont("body"))
         summary.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(summary)
@@ -408,7 +407,7 @@ class StatsScreen(BaseScreen):
         if not user.personal_bests:
             return
         c = COLORS
-        header = QLabel("PERSONAL BESTS")
+        header = QLabel(tr("dashboard.personal_bests"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -429,7 +428,7 @@ class StatsScreen(BaseScreen):
             cl.setSpacing(2)
 
             # Exercise name
-            name_lbl = QLabel(exercise)
+            name_lbl = QLabel(exercise_display_name(exercise))
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)
@@ -460,7 +459,7 @@ class StatsScreen(BaseScreen):
             return
         c = COLORS
 
-        header = QLabel("INSIGHTS")
+        header = QLabel(tr("stats.insights"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -497,7 +496,7 @@ class StatsScreen(BaseScreen):
         avg = sum(ex_scores) / len(ex_scores)
         diff = last_pct - avg
 
-        last_lbl = QLabel("LAST SESSION")
+        last_lbl = QLabel(tr("stats.last_session"))
         last_lbl.setFont(make_qfont("btn_sm"))
         last_lbl.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(last_lbl)
@@ -532,7 +531,7 @@ class StatsScreen(BaseScreen):
             this_week = [p for d, _, p in scored if d >= week_ago]
             last_week = [p for d, _, p in scored if two_weeks <= d < week_ago]
 
-            short_lbl = QLabel("7-DAY TREND")
+            short_lbl = QLabel(tr("stats.7_day_trend"))
             short_lbl.setFont(make_qfont("btn_sm"))
             short_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(short_lbl)
@@ -559,7 +558,7 @@ class StatsScreen(BaseScreen):
             if len(dates) >= 7:
                 self._add_separator(cl, c)
 
-                long_lbl = QLabel("STRENGTHS & WEAKNESSES")
+                long_lbl = QLabel(tr("stats.strengths_weaknesses"))
                 long_lbl.setFont(make_qfont("btn_sm"))
                 long_lbl.setStyleSheet(f"color: {c['muted']};")
                 cl.addWidget(long_lbl)
@@ -586,7 +585,7 @@ class StatsScreen(BaseScreen):
                         tag.setFont(make_qfont("btn_sm"))
                         tag.setStyleSheet(f"color: {c['muted']};")
                         cell_l.addWidget(tag)
-                        val = QLabel(f"{ex}  ({avgs[ex]:.0f}%)")
+                        val = QLabel(f"{exercise_display_name(ex)}  ({avgs[ex]:.0f}%)")
                         val.setFont(make_qfont("btn_bold"))
                         val.setStyleSheet(f"color: {color};")
                         cell_l.addWidget(val)
@@ -633,7 +632,7 @@ class StatsScreen(BaseScreen):
             return
         c = COLORS
 
-        header = QLabel("PROGRESS")
+        header = QLabel(tr("stats.progress"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
@@ -665,7 +664,8 @@ class StatsScreen(BaseScreen):
         for ex_name in exercises:
             if first_key is None:
                 first_key = ex_name
-            btn = QPushButton(ex_name)
+            btn = QPushButton(exercise_display_name(ex_name))
+            btn.setProperty("exercise_key", ex_name)
             btn.setStyleSheet(
                 btn_css(c["card"], c["text_on_card"],
                         padding="4px 10px", font_key="btn_sm")
@@ -690,7 +690,7 @@ class StatsScreen(BaseScreen):
 
         # Update button styles — highlight active
         for btn in self._chart_buttons:
-            if btn.text() == exercise_name:
+            if btn.property("exercise_key") == exercise_name:
                 btn.setStyleSheet(
                     btn_css(c["accent"], c["btn_text"],
                             padding="4px 10px", font_key="btn_sm")
@@ -712,7 +712,7 @@ class StatsScreen(BaseScreen):
         if not data:
             return
 
-        chart = _ProgressChart(exercise_name, data)
+        chart = _ProgressChart(exercise_display_name(exercise_name), data)
         self._chart_container.addWidget(chart)
 
     # ── History table ──
@@ -722,14 +722,14 @@ class StatsScreen(BaseScreen):
 
         # Header row with export buttons inline
         header_row = QHBoxLayout()
-        header = QLabel("SESSION HISTORY")
+        header = QLabel(tr("stats.session_history"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         header_row.addWidget(header)
         header_row.addStretch()
 
         if user.history:
-            count_lbl = QLabel(f"{len(user.history)} sessions")
+            count_lbl = QLabel(tr("stats.session_count", count=len(user.history)))
             count_lbl.setFont(make_qfont("body"))
             count_lbl.setStyleSheet(f"color: {c['muted']};")
             header_row.addWidget(count_lbl)
@@ -737,7 +737,7 @@ class StatsScreen(BaseScreen):
         layout.addLayout(header_row)
 
         if not user.history:
-            lbl = QLabel("No sessions yet. Start training!")
+            lbl = QLabel(tr("stats.no_sessions_yet_start_training"))
             lbl.setFont(make_qfont("body"))
             lbl.setStyleSheet(f"color: {c['muted']};")
             layout.addWidget(lbl)
@@ -770,7 +770,7 @@ class StatsScreen(BaseScreen):
 
         for i, entry in enumerate(user.history):
             table.setItem(i, 0, QTableWidgetItem(entry.timestamp))
-            table.setItem(i, 1, QTableWidgetItem(entry.exercise))
+            table.setItem(i, 1, QTableWidgetItem(exercise_display_name(entry.exercise)))
             table.setItem(i, 2, QTableWidgetItem(entry.result))
 
         table.setMinimumHeight(300)
@@ -782,16 +782,12 @@ class StatsScreen(BaseScreen):
     def _build_export(self, layout: QVBoxLayout, user) -> None:
         from PyQt6.QtWidgets import QCheckBox
         c = COLORS
-        header = QLabel("EXPORT DATA")
+        header = QLabel(tr("stats.export_data"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['fg']};")
         layout.addWidget(header)
 
-        desc = QLabel(
-            "Export session history with exercise parameters, scores, "
-            "and timing data. CSV is Excel-compatible; JSON is for "
-            "programmatic analysis in R, SPSS, or Python."
-        )
+        desc = QLabel(tr("stats.export_desc"))
         desc.setFont(make_qfont("body"))
         desc.setStyleSheet(f"color: {c['muted']};")
         desc.setWordWrap(True)
@@ -800,7 +796,7 @@ class StatsScreen(BaseScreen):
         layout.addSpacing(6)
 
         # Anonymize checkbox
-        self._anon_check = QCheckBox("Anonymize (replace name with participant ID)")
+        self._anon_check = QCheckBox(tr("stats.anonymize"))
         self._anon_check.setFont(make_qfont("body"))
         self._anon_check.setStyleSheet(
             f"QCheckBox {{ color: {c['fg']}; spacing: 8px; }}"
@@ -817,8 +813,8 @@ class StatsScreen(BaseScreen):
         row = QHBoxLayout()
         row.setSpacing(8)
         for text, cb in [
-            ("EXPORT CSV", lambda: self._export_csv(user)),
-            ("EXPORT JSON", lambda: self._export_json(user)),
+            (tr("stats.export_csv"), lambda: self._export_csv(user)),
+            (tr("stats.export_json"), lambda: self._export_json(user)),
         ]:
             btn = QPushButton(text)
             btn.setStyleSheet(
@@ -852,13 +848,13 @@ class StatsScreen(BaseScreen):
     def _export_csv(self, user) -> None:
         if not user.history:
             QMessageBox.information(
-                self, "No Data", "No session history to export."
+                self, tr("stats.no_data"), tr("stats.no_data_to_export")
             )
             return
         name = self._export_name(user)
         default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.csv"
         path, _ = QFileDialog.getSaveFileName(
-            self, "Export CSV", default_name, "CSV files (*.csv)"
+            self, tr("stats.export_csv"), default_name, "CSV files (*.csv)"
         )
         if not path:
             return
@@ -901,21 +897,22 @@ class StatsScreen(BaseScreen):
                 writer.writerow(["Exported", datetime.now().isoformat()])
 
             QMessageBox.information(
-                self, "Exported",
-                f"Data saved to:\n{os.path.basename(path)}\n\n"
-                f"{len(user.history)} sessions, "
-                f"{len(meta_keys)} metadata fields.",
+                self, tr("stats.exported"),
+                tr("stats.exported_msg",
+                   file=os.path.basename(path),
+                   sessions=len(user.history),
+                   fields=len(meta_keys)),
             )
         except OSError as e:
             QMessageBox.critical(
-                self, "Export Error", f"Could not save file:\n{e}"
+                self, tr("stats.export_error"), tr("stats.export_error_msg", error=e)
             )
 
     def _export_json(self, user) -> None:
         name = self._export_name(user)
         default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.json"
         path, _ = QFileDialog.getSaveFileName(
-            self, "Export JSON", default_name, "JSON files (*.json)"
+            self, tr("stats.export_json"), default_name, "JSON files (*.json)"
         )
         if not path:
             return
@@ -941,11 +938,12 @@ class StatsScreen(BaseScreen):
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             QMessageBox.information(
-                self, "Exported",
-                f"Data saved to:\n{os.path.basename(path)}\n\n"
-                f"{len(user.history)} sessions with full metadata.",
+                self, tr("stats.exported"),
+                tr("stats.exported_json_msg",
+                   file=os.path.basename(path),
+                   sessions=len(user.history)),
             )
         except OSError as e:
             QMessageBox.critical(
-                self, "Export Error", f"Could not save file:\n{e}"
+                self, tr("stats.export_error"), tr("stats.export_error_msg", error=e)
             )
