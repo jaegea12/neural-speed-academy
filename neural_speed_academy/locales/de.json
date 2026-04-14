@@ -521,5 +521,20 @@
   "result.mode.ascending": "Aufsteigend (1→2→3…)",
   "result.mode.go_nogo": "Gehen/Nicht-Gehen",
   "result.mode.choice": "Auswahl (4 Farben)",
-  "result.mode.simple": "Einfach"
+  "result.mode.simple": "Einfach",
+  "exercise.get_ready": "Bereit machen",
+  "stats.active_days_year": "{count} aktive Tage im letzten Jahr ({pct}%)",
+  "stats.active_days_total": "{count} aktive Tage insgesamt",
+  "intro.copy_text": "Text kopieren",
+  "intro.copy_tooltip": "Einführungstext in die Zwischenablage kopieren",
+  "pacer.fov.narrow": "Schmal",
+  "pacer.fov.standard": "Standard",
+  "pacer.fov.wide": "Breit",
+  "pacer.fov.full": "Voll",
+  "pacer.fov.ultra": "Ultra",
+  "pacer.fov.narrow.full": "Schmal (Anfänger)",
+  "pacer.fov.standard.full": "Standard",
+  "pacer.fov.wide.full": "Breit (Fortgeschritten)",
+  "pacer.fov.full.full": "Voll (Experte)",
+  "pacer.fov.ultra.full": "Ultra (Vollbild)"
 }

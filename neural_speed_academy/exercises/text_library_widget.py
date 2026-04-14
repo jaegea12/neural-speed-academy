@@ -37,19 +37,34 @@ _CUSTOM_PREFIX = "\u2605 "
 
 def get_training_text() -> str:
     """Return the user's training text, falling back to the first
-    locale-appropriate library entry if none is set."""
+    locale-appropriate library entry if none is set or if the stored
+    text belongs to a different locale's built-in library."""
     text = theme_manager.training_text
-    if text and text.strip():
-        return text
-
     locale = current_locale()
+
+    if text and text.strip():
+        # Check if the stored text is a built-in entry from another locale
+        is_foreign_builtin = False
+        for code, (lib, _label) in _TEXT_LIBRARIES.items():
+            if code == locale:
+                continue
+            for _name, (_diff, lib_text) in lib.items():
+                if text.strip() == lib_text.strip():
+                    is_foreign_builtin = True
+                    break
+            if is_foreign_builtin:
+                break
+
+        if not is_foreign_builtin:
+            return text
+
+    # Load first entry from current locale
     lib_entry = _TEXT_LIBRARIES.get(locale, _TEXT_LIBRARIES.get("en"))
     if lib_entry:
         lib_dict = lib_entry[0]
         first_key = next(iter(lib_dict), None)
         if first_key:
             _difficulty, fallback_text = lib_dict[first_key]
-            # Persist so the user sees it in the editor next time
             theme_manager.training_text = fallback_text
             theme_manager.save()
             return fallback_text
@@ -159,7 +174,7 @@ class TextLibraryWidget(QWidget):
         w = editor_width or screen_metrics.text_input_w
         self._editor.setFixedHeight(h)
         self._editor.setFixedWidth(w)
-        self._editor.setPlainText(theme_manager.training_text)
+        self._editor.setPlainText(get_training_text())
         root.addWidget(self._editor, 0, Qt.AlignmentFlag.AlignCenter)
 
     # ── Public API ──

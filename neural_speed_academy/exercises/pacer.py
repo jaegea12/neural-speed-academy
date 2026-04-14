@@ -323,9 +323,7 @@ class PacerExercise(BaseExercise):
         self._page_width_key = self._last_page_width or (theme_manager.fov if theme_manager else "standard")
         from neural_speed_academy.theme import FOV_PRESETS
         for key, preset in FOV_PRESETS.items():
-            # Use short label: first word of the preset label
-            short = preset["label"].split("(")[0].strip()
-            btn = QPushButton(short)
+            btn = QPushButton(tr(f"pacer.fov.{key}"))
             btn.setFont(make_qfont("btn_sm"))
             btn.setFixedWidth(80)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)

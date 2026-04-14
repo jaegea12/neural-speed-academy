@@ -521,5 +521,20 @@
   "result.mode.ascending": "Ascendente (1→2→3…)",
   "result.mode.go_nogo": "Ir/Não-Ir",
   "result.mode.choice": "Escolha (4 cores)",
-  "result.mode.simple": "Simples"
+  "result.mode.simple": "Simples",
+  "exercise.get_ready": "Prepare-se",
+  "stats.active_days_year": "{count} dias ativos no último ano ({pct}%)",
+  "stats.active_days_total": "{count} dias ativos no total",
+  "intro.copy_text": "Copiar texto",
+  "intro.copy_tooltip": "Copiar o texto de introdução para a área de transferência",
+  "pacer.fov.narrow": "Estreito",
+  "pacer.fov.standard": "Padrão",
+  "pacer.fov.wide": "Largo",
+  "pacer.fov.full": "Completo",
+  "pacer.fov.ultra": "Ultra",
+  "pacer.fov.narrow.full": "Estreito (Iniciante)",
+  "pacer.fov.standard.full": "Padrão",
+  "pacer.fov.wide.full": "Largo (Avançado)",
+  "pacer.fov.full.full": "Completo (Especialista)",
+  "pacer.fov.ultra.full": "Ultra (Tela cheia)"
 }
