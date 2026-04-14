@@ -94,18 +94,25 @@ class _ConsistencyCalendar(QWidget):
         cell, gap = self.CELL, self.GAP
         month_h = 16
 
-        # Month labels
+        # Month labels — skip if too close to the previous label
+        font = QFont("Segoe UI", 7)
         painter.setPen(QColor(c["muted"]))
-        painter.setFont(QFont("Segoe UI", 7))
+        painter.setFont(font)
+        fm = painter.fontMetrics()
         prev_month = -1
+        prev_label_end = -1
         for week in range(self._num_weeks):
             day = self._start + timedelta(weeks=week)
             if day.month != prev_month:
                 label = day.strftime("%b")
-                # Show year on January or on the very first label
                 if day.month == 1 or week == 0:
                     label = day.strftime("%b '%y")
-                painter.drawText(self._week_xs[week], 11, label)
+                x = self._week_xs[week]
+                label_w = fm.horizontalAdvance(label)
+                # Only draw if it won't overlap the previous label
+                if x > prev_label_end + 4:
+                    painter.drawText(x, 11, label)
+                    prev_label_end = x + label_w
                 prev_month = day.month
 
         # Cell colours
