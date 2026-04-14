@@ -521,5 +521,10 @@
   "result.mode.ascending": "Aufsteigend (1→2→3…)",
   "result.mode.go_nogo": "Gehen/Nicht-Gehen",
   "result.mode.choice": "Auswahl (4 Farben)",
-  "result.mode.simple": "Einfach"
+  "result.mode.simple": "Einfach",
+  "exercise.get_ready": "Bereit machen",
+  "stats.active_days_year": "{count} aktive Tage im letzten Jahr ({pct}%)",
+  "stats.active_days_total": "{count} aktive Tage insgesamt",
+  "intro.copy_text": "Text kopieren",
+  "intro.copy_tooltip": "Einführungstext in die Zwischenablage kopieren"
 }
