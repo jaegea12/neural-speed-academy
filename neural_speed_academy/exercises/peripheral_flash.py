@@ -62,7 +62,6 @@ class PeripheralFlashExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         cfg = PERIPHERAL_FLASH_CONFIG
         c = COLORS
@@ -72,6 +71,13 @@ class PeripheralFlashExercise(BaseExercise):
         self._eccentricity = kwargs.get("eccentricity", cfg["default_eccentricity"])
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._stim_type = kwargs.get("stim_type", "letters")
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._run_exercise()
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")

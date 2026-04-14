@@ -35,10 +35,23 @@ class ChunkingExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Skip config screen when launched from preset menu / training path
+        if kwargs:
+            chunk_size = kwargs.get(
+                "chunk_size", CHUNKING_CONFIG["default_chunk_size"]
+            )
+            wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+            text = theme_manager.training_text or ""
+            self._last_chunk = chunk_size
+            self._last_wpm = wpm
+            self._run_chunking(text, chunk_size, wpm)
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         slider_groove = (
             f"QSlider::groove:horizontal {{ background: {c['card']}; "

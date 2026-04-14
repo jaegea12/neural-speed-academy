@@ -103,10 +103,25 @@ class PacerExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Skip config screen when launched from preset menu / training path
+        if kwargs:
+            wpm = kwargs.get("wpm", PACER_CONFIG["default_wpm"])
+            mode = kwargs.get("mode", "single")
+            self._n_lines = kwargs.get("n_lines", 3)
+            self._chunk_size = kwargs.get("chunk_size", 3)
+            self._last_wpm = wpm
+            self._last_mode = mode
+            self._last_chunk = self._chunk_size
+            self._last_nlines = self._n_lines
+            text = theme_manager.training_text or ""
+            self._run_pacer(text, wpm, mode)
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")

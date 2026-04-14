@@ -70,7 +70,6 @@ class RapidDecisionGridExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         cfg = RAPID_DECISION_CONFIG
@@ -79,6 +78,13 @@ class RapidDecisionGridExercise(BaseExercise):
         self._mode = kwargs.get("mode", "ascending")
         self._grid_size = kwargs.get("grid_size", cfg["default_grid_size"])
         self._time_limit = kwargs.get("time_limit", 0)
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._run_grid()
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")

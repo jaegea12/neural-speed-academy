@@ -68,8 +68,8 @@ class SlideProcessingExercise(BaseExercise):
         self._category = kwargs.get("category", "mixed")
         self._custom_slides: list = kwargs.get("custom_slides", [])
 
-        # If launched from menu with specific params, skip config screen
-        if "," in self._category or kwargs.get("skip_config", False):
+        # Skip config screen when launched from preset menu
+        if kwargs:
             self._build_and_start()
             return
 

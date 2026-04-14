@@ -71,7 +71,6 @@ class SplitAttentionExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
 
         cfg = SPLIT_ATTENTION_CONFIG
         c = COLORS
@@ -83,6 +82,16 @@ class SplitAttentionExercise(BaseExercise):
         )
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._mode = kwargs.get("mode", "sequential")
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._round = 0
+            self._center_correct = 0
+            self._periph_correct = 0
+            self._build_arena()
+            return
+
+        self.add_nav_bar()
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")

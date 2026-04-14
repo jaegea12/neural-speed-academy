@@ -33,10 +33,19 @@ class RsvpExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Skip config screen when launched from preset menu / training path
+        if kwargs:
+            wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
+            text = theme_manager.training_text or ""
+            self._last_wpm = wpm
+            self._run_rsvp(text, wpm)
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         slider_groove = (
             f"QSlider::groove:horizontal {{ background: {c['card']}; "
