@@ -131,7 +131,7 @@ class SettingsScreen(BaseScreen):
 
         self._fov_group = QButtonGroup(self)
         for key, preset in FOV_PRESETS.items():
-            rb = QRadioButton(preset["label"])
+            rb = QRadioButton(tr(f"pacer.fov.{key}.full"))
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
             rb.setProperty("fov_key", key)

@@ -521,5 +521,22 @@
   "result.mode.ascending": "Ascendente (1→2→3…)",
   "result.mode.go_nogo": "Vai/Non-Vai",
   "result.mode.choice": "Scelta (4 colori)",
-  "result.mode.simple": "Semplice"
+  "result.mode.simple": "Semplice",
+  "exercise.get_ready": "Preparati",
+  "stats.active_days_year": "{count} giorni attivi nell’ultimo anno ({pct}%)",
+  "stats.active_days_total": "{count} giorni attivi in totale",
+  "intro.copy_text": "Copia testo",
+  "intro.copy_tooltip": "Copia il testo introduttivo negli appunti",
+  "pacer.fov.narrow": "Stretto",
+  "pacer.fov.standard": "Standard",
+  "pacer.fov.wide": "Largo",
+  "pacer.fov.full": "Pieno",
+  "pacer.fov.ultra": "Ultra",
+  "pacer.fov.narrow.full": "Stretto (Principiante)",
+  "pacer.fov.standard.full": "Standard",
+  "pacer.fov.wide.full": "Largo (Avanzato)",
+  "pacer.fov.full.full": "Pieno (Esperto)",
+  "pacer.fov.ultra.full": "Ultra (Schermo intero)",
+  "pacer.mode.single": "Riga singola",
+  "pacer.mode.multi": "Multiriga"
 }
