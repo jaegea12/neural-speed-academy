@@ -58,7 +58,13 @@ class _ConsistencyCalendar(QWidget):
         self._start -= timedelta(days=self._start.weekday())
 
         self._today = today
-        self._num_weeks = ((today - self._start).days // 7) + 1
+        # Show at least 12 weeks so the calendar never looks cramped
+        min_weeks = 12
+        actual_weeks = ((today - self._start).days // 7) + 1
+        self._num_weeks = max(actual_weeks, min_weeks)
+        # Adjust start if we expanded to meet the minimum
+        if self._num_weeks > actual_weeks:
+            self._start = today - timedelta(days=today.weekday()) - timedelta(weeks=self._num_weeks - 1)
 
         # Compute total width
         self._week_xs: list[int] = []
