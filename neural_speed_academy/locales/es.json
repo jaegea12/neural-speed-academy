@@ -521,5 +521,10 @@
   "result.mode.ascending": "Ascendente (1→2→3…)",
   "result.mode.go_nogo": "Ir/No-Ir",
   "result.mode.choice": "Elección (4 colores)",
-  "result.mode.simple": "Simple"
+  "result.mode.simple": "Simple",
+  "exercise.get_ready": "Prepárate",
+  "stats.active_days_year": "{count} días activos en el último año ({pct}%)",
+  "stats.active_days_total": "{count} días activos en total",
+  "intro.copy_text": "Copiar texto",
+  "intro.copy_tooltip": "Copiar el texto de introducción al portapapeles"
 }
