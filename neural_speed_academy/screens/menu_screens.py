@@ -200,14 +200,31 @@ class BaseMenuScreen(BaseScreen):
     def _tp_select_preset(self, idx: int) -> None:
         self._tp_selected_preset = idx
         c = COLORS
+        total = len(self._tp_preset_buttons)
+        from neural_speed_academy.theme import _color_shift
         # Update left panel buttons
         for i, btn in enumerate(self._tp_preset_buttons):
+            color_key = self._difficulty_color(i, total)
+            base_color = c[color_key]
             if i == idx:
-                btn.setStyleSheet(self._tp_toggle_on())
-            else:
-                color_key = self._difficulty_color(i, len(self._tp_preset_buttons))
+                # Selected: full colour + thick contrasting border
                 btn.setStyleSheet(
-                    btn_css(c[color_key], c["btn_text"], padding="6px 14px")
+                    f"QPushButton {{ background-color: {base_color}; "
+                    f"color: {c['btn_text']}; "
+                    f"border: 3px solid {c['fg']}; "
+                    f"padding: 6px 14px; border-radius: 4px; "
+                    f"font-weight: bold; }}"
+                )
+            else:
+                # Unselected: dimmed version, no border
+                dimmed = _color_shift(base_color, -35)
+                btn.setStyleSheet(
+                    f"QPushButton {{ background-color: {dimmed}; "
+                    f"color: {c['btn_text']}; "
+                    f"border: 2px solid transparent; "
+                    f"padding: 6px 14px; border-radius: 4px; }}"
+                    f"QPushButton:hover {{ background-color: {base_color}; "
+                    f"border: 2px solid {c['fg']}; }}"
                 )
         # Apply preset defaults to right panel
         _, preset_vals = self._tp_presets[idx]
