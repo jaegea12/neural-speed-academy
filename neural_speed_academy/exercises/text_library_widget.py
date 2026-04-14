@@ -35,6 +35,28 @@ _TEXT_LIBRARIES = {
 _CUSTOM_PREFIX = "\u2605 "
 
 
+def get_training_text() -> str:
+    """Return the user's training text, falling back to the first
+    locale-appropriate library entry if none is set."""
+    text = theme_manager.training_text
+    if text and text.strip():
+        return text
+
+    locale = current_locale()
+    lib_entry = _TEXT_LIBRARIES.get(locale, _TEXT_LIBRARIES.get("en"))
+    if lib_entry:
+        lib_dict = lib_entry[0]
+        first_key = next(iter(lib_dict), None)
+        if first_key:
+            _difficulty, fallback_text = lib_dict[first_key]
+            # Persist so the user sees it in the editor next time
+            theme_manager.training_text = fallback_text
+            theme_manager.save()
+            return fallback_text
+
+    return ""
+
+
 class TextLibraryWidget(QWidget):
     """Drop-in widget: text library dropdown + editor + save/delete buttons.
 

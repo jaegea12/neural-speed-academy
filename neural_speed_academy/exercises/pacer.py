@@ -117,7 +117,8 @@ class PacerExercise(BaseExercise):
             self._last_mode = mode
             self._last_chunk = self._chunk_size
             self._last_nlines = self._n_lines
-            text = theme_manager.training_text or ""
+            from neural_speed_academy.exercises.text_library_widget import get_training_text
+            text = get_training_text()
             self._show_countdown(lambda: self._run_pacer(text, wpm, mode))
             return
 

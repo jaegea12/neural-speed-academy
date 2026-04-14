@@ -40,7 +40,8 @@ class RsvpExercise(BaseExercise):
         # Skip config screen when launched from preset menu / training path
         if kwargs:
             wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
-            text = theme_manager.training_text or ""
+            from neural_speed_academy.exercises.text_library_widget import get_training_text
+            text = get_training_text()
             self._last_wpm = wpm
             self._show_countdown(lambda: self._run_rsvp(text, wpm))
             return

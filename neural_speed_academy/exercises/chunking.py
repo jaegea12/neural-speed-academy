@@ -45,7 +45,8 @@ class ChunkingExercise(BaseExercise):
                 "chunk_size", CHUNKING_CONFIG["default_chunk_size"]
             )
             wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
-            text = theme_manager.training_text or ""
+            from neural_speed_academy.exercises.text_library_widget import get_training_text
+            text = get_training_text()
             self._last_chunk = chunk_size
             self._last_wpm = wpm
             self._show_countdown(
