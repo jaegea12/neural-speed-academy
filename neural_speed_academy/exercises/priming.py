@@ -51,6 +51,9 @@ class PrimingExercise(BaseExercise):
         self.duration_s = duration_s
         self._requested_cycles = cycles
 
+        self._show_countdown(self._build_priming_ui)
+
+    def _build_priming_ui(self) -> None:
         self._clear()
         self._running = True
         self.add_nav_bar()

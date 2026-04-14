@@ -65,7 +65,6 @@ class ReactionTimeExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
 
         cfg = REACTION_TIME_CONFIG
         c = COLORS
@@ -74,6 +73,19 @@ class ReactionTimeExercise(BaseExercise):
         self._mode = kwargs.get("mode", "simple")
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._go_ratio = kwargs.get("go_ratio", cfg["go_ratio"])
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._round = 0
+            self._reaction_times = []
+            self._correct = 0
+            self._false_alarms = 0
+            self._misses = 0
+            self._too_early_count = 0
+            self._show_countdown(self._build_arena)
+            return
+
+        self.add_nav_bar()
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -196,7 +208,7 @@ class ReactionTimeExercise(BaseExercise):
         self._false_alarms = 0
         self._misses = 0
         self._too_early_count = 0
-        self._build_arena()
+        self._show_countdown(self._build_arena)
 
     # ── Arena ──
 

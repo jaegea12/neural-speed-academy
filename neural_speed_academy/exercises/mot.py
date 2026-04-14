@@ -301,7 +301,6 @@ class MotExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         cfg = MOT_CONFIG
         c = COLORS
@@ -312,6 +311,16 @@ class MotExercise(BaseExercise):
         self._speed = kwargs.get("speed", cfg["default_speed"])
         self._duration = kwargs.get("duration", cfg["default_duration"])
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._current_round = 0
+            self._total_correct = 0
+            self._total_possible = 0
+            self._show_countdown(self._run_round)
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -516,7 +525,7 @@ class MotExercise(BaseExercise):
         self._current_round = 0
         self._total_correct = 0
         self._total_possible = 0
-        self._run_round()
+        self._show_countdown(self._run_round)
 
     # ── Round loop ──
 

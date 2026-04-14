@@ -34,7 +34,7 @@ class SchulteExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         grid_size = kwargs.get("grid_size", theme_manager.schulte_grid_size)
         cell_idx = kwargs.get("cell_idx", theme_manager.schulte_cell_idx)
-        self._start_grid(grid_size, cell_idx)
+        self._show_countdown(lambda: self._start_grid(grid_size, cell_idx))
 
     # Reference cell sizes (px at 1920×1080), scaled by ScreenMetrics
     _CELL_PRESETS = {0: ("Small", 70), 1: ("Medium", 100), 2: ("Large", 120), 3: ("XL", 140)}

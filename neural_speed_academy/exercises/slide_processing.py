@@ -68,9 +68,9 @@ class SlideProcessingExercise(BaseExercise):
         self._category = kwargs.get("category", "mixed")
         self._custom_slides: list = kwargs.get("custom_slides", [])
 
-        # If launched from menu with specific params, skip config screen
-        if "," in self._category or kwargs.get("skip_config", False):
-            self._build_and_start()
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._show_countdown(self._build_and_start)
             return
 
         self.add_nav_bar()
@@ -225,7 +225,7 @@ class SlideProcessingExercise(BaseExercise):
                      "motivation", "neuroplasticity", "humor",
                      "history", "nutrition"]
         self._category = cat_names[self._cat_combo.currentIndex()]
-        self._build_and_start()
+        self._show_countdown(self._build_and_start)
 
     def _build_and_start(self) -> None:
         # Build slide pool from selected categories

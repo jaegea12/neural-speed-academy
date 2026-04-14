@@ -33,10 +33,20 @@ class RsvpExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Skip config screen when launched from preset menu / training path
+        if kwargs:
+            wpm = kwargs.get("wpm", RSVP_CONFIG["default_wpm"])
+            from neural_speed_academy.exercises.text_library_widget import get_training_text
+            text = get_training_text()
+            self._last_wpm = wpm
+            self._show_countdown(lambda: self._run_rsvp(text, wpm))
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         slider_groove = (
             f"QSlider::groove:horizontal {{ background: {c['card']}; "
@@ -138,7 +148,7 @@ class RsvpExercise(BaseExercise):
         theme_manager.save()
         wpm = self._wpm_slider.value()
         self._last_wpm = wpm
-        self._run_rsvp(text, wpm)
+        self._show_countdown(lambda: self._run_rsvp(text, wpm))
 
     def _run_rsvp(self, text: str, wpm: int) -> None:
         self.words = text.split()
