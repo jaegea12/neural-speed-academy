@@ -524,5 +524,7 @@
   "result.mode.simple": "Simples",
   "exercise.get_ready": "Prepare-se",
   "stats.active_days_year": "{count} dias ativos no último ano ({pct}%)",
-  "stats.active_days_total": "{count} dias ativos no total"
+  "stats.active_days_total": "{count} dias ativos no total",
+  "intro.copy_text": "Copiar texto",
+  "intro.copy_tooltip": "Copiar o texto de introdução para a área de transferência"
 }

@@ -524,5 +524,7 @@
   "result.mode.simple": "Simple",
   "exercise.get_ready": "Get Ready",
   "stats.active_days_year": "{count} active days in the last year ({pct}%)",
-  "stats.active_days_total": "{count} active days total"
+  "stats.active_days_total": "{count} active days total",
+  "intro.copy_text": "Copy Text",
+  "intro.copy_tooltip": "Copy introduction text to clipboard for use in training exercises"
 }
