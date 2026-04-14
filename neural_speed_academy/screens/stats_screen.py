@@ -23,11 +23,12 @@ from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class _ConsistencyCalendar(QWidget):
-    """GitHub-style heatmap showing training activity over the last 12 weeks."""
+    """GitHub-style heatmap showing training activity over the last 52 weeks."""
 
-    WEEKS = 12
-    CELL = 14
-    GAP = 3
+    WEEKS = 52
+    CELL = 12
+    GAP = 2
+    MONTH_GAP = 6  # extra horizontal space between months
 
     def __init__(
         self, active_dates: set[str],
@@ -35,13 +36,30 @@ class _ConsistencyCalendar(QWidget):
     ):
         super().__init__(parent)
         self._active = active_dates  # set of "YYYY-MM-DD" strings
-        total_w = self.WEEKS * (self.CELL + self.GAP) + 40
         total_h = 7 * (self.CELL + self.GAP) + 25
         self.setFixedHeight(total_h)
-        self.setMinimumWidth(total_w)
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
+
+    def _week_x_positions(self, label_w: int) -> list[int]:
+        """Compute x position for each week, inserting gaps at month boundaries."""
+        cell, gap = self.CELL, self.GAP
+        today = datetime.now().date()
+        start = today - timedelta(days=today.weekday()) - timedelta(weeks=self.WEEKS - 1)
+
+        positions = []
+        x = label_w
+        for week in range(self.WEEKS):
+            # Insert extra gap when a new month starts
+            if week > 0:
+                prev_day = start + timedelta(weeks=week - 1)
+                curr_day = start + timedelta(weeks=week)
+                if curr_day.month != prev_day.month:
+                    x += self.MONTH_GAP
+            positions.append(x)
+            x += cell + gap
+        return positions
 
     def paintEvent(self, event) -> None:
         c = COLORS
@@ -49,33 +67,34 @@ class _ConsistencyCalendar(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         cell, gap = self.CELL, self.GAP
-        label_w = 30
+        label_w = 24
         month_h = 18
 
         today = datetime.now().date()
         start = today - timedelta(days=today.weekday()) - timedelta(weeks=self.WEEKS - 1)
 
+        week_x = self._week_x_positions(label_w)
+
         # Month labels
         painter.setPen(QColor(c["muted"]))
-        painter.setFont(QFont("Segoe UI", 8))
+        painter.setFont(QFont("Segoe UI", 7))
         prev_month = -1
         for week in range(self.WEEKS):
             day = start + timedelta(weeks=week)
             if day.month != prev_month:
-                x = label_w + week * (cell + gap)
-                painter.drawText(x, 12, day.strftime("%b"))
+                painter.drawText(week_x[week], 11, day.strftime("%b"))
                 prev_month = day.month
 
         # Day-of-week labels
         day_labels = {0: "M", 2: "W", 4: "F"}
         for dow, label in day_labels.items():
             y = month_h + dow * (cell + gap) + cell - 2
-            painter.drawText(2, y, label)
+            painter.drawText(1, y, label)
 
         # Cell colours
-        empty_color = QColor(c["card"])
+        bg_color = QColor(c["bg"])
         border_color = QColor(c["muted"])
-        border_color.setAlpha(80)
+        border_color.setAlpha(50)
         active_color = QColor(c["accent"])
 
         for week in range(self.WEEKS):
@@ -83,7 +102,7 @@ class _ConsistencyCalendar(QWidget):
                 day = start + timedelta(weeks=week, days=dow)
                 if day > today:
                     continue
-                x = label_w + week * (cell + gap)
+                x = week_x[week]
                 y = month_h + dow * (cell + gap)
 
                 day_str = day.strftime("%Y-%m-%d")
@@ -91,7 +110,7 @@ class _ConsistencyCalendar(QWidget):
                     painter.setBrush(active_color)
                     painter.setPen(Qt.PenStyle.NoPen)
                 else:
-                    painter.setBrush(empty_color)
+                    painter.setBrush(bg_color)
                     painter.setPen(QPen(border_color, 1))
 
                 painter.drawRoundedRect(x, y, cell, cell, 2, 2)
@@ -337,14 +356,14 @@ class StatsScreen(BaseScreen):
 
         # Summary line
         today = datetime.now().date()
-        start = today - timedelta(weeks=12)
+        start = today - timedelta(weeks=52)
         recent_count = sum(
             1 for d in active_dates
             if d >= start.strftime("%Y-%m-%d")
         )
         total_days = (today - start).days + 1
         pct = round(recent_count / total_days * 100) if total_days else 0
-        summary = QLabel(tr("stats.active_days", count=recent_count, pct=pct))
+        summary = QLabel(tr("stats.active_days_year", count=recent_count, pct=pct))
         summary.setFont(make_qfont("body"))
         summary.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(summary)

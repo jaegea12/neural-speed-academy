@@ -522,5 +522,6 @@
   "result.mode.go_nogo": "Vai/Non-Vai",
   "result.mode.choice": "Scelta (4 colori)",
   "result.mode.simple": "Semplice",
-  "exercise.get_ready": "Preparati"
+  "exercise.get_ready": "Preparati",
+  "stats.active_days_year": "{count} giorni attivi nell’ultimo anno ({pct}%)"
 }

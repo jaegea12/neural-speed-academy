@@ -522,5 +522,6 @@
   "result.mode.go_nogo": "Go/No-Go",
   "result.mode.choice": "Choice (4 colors)",
   "result.mode.simple": "Simple",
-  "exercise.get_ready": "Get Ready"
+  "exercise.get_ready": "Get Ready",
+  "stats.active_days_year": "{count} active days in the last year ({pct}%)"
 }
