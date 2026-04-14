@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.theme import COLORS, make_qfont, input_css, screen_metrics
+from neural_speed_academy.i18n import tr
 
 _STOP_WORDS = frozenset(
     "the a an and or but in on at to for of is it that this with from by as "
@@ -232,7 +233,7 @@ def build_recall_screen(
     title.setAlignment(Qt.AlignmentFlag.AlignCenter)
     cl.addWidget(title)
 
-    desc = QLabel("Summarize what you just read in your own words.")
+    desc = QLabel(tr("recall.summarize_what_you_just_read_i"))
     desc.setFont(make_qfont("body"))
     desc.setStyleSheet(f"color: {c['fg']};")
     desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -250,7 +251,7 @@ def build_recall_screen(
         score, total, matches = score_recall(keywords, summary)
         on_scored(score, total, matches, keywords)
 
-    check_btn = QPushButton("CHECK")
+    check_btn = QPushButton(tr("flash.check"))
     check_btn.setFont(make_qfont("btn_bold"))
     check_btn.setStyleSheet(
         f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -260,7 +261,7 @@ def build_recall_screen(
     check_btn.clicked.connect(_score)
     cl.addWidget(check_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-    skip_btn = QPushButton("SKIP")
+    skip_btn = QPushButton(tr("recall.skip"))
     skip_btn.setFont(make_qfont("btn_sm"))
     skip_btn.setStyleSheet(
         f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
@@ -297,7 +298,7 @@ def build_recall_results(
     cl.setSpacing(6)
 
     int_score = int(score) if score == int(score) else round(score, 1)
-    score_lbl = QLabel(f"Key concepts recalled: {int_score}/{total}")
+    score_lbl = QLabel(tr("recall.keywords_recalled", score=int_score, total=total))
     score_lbl.setFont(make_qfont("header"))
     color = c["success"] if score >= total * 0.6 else c["alert"]
     score_lbl.setStyleSheet(f"color: {color};")
@@ -305,7 +306,7 @@ def build_recall_results(
     cl.addWidget(score_lbl)
 
     pct = round(score / total * 100) if total > 0 else 0
-    pct_lbl = QLabel(f"Comprehension: {pct}%")
+    pct_lbl = QLabel(tr("recall.comprehension_pct", pct=pct))
     pct_lbl.setFont(make_qfont("counter"))
     pct_lbl.setStyleSheet(f"color: {c['accent']};")
     pct_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)

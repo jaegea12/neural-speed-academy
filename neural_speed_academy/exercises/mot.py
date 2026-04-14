@@ -19,6 +19,7 @@ from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QKeySequence, QShortcut
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import MOT_CONFIG, USER_DATA_CONFIG
+from neural_speed_academy.i18n import tr
 
 
 class _Dot:
@@ -328,7 +329,7 @@ class MotExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -340,7 +341,7 @@ class MotExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("MULTIPLE OBJECT TRACKING")
+        title = QLabel(tr("mot.multiple_object_tracking"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -351,7 +352,7 @@ class MotExercise(BaseExercise):
         # Targets
         tgt_row = QHBoxLayout()
         tgt_row.addStretch()
-        tgt_lbl = QLabel("Targets:")
+        tgt_lbl = QLabel(tr("mot.targets"))
         tgt_lbl.setFont(make_qfont("slider_label"))
         tgt_lbl.setStyleSheet(f"color: {c['fg']};")
         tgt_row.addWidget(tgt_lbl)
@@ -377,7 +378,7 @@ class MotExercise(BaseExercise):
         # Distractors
         dist_row = QHBoxLayout()
         dist_row.addStretch()
-        dist_lbl = QLabel("Distractors:")
+        dist_lbl = QLabel(tr("mot.distractors"))
         dist_lbl.setFont(make_qfont("slider_label"))
         dist_lbl.setStyleSheet(f"color: {c['fg']};")
         dist_row.addWidget(dist_lbl)
@@ -403,7 +404,7 @@ class MotExercise(BaseExercise):
         # Speed
         spd_row = QHBoxLayout()
         spd_row.addStretch()
-        spd_lbl = QLabel("Speed:")
+        spd_lbl = QLabel(tr("mot.speed"))
         spd_lbl.setFont(make_qfont("slider_label"))
         spd_lbl.setStyleSheet(f"color: {c['fg']};")
         spd_row.addWidget(spd_lbl)
@@ -429,7 +430,7 @@ class MotExercise(BaseExercise):
         # Duration
         dur_row = QHBoxLayout()
         dur_row.addStretch()
-        dur_lbl = QLabel("Duration (s):")
+        dur_lbl = QLabel(tr("mot.duration_s"))
         dur_lbl.setFont(make_qfont("slider_label"))
         dur_lbl.setStyleSheet(f"color: {c['fg']};")
         dur_row.addWidget(dur_lbl)
@@ -455,7 +456,7 @@ class MotExercise(BaseExercise):
         # Rounds
         rnd_row = QHBoxLayout()
         rnd_row.addStretch()
-        rnd_lbl = QLabel("Rounds:")
+        rnd_lbl = QLabel(tr("mot.rounds"))
         rnd_lbl.setFont(make_qfont("slider_label"))
         rnd_lbl.setStyleSheet(f"color: {c['fg']};")
         rnd_row.addWidget(rnd_lbl)
@@ -480,7 +481,7 @@ class MotExercise(BaseExercise):
 
         # Start button
         cl.addSpacing(8)
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
@@ -491,7 +492,7 @@ class MotExercise(BaseExercise):
         start_btn.clicked.connect(self._start_from_ui)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        hint = QLabel("Ctrl+Enter to start")
+        hint = QLabel(tr("mot.ctrl_enter_to_start"))
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -540,7 +541,7 @@ class MotExercise(BaseExercise):
 
         top.addStretch()
 
-        self._phase_lbl = QLabel("MEMORIZE THE TARGETS")
+        self._phase_lbl = QLabel(tr("mot.memorize_the_targets"))
         self._phase_lbl.setFont(make_qfont("btn_bold"))
         self._phase_lbl.setStyleSheet(f"color: {c['fg']};")
         top.addWidget(self._phase_lbl)
@@ -554,9 +555,9 @@ class MotExercise(BaseExercise):
         self._score_lbl.setStyleSheet(f"color: {c['fg']};")
         top.addWidget(self._score_lbl)
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -592,7 +593,7 @@ class MotExercise(BaseExercise):
         if not self._running or not self._arena:
             return
         c = COLORS
-        self._phase_lbl.setText("TRACK THE TARGETS")
+        self._phase_lbl.setText(tr("mot.track_the_targets"))
         self._phase_lbl.setStyleSheet(f"color: {c['accent']};")
         self._arena.start_tracking()
         self._after(self._duration * 1000, self._stop_tracking)
@@ -666,10 +667,10 @@ class MotExercise(BaseExercise):
             result,
             is_personal_best=is_pb,
             details=(
-                f"Targets: {self._num_targets}  |  "
-                f"Distractors: {self._num_distractors}  |  "
-                f"Speed: {self._speed}\n"
-                f"Accuracy: {pct}%"
+                f"{tr('result.targets', count=self._num_targets)}  |  "
+                f"{tr('result.distractors', count=self._num_distractors)}  |  "
+                f"{tr('result.speed', speed=self._speed)}\n"
+                f"{tr('result.accuracy', pct=pct)}"
             ),
         )
 

@@ -13,6 +13,7 @@ from PyQt6.QtGui import QPixmap
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.i18n import tr
 
 
 class MainMenuScreen(BaseScreen):
@@ -48,7 +49,7 @@ class MainMenuScreen(BaseScreen):
             cl.addWidget(icon_lbl)
             cl.addSpacing(10)
 
-        title = QLabel("NEURAL SPEED\nACADEMY")
+        title = QLabel(tr("main.menu.neural_speed_nacademy"))
         title.setFont(make_qfont("title_lg"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -64,7 +65,7 @@ class MainMenuScreen(BaseScreen):
 
         cl.addSpacing(14)
 
-        tagline = QLabel("Let your brain process more information in less time")
+        tagline = QLabel(tr("main.menu.let_your_brain_process_more_in"))
         tagline.setFont(make_qfont("tagline"))
         tagline.setStyleSheet(f"color: {c['muted']};")
         tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -79,7 +80,7 @@ class MainMenuScreen(BaseScreen):
         buttons: list[tuple[str, str, str, object]] = []
 
         if logged_in:
-            welcome = QLabel(f"Welcome back, {user.name}")
+            welcome = QLabel(tr("main.menu.welcome_back", name=user.name))
             welcome.setFont(make_qfont("section_header"))
             welcome.setStyleSheet(f"color: {c['fg']};")
             welcome.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -87,28 +88,30 @@ class MainMenuScreen(BaseScreen):
             cl.addSpacing(12)
 
             buttons.append(
-                ("CONTINUE TRAINING", c["accent"], c["btn_text"],
+                (tr("main.menu.continue_training"), c["accent"], c["btn_text"],
                  lambda: self.navigator.to_dashboard()),
             )
             buttons.append(
-                ("SWITCH PROFILE", c["card"], c["text_on_card"],
+                (tr("main.menu.switch_profile"), c["card"], c["text_on_card"],
                  lambda: self.navigator.navigate_to("login")),
             )
         else:
             buttons.append(
-                ("LOGIN", c["accent"], c["btn_text"],
+                (tr("main.menu.login"), c["accent"], c["btn_text"],
                  lambda: self.navigator.navigate_to("login")),
             )
 
         buttons += [
-            ("TRAINING PATHS", c["accent"], c["btn_text"],
+            (tr("main.menu.training_paths"), c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("paths")),
-            ("INTRODUCTION", c["accent"], c["btn_text"],
+            (tr("main.menu.introduction"), c["accent"], c["btn_text"],
              lambda: self.navigator.navigate_to("introduction")),
-            ("SETTINGS", c["muted"], c["bg"],
+            (tr("main.menu.language"), c["accent"], c["btn_text"],
+             lambda: self.navigator.navigate_to("language")),
+            (tr("main.menu.settings"), c["muted"], c["bg"],
              lambda: self.navigator.navigate_to("settings")),
-            ("INFORMATION", c["muted"], c["bg"], self._show_info),
-            ("QUIT", c["alert"], c["btn_text"], self._quit),
+            (tr("main.menu.information"), c["muted"], c["bg"], self._show_info),
+            (tr("main.menu.quit"), c["alert"], c["btn_text"], self._quit),
         ]
 
         for text, bg, fg, callback in buttons:
@@ -136,29 +139,21 @@ class MainMenuScreen(BaseScreen):
     def _show_info(self) -> None:
         c = COLORS
         dialog = QDialog(self)
-        dialog.setWindowTitle("About")
+        dialog.setWindowTitle(tr("main.menu.about"))
         dialog.setFixedSize(580, 380)
         dialog.setStyleSheet(f"background-color: {c['card']};")
 
         layout = QVBoxLayout(dialog)
         layout.setContentsMargins(40, 30, 40, 15)
 
-        title = QLabel("NEURAL SPEED ACADEMY")
+        title = QLabel(tr("login.neural_speed_academy"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setWordWrap(True)
         layout.addWidget(title)
 
-        body = QLabel(
-            "A desktop application for speed reading\n"
-            "and cognitive training.\n\n"
-            "15 exercises across three categories:\n"
-            "Perception \u2022 Cognition \u2022 Reading\n\n"
-            "16 training paths \u2022 9 color profiles\n"
-            "Progress tracking \u2022 CSV/JSON export\n"
-            "Per-user profiles \u2022 Adjustable font scale"
-        )
+        body = QLabel(tr("main.menu.info_body"))
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['text_on_card']};")
         body.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -178,7 +173,7 @@ class MainMenuScreen(BaseScreen):
         credit.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(credit)
 
-        close_btn = QPushButton("CLOSE")
+        close_btn = QPushButton(tr("nav.close"))
         close_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="6px 20px")
         )
@@ -192,7 +187,7 @@ class MainMenuScreen(BaseScreen):
         c = COLORS
         msg = QMessageBox(self)
         msg.setWindowTitle("Quit")
-        msg.setText("Are you sure you want to quit?")
+        msg.setText(tr("main.menu.are_you_sure_you_want_to_quit"))
         msg.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )

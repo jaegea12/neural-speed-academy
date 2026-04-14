@@ -14,6 +14,7 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import WORD_PAIRS, USER_DATA_CONFIG, FLASH_TIMING
+from neural_speed_academy.i18n import tr
 
 
 class FlashExercise(BaseExercise):
@@ -89,9 +90,9 @@ class FlashExercise(BaseExercise):
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -141,7 +142,7 @@ class FlashExercise(BaseExercise):
         if not self._running:
             return
         c = COLORS
-        self._cross.setText("\u2022\u2022")
+        self._cross.setText(tr("flash.u2022_u2022"))
         self._cross.setStyleSheet(f"color: {c['accent']};")
         self._after(FLASH_TIMING["dots_duration"], self._do_flash)
 
@@ -272,7 +273,7 @@ class FlashExercise(BaseExercise):
                 container, 1, Qt.AlignmentFlag.AlignCenter
             )
 
-            check_btn = QPushButton("CHECK")
+            check_btn = QPushButton(tr("flash.check"))
             check_btn.setStyleSheet(
                 btn_css(c["accent"], c["btn_text"], padding="6px 20px")
             )
@@ -293,7 +294,7 @@ class FlashExercise(BaseExercise):
             )
             input_layout.addWidget(self._entry, alignment=Qt.AlignmentFlag.AlignCenter)
 
-            check_btn = QPushButton("CHECK")
+            check_btn = QPushButton(tr("flash.check"))
             check_btn.setStyleSheet(
                 btn_css(c["accent"], c["btn_text"], padding="6px 20px")
             )

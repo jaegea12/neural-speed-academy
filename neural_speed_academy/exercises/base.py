@@ -16,6 +16,7 @@ from PyQt6.QtCore import Qt, QTimer
 
 from neural_speed_academy.theme import COLORS, make_qfont, font_css
 from neural_speed_academy.config import USER_DATA_CONFIG
+from neural_speed_academy.i18n import tr
 
 if TYPE_CHECKING:
     from neural_speed_academy.navigation.navigator import Navigator
@@ -110,9 +111,9 @@ class BaseExercise(QWidget):
             f"padding: 2px 8px; border-radius: 3px; }}"
         )
 
-        back_btn = QPushButton("\u2190 Back")
-        back_btn.setAccessibleName("Go back")
-        back_btn.setToolTip("Go back (Escape)")
+        back_btn = QPushButton(tr("nav.back"))
+        back_btn.setAccessibleName(tr("nav.back_accessible"))
+        back_btn.setToolTip(tr("nav.back_tooltip"))
         back_btn.setStyleSheet(
             btn_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -122,8 +123,8 @@ class BaseExercise(QWidget):
         back_btn.clicked.connect(self.navigator.go_back)
         bar_layout.addWidget(back_btn)
 
-        hub_btn = QPushButton("Training Hub")
-        hub_btn.setAccessibleName("Go to Training Hub")
+        hub_btn = QPushButton(tr("nav.training_hub"))
+        hub_btn.setAccessibleName(tr("nav.training_hub"))
         hub_btn.setStyleSheet(
             btn_style
             + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
@@ -134,8 +135,8 @@ class BaseExercise(QWidget):
 
         bar_layout.addStretch()
 
-        menu_btn = QPushButton("Main Menu")
-        menu_btn.setAccessibleName("Go to Main Menu")
+        menu_btn = QPushButton(tr("nav.main_menu"))
+        menu_btn.setAccessibleName(tr("nav.main_menu"))
         menu_btn.setStyleSheet(
             btn_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -146,9 +147,9 @@ class BaseExercise(QWidget):
         bar_layout.addWidget(menu_btn)
 
         if show_stop:
-            stop_btn = QPushButton("\u25a0 STOP")
-            stop_btn.setAccessibleName("Stop exercise")
-            stop_btn.setToolTip("Stop exercise")
+            stop_btn = QPushButton(tr("nav.stop"))
+            stop_btn.setAccessibleName(tr("nav.stop"))
+            stop_btn.setToolTip(tr("nav.stop"))
             stop_btn.setStyleSheet(
                 btn_style
                 + f"QPushButton {{ background-color: {c['alert']}; color: {c['btn_text']}; }}"
@@ -159,7 +160,7 @@ class BaseExercise(QWidget):
 
         user = self.navigator.get_user()
         if user:
-            stats_label = QLabel(f"{user.name.upper()} | XP: {user.xp}")
+            stats_label = QLabel(tr("nav.user_stats", name=user.name.upper(), xp=user.xp))
             stats_label.setFont(make_qfont("nav_stats"))
             stats_label.setStyleSheet(
                 f"color: {c['accent']}; background: transparent;"
@@ -202,8 +203,8 @@ class BaseExercise(QWidget):
             except Exception as e:
                 logger.error(f"Failed to save exercise result: {e}")
                 QMessageBox.warning(
-                    self, "Save Error",
-                    "Could not save your progress. Please try again.",
+                    self, tr("common.error"),
+                    tr("exercise.save_error"),
                 )
         return is_pb
 
@@ -225,13 +226,13 @@ class BaseExercise(QWidget):
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.setSpacing(8)
 
-        title = QLabel("RESULTS")
+        title = QLabel(tr("exercise.results"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(title)
 
-        score_lbl = QLabel(f"Score: {result.score_string()}")
+        score_lbl = QLabel(tr("exercise.score_display", score=result.score_string()))
         score_lbl.setFont(make_qfont("btn_lg"))
         score_lbl.setStyleSheet(f"color: {c['fg']};")
         score_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -244,14 +245,14 @@ class BaseExercise(QWidget):
             det.setAlignment(Qt.AlignmentFlag.AlignCenter)
             cl.addWidget(det)
 
-        xp_lbl = QLabel(f"XP earned: +{result.xp_gained}")
+        xp_lbl = QLabel(tr("exercise.xp_earned", xp=result.xp_gained))
         xp_lbl.setFont(make_qfont("counter"))
         xp_lbl.setStyleSheet(f"color: {c['accent']};")
         xp_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cl.addWidget(xp_lbl)
 
         if is_personal_best:
-            pb = QLabel("NEW PERSONAL BEST!")
+            pb = QLabel(tr("exercise.new_pb"))
             pb.setFont(make_qfont("btn_bold"))
             pb.setStyleSheet(f"color: {c['success']};")
             pb.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -259,7 +260,7 @@ class BaseExercise(QWidget):
 
         cl.addSpacing(15)
 
-        cont_btn = QPushButton("CONTINUE")
+        cont_btn = QPushButton(tr("exercise.continue"))
         cont_btn.setFont(make_qfont("btn_bold"))
         cont_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -273,7 +274,7 @@ class BaseExercise(QWidget):
 
     def handle_error(self, error: Exception, message: str = "An error occurred") -> None:
         logger.error(f"{self.name} error: {error}")
-        QMessageBox.critical(self, "Error", f"{message}\n\nDetails: {error}")
+        QMessageBox.critical(self, tr("common.error"), f"{message}\n\nDetails: {error}")
         self.navigator.finish_exercise()
 
     @abstractmethod

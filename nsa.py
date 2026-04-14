@@ -20,6 +20,7 @@ from neural_speed_academy.screens.settings_screen import SettingsScreen
 from neural_speed_academy.screens.dashboard_screen import DashboardScreen
 from neural_speed_academy.screens.stats_screen import StatsScreen
 from neural_speed_academy.screens.introduction_screen import IntroductionScreen
+from neural_speed_academy.screens.language_screen import LanguageScreen
 from neural_speed_academy.screens.menu_screens import (
     FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, SchulteMenuScreen,
     PrimingMenuScreen, SequenceMemoryMenuScreen, PeripheralFlashMenuScreen,
@@ -105,6 +106,8 @@ class NeuralSpeedAcademy:
             "stats", lambda: StatsScreen(nav))
         nav.register_screen(
             "introduction", lambda: IntroductionScreen(nav))
+        nav.register_screen(
+            "language", lambda: LanguageScreen(nav))
         nav.register_screen(
             "paths", lambda: PathSelectionScreen(nav))
         nav.register_screen(

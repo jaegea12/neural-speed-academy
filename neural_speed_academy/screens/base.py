@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
+from neural_speed_academy.i18n import tr
 
 if TYPE_CHECKING:
     from neural_speed_academy.navigation.navigator import Navigator
@@ -70,9 +71,9 @@ class BaseScreen(QWidget):
                 return
             action()
 
-        back_btn = QPushButton("\u2190 Back")
-        back_btn.setAccessibleName("Go back")
-        back_btn.setToolTip("Go back (Escape)")
+        back_btn = QPushButton(tr("nav.back"))
+        back_btn.setAccessibleName(tr("nav.back_accessible"))
+        back_btn.setToolTip(tr("nav.back_tooltip"))
         back_btn.setStyleSheet(
             nav_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -82,7 +83,7 @@ class BaseScreen(QWidget):
         back_btn.clicked.connect(lambda: _guarded_nav(self.navigator.go_back))
         bar_layout.addWidget(back_btn)
 
-        hub_btn = QPushButton("Training Hub")
+        hub_btn = QPushButton(tr("nav.training_hub"))
         hub_btn.setStyleSheet(
             nav_style
             + f"QPushButton {{ background-color: {c['accent']}; color: {c['btn_text']}; }}"
@@ -93,7 +94,7 @@ class BaseScreen(QWidget):
 
         bar_layout.addStretch()
 
-        menu_btn = QPushButton("Main Menu")
+        menu_btn = QPushButton(tr("nav.main_menu"))
         menu_btn.setStyleSheet(
             nav_style
             + f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; }}"
@@ -105,7 +106,7 @@ class BaseScreen(QWidget):
 
         user = self.navigator.get_user()
         if user:
-            stats_label = QLabel(f"{user.name.upper()} | XP: {user.xp}")
+            stats_label = QLabel(tr("nav.user_stats", name=user.name.upper(), xp=user.xp))
             stats_label.setFont(make_qfont("nav_stats"))
             stats_label.setStyleSheet(
                 f"color: {c['accent']}; background: transparent;"
@@ -217,7 +218,7 @@ def _show_guide_dialog(parent: QWidget, topic: str) -> None:
         layout.addWidget(scroll, 1)
         dlg.setFixedSize(dialog_w, max_h)
 
-    close_btn = QPushButton("CLOSE")
+    close_btn = QPushButton(tr("nav.close"))
     close_btn.setFont(make_qfont("btn_bold"))
     close_btn.setStyleSheet(
         f"background-color: {c['accent']}; color: {c['btn_text']}; "

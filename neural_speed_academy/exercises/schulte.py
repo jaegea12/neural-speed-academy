@@ -14,6 +14,7 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics, theme_manager
 from neural_speed_academy.config import SCHULTE_CONFIG
+from neural_speed_academy.i18n import tr
 
 
 class SchulteExercise(BaseExercise):
@@ -68,23 +69,23 @@ class SchulteExercise(BaseExercise):
         top = QHBoxLayout()
         top.setContentsMargins(10, 6, 10, 2)
 
-        self._lbl_target = QLabel(f"FIND: {self.target}")
+        self._lbl_target = QLabel(tr("schulte.find", target=self.target))
         self._lbl_target.setFont(make_qfont("grid_btn"))
         self._lbl_target.setStyleSheet(f"color: {c['fg']};")
         top.addWidget(self._lbl_target)
 
         top.addStretch()
 
-        self._lbl_score = QLabel(f"SCORE: {self.score}")
+        self._lbl_score = QLabel(tr("schulte.score", score=self.score))
         self._lbl_score.setFont(make_qfont("grid_btn"))
         self._lbl_score.setStyleSheet(f"color: {c['accent']};")
         top.addWidget(self._lbl_score)
 
         top.addStretch()
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -170,5 +171,5 @@ class SchulteExercise(BaseExercise):
         )
         is_pb = self.complete(result)
         self.show_result_screen(
-            result, is_personal_best=is_pb, details="Grid cleared!"
+            result, is_personal_best=is_pb, details=tr("result.grid_cleared")
         )

@@ -24,6 +24,7 @@ from PyQt6.QtGui import QKeySequence, QShortcut
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css, screen_metrics, theme_manager
 from neural_speed_academy.config import RAPID_DECISION_CONFIG
+from neural_speed_academy.i18n import tr
 
 
 class RapidDecisionGridExercise(BaseExercise):
@@ -95,7 +96,7 @@ class RapidDecisionGridExercise(BaseExercise):
         # Guide button
         top = QHBoxLayout()
         top.setContentsMargins(0, 0, 0, 0)
-        guide_btn = QPushButton("GUIDE")
+        guide_btn = QPushButton(tr("chunking.guide"))
         guide_btn.setFont(make_qfont("btn_sm"))
         guide_btn.setStyleSheet(
             f"background-color: {c['accent']}; color: {c['btn_text']}; "
@@ -109,7 +110,7 @@ class RapidDecisionGridExercise(BaseExercise):
         top.addStretch()
         cl.addLayout(top)
 
-        title = QLabel("RAPID DECISION GRID")
+        title = QLabel(tr("rapid.decision.rapid_decision_grid"))
         title.setFont(make_qfont("section_header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -120,7 +121,7 @@ class RapidDecisionGridExercise(BaseExercise):
         # Mode selector
         mode_row = QHBoxLayout()
         mode_row.addStretch()
-        mode_lbl = QLabel("Mode:")
+        mode_lbl = QLabel(tr("pacer.mode"))
         mode_lbl.setFont(make_qfont("slider_label"))
         mode_lbl.setStyleSheet(f"color: {c['fg']};")
         mode_row.addWidget(mode_lbl)
@@ -159,7 +160,7 @@ class RapidDecisionGridExercise(BaseExercise):
         # Grid size
         size_row = QHBoxLayout()
         size_row.addStretch()
-        size_lbl = QLabel("Grid size:")
+        size_lbl = QLabel(tr("rapid.decision.grid_size"))
         size_lbl.setFont(make_qfont("slider_label"))
         size_lbl.setStyleSheet(f"color: {c['fg']};")
         size_row.addWidget(size_lbl)
@@ -185,7 +186,7 @@ class RapidDecisionGridExercise(BaseExercise):
         # Cell size
         cell_row = QHBoxLayout()
         cell_row.addStretch()
-        cell_lbl = QLabel("Cell size:")
+        cell_lbl = QLabel(tr("rapid.decision.cell_size"))
         cell_lbl.setFont(make_qfont("slider_label"))
         cell_lbl.setStyleSheet(f"color: {c['fg']};")
         cell_row.addWidget(cell_lbl)
@@ -212,7 +213,7 @@ class RapidDecisionGridExercise(BaseExercise):
         # Time limit
         time_row = QHBoxLayout()
         time_row.addStretch()
-        time_lbl = QLabel("Time limit:")
+        time_lbl = QLabel(tr("rapid.decision.time_limit"))
         time_lbl.setFont(make_qfont("slider_label"))
         time_lbl.setStyleSheet(f"color: {c['fg']};")
         time_row.addWidget(time_lbl)
@@ -241,7 +242,7 @@ class RapidDecisionGridExercise(BaseExercise):
 
         # Start button
         cl.addSpacing(8)
-        start_btn = QPushButton("START")
+        start_btn = QPushButton(tr("mot.start"))
         start_btn.setFont(make_qfont("btn_lg"))
         start_btn.setStyleSheet(
             f"QPushButton {{ background-color: {c['success']}; "
@@ -252,7 +253,7 @@ class RapidDecisionGridExercise(BaseExercise):
         start_btn.clicked.connect(self._start_from_ui)
         cl.addWidget(start_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        hint = QLabel("Ctrl+Enter to start")
+        hint = QLabel(tr("mot.ctrl_enter_to_start"))
         hint.setFont(make_qfont("btn_sm"))
         hint.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -336,7 +337,7 @@ class RapidDecisionGridExercise(BaseExercise):
 
         stats.addStretch()
 
-        self._lbl_score = QLabel("SCORE: 0")
+        self._lbl_score = QLabel(tr("rapid.decision.score_0"))
         self._lbl_score.setFont(make_qfont("grid_btn"))
         self._lbl_score.setStyleSheet(f"color: {c['accent']};")
         stats.addWidget(self._lbl_score)
@@ -349,9 +350,9 @@ class RapidDecisionGridExercise(BaseExercise):
         self._lbl_timer.setStyleSheet(f"color: {c['fg']};")
         stats.addWidget(self._lbl_timer)
 
-        exit_btn = QPushButton("\u2716")
-        exit_btn.setAccessibleName("Close")
-        exit_btn.setToolTip("Close")
+        exit_btn = QPushButton(tr("chunking.u2716"))
+        exit_btn.setAccessibleName(tr("chunking.close"))
+        exit_btn.setToolTip(tr("chunking.close"))
         exit_btn.setFont(make_qfont("exit_btn"))
         exit_btn.setStyleSheet(
             btn_css(c["alert"], c["text_on_card"], padding="4px 8px",
@@ -614,11 +615,11 @@ class RapidDecisionGridExercise(BaseExercise):
         )
         is_pb = self.complete(result)
 
-        status = "Time's up!" if timed_out else "Grid cleared!"
+        status = tr("result.times_up") if timed_out else tr("result.grid_cleared")
         mode_label = dict(self.MODES).get(self._mode, self._mode)
         details = (
-            f"Mode: {mode_label}\n"
-            f"Completed: {completed}/{total_targets} targets in {elapsed}s\n"
+            f"{tr('result.mode', mode=mode_label)}\n"
+            f"{tr('result.completed', done=completed, total=total_targets, time=elapsed)}\n"
             f"{status}"
         )
         self.show_result_screen(result, is_personal_best=is_pb, details=details)

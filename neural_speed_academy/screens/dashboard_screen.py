@@ -13,6 +13,7 @@ from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class DashboardScreen(BaseScreen):
@@ -32,7 +33,7 @@ class DashboardScreen(BaseScreen):
         header.setStyleSheet(f"background-color: {c['card']};")
         header.setFixedHeight(60)
         hl = QHBoxLayout(header)
-        title = QLabel("TRAINING HUB")
+        title = QLabel(tr("dashboard.training_hub"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['text_on_card']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -69,7 +70,7 @@ class DashboardScreen(BaseScreen):
 
         # Eye Priming — standalone warmup button above exercise grid
         c_priming = COLORS
-        warmup_btn = QPushButton("EYE WARMUP")
+        warmup_btn = QPushButton(tr("dashboard.eye_warmup"))
         warmup_btn.setMaximumWidth(250)
         warmup_btn.setStyleSheet(
             btn_css(c_priming["priming"], c_priming["btn_text"],
@@ -84,26 +85,26 @@ class DashboardScreen(BaseScreen):
         grid = QGridLayout()
         grid.setSpacing(8)
 
-        self._create_section(grid, "PERCEPTION", 0, [
-            ("Flash Numbers", self._cb("menu_flash")),
-            ("Word Drills", self._cb("menu_words")),
-            ("Eye-Span", self._cb("menu_eyespan")),
-            ("Schulte Grid", self._cb("menu_schulte")),
-            ("Peripheral Flash", self._cb("menu_peripheral_flash")),
+        self._create_section(grid, tr("dashboard.cat.perception"), 0, [
+            (tr("dashboard.ex.flash_numbers"), self._cb("menu_flash")),
+            (tr("dashboard.ex.word_drills"), self._cb("menu_words")),
+            (tr("dashboard.ex.eyespan"), self._cb("menu_eyespan")),
+            (tr("dashboard.ex.schulte"), self._cb("menu_schulte")),
+            (tr("dashboard.ex.peripheral_flash"), self._cb("menu_peripheral_flash")),
         ])
-        self._create_section(grid, "COGNITION", 1, [
-            ("Sequence Memory", self._cb("menu_sequence_memory")),
-            ("Rapid Decision", self._cb("menu_rapid_decision")),
-            ("Object Tracking", self._cb("menu_mot")),
-            ("Split Attention", self._cb("menu_split_attention")),
-            ("Reaction Time", self._cb("menu_reaction_time")),
+        self._create_section(grid, tr("dashboard.cat.cognition"), 1, [
+            (tr("dashboard.ex.sequence_memory"), self._cb("menu_sequence_memory")),
+            (tr("dashboard.ex.rapid_decision"), self._cb("menu_rapid_decision")),
+            (tr("dashboard.ex.mot"), self._cb("menu_mot")),
+            (tr("dashboard.ex.split_attention"), self._cb("menu_split_attention")),
+            (tr("dashboard.ex.reaction_time"), self._cb("menu_reaction_time")),
         ])
-        self._create_section(grid, "READING", 2, [
-            ("Pacer & Quiz", self._cb("setup_pacer")),
-            ("RSVP Reader", self._cb("setup_rsvp")),
-            ("Chunking", self._cb("setup_chunking")),
-            ("Spaced Repetition", self._cb("start_sr")),
-            ("Slide Processing", self._cb("menu_slide_processing")),
+        self._create_section(grid, tr("dashboard.cat.reading"), 2, [
+            (tr("dashboard.ex.pacer"), self._cb("setup_pacer")),
+            (tr("dashboard.ex.rsvp"), self._cb("setup_rsvp")),
+            (tr("dashboard.ex.chunking"), self._cb("setup_chunking")),
+            (tr("dashboard.ex.spaced_repetition"), self._cb("start_sr")),
+            (tr("dashboard.ex.slide_processing"), self._cb("menu_slide_processing")),
         ])
         cl.addLayout(grid)
         cl.addStretch()
@@ -127,21 +128,20 @@ class DashboardScreen(BaseScreen):
         cl = QHBoxLayout(card)
 
         level = user.xp // 1000 + 1
-        info = QLabel(
-            f"{user.name.upper()}   |   Level {level}   |   "
-            f"Streak: {user.streak} day{'s' if user.streak != 1 else ''}"
-        )
+        info = QLabel(tr("dashboard.user_info",
+            name=user.name.upper(), level=level,
+            streak=user.streak))
         info.setFont(make_qfont("btn_sm"))
         info.setStyleSheet(f"color: {c['text_on_card']};")
         cl.addWidget(info)
         cl.addStretch()
 
-        last_text = "No sessions yet"
+        last_text = tr("dashboard.no_sessions_yet")
         if user.history:
             last = user.history[0]
-            last_text = (
-                f"Last: {last.exercise} \u2014 {last.result} ({last.timestamp})"
-            )
+            last_text = tr("dashboard.last_session_info",
+                exercise=exercise_display_name(last.exercise),
+                result=last.result, timestamp=last.timestamp)
         last_lbl = QLabel(last_text)
         last_lbl.setFont(make_qfont("btn_sm"))
         last_lbl.setStyleSheet(f"color: {c['muted']};")
@@ -164,7 +164,7 @@ class DashboardScreen(BaseScreen):
         )
         bar_row.addWidget(progress)
 
-        xp_label = QLabel(f"{xp_in_level}/1000 XP to Level {level + 1}")
+        xp_label = QLabel(tr("stats.xp_to_next", current=xp_in_level, level=level + 1))
         xp_label.setFont(make_qfont("btn_sm"))
         xp_label.setStyleSheet(f"color: {c['muted']};")
         bar_row.addWidget(xp_label)
@@ -185,13 +185,13 @@ class DashboardScreen(BaseScreen):
         )
         bl = QHBoxLayout(banner)
 
-        welcome = QLabel("Welcome! New to speed reading?")
+        welcome = QLabel(tr("dashboard.welcome_new_to_speed_reading"))
         welcome.setFont(make_qfont("btn_bold"))
         welcome.setStyleSheet(f"color: {c['btn_text']};")
         bl.addWidget(welcome)
         bl.addStretch()
 
-        start_btn = QPushButton("START FOUNDATION PATH")
+        start_btn = QPushButton(tr("dashboard.start_foundation_path"))
         start_btn.setStyleSheet(
             btn_css(c["btn_text"], c["accent"], padding="4px 12px", radius=3)
         )
@@ -227,8 +227,8 @@ class DashboardScreen(BaseScreen):
 
         # Left: forward navigation
         for label, cb_name in [
-            ("Training Paths", "show_paths"),
-            ("Stats & History", "show_stats"),
+            (tr("dashboard.nav.training_paths"), "show_paths"),
+            (tr("dashboard.nav.stats_history"), "show_stats"),
         ]:
             btn = QPushButton(label)
             btn.setStyleSheet(action_style)
@@ -239,7 +239,7 @@ class DashboardScreen(BaseScreen):
         bar.addStretch()
 
         # Right: exit actions
-        menu_btn = QPushButton("Main Menu")
+        menu_btn = QPushButton(tr("nav.main_menu"))
         menu_btn.setStyleSheet(exit_style)
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         menu_btn.clicked.connect(
@@ -247,7 +247,7 @@ class DashboardScreen(BaseScreen):
         )
         bar.addWidget(menu_btn)
 
-        logout_btn = QPushButton("Logout")
+        logout_btn = QPushButton(tr("dashboard.logout"))
         logout_btn.setStyleSheet(exit_style)
         logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         logout_btn.clicked.connect(self.navigator.logout)
@@ -276,7 +276,7 @@ class DashboardScreen(BaseScreen):
         c = COLORS
         _, step_label, _ = steps[pp.current_step]
         btn = QPushButton(
-            f"CONTINUE: {path_data['name']} \u2014 {step_label}"
+            tr("dashboard.continue_path", path=path_data['name'], step=step_label)
         )
         btn.setStyleSheet(
             btn_css(c["success"], c["btn_text"], padding="10px")
@@ -295,7 +295,7 @@ class DashboardScreen(BaseScreen):
             return
         c = COLORS
 
-        header = QLabel("PERSONAL BESTS")
+        header = QLabel(tr("dashboard.personal_bests"))
         header.setFont(make_qfont("section_header"))
         header.setStyleSheet(f"color: {c['muted']};")
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -316,7 +316,7 @@ class DashboardScreen(BaseScreen):
             cl.setContentsMargins(10, 6, 10, 6)
             cl.setSpacing(8)
 
-            name_lbl = QLabel(exercise)
+            name_lbl = QLabel(exercise_display_name(exercise))
             name_lbl.setFont(make_qfont("btn_sm"))
             name_lbl.setStyleSheet(f"color: {c['muted']};")
             cl.addWidget(name_lbl)
