@@ -264,7 +264,7 @@ class FlashMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.flash_numbers"), "flash", None,
-            left_label="DIGITS",
+            left_label=tr("menu.label.digits"),
             presets=[
                 ("1 Digit",   {"low": 1, "high": 1, "rounds": 10}),
                 ("2 Digits",  {"low": 2, "high": 2, "rounds": 10}),
@@ -276,13 +276,13 @@ class FlashMenuScreen(BaseMenuScreen):
                 ("8 Digits",  {"low": 8, "high": 8, "rounds": 15}),
             ],
             params=[
-                ("RANGE", "range_mode", [
-                    ("Fixed", "fixed"),
-                    ("Mix ±1", "mix1"),
-                    ("Mix ±2", "mix2"),
-                    ("Chaos", "chaos"),
+                (tr("menu.label.range"), "range_mode", [
+                    (tr("flash.range.fixed"), "fixed"),
+                    (tr("flash.range.mix1"), "mix1"),
+                    (tr("flash.range.mix2"), "mix2"),
+                    (tr("flash.range.chaos"), "chaos"),
                 ], "fixed"),
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("12", 12), ("15", 15), ("20", 20),
                 ], 10),
             ],
@@ -324,12 +324,12 @@ class WordsMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.word_drills"), "flash", None,
-            left_label="MODE",
+            left_label=tr("menu.label.mode"),
             presets=[
-                ("Ambiguous Words", {"mode": "flash_word"}),
+                (tr("words.ambiguous"), {"mode": "flash_word"}),
             ],
             params=[
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("15", 15), ("20", 20), ("30", 30),
                 ], 10),
             ],
@@ -355,7 +355,7 @@ class EyespanMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.eyespan_training"), "eyespan", None,
-            left_label="DIGITS",
+            left_label=tr("menu.label.digits"),
             presets=[
                 ("1 Digit",  {"low": 1, "high": 1, "rounds": 10}),
                 ("2 Digits", {"low": 2, "high": 2, "rounds": 10}),
@@ -365,18 +365,18 @@ class EyespanMenuScreen(BaseMenuScreen):
                 ("6 Digits", {"low": 6, "high": 6, "rounds": 15}),
             ],
             params=[
-                ("DIRECTION", "direction", [
-                    ("Horizontal", "h"),
-                    ("Vertical", "v"),
-                    ("Mixed", "m"),
+                (tr("menu.label.direction"), "direction", [
+                    (tr("eyespan.horizontal"), "h"),
+                    (tr("eyespan.vertical"), "v"),
+                    (tr("eyespan.mixed"), "m"),
                 ], "h"),
-                ("WIDTH", "width", [
-                    ("Narrow 30%", 30),
-                    ("Medium 50%", 50),
-                    ("Wide 70%", 70),
-                    ("Max 90%", 90),
+                (tr("menu.label.width"), "width", [
+                    (tr("eyespan.narrow"), 30),
+                    (tr("eyespan.medium"), 50),
+                    (tr("eyespan.wide"), 70),
+                    (tr("eyespan.max"), 90),
                 ], 50),
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("12", 12), ("15", 15), ("20", 20),
                 ], 10),
             ],
@@ -446,21 +446,21 @@ class PrimingMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.eye_priming"), "priming", None,
-            left_label="EXERCISE",
+            left_label=tr("menu.label.exercise"),
             presets=[
-                ("Horizontal Saccades", {"mode": "saccade_h", "use_delay": True}),
-                ("Vertical Saccades",   {"mode": "saccade_v", "use_delay": True}),
-                ("Diagonal Saccades",   {"mode": "saccade_diag", "use_delay": True}),
-                ("Expanding Saccades",  {"mode": "saccade_expand", "use_delay": True}),
-                ("Pursuit: Line",       {"mode": "pursuit_line", "use_delay": False}),
-                ("Pursuit: Circle",     {"mode": "pursuit_circle", "use_delay": False}),
-                ("Pursuit: Figure-8",   {"mode": "pursuit_figure8", "use_delay": False}),
+                (tr("priming.saccade_h"), {"mode": "saccade_h", "use_delay": True}),
+                (tr("priming.saccade_v"),   {"mode": "saccade_v", "use_delay": True}),
+                (tr("priming.saccade_diag"),   {"mode": "saccade_diag", "use_delay": True}),
+                (tr("priming.saccade_expand"),  {"mode": "saccade_expand", "use_delay": True}),
+                (tr("priming.pursuit_line"),       {"mode": "pursuit_line", "use_delay": False}),
+                (tr("priming.pursuit_circle"),     {"mode": "pursuit_circle", "use_delay": False}),
+                (tr("priming.pursuit_figure8"),   {"mode": "pursuit_figure8", "use_delay": False}),
             ],
             params=[
-                ("SPEED", "speed", [
-                    ("Slow", "slow"), ("Fast", "fast"),
+                (tr("menu.label.speed"), "speed", [
+                    (tr("priming.slow"), "slow"), (tr("priming.fast"), "fast"),
                 ], "slow"),
-                ("DURATION", "duration_s", [
+                (tr("menu.label.duration"), "duration_s", [
                     ("30s", 30.0), ("45s", 45.0), ("60s", 60.0),
                 ], 45.0),
             ],
@@ -498,30 +498,30 @@ class PeripheralFlashMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.peripheral_flash"), "peripheral_flash", None,
-            left_label="DIFFICULTY",
+            left_label=tr("menu.label.difficulty"),
             presets=[
-                ("Beginner",     {"flash_ms": 100, "eccentricity": 30}),
-                ("Easy",         {"flash_ms": 100, "eccentricity": 50}),
-                ("Moderate",     {"flash_ms": 80,  "eccentricity": 50}),
-                ("Challenging",  {"flash_ms": 80,  "eccentricity": 70}),
-                ("Hard",         {"flash_ms": 60,  "eccentricity": 70}),
-                ("Expert",       {"flash_ms": 50,  "eccentricity": 80}),
-                ("Elite",        {"flash_ms": 50,  "eccentricity": 90}),
+                (tr("menu.diff.beginner"),     {"flash_ms": 100, "eccentricity": 30}),
+                (tr("menu.diff.easy"),         {"flash_ms": 100, "eccentricity": 50}),
+                (tr("menu.diff.moderate"),     {"flash_ms": 80,  "eccentricity": 50}),
+                (tr("menu.diff.challenging"),  {"flash_ms": 80,  "eccentricity": 70}),
+                (tr("menu.diff.hard"),         {"flash_ms": 60,  "eccentricity": 70}),
+                (tr("menu.diff.expert"),       {"flash_ms": 50,  "eccentricity": 80}),
+                (tr("menu.diff.elite"),        {"flash_ms": 50,  "eccentricity": 90}),
             ],
             params=[
-                ("TYPE", "stim_type", [
-                    ("Letters", "letters"),
-                    ("Numbers", "numbers"),
-                    ("Shapes", "shapes"),
+                (tr("menu.label.type"), "stim_type", [
+                    (tr("peripheral.type.letters"), "letters"),
+                    (tr("peripheral.type.numbers"), "numbers"),
+                    (tr("peripheral.type.shapes"), "shapes"),
                 ], "letters"),
-                ("FLASH TIME", "flash_ms", [
+                (tr("menu.label.flash_time"), "flash_ms", [
                     ("100ms", 100), ("80ms", 80), ("60ms", 60), ("50ms", 50),
                 ], 100),
-                ("ECCENTRICITY", "eccentricity", [
+                (tr("menu.label.eccentricity"), "eccentricity", [
                     ("30%", 30), ("50%", 50), ("70%", 70),
                     ("80%", 80), ("90%", 90),
                 ], 50),
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("15", 15), ("20", 20), ("25", 25),
                 ], 15),
             ],
@@ -559,14 +559,14 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
             ],
             params=[
                 (tr("rapid.mode"), "mode", [
-                    ("Ascending", "ascending"),
-                    ("Descending", "descending"),
-                    ("Even Only", "even_only"),
-                    ("Odd Only", "odd_only"),
-                    ("Alternating", "alternating"),
+                    (tr("rapid.ascending"), "ascending"),
+                    (tr("rapid.descending"), "descending"),
+                    (tr("rapid.even_only"), "even_only"),
+                    (tr("rapid.odd_only"), "odd_only"),
+                    (tr("rapid.alternating"), "alternating"),
                 ], "ascending"),
                 (tr("rapid.time_limit"), "time_limit", [
-                    ("None", 0), ("60s", 60), ("45s", 45), ("30s", 30),
+                    (tr("rapid.none"), 0), ("60s", 60), ("45s", 45), ("30s", 30),
                 ], 0),
                 (tr("schulte.grid_fill"), "fill_idx", [
                     ("60%", 0), ("75%", 1), ("90%", 2),
@@ -597,24 +597,24 @@ class MotMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.mot"), "mot", None,
-            left_label="TARGETS",
+            left_label=tr("menu.label.targets"),
             presets=[
-                ("2 Targets", {"targets": 2, "distractors": 4, "speed": 2}),
-                ("3 Targets", {"targets": 3, "distractors": 5, "speed": 3}),
-                ("4 Targets", {"targets": 4, "distractors": 6, "speed": 3}),
-                ("5 Targets", {"targets": 5, "distractors": 7, "speed": 4}),
-                ("6 Targets", {"targets": 6, "distractors": 8, "speed": 5}),
+                (tr("mot.targets", n=2), {"targets": 2, "distractors": 4, "speed": 2}),
+                (tr("mot.targets", n=3), {"targets": 3, "distractors": 5, "speed": 3}),
+                (tr("mot.targets", n=4), {"targets": 4, "distractors": 6, "speed": 3}),
+                (tr("mot.targets", n=5), {"targets": 5, "distractors": 7, "speed": 4}),
+                (tr("mot.targets", n=6), {"targets": 6, "distractors": 8, "speed": 5}),
             ],
             params=[
-                ("SPEED", "speed", [
-                    ("2 (Slow)", 2), ("3", 3), ("4", 4),
-                    ("5 (Fast)", 5), ("6 (Sprint)", 6),
+                (tr("menu.label.speed"), "speed", [
+                    (tr("mot.slow"), 2), ("3", 3), ("4", 4),
+                    (tr("mot.fast"), 5), (tr("mot.sprint"), 6),
                 ], 3),
-                ("DURATION", "duration", [
+                (tr("menu.label.duration"), "duration", [
                     ("5s", 5), ("6s", 6), ("7s", 7),
                     ("8s", 8), ("10s", 10),
                 ], 6),
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("5", 5), ("7", 7), ("10", 10),
                 ], 5),
             ],
@@ -706,14 +706,14 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         left.addWidget(cat_header)
 
         categories = [
-            ("Science", "science"),
-            ("Business", "business"),
-            ("Geography", "geography"),
-            ("Motivation", "motivation"),
-            ("Neuroplasticity", "neuroplasticity"),
-            ("Humor", "humor"),
-            ("History", "history"),
-            ("Nutrition", "nutrition"),
+            (tr("slide.cat.science"), "science"),
+            (tr("slide.cat.business"), "business"),
+            (tr("slide.cat.geography"), "geography"),
+            (tr("slide.cat.motivation"), "motivation"),
+            (tr("slide.cat.neuroplasticity"), "neuroplasticity"),
+            (tr("slide.cat.humor"), "humor"),
+            (tr("slide.cat.history"), "history"),
+            (tr("slide.cat.nutrition"), "nutrition"),
         ]
 
         for label, key in categories:
@@ -816,7 +816,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
 
         time_options = [15, 12, 10, 8, 6, 5, 4, 3]
         for t in time_options:
-            btn = QPushButton(f"{t} seconds")
+            btn = QPushButton(tr("menus.n_seconds", n=t))
             btn.setFont(make_qfont("menu_btn"))
             btn.setFixedHeight(40)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -1028,18 +1028,18 @@ class ReactionTimeMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.reaction_time"), "reaction_time", None,
-            left_label="MODE",
+            left_label=tr("menu.label.mode"),
             presets=[
-                ("Simple",     {"mode": "simple",    "go_ratio": 1.0}),
-                ("Choice",     {"mode": "choice",    "go_ratio": 1.0}),
-                ("Go / No-Go", {"mode": "go_no_go",  "go_ratio": 0.7}),
+                (tr("reaction.simple"),     {"mode": "simple",    "go_ratio": 1.0}),
+                (tr("reaction.choice"),     {"mode": "choice",    "go_ratio": 1.0}),
+                (tr("reaction.go_no_go"), {"mode": "go_no_go",  "go_ratio": 0.7}),
             ],
             params=[
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("15", 15), ("20", 20),
                     ("25", 25), ("30", 30),
                 ], 15),
-                ("GO RATIO (Go/No-Go)", "go_ratio", [
+                (tr("menu.label.go_ratio"), "go_ratio", [
                     ("70/30", 0.7), ("60/40", 0.6), ("50/50", 0.5),
                 ], 0.7),
             ],
@@ -1071,23 +1071,23 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.split_attention"), "split_attention", None,
-            left_label="DIFFICULTY",
+            left_label=tr("menu.label.difficulty"),
             presets=[
-                ("Beginner",    {"center_ms": 150, "peripheral_ms": 120}),
-                ("Easy",        {"center_ms": 120, "peripheral_ms": 100}),
-                ("Moderate",    {"center_ms": 100, "peripheral_ms": 80}),
-                ("Challenging", {"center_ms": 80,  "peripheral_ms": 60}),
-                ("Hard",        {"center_ms": 60,  "peripheral_ms": 50}),
-                ("Expert",      {"center_ms": 50,  "peripheral_ms": 40}),
-                ("Elite",       {"center_ms": 40,  "peripheral_ms": 40}),
+                (tr("menu.diff.beginner"),    {"center_ms": 150, "peripheral_ms": 120}),
+                (tr("menu.diff.easy"),        {"center_ms": 120, "peripheral_ms": 100}),
+                (tr("menu.diff.moderate"),    {"center_ms": 100, "peripheral_ms": 80}),
+                (tr("menu.diff.challenging"), {"center_ms": 80,  "peripheral_ms": 60}),
+                (tr("menu.diff.hard"),        {"center_ms": 60,  "peripheral_ms": 50}),
+                (tr("menu.diff.expert"),      {"center_ms": 50,  "peripheral_ms": 40}),
+                (tr("menu.diff.elite"),       {"center_ms": 40,  "peripheral_ms": 40}),
             ],
             params=[
-                ("MODE", "mode", [
-                    ("Sequential", "sequential"),
-                    ("Simultaneous", "simultaneous"),
-                    ("Rapid", "rapid"),
+                (tr("menu.label.mode"), "mode", [
+                    (tr("split.sequential"), "sequential"),
+                    (tr("split.simultaneous"), "simultaneous"),
+                    (tr("split.rapid"), "rapid"),
                 ], "sequential"),
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("15", 15), ("20", 20), ("25", 25),
                 ], 15),
             ],
@@ -1116,27 +1116,27 @@ class SequenceMemoryMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.sequence_memory"), "sequence_memory", None,
-            left_label="LENGTH",
+            left_label=tr("menu.label.length"),
             presets=[
-                ("3 Items", {"start_length": 3, "flash_ms": 1000}),
-                ("4 Items", {"start_length": 4, "flash_ms": 800}),
-                ("5 Items", {"start_length": 5, "flash_ms": 700}),
-                ("6 Items", {"start_length": 6, "flash_ms": 500}),
-                ("7+ Items", {"start_length": 7, "flash_ms": 400}),
+                (tr("seq.items", n=3), {"start_length": 3, "flash_ms": 1000}),
+                (tr("seq.items", n=4), {"start_length": 4, "flash_ms": 800}),
+                (tr("seq.items", n=5), {"start_length": 5, "flash_ms": 700}),
+                (tr("seq.items", n=6), {"start_length": 6, "flash_ms": 500}),
+                (tr("seq.items", n="7+"), {"start_length": 7, "flash_ms": 400}),
             ],
             params=[
-                ("MODE", "mode", [
-                    ("Numbers", "numbers"),
-                    ("Words", "words"),
-                    ("Mixed", "mixed"),
+                (tr("menu.label.mode"), "mode", [
+                    (tr("seq.numbers"), "numbers"),
+                    (tr("seq.words"), "words"),
+                    (tr("seq.mixed"), "mixed"),
                 ], "numbers"),
-                ("SPEED", "flash_ms", [
-                    ("Slow (1s)", 1000),
-                    ("Normal (800ms)", 800),
-                    ("Fast (500ms)", 500),
-                    ("Sprint (400ms)", 400),
+                (tr("menu.label.speed"), "flash_ms", [
+                    (tr("seq.slow"), 1000),
+                    (tr("seq.normal"), 800),
+                    (tr("seq.fast"), 500),
+                    (tr("seq.sprint"), 400),
                 ], 800),
-                ("ROUNDS", "rounds", [
+                (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("12", 12), ("15", 15), ("20", 20),
                 ], 10),
             ],
