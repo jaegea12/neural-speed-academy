@@ -354,35 +354,45 @@ THEME_LABELS = {
 
 # --- Font Definitions ---
 
+# Cross-platform UI font: Segoe UI (Windows), .AppleSystemUIFont (macOS),
+# Ubuntu/Cantarell (Linux), with sans-serif as final fallback.
+import sys as _sys
+if _sys.platform == "darwin":
+    _UI_FONT = ".AppleSystemUIFont"
+elif _sys.platform.startswith("linux"):
+    _UI_FONT = "Ubuntu"
+else:
+    _UI_FONT = "Segoe UI"
+
 FONTS = {
-    "title": ("Segoe UI", 36, "bold"),
-    "title_lg": ("Segoe UI", 48, "bold"),
-    "header": ("Segoe UI", 26, "bold"),
-    "sub": ("Segoe UI", 12),
-    "tagline": ("Segoe UI", 16),
-    "body": ("Segoe UI", 11),
+    "title": (_UI_FONT, 36, "bold"),
+    "title_lg": (_UI_FONT, 48, "bold"),
+    "header": (_UI_FONT, 26, "bold"),
+    "sub": (_UI_FONT, 12),
+    "tagline": (_UI_FONT, 16),
+    "body": (_UI_FONT, 11),
     "flash": ("Consolas", 90, "bold"),
-    "rsvp": ("Segoe UI", 48, "bold"),
+    "rsvp": (_UI_FONT, 48, "bold"),
     "pacer": ("Georgia", 16),
-    "btn": ("Segoe UI", 11),
-    "btn_bold": ("Segoe UI", 12, "bold"),
-    "btn_lg": ("Segoe UI", 16, "bold"),
-    "btn_sm": ("Segoe UI", 11, "bold"),
-    "section_header": ("Segoe UI", 14, "bold"),
-    "counter": ("Segoe UI", 12, "bold"),
-    "grid_btn": ("Segoe UI", 20, "bold"),
-    "input": ("Segoe UI", 24),
-    "input_sm": ("Segoe UI", 12),
+    "btn": (_UI_FONT, 11),
+    "btn_bold": (_UI_FONT, 12, "bold"),
+    "btn_lg": (_UI_FONT, 16, "bold"),
+    "btn_sm": (_UI_FONT, 11, "bold"),
+    "section_header": (_UI_FONT, 14, "bold"),
+    "counter": (_UI_FONT, 12, "bold"),
+    "grid_btn": (_UI_FONT, 20, "bold"),
+    "input": (_UI_FONT, 24),
+    "input_sm": (_UI_FONT, 12),
     "cross": ("Arial", 50),
     "priming_dot": ("Arial", 30),
     "exit_btn": ("Arial", 14),
-    "slider_label": ("Segoe UI", 12),
+    "slider_label": (_UI_FONT, 12),
     "pacer_text": ("Georgia", 12),
-    "nav_stats": ("Segoe UI", 11, "bold"),
-    "menu_header": ("Segoe UI", 13, "bold"),
-    "menu_btn": ("Segoe UI", 12),
-    "treeview": ("Segoe UI", 10),
-    "treeview_heading": ("Segoe UI", 10, "bold"),
+    "nav_stats": (_UI_FONT, 11, "bold"),
+    "menu_header": (_UI_FONT, 13, "bold"),
+    "menu_btn": (_UI_FONT, 12),
+    "treeview": (_UI_FONT, 10),
+    "treeview_heading": (_UI_FONT, 10, "bold"),
 }
 
 

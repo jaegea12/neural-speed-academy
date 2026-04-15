@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt, QRectF, QPointF
 from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPainterPath
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, btn_css, _UI_FONT
 from neural_speed_academy.i18n import tr, exercise_display_name
 
 
@@ -95,7 +95,7 @@ class _ConsistencyCalendar(QWidget):
         month_h = 16
 
         # Month labels — skip if too close to the previous label
-        font = QFont("Segoe UI", 7)
+        font = QFont(_UI_FONT, 7)
         painter.setPen(QColor(c["muted"]))
         painter.setFont(font)
         fm = painter.fontMetrics()
@@ -172,12 +172,12 @@ class _ProgressChart(QWidget):
 
         # Title
         painter.setPen(QColor(c["text_on_card"]))
-        painter.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        painter.setFont(QFont(_UI_FONT, 11, QFont.Weight.Bold))
         painter.drawText(margin_l, 20, self._title)
 
         if len(self._data) < 2:
             painter.setPen(QColor(c["muted"]))
-            painter.setFont(QFont("Segoe UI", 10))
+            painter.setFont(QFont(_UI_FONT, 10))
             painter.drawText(
                 QRectF(0, 0, w, h), Qt.AlignmentFlag.AlignCenter,
                 "Need at least 2 sessions to show progress"
@@ -194,7 +194,7 @@ class _ProgressChart(QWidget):
         painter.drawLine(margin_l, h - margin_b, w - margin_r, h - margin_b)
 
         # Y labels (0%, 50%, 100%)
-        painter.setFont(QFont("Segoe UI", 8))
+        painter.setFont(QFont(_UI_FONT, 8))
         for pct in [0, 50, 100]:
             y = margin_t + chart_h * (1 - pct / 100)
             painter.setPen(QColor(c["muted"]))
@@ -252,7 +252,7 @@ class _ProgressChart(QWidget):
 
         # X labels (first and last timestamp)
         painter.setPen(QColor(c["muted"]))
-        painter.setFont(QFont("Segoe UI", 8))
+        painter.setFont(QFont(_UI_FONT, 8))
         painter.drawText(margin_l, h - 5, self._data[0][0])
         last_ts = self._data[-1][0]
         fm = painter.fontMetrics()
@@ -404,7 +404,7 @@ class StatsScreen(BaseScreen):
         day_labels_layout.setSpacing(0)
         for label in ["M", "T", "W", "T", "F", "S", "S"]:
             lbl = QLabel(label)
-            lbl.setFont(QFont("Segoe UI", 7))
+            lbl.setFont(QFont(_UI_FONT, 7))
             lbl.setStyleSheet(f"color: {c['muted']};")
             lbl.setFixedHeight(cell + gap)
             lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
