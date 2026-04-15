@@ -37,11 +37,13 @@ class RapidDecisionGridExercise(BaseExercise):
         ("alternating", "Alternating Colors"),
     ]
 
-    # Cell size presets (same as Schulte)
+    # Cell size presets (legacy, used by old config screen)
     _CELL_PRESETS = {
         0: ("Small", 70), 1: ("Medium", 100),
         2: ("Large", 120), 3: ("XL", 140),
     }
+    # Fill-percentage presets (same as Schulte)
+    FILL_PRESETS = {0: 60, 1: 75, 2: 90}
 
     def __init__(self, navigator, parent: QWidget | None = None):
         super().__init__(navigator, parent)
@@ -78,6 +80,8 @@ class RapidDecisionGridExercise(BaseExercise):
         self._mode = kwargs.get("mode", "ascending")
         self._grid_size = kwargs.get("grid_size", cfg["default_grid_size"])
         self._time_limit = kwargs.get("time_limit", 0)
+        if "fill_idx" in kwargs:
+            self._fill_idx = kwargs["fill_idx"]
 
         # Skip config screen when launched from preset menu
         if kwargs:
@@ -384,9 +388,17 @@ class RapidDecisionGridExercise(BaseExercise):
         hint_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._layout.addWidget(hint_lbl)
 
-        # Build grid
-        cell_idx = self._cell_slider.value() if hasattr(self, '_cell_slider') else 1
-        btn_size = screen_metrics.s(self._CELL_PRESETS[cell_idx][1])
+        # Build grid — use fill % if available, else legacy cell presets
+        if hasattr(self, '_fill_idx'):
+            fill_pct = self.FILL_PRESETS.get(self._fill_idx, 75)
+            win = self.window()
+            avail_h = win.height() if win else screen_metrics.screen_h
+            grid_h = int((avail_h - 100) * fill_pct / 100)
+            spacing = 6
+            btn_size = max(30, (grid_h - (self._grid_size - 1) * spacing) // self._grid_size)
+        else:
+            cell_idx = self._cell_slider.value() if hasattr(self, '_cell_slider') else 1
+            btn_size = screen_metrics.s(self._CELL_PRESETS[cell_idx][1])
 
         grid_widget = QWidget()
         grid = QGridLayout(grid_widget)

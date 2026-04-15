@@ -406,6 +406,7 @@ class SchulteMenuScreen(BaseMenuScreen):
         super().__init__(navigator, parent)
 
     def build(self, **kwargs) -> None:
+        saved_grid = theme_manager.schulte_grid_size  # 3–7
         self._create_two_panel_menu(
             tr("menu.schulte_grid"), "schulte", None,
             left_label="GRID SIZE",
@@ -421,7 +422,7 @@ class SchulteMenuScreen(BaseMenuScreen):
                     ("60%", 0), ("75%", 1), ("90%", 2),
                 ], theme_manager.schulte_fill_idx),
             ],
-            default_preset=2,
+            default_preset=max(0, min(4, saved_grid - 3)),
         )
 
     def _tp_launch(self, exercise_cls) -> None:
@@ -567,6 +568,9 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
                 ("TIME LIMIT", "time_limit", [
                     ("None", 0), ("60s", 60), ("45s", 45), ("30s", 30),
                 ], 0),
+                (tr("schulte.grid_fill"), "fill_idx", [
+                    ("60%", 0), ("75%", 1), ("90%", 2),
+                ], 1),
             ],
             default_preset=2,
         )
@@ -581,6 +585,7 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
             mode=self._tp_param_values.get("mode", "ascending"),
             grid_size=preset_vals["grid_size"],
             time_limit=self._tp_param_values.get("time_limit", 0),
+            fill_idx=self._tp_param_values.get("fill_idx", 1),
         )
 
 
