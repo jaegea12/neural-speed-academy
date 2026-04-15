@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen
-from neural_speed_academy.theme import COLORS, make_qfont, btn_css
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css, theme_manager
 from neural_speed_academy.i18n import tr
 
 
@@ -419,7 +419,7 @@ class SchulteMenuScreen(BaseMenuScreen):
             params=[
                 (tr("schulte.grid_fill"), "fill_idx", [
                     ("60%", 0), ("75%", 1), ("90%", 2),
-                ], 1),
+                ], theme_manager.schulte_fill_idx),
             ],
             default_preset=2,
         )
@@ -429,10 +429,10 @@ class SchulteMenuScreen(BaseMenuScreen):
 
         _, preset_vals = self._tp_presets[self._tp_selected_preset]
         grid_size = preset_vals["grid_size"]
-        cell_idx = self._tp_param_values.get("cell_idx", 1)
+        fill_idx = self._tp_param_values.get("fill_idx", 1)
 
         self.navigator.launch_exercise(
-            SchulteExercise, grid_size=grid_size, cell_idx=cell_idx,
+            SchulteExercise, grid_size=grid_size, fill_idx=fill_idx,
         )
 
 

@@ -59,9 +59,11 @@ class SchulteExercise(BaseExercise):
         self._errors = 0
         self._start_time = time.monotonic()
 
-        # Compute cell size from screen height percentage
+        # Compute cell size from window height percentage
         fill_pct = self.FILL_PRESETS.get(fill_idx, 75)
-        avail_h = screen_metrics.screen_h
+        # Use actual window height, not physical screen height
+        win = self.window()
+        avail_h = win.height() if win else screen_metrics.screen_h
         # Reserve space for top bar (~50px) and spacing
         grid_h = int((avail_h - 60) * fill_pct / 100)
         spacing = 6
