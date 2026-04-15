@@ -539,5 +539,8 @@
   "pacer.fov.ultra.full": "Ultra (Pantalla completa)",
   "pacer.mode.single": "Línea única",
   "pacer.mode.multi": "Multilínea",
-  "schulte.grid_fill": "TAMAÑO"
+  "schulte.grid_fill": "RELLENO",
+  "schulte.grid_size": "TAMAÑO CUADRÍCULA",
+  "rapid.mode": "MODO",
+  "rapid.time_limit": "LÍMITE TIEMPO"
 }

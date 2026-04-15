@@ -134,7 +134,7 @@ class SchulteExercise(BaseExercise):
         if value == self.target:
             button.setStyleSheet(
                 f"QPushButton {{ background-color: {c['grid_solved']}; "
-                f"color: {c['grid_text']}; border: 2px solid transparent; border-radius: 4px; }}"
+                f"color: {c['muted']}; border: 2px solid transparent; border-radius: 4px; }}"
             )
             button.setEnabled(False)
             self.target += 1

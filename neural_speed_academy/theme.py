@@ -278,7 +278,7 @@ DARK_BLUE_COLORS = {
     "highlight": "#38bdf8",
     "priming": "#22d3ee",
     "grid_btn": "#1e3350",
-    "grid_solved": "#1e3a5f",
+    "grid_solved": "#111c2a",
     "grid_text": "#d8e4f0",
     "success": "#34d399",
     "cross": "#4b6a8a",

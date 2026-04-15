@@ -539,5 +539,8 @@
   "pacer.fov.ultra.full": "Ultra (Plein écran)",
   "pacer.mode.single": "Ligne unique",
   "pacer.mode.multi": "Multilignes",
-  "schulte.grid_fill": "REMPLISSAGE"
+  "schulte.grid_fill": "REMPLISSAGE",
+  "schulte.grid_size": "TAILLE GRILLE",
+  "rapid.mode": "MODE",
+  "rapid.time_limit": "LIMITE TEMPS"
 }

@@ -539,5 +539,8 @@
   "pacer.fov.ultra.full": "Ultra (Schermo intero)",
   "pacer.mode.single": "Riga singola",
   "pacer.mode.multi": "Multiriga",
-  "schulte.grid_fill": "DIMENSIONE"
+  "schulte.grid_fill": "RIEMPIMENTO",
+  "schulte.grid_size": "DIM. GRIGLIA",
+  "rapid.mode": "MODALITÀ",
+  "rapid.time_limit": "LIMITE TEMPO"
 }

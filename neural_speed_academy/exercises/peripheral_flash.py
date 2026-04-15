@@ -335,12 +335,12 @@ class PeripheralFlashExercise(BaseExercise):
             Qt.AlignmentFlag.AlignCenter,
         )
 
-        # Feedback label
-        self._feedback_lbl = QLabel("")
+        # Feedback label (positioned near fixation cross in arena)
+        self._feedback_lbl = QLabel("", self._arena)
         self._feedback_lbl.setFont(make_qfont("btn_bold"))
         self._feedback_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._feedback_lbl.setFixedHeight(30)
-        self._layout.addWidget(self._feedback_lbl)
+        self._feedback_lbl.setFixedSize(300, 30)
+        self._feedback_lbl.hide()
 
         # Start first round after a brief delay
         self._after(800, self._next_round)
@@ -350,13 +350,21 @@ class PeripheralFlashExercise(BaseExercise):
         self._position_fixation()
 
     def _position_fixation(self) -> None:
-        """Center the fixation cross in the arena."""
+        """Center the fixation cross and feedback label in the arena."""
         if self._arena and self._fixation:
             aw = self._arena.width()
             ah = self._arena.height()
             fw = self._fixation.width()
             fh = self._fixation.height()
-            self._fixation.move((aw - fw) // 2, (ah - fh) // 2)
+            fx = (aw - fw) // 2
+            fy = (ah - fh) // 2
+            self._fixation.move(fx, fy)
+            # Position feedback just below the fixation cross
+            if self._feedback_lbl:
+                fbw = self._feedback_lbl.width()
+                self._feedback_lbl.move(
+                    (aw - fbw) // 2, fy + fh + 8
+                )
 
     def _generate_stimulus(self) -> tuple[str, str]:
         """Generate a stimulus and its answer string.
@@ -411,8 +419,7 @@ class PeripheralFlashExercise(BaseExercise):
         self._progress_lbl.setText(
             f"Round {self._round}/{self._total_rounds}"
         )
-        self._feedback_lbl.setText("")
-        self._feedback_lbl.setStyleSheet(f"color: {c['bg']};")
+        self._feedback_lbl.hide()
         self._answer_container.hide()
 
         # Position fixation
@@ -509,7 +516,9 @@ class PeripheralFlashExercise(BaseExercise):
         if chosen == self._current_answer:
             self._correct += 1
             self._feedback_lbl.setText(tr("peripheral.flash.u2714_correct"))
-            self._feedback_lbl.setStyleSheet(f"color: {c['success']};")
+            self._feedback_lbl.setStyleSheet(
+                f"color: {c['success']}; background: transparent;"
+            )
         else:
             expected = self._current_answer
             if self._stim_type == "shapes":
@@ -520,7 +529,10 @@ class PeripheralFlashExercise(BaseExercise):
                 sym = shape_map.get(expected, "")
                 expected = f"{sym} {expected}" if sym else expected
             self._feedback_lbl.setText(f"\u2718 It was: {expected}")
-            self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
+            self._feedback_lbl.setStyleSheet(
+                f"color: {c['alert']}; background: transparent;"
+            )
+        self._feedback_lbl.show()
 
         self._score_lbl.setText(f"Score: {self._correct}/{self._round}")
         self._answer_container.hide()

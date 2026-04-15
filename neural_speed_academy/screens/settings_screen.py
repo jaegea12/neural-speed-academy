@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QRadioButton, QButtonGroup, QFrame,
+    QButtonGroup,
     QMessageBox, QSlider,
 )
 from PyQt6.QtCore import Qt
@@ -19,19 +19,16 @@ from neural_speed_academy.theme import (
 from neural_speed_academy.i18n import tr
 
 
-def _radio_style(c: dict) -> str:
-    """QSS for radio buttons with visible indicator in all themes."""
+def _toggle_style(c: dict) -> str:
+    """QSS for toggle buttons used in place of radio buttons."""
     return (
-        f"QRadioButton {{ color: {c['fg']}; background: transparent; "
-        f"spacing: 8px; padding: 2px 4px; border-radius: 3px; }}"
-        f"QRadioButton:hover {{ background-color: {c['card']}; }}"
-        f"QRadioButton::indicator {{ width: 16px; height: 16px; "
-        f"border: 2px solid {c['muted']}; border-radius: 8px; "
-        f"background: transparent; }}"
-        f"QRadioButton::indicator:checked {{ "
-        f"border: 2px solid {c['accent']}; "
-        f"background: {c['accent']}; }}"
-        f"QRadioButton:focus {{ outline: 2px solid {c['accent']}; }}"
+        f"QPushButton {{ color: {c['fg']}; background: {c['card']}; "
+        f"border: 2px solid transparent; border-radius: 4px; "
+        f"padding: 4px 12px; text-align: left; }}"
+        f"QPushButton:hover {{ background: {c['card']}; "
+        f"border: 2px solid {c['muted']}; }}"
+        f"QPushButton:checked {{ background: {c['accent']}; "
+        f"color: {c['btn_text']}; border: 2px solid {c['accent']}; }}"
     )
 
 
@@ -60,7 +57,7 @@ class SettingsScreen(BaseScreen):
         cl.addSpacing(10)
 
         # --- Settings: 3 sections side by side ---
-        rb_style = _radio_style(c)
+        toggle_style = _toggle_style(c)
 
         top_row = QHBoxLayout()
         top_row.setSpacing(40)
@@ -102,14 +99,16 @@ class SettingsScreen(BaseScreen):
             header.setStyleSheet(f"color: {c['muted']};")
             col.addWidget(header)
             for key, label in profiles:
-                rb = QRadioButton(label)
-                rb.setFont(make_qfont("btn"))
-                rb.setStyleSheet(rb_style)
-                rb.setProperty("profile_key", key)
+                btn = QPushButton(label)
+                btn.setCheckable(True)
+                btn.setFont(make_qfont("btn"))
+                btn.setStyleSheet(toggle_style)
+                btn.setProperty("profile_key", key)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 if key == theme_manager.profile:
-                    rb.setChecked(True)
-                self._profile_group.addButton(rb)
-                col.addWidget(rb)
+                    btn.setChecked(True)
+                self._profile_group.addButton(btn)
+                col.addWidget(btn)
             col.addStretch()
             theme_cols.addLayout(col)
         profile_section.addLayout(theme_cols)
@@ -130,17 +129,19 @@ class SettingsScreen(BaseScreen):
 
         self._disp_group = QButtonGroup(self)
         for key, label in [("fullscreen", tr("settings.fullscreen")), ("windowed", tr("settings.windowed"))]:
-            rb = QRadioButton(label)
-            rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(rb_style)
-            rb.setProperty("disp_key", key)
+            btn = QPushButton(label)
+            btn.setCheckable(True)
+            btn.setFont(make_qfont("btn"))
+            btn.setStyleSheet(toggle_style)
+            btn.setProperty("disp_key", key)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
             is_fs = theme_manager.fullscreen
-            rb.setChecked(
+            btn.setChecked(
                 (key == "fullscreen" and is_fs) or
                 (key == "windowed" and not is_fs)
             )
-            self._disp_group.addButton(rb)
-            disp_section.addWidget(rb)
+            self._disp_group.addButton(btn)
+            disp_section.addWidget(btn)
         self._disp_group.buttonClicked.connect(self._on_display_changed)
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)

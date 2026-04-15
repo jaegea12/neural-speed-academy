@@ -409,7 +409,7 @@ class SchulteMenuScreen(BaseMenuScreen):
         saved_grid = theme_manager.schulte_grid_size  # 3–7
         self._create_two_panel_menu(
             tr("menu.schulte_grid"), "schulte", None,
-            left_label="GRID SIZE",
+            left_label=tr("schulte.grid_size"),
             presets=[
                 ("3×3  (9)",   {"grid_size": 3}),
                 ("4×4  (16)",  {"grid_size": 4}),
@@ -549,7 +549,7 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.rapid_decision"), "rapid_decision", None,
-            left_label="GRID SIZE",
+            left_label=tr("schulte.grid_size"),
             presets=[
                 ("3\u00d73",  {"grid_size": 3}),
                 ("4\u00d74",  {"grid_size": 4}),
@@ -558,14 +558,14 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
                 ("7\u00d77",  {"grid_size": 7}),
             ],
             params=[
-                ("MODE", "mode", [
+                (tr("rapid.mode"), "mode", [
                     ("Ascending", "ascending"),
                     ("Descending", "descending"),
                     ("Even Only", "even_only"),
                     ("Odd Only", "odd_only"),
                     ("Alternating", "alternating"),
                 ], "ascending"),
-                ("TIME LIMIT", "time_limit", [
+                (tr("rapid.time_limit"), "time_limit", [
                     ("None", 0), ("60s", 60), ("45s", 45), ("30s", 30),
                 ], 0),
                 (tr("schulte.grid_fill"), "fill_idx", [

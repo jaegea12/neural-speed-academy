@@ -539,5 +539,8 @@
   "pacer.fov.ultra.full": "Ultra (Vollbild)",
   "pacer.mode.single": "Einzelzeile",
   "pacer.mode.multi": "Mehrzeilig",
-  "schulte.grid_fill": "RASTERGRÖSSE"
+  "schulte.grid_fill": "FÜLLUNG",
+  "schulte.grid_size": "RASTERGRÖSSE",
+  "rapid.mode": "MODUS",
+  "rapid.time_limit": "ZEITLIMIT"
 }
