@@ -538,5 +538,6 @@
   "pacer.fov.full.full": "Plein (Expert)",
   "pacer.fov.ultra.full": "Ultra (Plein écran)",
   "pacer.mode.single": "Ligne unique",
-  "pacer.mode.multi": "Multilignes"
+  "pacer.mode.multi": "Multilignes",
+  "schulte.grid_fill": "REMPLISSAGE"
 }

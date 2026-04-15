@@ -538,5 +538,6 @@
   "pacer.fov.full.full": "Completo (Especialista)",
   "pacer.fov.ultra.full": "Ultra (Tela cheia)",
   "pacer.mode.single": "Linha única",
-  "pacer.mode.multi": "Multilinhas"
+  "pacer.mode.multi": "Multilinhas",
+  "schulte.grid_fill": "TAMANHO"
 }

@@ -444,6 +444,7 @@ class ThemeManager:
         self._fullscreen: bool = True
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
+        self._schulte_fill_idx: int = 1             # 0=60%, 1=75%, 2=90%
         self._custom_texts: dict[str, str] = {}     # name -> text
         self._locale: str = "en"
         self._listeners: list = []
@@ -505,6 +506,14 @@ class ThemeManager:
         self._schulte_cell_idx = max(0, min(3, value))
 
     @property
+    def schulte_fill_idx(self) -> int:
+        return self._schulte_fill_idx
+
+    @schulte_fill_idx.setter
+    def schulte_fill_idx(self, value: int) -> None:
+        self._schulte_fill_idx = max(0, min(2, value))
+
+    @property
     def fov_config(self) -> dict:
         """Return the active FOV preset values."""
         return FOV_PRESETS.get(self._fov, FOV_PRESETS[DEFAULT_FOV])
@@ -564,6 +573,7 @@ class ThemeManager:
                 data["schulte_grid_size"] = self._schulte_grid_size
             if self._schulte_cell_idx is not None:
                 data["schulte_cell_idx"] = self._schulte_cell_idx
+            data["schulte_fill_idx"] = self._schulte_fill_idx
             if self._custom_texts:
                 data["custom_texts"] = self._custom_texts
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
@@ -597,6 +607,9 @@ class ThemeManager:
             sc = data.get("schulte_cell_idx")
             if sc is not None:
                 self._schulte_cell_idx = int(sc)
+            sf = data.get("schulte_fill_idx")
+            if sf is not None:
+                self._schulte_fill_idx = int(sf)
             ct = data.get("custom_texts")
             if isinstance(ct, dict):
                 self._custom_texts = {k: v for k, v in ct.items()

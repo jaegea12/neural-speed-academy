@@ -538,5 +538,6 @@
   "pacer.fov.full.full": "Full (Expert)",
   "pacer.fov.ultra.full": "Ultra (Full Screen)",
   "pacer.mode.single": "Single-Line",
-  "pacer.mode.multi": "Multi-Line"
+  "pacer.mode.multi": "Multi-Line",
+  "schulte.grid_fill": "GRID FILL"
 }

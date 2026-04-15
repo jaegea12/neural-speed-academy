@@ -13,7 +13,7 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 
 from neural_speed_academy.theme import (
-    COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, btn_css,
+    COLORS, THEME_LABELS, make_qfont, font_css, btn_css,
     theme_manager,
 )
 from neural_speed_academy.i18n import tr
@@ -45,7 +45,6 @@ class SettingsScreen(BaseScreen):
         # Snapshot saved state on first build only; preserve across theme rebuilds
         if not hasattr(self, '_initial_profile'):
             self._initial_profile = theme_manager.profile
-            self._initial_fov = theme_manager.fov
             self._initial_fullscreen = theme_manager.fullscreen
             self._initial_text = theme_manager.training_text
 
@@ -116,32 +115,6 @@ class SettingsScreen(BaseScreen):
         profile_section.addLayout(theme_cols)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
         top_row.addLayout(profile_section, 2)
-
-        # -- FIELD OF VIEW section --
-        fov_section = QVBoxLayout()
-        fov_section.setSpacing(4)
-        sec2 = QLabel(tr("settings.field_of_view"))
-        sec2.setFont(make_qfont("section_header"))
-        sec2.setStyleSheet(f"color: {c['accent']};")
-        fov_section.addWidget(sec2)
-        fov_desc = QLabel(tr("settings.pacer_page_width_font"))
-        fov_desc.setFont(make_qfont("btn_sm"))
-        fov_desc.setStyleSheet(f"color: {c['muted']};")
-        fov_section.addWidget(fov_desc)
-
-        self._fov_group = QButtonGroup(self)
-        for key, preset in FOV_PRESETS.items():
-            rb = QRadioButton(tr(f"pacer.fov.{key}.full"))
-            rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(rb_style)
-            rb.setProperty("fov_key", key)
-            if key == theme_manager.fov:
-                rb.setChecked(True)
-            self._fov_group.addButton(rb)
-            fov_section.addWidget(rb)
-        self._fov_group.buttonClicked.connect(self._on_fov_changed)
-        fov_section.addStretch()
-        top_row.addLayout(fov_section, 1)
 
         # -- DISPLAY MODE section --
         disp_section = QVBoxLayout()
@@ -342,8 +315,6 @@ class SettingsScreen(BaseScreen):
         """Check if any settings differ from the last saved state."""
         if theme_manager.profile != self._initial_profile:
             return True
-        if theme_manager.fov != self._initial_fov:
-            return True
         if theme_manager.fullscreen != self._initial_fullscreen:
             return True
         if hasattr(self, '_text_lib'):
@@ -380,7 +351,6 @@ class SettingsScreen(BaseScreen):
         elif clicked == discard_btn:
             # Revert unsaved changes
             theme_manager.set_profile(self._initial_profile)
-            theme_manager.fov = self._initial_fov
             theme_manager.fullscreen = self._initial_fullscreen
             return True
         else:
@@ -399,9 +369,6 @@ class SettingsScreen(BaseScreen):
         # Rebuild in-place to reflect new colors without polluting nav history
         self.show_screen()
 
-    def _on_fov_changed(self, btn) -> None:
-        theme_manager.fov = btn.property("fov_key")
-
     def _on_display_changed(self, btn) -> None:
         is_fs = btn.property("disp_key") == "fullscreen"
         theme_manager.fullscreen = is_fs
@@ -419,7 +386,6 @@ class SettingsScreen(BaseScreen):
         theme_manager.save()
         # Update snapshot so back-navigation won't warn again
         self._initial_profile = theme_manager.profile
-        self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
 
@@ -427,7 +393,6 @@ class SettingsScreen(BaseScreen):
         theme_manager.reset_defaults()
         # Reset the snapshot since defaults were saved
         self._initial_profile = theme_manager.profile
-        self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
         self.show_screen()

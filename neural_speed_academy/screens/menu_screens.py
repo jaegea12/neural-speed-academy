@@ -417,8 +417,8 @@ class SchulteMenuScreen(BaseMenuScreen):
                 ("7×7  (49)",  {"grid_size": 7}),
             ],
             params=[
-                ("CELL SIZE", "cell_idx", [
-                    ("Small", 0), ("Medium", 1), ("Large", 2), ("XL", 3),
+                (tr("schulte.grid_fill"), "fill_idx", [
+                    ("60%", 0), ("75%", 1), ("90%", 2),
                 ], 1),
             ],
             default_preset=2,

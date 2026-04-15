@@ -31,24 +31,20 @@ class SchulteExercise(BaseExercise):
     def name(self) -> str:
         return "Schulte Grid"
 
+    # Fill-percentage presets: how much of the screen height the grid uses
+    FILL_PRESETS = {0: 60, 1: 75, 2: 90}
+
     def start(self, **kwargs) -> None:
         grid_size = kwargs.get("grid_size", theme_manager.schulte_grid_size)
-        cell_idx = kwargs.get("cell_idx", theme_manager.schulte_cell_idx)
-        self._show_countdown(lambda: self._start_grid(grid_size, cell_idx))
-
-    # Reference cell sizes (px at 1920×1080), scaled by ScreenMetrics
-    _CELL_PRESETS = {0: ("Small", 70), 1: ("Medium", 100), 2: ("Large", 120), 3: ("XL", 140)}
-
-    @classmethod
-    def _cell_px(cls, idx: int) -> int:
-        return screen_metrics.s(cls._CELL_PRESETS[idx][1])
+        fill_idx = kwargs.get("fill_idx", getattr(theme_manager, "schulte_fill_idx", 1))
+        self._show_countdown(lambda: self._start_grid(grid_size, fill_idx))
 
     # ── Grid screen ──
 
-    def _start_grid(self, grid_size: int = 5, cell_idx: int = 1) -> None:
+    def _start_grid(self, grid_size: int = 5, fill_idx: int = 1) -> None:
         # Save as new defaults
         theme_manager.schulte_grid_size = grid_size
-        theme_manager.schulte_cell_idx = cell_idx
+        theme_manager.schulte_fill_idx = fill_idx
         theme_manager.save()
 
         self._clear()
@@ -63,7 +59,13 @@ class SchulteExercise(BaseExercise):
         self._errors = 0
         self._start_time = time.monotonic()
 
-        btn_size = self._cell_px(cell_idx)
+        # Compute cell size from screen height percentage
+        fill_pct = self.FILL_PRESETS.get(fill_idx, 75)
+        avail_h = screen_metrics.screen_h
+        # Reserve space for top bar (~50px) and spacing
+        grid_h = int((avail_h - 60) * fill_pct / 100)
+        spacing = 6
+        btn_size = max(30, (grid_h - (grid_size - 1) * spacing) // grid_size)
 
         # Minimal top bar
         top = QHBoxLayout()
