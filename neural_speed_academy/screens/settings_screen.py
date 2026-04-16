@@ -322,9 +322,11 @@ class SettingsScreen(BaseScreen):
 
 
     def _has_unsaved_changes(self) -> bool:
-        """Check if any settings differ from the last saved state."""
-        if theme_manager.profile != self._initial_profile:
-            return True
+        """Check if any settings differ from the last saved state.
+
+        Profile changes are persisted immediately in _on_profile_changed,
+        so only text and fullscreen need checking here.
+        """
         if theme_manager.fullscreen != self._initial_fullscreen:
             return True
         if hasattr(self, '_text_lib'):
@@ -359,8 +361,8 @@ class SettingsScreen(BaseScreen):
             self._save()
             return True
         elif clicked == discard_btn:
-            # Revert unsaved changes
-            theme_manager.set_profile(self._initial_profile)
+            # Revert unsaved text/fullscreen changes
+            # (profile is already persisted by _on_profile_changed)
             theme_manager.fullscreen = self._initial_fullscreen
             return True
         else:
@@ -371,6 +373,9 @@ class SettingsScreen(BaseScreen):
     def _on_profile_changed(self, btn) -> None:
         profile = btn.property("profile_key")
         theme_manager.set_profile(profile)
+        # Persist immediately so nsa_settings.json stays in sync
+        theme_manager.save()
+        self._initial_profile = profile
         # Save to user profile if logged in
         user = self.navigator.get_user()
         if user:
