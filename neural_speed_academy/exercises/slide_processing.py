@@ -20,8 +20,9 @@ from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import (
-    SLIDE_PROCESSING_CONFIG, SLIDE_LIBRARY, USER_DATA_CONFIG,
+    SLIDE_PROCESSING_CONFIG, USER_DATA_CONFIG,
 )
+from neural_speed_academy.slides import get_slide_library
 from neural_speed_academy.i18n import tr
 
 
@@ -229,22 +230,23 @@ class SlideProcessingExercise(BaseExercise):
 
     def _build_and_start(self) -> None:
         # Build slide pool from selected categories
+        library = get_slide_library()
         pool = []
         cats = self._category.split(",")
         if "custom_only" not in cats:
             if "mixed" in cats:
-                for slides in SLIDE_LIBRARY.values():
+                for slides in library.values():
                     pool.extend(slides)
             else:
                 for cat in cats:
-                    pool.extend(SLIDE_LIBRARY.get(cat.strip(), []))
+                    pool.extend(library.get(cat.strip(), []))
 
         # Add custom slides
         if self._custom_slides:
             pool.extend(self._custom_slides)
 
         if not pool:
-            for slides in SLIDE_LIBRARY.values():
+            for slides in library.values():
                 pool.extend(slides)
 
         random.shuffle(pool)
