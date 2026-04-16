@@ -43,7 +43,11 @@ class SettingsScreen(BaseScreen):
         if not hasattr(self, '_initial_profile'):
             self._initial_profile = theme_manager.profile
             self._initial_fullscreen = theme_manager.fullscreen
+            # Will be updated after TextLibraryWidget is created (see below)
             self._initial_text = theme_manager.training_text
+            self._need_text_snapshot = True
+        else:
+            self._need_text_snapshot = False
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(50, 20, 50, 20)
@@ -245,6 +249,11 @@ class SettingsScreen(BaseScreen):
         text_wrapper.addLayout(text_section, 8)
         text_wrapper.addStretch(1)
         cl.addLayout(text_wrapper)
+
+        # Sync initial text snapshot with what the widget actually displays
+        if self._need_text_snapshot:
+            self._initial_text = self._text_lib.text().strip() or theme_manager.training_text
+            self._need_text_snapshot = False
 
         cl.addSpacing(15)
 
