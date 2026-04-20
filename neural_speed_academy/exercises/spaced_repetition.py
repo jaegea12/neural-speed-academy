@@ -670,7 +670,7 @@ class SpacedRepetitionExercise(BaseExercise):
         if self._timed_mode > 0:
             self._timer_remaining = self._timed_mode
             self._timer_lbl = QLabel(f"{self._timed_mode}s")
-            self._timer_lbl.setFont(QFont("Arial", 18, QFont.Weight.Bold))
+            self._timer_lbl.setFont(QFont("Inter", 18, QFont.Weight.Bold))
             self._timer_lbl.setStyleSheet(f"color: {c['alert']};")
             top.addWidget(self._timer_lbl)
             top.addSpacing(10)

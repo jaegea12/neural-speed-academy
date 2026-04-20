@@ -70,8 +70,8 @@ class _HighlightReader(QTextEdit):
 class PacerExercise(BaseExercise):
 
     MODES = {
-        "single": "Single-Line",
-        "multi": "Multi-Line",
+        "single": "pacer.mode.single",
+        "multi": "pacer.mode.multi",
     }
 
     def __init__(self, navigator, parent: QWidget | None = None):
@@ -103,10 +103,26 @@ class PacerExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Skip config screen when launched from preset menu / training path
+        if kwargs:
+            wpm = kwargs.get("wpm", PACER_CONFIG["default_wpm"])
+            mode = kwargs.get("mode", "single")
+            self._n_lines = kwargs.get("n_lines", 3)
+            self._chunk_size = kwargs.get("chunk_size", 3)
+            self._last_wpm = wpm
+            self._last_mode = mode
+            self._last_chunk = self._chunk_size
+            self._last_nlines = self._n_lines
+            from neural_speed_academy.exercises.text_library_widget import get_training_text
+            text = get_training_text()
+            self._show_countdown(lambda: self._run_pacer(text, wpm, mode))
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -189,8 +205,8 @@ class PacerExercise(BaseExercise):
 
         rb_style = _radio_style(c)
         self._mode_group = QButtonGroup(self)
-        for key, label in self.MODES.items():
-            rb = QRadioButton(label)
+        for key, label_key in self.MODES.items():
+            rb = QRadioButton(tr(label_key))
             rb.setFont(make_qfont("btn"))
             rb.setStyleSheet(rb_style)
             rb.setProperty("mode_key", key)
@@ -307,11 +323,9 @@ class PacerExercise(BaseExercise):
         self._page_width_key = self._last_page_width or (theme_manager.fov if theme_manager else "standard")
         from neural_speed_academy.theme import FOV_PRESETS
         for key, preset in FOV_PRESETS.items():
-            # Use short label: first word of the preset label
-            short = preset["label"].split("(")[0].strip()
-            btn = QPushButton(short)
+            btn = QPushButton(tr(f"pacer.fov.{key}"))
             btn.setFont(make_qfont("btn_sm"))
-            btn.setFixedWidth(80)
+            btn.setMinimumWidth(70)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(lambda _, k=key: self._select_page_width(k))
             pwidth_row.addWidget(btn)
@@ -418,7 +432,7 @@ class PacerExercise(BaseExercise):
         self._last_nlines = self._n_lines
         self._last_text_size = self._text_size
         self._last_page_width = self._page_width_key
-        self._run_pacer(text, wpm, mode)
+        self._show_countdown(lambda: self._run_pacer(text, wpm, mode))
 
     def _run_pacer(self, text: str, wpm: int, mode: str) -> None:
         words = text.split()
@@ -491,7 +505,7 @@ class PacerExercise(BaseExercise):
         }
 
         self._reader = _HighlightReader()
-        reader_font = QFont("Georgia", font_size)
+        reader_font = QFont("Source Serif 4", font_size)
         self._reader.setFont(reader_font)
         px, py = fov["pad_x"], fov["pad_y"]
         self._reader.setStyleSheet(
@@ -500,6 +514,10 @@ class PacerExercise(BaseExercise):
             f"border: 1px solid {c['muted']}; "
             f"padding: {py}px {px}px; }}"
         )
+        # #osx — QTextEdit line spacing and text layout may differ from
+        # Windows due to Core Text shaping. The highlight overlay
+        # (paintEvent) relies on QTextCursor.rect() which can be off
+        # by a pixel or two, causing slight misalignment of the pacer bar.
         self._reader.setFixedSize(page_w, page_h)
         self._reader.setReadOnly(True)
         # Hide scrollbars visually but allow programmatic vertical scrolling

@@ -35,10 +35,26 @@ class ChunkingExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar(show_stop=False)
 
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
+
+        # Skip config screen when launched from preset menu / training path
+        if kwargs:
+            chunk_size = kwargs.get(
+                "chunk_size", CHUNKING_CONFIG["default_chunk_size"]
+            )
+            wpm = kwargs.get("wpm", CHUNKING_CONFIG["default_wpm"])
+            from neural_speed_academy.exercises.text_library_widget import get_training_text
+            text = get_training_text()
+            self._last_chunk = chunk_size
+            self._last_wpm = wpm
+            self._show_countdown(
+                lambda: self._run_chunking(text, chunk_size, wpm)
+            )
+            return
+
+        self.add_nav_bar(show_stop=False)
 
         slider_groove = (
             f"QSlider::groove:horizontal {{ background: {c['card']}; "
@@ -174,7 +190,9 @@ class ChunkingExercise(BaseExercise):
         theme_manager.save()
         self._last_chunk = self._chunk_slider.value()
         self._last_wpm = self._wpm_slider.value()
-        self._run_chunking(text, self._last_chunk, self._last_wpm)
+        self._show_countdown(
+            lambda: self._run_chunking(text, self._last_chunk, self._last_wpm)
+        )
 
     def _build_chunks(self, text: str, size: int) -> list:
         words = text.split()

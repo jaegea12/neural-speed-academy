@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QRadioButton, QButtonGroup, QFrame,
+    QButtonGroup,
     QMessageBox, QSlider,
 )
 from PyQt6.QtCore import Qt
@@ -13,25 +13,22 @@ from PyQt6.QtCore import Qt
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
 
 from neural_speed_academy.theme import (
-    COLORS, FOV_PRESETS, THEME_LABELS, make_qfont, font_css, btn_css,
+    COLORS, THEME_LABELS, make_qfont, font_css, btn_css,
     theme_manager,
 )
 from neural_speed_academy.i18n import tr
 
 
-def _radio_style(c: dict) -> str:
-    """QSS for radio buttons with visible indicator in all themes."""
+def _toggle_style(c: dict) -> str:
+    """QSS for toggle buttons used in place of radio buttons."""
     return (
-        f"QRadioButton {{ color: {c['fg']}; background: transparent; "
-        f"spacing: 8px; padding: 2px 4px; border-radius: 3px; }}"
-        f"QRadioButton:hover {{ background-color: {c['card']}; }}"
-        f"QRadioButton::indicator {{ width: 16px; height: 16px; "
-        f"border: 2px solid {c['muted']}; border-radius: 8px; "
-        f"background: transparent; }}"
-        f"QRadioButton::indicator:checked {{ "
-        f"border: 2px solid {c['accent']}; "
-        f"background: {c['accent']}; }}"
-        f"QRadioButton:focus {{ outline: 2px solid {c['accent']}; }}"
+        f"QPushButton {{ color: {c['fg']}; background: {c['card']}; "
+        f"border: 2px solid transparent; border-radius: 4px; "
+        f"padding: 4px 12px; text-align: left; }}"
+        f"QPushButton:hover {{ background: {c['card']}; "
+        f"border: 2px solid {c['muted']}; }}"
+        f"QPushButton:checked {{ background: {c['accent']}; "
+        f"color: {c['btn_text']}; border: 2px solid {c['accent']}; }}"
     )
 
 
@@ -45,9 +42,12 @@ class SettingsScreen(BaseScreen):
         # Snapshot saved state on first build only; preserve across theme rebuilds
         if not hasattr(self, '_initial_profile'):
             self._initial_profile = theme_manager.profile
-            self._initial_fov = theme_manager.fov
             self._initial_fullscreen = theme_manager.fullscreen
+            # Will be updated after TextLibraryWidget is created (see below)
             self._initial_text = theme_manager.training_text
+            self._need_text_snapshot = True
+        else:
+            self._need_text_snapshot = False
 
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(50, 20, 50, 20)
@@ -61,7 +61,7 @@ class SettingsScreen(BaseScreen):
         cl.addSpacing(10)
 
         # --- Settings: 3 sections side by side ---
-        rb_style = _radio_style(c)
+        toggle_style = _toggle_style(c)
 
         top_row = QHBoxLayout()
         top_row.setSpacing(40)
@@ -103,45 +103,21 @@ class SettingsScreen(BaseScreen):
             header.setStyleSheet(f"color: {c['muted']};")
             col.addWidget(header)
             for key, label in profiles:
-                rb = QRadioButton(label)
-                rb.setFont(make_qfont("btn"))
-                rb.setStyleSheet(rb_style)
-                rb.setProperty("profile_key", key)
+                btn = QPushButton(label)
+                btn.setCheckable(True)
+                btn.setFont(make_qfont("btn"))
+                btn.setStyleSheet(toggle_style)
+                btn.setProperty("profile_key", key)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 if key == theme_manager.profile:
-                    rb.setChecked(True)
-                self._profile_group.addButton(rb)
-                col.addWidget(rb)
+                    btn.setChecked(True)
+                self._profile_group.addButton(btn)
+                col.addWidget(btn)
             col.addStretch()
             theme_cols.addLayout(col)
         profile_section.addLayout(theme_cols)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
         top_row.addLayout(profile_section, 2)
-
-        # -- FIELD OF VIEW section --
-        fov_section = QVBoxLayout()
-        fov_section.setSpacing(4)
-        sec2 = QLabel(tr("settings.field_of_view"))
-        sec2.setFont(make_qfont("section_header"))
-        sec2.setStyleSheet(f"color: {c['accent']};")
-        fov_section.addWidget(sec2)
-        fov_desc = QLabel(tr("settings.pacer_page_width_font"))
-        fov_desc.setFont(make_qfont("btn_sm"))
-        fov_desc.setStyleSheet(f"color: {c['muted']};")
-        fov_section.addWidget(fov_desc)
-
-        self._fov_group = QButtonGroup(self)
-        for key, preset in FOV_PRESETS.items():
-            rb = QRadioButton(preset["label"])
-            rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(rb_style)
-            rb.setProperty("fov_key", key)
-            if key == theme_manager.fov:
-                rb.setChecked(True)
-            self._fov_group.addButton(rb)
-            fov_section.addWidget(rb)
-        self._fov_group.buttonClicked.connect(self._on_fov_changed)
-        fov_section.addStretch()
-        top_row.addLayout(fov_section, 1)
 
         # -- DISPLAY MODE section --
         disp_section = QVBoxLayout()
@@ -157,17 +133,19 @@ class SettingsScreen(BaseScreen):
 
         self._disp_group = QButtonGroup(self)
         for key, label in [("fullscreen", tr("settings.fullscreen")), ("windowed", tr("settings.windowed"))]:
-            rb = QRadioButton(label)
-            rb.setFont(make_qfont("btn"))
-            rb.setStyleSheet(rb_style)
-            rb.setProperty("disp_key", key)
+            btn = QPushButton(label)
+            btn.setCheckable(True)
+            btn.setFont(make_qfont("btn"))
+            btn.setStyleSheet(toggle_style)
+            btn.setProperty("disp_key", key)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
             is_fs = theme_manager.fullscreen
-            rb.setChecked(
+            btn.setChecked(
                 (key == "fullscreen" and is_fs) or
                 (key == "windowed" and not is_fs)
             )
-            self._disp_group.addButton(rb)
-            disp_section.addWidget(rb)
+            self._disp_group.addButton(btn)
+            disp_section.addWidget(btn)
         self._disp_group.buttonClicked.connect(self._on_display_changed)
         disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
@@ -272,6 +250,11 @@ class SettingsScreen(BaseScreen):
         text_wrapper.addStretch(1)
         cl.addLayout(text_wrapper)
 
+        # Sync initial text snapshot with what the widget actually displays
+        if self._need_text_snapshot:
+            self._initial_text = self._text_lib.text().strip() or theme_manager.training_text
+            self._need_text_snapshot = False
+
         cl.addSpacing(15)
 
         # Buttons
@@ -339,11 +322,11 @@ class SettingsScreen(BaseScreen):
 
 
     def _has_unsaved_changes(self) -> bool:
-        """Check if any settings differ from the last saved state."""
-        if theme_manager.profile != self._initial_profile:
-            return True
-        if theme_manager.fov != self._initial_fov:
-            return True
+        """Check if any settings differ from the last saved state.
+
+        Profile changes are persisted immediately in _on_profile_changed,
+        so only text and fullscreen need checking here.
+        """
         if theme_manager.fullscreen != self._initial_fullscreen:
             return True
         if hasattr(self, '_text_lib'):
@@ -378,9 +361,8 @@ class SettingsScreen(BaseScreen):
             self._save()
             return True
         elif clicked == discard_btn:
-            # Revert unsaved changes
-            theme_manager.set_profile(self._initial_profile)
-            theme_manager.fov = self._initial_fov
+            # Revert unsaved text/fullscreen changes
+            # (profile is already persisted by _on_profile_changed)
             theme_manager.fullscreen = self._initial_fullscreen
             return True
         else:
@@ -391,6 +373,9 @@ class SettingsScreen(BaseScreen):
     def _on_profile_changed(self, btn) -> None:
         profile = btn.property("profile_key")
         theme_manager.set_profile(profile)
+        # Persist immediately so nsa_settings.json stays in sync
+        theme_manager.save()
+        self._initial_profile = profile
         # Save to user profile if logged in
         user = self.navigator.get_user()
         if user:
@@ -398,9 +383,6 @@ class SettingsScreen(BaseScreen):
             self.navigator.save_user()
         # Rebuild in-place to reflect new colors without polluting nav history
         self.show_screen()
-
-    def _on_fov_changed(self, btn) -> None:
-        theme_manager.fov = btn.property("fov_key")
 
     def _on_display_changed(self, btn) -> None:
         is_fs = btn.property("disp_key") == "fullscreen"
@@ -419,7 +401,6 @@ class SettingsScreen(BaseScreen):
         theme_manager.save()
         # Update snapshot so back-navigation won't warn again
         self._initial_profile = theme_manager.profile
-        self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
 
@@ -427,7 +408,6 @@ class SettingsScreen(BaseScreen):
         theme_manager.reset_defaults()
         # Reset the snapshot since defaults were saved
         self._initial_profile = theme_manager.profile
-        self._initial_fov = theme_manager.fov
         self._initial_fullscreen = theme_manager.fullscreen
         self._initial_text = theme_manager.training_text
         self.show_screen()

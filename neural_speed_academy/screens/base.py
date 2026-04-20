@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics
+from neural_speed_academy.theme import COLORS, make_qfont, font_css, screen_metrics, _UI_FONT
 from neural_speed_academy.i18n import tr
 
 if TYPE_CHECKING:
@@ -171,7 +171,7 @@ def _show_guide_dialog(parent: QWidget, topic: str) -> None:
     layout.addWidget(heading)
 
     body = QLabel(text)
-    body_font = QFont("Segoe UI", 13)
+    body_font = QFont(_UI_FONT, 13)
     body.setFont(body_font)
     body.setStyleSheet(f"color: {c['text_on_card']}; line-height: 1.5;")
     body.setWordWrap(True)

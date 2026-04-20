@@ -62,7 +62,7 @@ class FlashExercise(BaseExercise):
         self.correct_count = 0
         self.level_logic = level_func
         self.span_config = span_config or {}
-        self._next_round()
+        self._show_countdown(self._next_round)
 
     def _next_round(self) -> None:
         if self.current_round >= self.rounds_total:

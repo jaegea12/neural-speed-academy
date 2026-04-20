@@ -278,7 +278,7 @@ DARK_BLUE_COLORS = {
     "highlight": "#38bdf8",
     "priming": "#22d3ee",
     "grid_btn": "#1e3350",
-    "grid_solved": "#1e3a5f",
+    "grid_solved": "#111c2a",
     "grid_text": "#d8e4f0",
     "success": "#34d399",
     "cross": "#4b6a8a",
@@ -354,35 +354,81 @@ THEME_LABELS = {
 
 # --- Font Definitions ---
 
+# Bundled fonts (assets/fonts/) ensure consistent rendering on all platforms.
+# Fonts are registered with QFontDatabase on first call to load_bundled_fonts().
+
+_FONTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "fonts")
+_BUNDLED_FONTS = [
+    "Inter-Regular.ttf",
+    "Inter-Bold.ttf",
+    "JetBrainsMono-Regular.ttf",
+    "JetBrainsMono-Bold.ttf",
+    "SourceSerif4-Regular.ttf",
+    "SourceSerif4-Bold.ttf",
+]
+_fonts_loaded = False
+
+
+def load_bundled_fonts() -> None:
+    """Register bundled TTF fonts with Qt. Call once after QApplication exists.
+
+    #win #linux #osx — font rendering differs across platforms:
+      Windows: uses DirectWrite; hinting is strong, text looks sharp.
+      Linux: uses FreeType; rendering depends on distro fontconfig.
+        Some distros disable subpixel antialiasing by default, making
+        text look thinner. Bundled fonts avoid missing-font fallback
+        but won't fix fontconfig rendering preferences.
+      macOS: uses Core Text; ignores hinting, renders with its own
+        antialiasing. Text may appear slightly bolder than on Windows.
+    """
+    global _fonts_loaded
+    if _fonts_loaded:
+        return
+    _fonts_loaded = True
+    try:
+        from PyQt6.QtGui import QFontDatabase
+        for name in _BUNDLED_FONTS:
+            path = os.path.join(_FONTS_DIR, name)
+            if os.path.exists(path):
+                QFontDatabase.addApplicationFont(path)
+    except ImportError:
+        pass  # headless / test environment
+
+
+# Font family constants — bundled fonts used everywhere.
+_UI_FONT = "Inter"
+_MONO_FONT = "JetBrains Mono"
+_SERIF_FONT = "Source Serif 4"
+
 FONTS = {
-    "title": ("Segoe UI", 36, "bold"),
-    "title_lg": ("Segoe UI", 48, "bold"),
-    "header": ("Segoe UI", 26, "bold"),
-    "sub": ("Segoe UI", 12),
-    "tagline": ("Segoe UI", 16),
-    "body": ("Segoe UI", 11),
-    "flash": ("Consolas", 90, "bold"),
-    "rsvp": ("Segoe UI", 48, "bold"),
-    "pacer": ("Georgia", 16),
-    "btn": ("Segoe UI", 11),
-    "btn_bold": ("Segoe UI", 12, "bold"),
-    "btn_lg": ("Segoe UI", 16, "bold"),
-    "btn_sm": ("Segoe UI", 11, "bold"),
-    "section_header": ("Segoe UI", 14, "bold"),
-    "counter": ("Segoe UI", 12, "bold"),
-    "grid_btn": ("Segoe UI", 20, "bold"),
-    "input": ("Segoe UI", 24),
-    "input_sm": ("Segoe UI", 12),
-    "cross": ("Arial", 50),
-    "priming_dot": ("Arial", 30),
-    "exit_btn": ("Arial", 14),
-    "slider_label": ("Segoe UI", 12),
-    "pacer_text": ("Georgia", 12),
-    "nav_stats": ("Segoe UI", 11, "bold"),
-    "menu_header": ("Segoe UI", 13, "bold"),
-    "menu_btn": ("Segoe UI", 12),
-    "treeview": ("Segoe UI", 10),
-    "treeview_heading": ("Segoe UI", 10, "bold"),
+    "title": (_UI_FONT, 36, "bold"),
+    "title_lg": (_UI_FONT, 48, "bold"),
+    "header": (_UI_FONT, 26, "bold"),
+    "sub": (_UI_FONT, 12),
+    "tagline": (_UI_FONT, 16),
+    "body": (_UI_FONT, 11),
+    "flash": (_MONO_FONT, 90, "bold"),
+    "rsvp": (_UI_FONT, 48, "bold"),
+    "pacer": (_SERIF_FONT, 16),
+    "btn": (_UI_FONT, 11),
+    "btn_bold": (_UI_FONT, 12, "bold"),
+    "btn_lg": (_UI_FONT, 16, "bold"),
+    "btn_sm": (_UI_FONT, 11, "bold"),
+    "section_header": (_UI_FONT, 14, "bold"),
+    "counter": (_UI_FONT, 12, "bold"),
+    "grid_btn": (_UI_FONT, 20, "bold"),
+    "input": (_UI_FONT, 24),
+    "input_sm": (_UI_FONT, 12),
+    "cross": (_UI_FONT, 50),
+    "priming_dot": (_UI_FONT, 30),
+    "exit_btn": (_UI_FONT, 14),
+    "slider_label": (_UI_FONT, 12),
+    "pacer_text": (_SERIF_FONT, 12),
+    "nav_stats": (_UI_FONT, 11, "bold"),
+    "menu_header": (_UI_FONT, 13, "bold"),
+    "menu_btn": (_UI_FONT, 12),
+    "treeview": (_UI_FONT, 10),
+    "treeview_heading": (_UI_FONT, 10, "bold"),
 }
 
 
@@ -434,6 +480,7 @@ class ThemeManager:
         self._fullscreen: bool = True
         self._schulte_grid_size: int | None = None  # None = use config default
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
+        self._schulte_fill_idx: int = 1             # 0=60%, 1=75%, 2=90%
         self._custom_texts: dict[str, str] = {}     # name -> text
         self._locale: str = "en"
         self._listeners: list = []
@@ -495,6 +542,14 @@ class ThemeManager:
         self._schulte_cell_idx = max(0, min(3, value))
 
     @property
+    def schulte_fill_idx(self) -> int:
+        return self._schulte_fill_idx
+
+    @schulte_fill_idx.setter
+    def schulte_fill_idx(self, value: int) -> None:
+        self._schulte_fill_idx = max(0, min(2, value))
+
+    @property
     def fov_config(self) -> dict:
         """Return the active FOV preset values."""
         return FOV_PRESETS.get(self._fov, FOV_PRESETS[DEFAULT_FOV])
@@ -554,6 +609,7 @@ class ThemeManager:
                 data["schulte_grid_size"] = self._schulte_grid_size
             if self._schulte_cell_idx is not None:
                 data["schulte_cell_idx"] = self._schulte_cell_idx
+            data["schulte_fill_idx"] = self._schulte_fill_idx
             if self._custom_texts:
                 data["custom_texts"] = self._custom_texts
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
@@ -587,6 +643,9 @@ class ThemeManager:
             sc = data.get("schulte_cell_idx")
             if sc is not None:
                 self._schulte_cell_idx = int(sc)
+            sf = data.get("schulte_fill_idx")
+            if sf is not None:
+                self._schulte_fill_idx = int(sf)
             ct = data.get("custom_texts")
             if isinstance(ct, dict):
                 self._custom_texts = {k: v for k, v in ct.items()
@@ -653,7 +712,14 @@ class ScreenMetrics:
         self._sy = 1.0
 
     def init_from_screen(self) -> None:
-        """Call after QApplication is created."""
+        """Call after QApplication is created.
+
+        #win #linux #osx — availableGeometry() returns logical pixels.
+        On macOS Retina and Linux with fractional scaling, logical size
+        may differ from physical pixels. Qt handles the mapping, but
+        widget sizes set via setFixedSize() are in logical pixels, so
+        elements may appear physically larger on HiDPI screens.
+        """
         from PyQt6.QtWidgets import QApplication
         screen = QApplication.primaryScreen()
         if screen:
@@ -750,7 +816,15 @@ screen_metrics = ScreenMetrics()
 
 
 def font_css(key: str) -> str:
-    """Return QSS font-family, font-size, font-weight declarations."""
+    """Return QSS font-family, font-size, font-weight declarations.
+
+    #win #linux #osx — point sizes render at different physical sizes
+    depending on the platform's DPI. A 12pt font is ~16px at 96 DPI
+    (Windows default) but ~16px at 72 DPI on macOS (Core Text scales
+    differently). Linux varies by desktop environment. The visual
+    result is that text may appear slightly larger or smaller across
+    platforms even at the same point size.
+    """
     spec = FONTS[key]
     family = spec[0]
     size = int(spec[1] * theme_manager.font_scale)
