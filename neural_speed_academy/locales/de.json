@@ -621,5 +621,6 @@
   "slide.cat.history": "Geschichte",
   "slide.cat.nutrition": "Ernährung",
   "seq.items": "{n} Elemente",
-  "menus.n_seconds": "{n} Sekunden"
+  "menus.n_seconds": "{n} Sekunden",
+  "common.error": "Fehler"
 }
