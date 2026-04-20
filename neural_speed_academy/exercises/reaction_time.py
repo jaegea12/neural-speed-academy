@@ -65,7 +65,6 @@ class ReactionTimeExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
 
         cfg = REACTION_TIME_CONFIG
         c = COLORS
@@ -74,6 +73,19 @@ class ReactionTimeExercise(BaseExercise):
         self._mode = kwargs.get("mode", "simple")
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._go_ratio = kwargs.get("go_ratio", cfg["go_ratio"])
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._round = 0
+            self._reaction_times = []
+            self._correct = 0
+            self._false_alarms = 0
+            self._misses = 0
+            self._too_early_count = 0
+            self._show_countdown(self._build_arena)
+            return
+
+        self.add_nav_bar()
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -196,7 +208,7 @@ class ReactionTimeExercise(BaseExercise):
         self._false_alarms = 0
         self._misses = 0
         self._too_early_count = 0
-        self._build_arena()
+        self._show_countdown(self._build_arena)
 
     # ── Arena ──
 
@@ -240,8 +252,12 @@ class ReactionTimeExercise(BaseExercise):
         self._layout.addWidget(self._arena, 1)
 
         # Stimulus label (large shape in center of arena)
+        # #linux — repaint() calls below force immediate redraw for
+        # timing-critical stimulus display. On some Linux compositors
+        # (especially Wayland), repaint() may not flush to screen
+        # immediately, adding a few ms of display latency.
         self._stimulus_lbl = QLabel("", self._arena)
-        self._stimulus_lbl.setFont(QFont("Arial", 120))
+        self._stimulus_lbl.setFont(QFont("Inter", 120))
         self._stimulus_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._stimulus_lbl.setFixedSize(200, 200)
         self._stimulus_lbl.hide()
@@ -255,7 +271,7 @@ class ReactionTimeExercise(BaseExercise):
 
         # Feedback label (in arena, near stimulus so eyes stay centered)
         self._feedback_lbl = QLabel("", self._arena)
-        self._feedback_lbl.setFont(QFont("Arial", 24, QFont.Weight.Bold))
+        self._feedback_lbl.setFont(QFont("Inter", 24, QFont.Weight.Bold))
         self._feedback_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._feedback_lbl.setFixedSize(500, 40)
 
@@ -332,7 +348,7 @@ class ReactionTimeExercise(BaseExercise):
 
         # Show fixation cross
         self._stimulus_lbl.setText("+")
-        self._stimulus_lbl.setFont(QFont("Arial", 72, QFont.Weight.Bold))
+        self._stimulus_lbl.setFont(QFont("Inter", 72, QFont.Weight.Bold))
         self._stimulus_lbl.setStyleSheet(
             f"color: {c['muted']}; background: transparent;"
         )
@@ -368,7 +384,7 @@ class ReactionTimeExercise(BaseExercise):
         cfg = REACTION_TIME_CONFIG
         c = COLORS
 
-        self._stimulus_lbl.setFont(QFont("Arial", 120))
+        self._stimulus_lbl.setFont(QFont("Inter", 120))
         self._instruction_lbl.hide()
 
         if self._mode == "simple":

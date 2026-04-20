@@ -92,6 +92,35 @@ class BaseExercise(QWidget):
         self._timers.append(timer)
         return timer
 
+    def _show_countdown(self, callback, duration_ms: int = 1000) -> None:
+        """Show a brief 'Get Ready' screen, then call *callback*.
+
+        Displays a centred countdown that ticks once per second.
+        *duration_ms* is the total wait (default 1 s).
+        """
+        self._clear()
+        self._running = True
+
+        c = COLORS
+        self.setStyleSheet(f"background-color: {c['bg']};")
+
+        container = QWidget()
+        container.setStyleSheet(f"background-color: {c['bg']};")
+        cl = QVBoxLayout(container)
+        cl.setContentsMargins(0, 0, 0, 0)
+        cl.addStretch()
+
+        ready_lbl = QLabel(tr("exercise.get_ready"))
+        ready_lbl.setFont(make_qfont("header"))
+        ready_lbl.setStyleSheet(f"color: {c['accent']};")
+        ready_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        cl.addWidget(ready_lbl)
+
+        cl.addStretch()
+        self._layout.addWidget(container, 1)
+
+        self._after(duration_ms, callback)
+
     def add_nav_bar(self, show_stop: bool = True) -> QFrame:
         """Add a navigation bar (same pattern as BaseScreen).
 

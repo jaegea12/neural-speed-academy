@@ -71,7 +71,6 @@ class SplitAttentionExercise(BaseExercise):
     def start(self, **kwargs) -> None:
         self._clear()
         self._running = True
-        self.add_nav_bar()
 
         cfg = SPLIT_ATTENTION_CONFIG
         c = COLORS
@@ -83,6 +82,16 @@ class SplitAttentionExercise(BaseExercise):
         )
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._mode = kwargs.get("mode", "sequential")
+
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._round = 0
+            self._center_correct = 0
+            self._periph_correct = 0
+            self._show_countdown(self._build_arena)
+            return
+
+        self.add_nav_bar()
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
@@ -260,7 +269,7 @@ class SplitAttentionExercise(BaseExercise):
         self._round = 0
         self._center_correct = 0
         self._periph_correct = 0
-        self._build_arena()
+        self._show_countdown(self._build_arena)
 
     # ── Arena ──
 
@@ -309,7 +318,7 @@ class SplitAttentionExercise(BaseExercise):
 
         # Fixation cross
         self._fixation = QLabel("+", self._arena)
-        self._fixation.setFont(QFont("Arial", 48, QFont.Weight.Bold))
+        self._fixation.setFont(QFont("Inter", 48, QFont.Weight.Bold))
         self._fixation.setStyleSheet(
             f"color: {c['fg']}; background: transparent;"
         )
@@ -318,7 +327,7 @@ class SplitAttentionExercise(BaseExercise):
 
         # Center word label (hidden until flash)
         self._center_lbl = QLabel("", self._arena)
-        self._center_lbl.setFont(QFont("Arial", 36, QFont.Weight.Bold))
+        self._center_lbl.setFont(QFont("Inter", 36, QFont.Weight.Bold))
         self._center_lbl.setStyleSheet(
             f"color: {c['fg']}; background: transparent;"
         )
@@ -327,7 +336,7 @@ class SplitAttentionExercise(BaseExercise):
 
         # Peripheral shape label (hidden until flash)
         self._periph_lbl = QLabel("", self._arena)
-        self._periph_lbl.setFont(QFont("Arial", 42, QFont.Weight.Bold))
+        self._periph_lbl.setFont(QFont("Inter", 42, QFont.Weight.Bold))
         self._periph_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._periph_lbl.setFixedSize(80, 80)
         self._periph_lbl.hide()
@@ -469,6 +478,7 @@ class SplitAttentionExercise(BaseExercise):
 
         if self._mode in ("simultaneous", "rapid"):
             # Show both at once — raise to front and force repaint
+            # #linux — repaint() may not flush immediately on Wayland
             self._center_lbl.raise_()
             self._periph_lbl.raise_()
             self._center_lbl.show()

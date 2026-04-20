@@ -20,8 +20,9 @@ from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 from neural_speed_academy.exercises.base import BaseExercise, ExerciseResult
 from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.config import (
-    SLIDE_PROCESSING_CONFIG, SLIDE_LIBRARY, USER_DATA_CONFIG,
+    SLIDE_PROCESSING_CONFIG, USER_DATA_CONFIG,
 )
+from neural_speed_academy.slides import get_slide_library
 from neural_speed_academy.i18n import tr
 
 
@@ -68,9 +69,9 @@ class SlideProcessingExercise(BaseExercise):
         self._category = kwargs.get("category", "mixed")
         self._custom_slides: list = kwargs.get("custom_slides", [])
 
-        # If launched from menu with specific params, skip config screen
-        if "," in self._category or kwargs.get("skip_config", False):
-            self._build_and_start()
+        # Skip config screen when launched from preset menu
+        if kwargs:
+            self._show_countdown(self._build_and_start)
             return
 
         self.add_nav_bar()
@@ -225,26 +226,27 @@ class SlideProcessingExercise(BaseExercise):
                      "motivation", "neuroplasticity", "humor",
                      "history", "nutrition"]
         self._category = cat_names[self._cat_combo.currentIndex()]
-        self._build_and_start()
+        self._show_countdown(self._build_and_start)
 
     def _build_and_start(self) -> None:
         # Build slide pool from selected categories
+        library = get_slide_library()
         pool = []
         cats = self._category.split(",")
         if "custom_only" not in cats:
             if "mixed" in cats:
-                for slides in SLIDE_LIBRARY.values():
+                for slides in library.values():
                     pool.extend(slides)
             else:
                 for cat in cats:
-                    pool.extend(SLIDE_LIBRARY.get(cat.strip(), []))
+                    pool.extend(library.get(cat.strip(), []))
 
         # Add custom slides
         if self._custom_slides:
             pool.extend(self._custom_slides)
 
         if not pool:
-            for slides in SLIDE_LIBRARY.values():
+            for slides in library.values():
                 pool.extend(slides)
 
         random.shuffle(pool)
@@ -395,7 +397,7 @@ class SlideProcessingExercise(BaseExercise):
         top.addStretch()
 
         self._countdown_lbl = QLabel(f"{self._display_s}s")
-        self._countdown_lbl.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+        self._countdown_lbl.setFont(QFont("Inter", 20, QFont.Weight.Bold))
         self._countdown_lbl.setStyleSheet(f"color: {c['alert']};")
         top.addWidget(self._countdown_lbl)
 
@@ -427,7 +429,7 @@ class SlideProcessingExercise(BaseExercise):
 
         # Title
         title_lbl = QLabel(title.upper())
-        title_lbl.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        title_lbl.setFont(QFont("Inter", 22, QFont.Weight.Bold))
         title_lbl.setStyleSheet(f"color: {c['accent']};")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_lbl.setWordWrap(True)
@@ -446,7 +448,7 @@ class SlideProcessingExercise(BaseExercise):
         # Bullet points
         for bullet in show_bullets:
             bullet_lbl = QLabel(f"  •  {bullet}")
-            bullet_lbl.setFont(QFont("Arial", 15))
+            bullet_lbl.setFont(QFont("Inter", 15))
             bullet_lbl.setStyleSheet(f"color: {c['fg']};")
             bullet_lbl.setWordWrap(True)
             card_layout.addWidget(bullet_lbl)
@@ -541,7 +543,7 @@ class SlideProcessingExercise(BaseExercise):
 
         # Question
         q_lbl = QLabel(q_text)
-        q_lbl.setFont(QFont("Arial", 18, QFont.Weight.Bold))
+        q_lbl.setFont(QFont("Inter", 18, QFont.Weight.Bold))
         q_lbl.setStyleSheet(f"color: {c['fg']};")
         q_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         q_lbl.setWordWrap(True)
@@ -552,7 +554,7 @@ class SlideProcessingExercise(BaseExercise):
         # Answer buttons
         for i, choice in enumerate(choices):
             btn = QPushButton(f"  {i + 1}.  {choice}")
-            btn.setFont(QFont("Arial", 14))
+            btn.setFont(QFont("Inter", 14))
             btn.setFixedHeight(45)
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; "
@@ -627,7 +629,7 @@ class SlideProcessingExercise(BaseExercise):
             fb = QLabel(f"\u2718  Answer: {choices[correct_idx]}")
             fb.setStyleSheet(f"color: {c['alert']};")
 
-        fb.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        fb.setFont(QFont("Inter", 22, QFont.Weight.Bold))
         fb.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._layout.addWidget(fb)
 

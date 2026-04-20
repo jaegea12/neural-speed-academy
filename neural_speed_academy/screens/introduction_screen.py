@@ -4,11 +4,13 @@ use cases, and exercise descriptions.
 """
 from __future__ import annotations
 
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QFrame
+from PyQt6.QtWidgets import (
+    QVBoxLayout, QHBoxLayout, QLabel, QFrame, QPushButton, QApplication,
+)
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.screens.base import BaseScreen, make_scroll_area
-from neural_speed_academy.theme import COLORS, make_qfont
+from neural_speed_academy.theme import COLORS, make_qfont, btn_css
 from neural_speed_academy.i18n import tr
 
 
@@ -46,12 +48,27 @@ class IntroductionScreen(BaseScreen):
         scroll, content, cl = make_scroll_area(self._layout)
         cl.setContentsMargins(60, 20, 60, 30)
 
+        title_row = QHBoxLayout()
+        title_row.addStretch()
         title = QLabel(tr("introduction.introduction"))
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cl.addWidget(title)
+        title_row.addWidget(title)
+
+        copy_btn = QPushButton(tr("intro.copy_text"))
+        copy_btn.setFont(make_qfont("btn_sm"))
+        copy_btn.setStyleSheet(
+            btn_css(c["card"], c["fg"], padding="4px 12px")
+        )
+        copy_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        copy_btn.setToolTip(tr("intro.copy_tooltip"))
+        copy_btn.clicked.connect(lambda: self._copy_intro(copy_btn))
+        title_row.addWidget(copy_btn)
+        title_row.addStretch()
+        cl.addLayout(title_row)
         cl.addSpacing(10)
+
+        self._copy_btn_ref = copy_btn
 
         for entry_type, idx in _INTRO_ORDER:
             if entry_type == "section":
@@ -91,3 +108,24 @@ class IntroductionScreen(BaseScreen):
 
                 cl.addWidget(card)
                 cl.addSpacing(15)
+
+    def _copy_intro(self, btn: QPushButton) -> None:
+        """Copy all introduction text to clipboard."""
+        parts: list[str] = []
+        for entry_type, idx in _INTRO_ORDER:
+            if entry_type == "section":
+                parts.append(tr(f"intro.section.{idx}.title"))
+                parts.append(tr(f"intro.section.{idx}.body"))
+                parts.append("")
+            elif entry_type == "fact":
+                parts.append(tr(f"intro.fact.{idx}"))
+                parts.append("")
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText("\n".join(parts))
+
+        # Brief visual feedback
+        original = btn.text()
+        btn.setText("✅")
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(1500, lambda: btn.setText(original))
