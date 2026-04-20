@@ -397,7 +397,7 @@ class SlideProcessingExercise(BaseExercise):
         top.addStretch()
 
         self._countdown_lbl = QLabel(f"{self._display_s}s")
-        self._countdown_lbl.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+        self._countdown_lbl.setFont(QFont("Inter", 20, QFont.Weight.Bold))
         self._countdown_lbl.setStyleSheet(f"color: {c['alert']};")
         top.addWidget(self._countdown_lbl)
 
@@ -429,7 +429,7 @@ class SlideProcessingExercise(BaseExercise):
 
         # Title
         title_lbl = QLabel(title.upper())
-        title_lbl.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        title_lbl.setFont(QFont("Inter", 22, QFont.Weight.Bold))
         title_lbl.setStyleSheet(f"color: {c['accent']};")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_lbl.setWordWrap(True)
@@ -448,7 +448,7 @@ class SlideProcessingExercise(BaseExercise):
         # Bullet points
         for bullet in show_bullets:
             bullet_lbl = QLabel(f"  •  {bullet}")
-            bullet_lbl.setFont(QFont("Arial", 15))
+            bullet_lbl.setFont(QFont("Inter", 15))
             bullet_lbl.setStyleSheet(f"color: {c['fg']};")
             bullet_lbl.setWordWrap(True)
             card_layout.addWidget(bullet_lbl)
@@ -543,7 +543,7 @@ class SlideProcessingExercise(BaseExercise):
 
         # Question
         q_lbl = QLabel(q_text)
-        q_lbl.setFont(QFont("Arial", 18, QFont.Weight.Bold))
+        q_lbl.setFont(QFont("Inter", 18, QFont.Weight.Bold))
         q_lbl.setStyleSheet(f"color: {c['fg']};")
         q_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         q_lbl.setWordWrap(True)
@@ -554,7 +554,7 @@ class SlideProcessingExercise(BaseExercise):
         # Answer buttons
         for i, choice in enumerate(choices):
             btn = QPushButton(f"  {i + 1}.  {choice}")
-            btn.setFont(QFont("Arial", 14))
+            btn.setFont(QFont("Inter", 14))
             btn.setFixedHeight(45)
             btn.setStyleSheet(
                 f"QPushButton {{ background-color: {c['card']}; "
@@ -629,7 +629,7 @@ class SlideProcessingExercise(BaseExercise):
             fb = QLabel(f"\u2718  Answer: {choices[correct_idx]}")
             fb.setStyleSheet(f"color: {c['alert']};")
 
-        fb.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        fb.setFont(QFont("Inter", 22, QFont.Weight.Bold))
         fb.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._layout.addWidget(fb)
 

@@ -252,8 +252,12 @@ class ReactionTimeExercise(BaseExercise):
         self._layout.addWidget(self._arena, 1)
 
         # Stimulus label (large shape in center of arena)
+        # #linux — repaint() calls below force immediate redraw for
+        # timing-critical stimulus display. On some Linux compositors
+        # (especially Wayland), repaint() may not flush to screen
+        # immediately, adding a few ms of display latency.
         self._stimulus_lbl = QLabel("", self._arena)
-        self._stimulus_lbl.setFont(QFont("Arial", 120))
+        self._stimulus_lbl.setFont(QFont("Inter", 120))
         self._stimulus_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._stimulus_lbl.setFixedSize(200, 200)
         self._stimulus_lbl.hide()
@@ -267,7 +271,7 @@ class ReactionTimeExercise(BaseExercise):
 
         # Feedback label (in arena, near stimulus so eyes stay centered)
         self._feedback_lbl = QLabel("", self._arena)
-        self._feedback_lbl.setFont(QFont("Arial", 24, QFont.Weight.Bold))
+        self._feedback_lbl.setFont(QFont("Inter", 24, QFont.Weight.Bold))
         self._feedback_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._feedback_lbl.setFixedSize(500, 40)
 
@@ -344,7 +348,7 @@ class ReactionTimeExercise(BaseExercise):
 
         # Show fixation cross
         self._stimulus_lbl.setText("+")
-        self._stimulus_lbl.setFont(QFont("Arial", 72, QFont.Weight.Bold))
+        self._stimulus_lbl.setFont(QFont("Inter", 72, QFont.Weight.Bold))
         self._stimulus_lbl.setStyleSheet(
             f"color: {c['muted']}; background: transparent;"
         )
@@ -380,7 +384,7 @@ class ReactionTimeExercise(BaseExercise):
         cfg = REACTION_TIME_CONFIG
         c = COLORS
 
-        self._stimulus_lbl.setFont(QFont("Arial", 120))
+        self._stimulus_lbl.setFont(QFont("Inter", 120))
         self._instruction_lbl.hide()
 
         if self._mode == "simple":

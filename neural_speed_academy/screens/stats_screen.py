@@ -940,6 +940,10 @@ class StatsScreen(BaseScreen):
             return
         name = self._export_name(user)
         default_name = f"nsa_{name}_{datetime.now():%Y%m%d}.csv"
+        # #osx — native file dialog may not pre-fill the filename on
+        # some macOS versions; user sees an empty save field.
+        # #linux — on Wayland the dialog may appear behind the main
+        # window if the compositor doesn't handle transient windows.
         path, _ = QFileDialog.getSaveFileName(
             self, tr("stats.export_csv"), default_name, "CSV files (*.csv)"
         )

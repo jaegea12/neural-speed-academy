@@ -309,14 +309,14 @@ class PeripheralFlashExercise(BaseExercise):
 
         # Fixation cross (always visible during rounds)
         self._fixation = QLabel("+", self._arena)
-        self._fixation.setFont(QFont("Arial", 48, QFont.Weight.Bold))
+        self._fixation.setFont(QFont("Inter", 48, QFont.Weight.Bold))
         self._fixation.setStyleSheet(f"color: {c['fg']}; background: transparent;")
         self._fixation.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._fixation.setFixedSize(60, 60)
 
         # Stimulus label (hidden until flash)
         self._stim_label = QLabel("", self._arena)
-        self._stim_label.setFont(QFont("Arial", 42, QFont.Weight.Bold))
+        self._stim_label.setFont(QFont("Inter", 42, QFont.Weight.Bold))
         self._stim_label.setStyleSheet(
             f"color: {c['accent']}; background: transparent;"
         )

@@ -71,7 +71,7 @@ class PrimingExercise(BaseExercise):
         guide_btn.clicked.connect(lambda: self.show_guide("priming"))
         self._layout.addWidget(guide_btn, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self._lbl_mode = QLabel(MODE_LABELS.get(mode, mode.upper()))
+        self._lbl_mode = QLabel(MODE_LABELS.get(self.mode, self.mode.upper()))
         self._lbl_mode.setFont(make_qfont("counter"))
         self._lbl_mode.setStyleSheet(f"color: {c['accent']};")
         self._lbl_mode.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -155,6 +155,7 @@ class PrimingExercise(BaseExercise):
     # --- Smooth pursuit modes ---
 
     def _init_pursuit(self) -> None:
+        # #win — 20ms timer may jitter due to default 15.6ms resolution
         self._frame_ms = 20
         total_ms = int(self.duration_s * 1000)
         self._pursuit_steps = total_ms // self._frame_ms

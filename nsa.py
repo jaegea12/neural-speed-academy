@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon, QKeySequence, QShortcut
 
-from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics
+from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics, load_bundled_fonts
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
 from neural_speed_academy.navigation.navigator import Navigator
 
@@ -46,6 +46,9 @@ class NeuralSpeedAcademy:
     def __init__(self):
         self.app = QApplication(sys.argv)
         self.app.setApplicationName("Neural Speed Academy")
+
+        # Register bundled fonts before any UI is built
+        load_bundled_fonts()
 
         # App icon (title bar, taskbar, Alt-Tab)
         _icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.png")
@@ -186,7 +189,12 @@ class NeuralSpeedAcademy:
     def _set_windowed(self) -> None:
         from PyQt6.QtWidgets import QApplication
         from PyQt6.QtCore import Qt as QtCore_Qt
-        # Restore normal window flags (frame, resize handles, etc.)
+        # #win #linux #osx — setWindowFlags behaves differently per WM:
+        #   Windows: works reliably, restores title bar and resize handles.
+        #   Linux/X11: some WMs ignore flags or add extra decorations.
+        #   Linux/Wayland: setWindowFlags may be ignored entirely; window
+        #     position via move() is also unsupported (compositor decides).
+        #   macOS: works but showNormal() after fullscreen can briefly flash.
         self.window.setWindowFlags(
             QtCore_Qt.WindowType.Window
             | QtCore_Qt.WindowType.WindowCloseButtonHint
@@ -209,7 +217,8 @@ class NeuralSpeedAcademy:
         self.window.showNormal()
         # Update screen metrics to match window size
         screen_metrics.update_from_window(self.window.width(), self.window.height())
-        # Center on screen
+        # #linux — move() is a no-op on Wayland; window stays where the
+        # compositor placed it. Works on X11, Windows, and macOS.
         if screen:
             geo = screen.availableGeometry()
             x = (geo.width() - self.window.width()) // 2 + geo.x()
@@ -221,6 +230,11 @@ class NeuralSpeedAcademy:
     def _set_fullscreen(self) -> None:
         self.window.setMinimumSize(0, 0)
         self.window.setMaximumSize(16777215, 16777215)
+        # #osx — showFullScreen() uses macOS native fullscreen animation
+        # (slides to a new Space). This is slower than on Windows/Linux
+        # and cannot be suppressed without FramelessWindowHint.
+        # #linux — on Wayland, fullscreen is compositor-managed and may
+        # not cover panels/docks on all desktops.
         self.window.showFullScreen()
         # Update screen metrics to match full screen
         screen_metrics.init_from_screen()
@@ -304,7 +318,12 @@ class NeuralSpeedAcademy:
         return False
 
     def run(self) -> None:
-        # Global keyboard shortcuts (only keys that never conflict with widgets)
+        # #osx — Ctrl maps to Cmd on macOS. QShortcut("Ctrl+Q") becomes
+        # Cmd+Q, which is the standard macOS quit shortcut. F11 may be
+        # captured by Mission Control unless the user disables it in
+        # System Settings > Keyboard > Shortcuts.
+        # #linux — F11 works on most DEs but some (e.g. tiling WMs)
+        # may intercept it for their own fullscreen toggle.
         for key, handler in [
             ("F11", self._toggle_fullscreen),
             ("Escape", self._handle_escape),

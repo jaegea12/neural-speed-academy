@@ -505,7 +505,7 @@ class PacerExercise(BaseExercise):
         }
 
         self._reader = _HighlightReader()
-        reader_font = QFont("Georgia", font_size)
+        reader_font = QFont("Source Serif 4", font_size)
         self._reader.setFont(reader_font)
         px, py = fov["pad_x"], fov["pad_y"]
         self._reader.setStyleSheet(
@@ -514,6 +514,10 @@ class PacerExercise(BaseExercise):
             f"border: 1px solid {c['muted']}; "
             f"padding: {py}px {px}px; }}"
         )
+        # #osx — QTextEdit line spacing and text layout may differ from
+        # Windows due to Core Text shaping. The highlight overlay
+        # (paintEvent) relies on QTextCursor.rect() which can be off
+        # by a pixel or two, causing slight misalignment of the pacer bar.
         self._reader.setFixedSize(page_w, page_h)
         self._reader.setReadOnly(True)
         # Hide scrollbars visually but allow programmatic vertical scrolling

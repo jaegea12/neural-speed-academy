@@ -354,15 +354,51 @@ THEME_LABELS = {
 
 # --- Font Definitions ---
 
-# Cross-platform UI font: Segoe UI (Windows), .AppleSystemUIFont (macOS),
-# Ubuntu/Cantarell (Linux), with sans-serif as final fallback.
-import sys as _sys
-if _sys.platform == "darwin":
-    _UI_FONT = ".AppleSystemUIFont"
-elif _sys.platform.startswith("linux"):
-    _UI_FONT = "Ubuntu"
-else:
-    _UI_FONT = "Segoe UI"
+# Bundled fonts (assets/fonts/) ensure consistent rendering on all platforms.
+# Fonts are registered with QFontDatabase on first call to load_bundled_fonts().
+
+_FONTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "fonts")
+_BUNDLED_FONTS = [
+    "Inter-Regular.ttf",
+    "Inter-Bold.ttf",
+    "JetBrainsMono-Regular.ttf",
+    "JetBrainsMono-Bold.ttf",
+    "SourceSerif4-Regular.ttf",
+    "SourceSerif4-Bold.ttf",
+]
+_fonts_loaded = False
+
+
+def load_bundled_fonts() -> None:
+    """Register bundled TTF fonts with Qt. Call once after QApplication exists.
+
+    #win #linux #osx — font rendering differs across platforms:
+      Windows: uses DirectWrite; hinting is strong, text looks sharp.
+      Linux: uses FreeType; rendering depends on distro fontconfig.
+        Some distros disable subpixel antialiasing by default, making
+        text look thinner. Bundled fonts avoid missing-font fallback
+        but won't fix fontconfig rendering preferences.
+      macOS: uses Core Text; ignores hinting, renders with its own
+        antialiasing. Text may appear slightly bolder than on Windows.
+    """
+    global _fonts_loaded
+    if _fonts_loaded:
+        return
+    _fonts_loaded = True
+    try:
+        from PyQt6.QtGui import QFontDatabase
+        for name in _BUNDLED_FONTS:
+            path = os.path.join(_FONTS_DIR, name)
+            if os.path.exists(path):
+                QFontDatabase.addApplicationFont(path)
+    except ImportError:
+        pass  # headless / test environment
+
+
+# Font family constants — bundled fonts used everywhere.
+_UI_FONT = "Inter"
+_MONO_FONT = "JetBrains Mono"
+_SERIF_FONT = "Source Serif 4"
 
 FONTS = {
     "title": (_UI_FONT, 36, "bold"),
@@ -371,9 +407,9 @@ FONTS = {
     "sub": (_UI_FONT, 12),
     "tagline": (_UI_FONT, 16),
     "body": (_UI_FONT, 11),
-    "flash": ("Consolas", 90, "bold"),
+    "flash": (_MONO_FONT, 90, "bold"),
     "rsvp": (_UI_FONT, 48, "bold"),
-    "pacer": ("Georgia", 16),
+    "pacer": (_SERIF_FONT, 16),
     "btn": (_UI_FONT, 11),
     "btn_bold": (_UI_FONT, 12, "bold"),
     "btn_lg": (_UI_FONT, 16, "bold"),
@@ -383,11 +419,11 @@ FONTS = {
     "grid_btn": (_UI_FONT, 20, "bold"),
     "input": (_UI_FONT, 24),
     "input_sm": (_UI_FONT, 12),
-    "cross": ("Arial", 50),
-    "priming_dot": ("Arial", 30),
-    "exit_btn": ("Arial", 14),
+    "cross": (_UI_FONT, 50),
+    "priming_dot": (_UI_FONT, 30),
+    "exit_btn": (_UI_FONT, 14),
     "slider_label": (_UI_FONT, 12),
-    "pacer_text": ("Georgia", 12),
+    "pacer_text": (_SERIF_FONT, 12),
     "nav_stats": (_UI_FONT, 11, "bold"),
     "menu_header": (_UI_FONT, 13, "bold"),
     "menu_btn": (_UI_FONT, 12),
@@ -676,7 +712,14 @@ class ScreenMetrics:
         self._sy = 1.0
 
     def init_from_screen(self) -> None:
-        """Call after QApplication is created."""
+        """Call after QApplication is created.
+
+        #win #linux #osx — availableGeometry() returns logical pixels.
+        On macOS Retina and Linux with fractional scaling, logical size
+        may differ from physical pixels. Qt handles the mapping, but
+        widget sizes set via setFixedSize() are in logical pixels, so
+        elements may appear physically larger on HiDPI screens.
+        """
         from PyQt6.QtWidgets import QApplication
         screen = QApplication.primaryScreen()
         if screen:
@@ -773,7 +816,15 @@ screen_metrics = ScreenMetrics()
 
 
 def font_css(key: str) -> str:
-    """Return QSS font-family, font-size, font-weight declarations."""
+    """Return QSS font-family, font-size, font-weight declarations.
+
+    #win #linux #osx — point sizes render at different physical sizes
+    depending on the platform's DPI. A 12pt font is ~16px at 96 DPI
+    (Windows default) but ~16px at 72 DPI on macOS (Core Text scales
+    differently). Linux varies by desktop environment. The visual
+    result is that text may appear slightly larger or smaller across
+    platforms even at the same point size.
+    """
     spec = FONTS[key]
     family = spec[0]
     size = int(spec[1] * theme_manager.font_scale)
