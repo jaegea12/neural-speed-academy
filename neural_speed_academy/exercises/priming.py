@@ -96,10 +96,10 @@ class PrimingExercise(BaseExercise):
         self._dot.setFixedSize(40, 40)
         self._dot.move(400, 250)
 
-        if mode.startswith("saccade"):
+        if self.mode.startswith("saccade"):
             self._build_saccade_pattern()
             self._after(500, self._saccade_step)
-        elif mode.startswith("pursuit"):
+        elif self.mode.startswith("pursuit"):
             self._init_pursuit()
             self._after(500, self._pursuit_step_fn)
 
