@@ -112,10 +112,6 @@ class _MotArena(QWidget):
         self._num_targets: int = 0
         self._selections_remaining: int = 0
 
-        # #win #linux #osx — QTimer(16ms) targets ~60 FPS but actual
-        # interval depends on OS timer resolution. Windows defaults to
-        # ~15.6ms granularity (adequate). Linux/macOS are typically 1ms.
-        # On slow machines or under compositor load, frames may drop.
         self._timer = QTimer(self)
         self._timer.setInterval(16)  # ~60 FPS
         self._timer.timeout.connect(self._tick)

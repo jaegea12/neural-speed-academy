@@ -477,14 +477,13 @@ class SplitAttentionExercise(BaseExercise):
         self._fixation.hide()
 
         if self._mode in ("simultaneous", "rapid"):
-            # Show both at once — raise to front and force repaint
-            # #linux — repaint() may not flush immediately on Wayland
+            # Show both at once — raise to front and flush to screen
             self._center_lbl.raise_()
             self._periph_lbl.raise_()
             self._center_lbl.show()
             self._periph_lbl.show()
-            self._center_lbl.repaint()
-            self._periph_lbl.repaint()
+            self._flush_widget(self._center_lbl)
+            self._flush_widget(self._periph_lbl)
             # Hide center after center_ms
             self._after(self._center_ms, self._hide_center)
             # Hide peripheral after peripheral_ms
@@ -497,7 +496,7 @@ class SplitAttentionExercise(BaseExercise):
             # Sequential: center first, then peripheral
             self._center_lbl.raise_()
             self._center_lbl.show()
-            self._center_lbl.repaint()
+            self._flush_widget(self._center_lbl)
             self._after(self._center_ms, self._seq_hide_center)
 
     def _hide_center(self) -> None:
@@ -520,7 +519,7 @@ class SplitAttentionExercise(BaseExercise):
             return
         self._periph_lbl.raise_()
         self._periph_lbl.show()
-        self._periph_lbl.repaint()
+        self._flush_widget(self._periph_lbl)
         self._after(self._peripheral_ms, self._seq_hide_peripheral)
 
     def _seq_hide_peripheral(self) -> None:

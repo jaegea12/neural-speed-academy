@@ -155,7 +155,6 @@ class PrimingExercise(BaseExercise):
     # --- Smooth pursuit modes ---
 
     def _init_pursuit(self) -> None:
-        # #win — 20ms timer may jitter due to default 15.6ms resolution
         self._frame_ms = 20
         total_ms = int(self.duration_s * 1000)
         self._pursuit_steps = total_ms // self._frame_ms

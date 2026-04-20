@@ -113,13 +113,11 @@ class SchulteExercise(BaseExercise):
                 btn = QPushButton(str(val))
                 btn.setFont(make_qfont("grid_btn"))
                 btn.setFixedSize(btn_size, btn_size)
-                # #linux — QSS 'opacity' is not supported by all Qt
-                # platform themes; the hover effect may be invisible.
                 btn.setStyleSheet(
                     f"QPushButton {{ background-color: {c['grid_btn']}; "
                     f"color: {c['grid_text']}; border: 2px solid transparent; "
                     f"border-radius: 4px; }}"
-                    f"QPushButton:hover {{ opacity: 0.9; }}"
+                    f"QPushButton:hover {{ border: 2px solid {c['muted']}; }}"
                 )
                 btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 btn.clicked.connect(

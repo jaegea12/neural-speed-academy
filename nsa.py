@@ -41,9 +41,28 @@ from neural_speed_academy.exercises.priming import PrimingExercise
 from neural_speed_academy.exercises.spaced_repetition import SpacedRepetitionExercise
 
 
+def _set_timer_resolution():
+    """Request 1ms timer resolution on Windows for smooth animations.
+
+    Windows defaults to ~15.6ms granularity, causing jitter in QTimer-
+    based animations (MOT at 16ms, priming pursuit at 20ms). Returns a
+    cleanup function to restore the default on exit.
+    """
+    if sys.platform != "win32":
+        return lambda: None
+    try:
+        import ctypes
+        winmm = ctypes.windll.winmm
+        winmm.timeBeginPeriod(1)
+        return lambda: winmm.timeEndPeriod(1)
+    except (AttributeError, OSError):
+        return lambda: None
+
+
 class NeuralSpeedAcademy:
 
     def __init__(self):
+        self._restore_timer = _set_timer_resolution()
         self.app = QApplication(sys.argv)
         self.app.setApplicationName("Neural Speed Academy")
 
@@ -186,15 +205,15 @@ class NeuralSpeedAcademy:
 
     _WINDOWED_MIN_W, _WINDOWED_MIN_H = 900, 650
 
+    @staticmethod
+    def _is_wayland() -> bool:
+        """Detect if running under Wayland (move/position calls are no-ops)."""
+        return os.environ.get("XDG_SESSION_TYPE") == "wayland" or \
+               os.environ.get("WAYLAND_DISPLAY", "") != ""
+
     def _set_windowed(self) -> None:
         from PyQt6.QtWidgets import QApplication
         from PyQt6.QtCore import Qt as QtCore_Qt
-        # #win #linux #osx — setWindowFlags behaves differently per WM:
-        #   Windows: works reliably, restores title bar and resize handles.
-        #   Linux/X11: some WMs ignore flags or add extra decorations.
-        #   Linux/Wayland: setWindowFlags may be ignored entirely; window
-        #     position via move() is also unsupported (compositor decides).
-        #   macOS: works but showNormal() after fullscreen can briefly flash.
         self.window.setWindowFlags(
             QtCore_Qt.WindowType.Window
             | QtCore_Qt.WindowType.WindowCloseButtonHint
@@ -217,9 +236,8 @@ class NeuralSpeedAcademy:
         self.window.showNormal()
         # Update screen metrics to match window size
         screen_metrics.update_from_window(self.window.width(), self.window.height())
-        # #linux — move() is a no-op on Wayland; window stays where the
-        # compositor placed it. Works on X11, Windows, and macOS.
-        if screen:
+        # Center on screen — skip on Wayland where move() is a no-op
+        if screen and not self._is_wayland():
             geo = screen.availableGeometry()
             x = (geo.width() - self.window.width()) // 2 + geo.x()
             y = (geo.height() - self.window.height()) // 2 + geo.y()
@@ -354,7 +372,10 @@ class NeuralSpeedAcademy:
             self._set_fullscreen()
         else:
             self._set_windowed()
-        sys.exit(self.app.exec())
+        try:
+            sys.exit(self.app.exec())
+        finally:
+            self._restore_timer()
 
 
 if __name__ == "__main__":

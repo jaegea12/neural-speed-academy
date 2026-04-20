@@ -252,10 +252,6 @@ class ReactionTimeExercise(BaseExercise):
         self._layout.addWidget(self._arena, 1)
 
         # Stimulus label (large shape in center of arena)
-        # #linux — repaint() calls below force immediate redraw for
-        # timing-critical stimulus display. On some Linux compositors
-        # (especially Wayland), repaint() may not flush to screen
-        # immediately, adding a few ms of display latency.
         self._stimulus_lbl = QLabel("", self._arena)
         self._stimulus_lbl.setFont(QFont("Inter", 120))
         self._stimulus_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -353,7 +349,7 @@ class ReactionTimeExercise(BaseExercise):
             f"color: {c['muted']}; background: transparent;"
         )
         self._stimulus_lbl.show()
-        self._stimulus_lbl.repaint()
+        self._flush_widget(self._stimulus_lbl)
 
         # Instruction
         if self._mode == "simple":
@@ -423,7 +419,7 @@ class ReactionTimeExercise(BaseExercise):
 
         self._stimulus_lbl.raise_()
         self._stimulus_lbl.show()
-        self._stimulus_lbl.repaint()
+        self._flush_widget(self._stimulus_lbl)
 
         self._stimulus_time = time.perf_counter()
         self._waiting_for_response = True
@@ -470,7 +466,7 @@ class ReactionTimeExercise(BaseExercise):
             self._stimulus_lbl.setStyleSheet(
                 f"color: {c['alert']}; background: transparent;"
             )
-            self._stimulus_lbl.repaint()
+            self._flush_widget(self._stimulus_lbl)
             self._feedback_lbl.setText(tr("reaction.time.too_early_wait_for_the_stimulu"))
             self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
             self._input_locked = True
