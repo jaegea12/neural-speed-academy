@@ -180,7 +180,7 @@ class BaseMenuScreen(BaseScreen):
         cl.addStretch()
 
         # Restore last-used config or fall back to default preset
-        saved = theme_manager.get_exercise_config(exercise_cls.__name__)
+        saved = theme_manager.get_exercise_config(type(self).__name__)
         if saved:
             preset_idx = saved.pop("_preset", default_preset)
             if not (0 <= preset_idx < len(presets)):
@@ -256,9 +256,12 @@ class BaseMenuScreen(BaseScreen):
             else:
                 btn.setStyleSheet(self._tp_toggle_off())
 
-    def _tp_save_config(self, exercise_cls) -> None:
-        """Silently persist current menu config for next visit."""
-        theme_manager.save_exercise_config(exercise_cls.__name__, {
+    def _tp_save_config(self, exercise_cls=None) -> None:
+        """Silently persist current menu config for next visit.
+
+        Uses the menu screen class name as key (unique per exercise).
+        """
+        theme_manager.save_exercise_config(type(self).__name__, {
             "_preset": self._tp_selected_preset,
             **self._tp_param_values,
         })
