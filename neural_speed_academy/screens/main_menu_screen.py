@@ -49,7 +49,7 @@ class MainMenuScreen(BaseScreen):
             cl.addWidget(icon_lbl)
             cl.addSpacing(10)
 
-        title = QLabel(tr("main.menu.neural_speed_nacademy"))
+        title = QLabel(tr("main.menu.neural_speed_academy"))
         title.setFont(make_qfont("title_lg"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
