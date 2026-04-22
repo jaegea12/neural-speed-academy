@@ -482,6 +482,7 @@ class ThemeManager:
         self._schulte_cell_idx: int | None = None   # None = derive from FOV
         self._schulte_fill_idx: int = 1             # 0=60%, 1=75%, 2=90%
         self._custom_texts: dict[str, str] = {}     # name -> text
+        self._exercise_configs: dict[str, dict] = {}  # exercise_key -> last-used params
         self._locale: str = "en"
         self._listeners: list = []
 
@@ -579,6 +580,15 @@ class ThemeManager:
         self._custom_texts.pop(name, None)
         self.save()
 
+    def get_exercise_config(self, key: str) -> dict:
+        """Return last-used config for an exercise, or empty dict."""
+        return dict(self._exercise_configs.get(key, {}))
+
+    def save_exercise_config(self, key: str, config: dict) -> None:
+        """Persist last-used config for an exercise."""
+        self._exercise_configs[key] = dict(config)
+        self.save()
+
     @property
     def colors(self) -> dict:
         return THEME_PROFILES.get(self._profile, DARK_COLORS)
@@ -612,6 +622,8 @@ class ThemeManager:
             data["schulte_fill_idx"] = self._schulte_fill_idx
             if self._custom_texts:
                 data["custom_texts"] = self._custom_texts
+            if self._exercise_configs:
+                data["exercise_configs"] = self._exercise_configs
             with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except IOError:
@@ -650,6 +662,12 @@ class ThemeManager:
             if isinstance(ct, dict):
                 self._custom_texts = {k: v for k, v in ct.items()
                                       if isinstance(k, str) and isinstance(v, str)}
+            ec = data.get("exercise_configs")
+            if isinstance(ec, dict):
+                self._exercise_configs = {
+                    k: v for k, v in ec.items()
+                    if isinstance(k, str) and isinstance(v, dict)
+                }
             locale = data.get("locale", "en")
             if isinstance(locale, str) and len(locale) >= 2:
                 self._locale = locale

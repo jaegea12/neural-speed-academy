@@ -23,16 +23,16 @@ from neural_speed_academy.i18n import tr, exercise_display_name
 
 
 class _ConsistencyCalendar(QWidget):
-    """GitHub-style heatmap that grows with the user's training history.
+    """GitHub-style contribution heatmap.
 
-    Shows from the user's first training date (or current month if new)
-    up to today.  Horizontally scrollable when the history exceeds the
-    visible width.
+    Columns are ISO weeks (Mon-Sun). Rows are days of the week.
+    Month labels appear above the first week that starts in that month.
+    Only days up to today are drawn; future cells are blank.
     """
 
-    CELL = 12
-    GAP = 2
-    MONTH_GAP = 8  # extra horizontal space between months
+    CELL = 13
+    GAP = 3
+    RADIUS = 3
 
     def __init__(
         self, active_dates: set[str],
@@ -40,12 +40,10 @@ class _ConsistencyCalendar(QWidget):
         parent: QWidget | None = None,
     ):
         super().__init__(parent)
-        self._active = active_dates  # set of "YYYY-MM-DD" strings
+        self._active = active_dates
 
         today = datetime.now().date()
 
-        # Determine start: first day of the month of the earliest session,
-        # or first day of the current month for new users.
         if first_date:
             try:
                 earliest = datetime.strptime(first_date, "%Y-%m-%d").date()
@@ -53,91 +51,80 @@ class _ConsistencyCalendar(QWidget):
                 earliest = today
         else:
             earliest = today
+
+        # Start from the Monday of the earliest month's first week
         self._start = earliest.replace(day=1)
-        # Align to Monday of that week
         self._start -= timedelta(days=self._start.weekday())
 
         self._today = today
-        # Show at least 12 weeks so the calendar never looks cramped
-        min_weeks = 12
+        min_weeks = 14
         actual_weeks = ((today - self._start).days // 7) + 1
         self._num_weeks = max(actual_weeks, min_weeks)
-        # Adjust start if we expanded to meet the minimum
         if self._num_weeks > actual_weeks:
-            self._start = today - timedelta(days=today.weekday()) - timedelta(weeks=self._num_weeks - 1)
+            self._start = (today - timedelta(days=today.weekday())
+                           - timedelta(weeks=self._num_weeks - 1))
 
-        # Compute total width
-        self._week_xs: list[int] = []
-        self._compute_positions()
-
-        total_w = (self._week_xs[-1] if self._week_xs else 0) + self.CELL + 10
-        total_h = 7 * (self.CELL + self.GAP) + 24
+        step = self.CELL + self.GAP
+        month_h = 18
+        total_w = self._num_weeks * step + 10
+        total_h = 7 * step + month_h
         self.setFixedSize(max(total_w, 200), total_h)
-
-    def _compute_positions(self) -> None:
-        cell, gap = self.CELL, self.GAP
-        x = 0
-        for week in range(self._num_weeks):
-            if week > 0:
-                prev_day = self._start + timedelta(weeks=week - 1)
-                curr_day = self._start + timedelta(weeks=week)
-                if curr_day.month != prev_day.month:
-                    x += self.MONTH_GAP
-            self._week_xs.append(x)
-            x += cell + gap
 
     def paintEvent(self, event) -> None:
         c = COLORS
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        cell, gap = self.CELL, self.GAP
-        month_h = 16
+        cell = self.CELL
+        step = cell + self.GAP
+        month_h = 18
 
-        # Month labels — skip if too close to the previous label
-        font = QFont(_UI_FONT, 7)
-        painter.setPen(QColor(c["muted"]))
+        # ── Month labels ──
+        font = QFont(_UI_FONT, 8)
         painter.setFont(font)
         fm = painter.fontMetrics()
+        painter.setPen(QColor(c["fg"]))
         prev_month = -1
         prev_label_end = -1
         for week in range(self._num_weeks):
-            day = self._start + timedelta(weeks=week)
-            if day.month != prev_month:
-                label = day.strftime("%b")
-                if day.month == 1 or week == 0:
-                    label = day.strftime("%b '%y")
-                x = self._week_xs[week]
+            monday = self._start + timedelta(weeks=week)
+            if monday.month != prev_month:
+                label = monday.strftime("%b")
+                if monday.month == 1 or week == 0:
+                    label = monday.strftime("%b '%y")
+                x = week * step
                 label_w = fm.horizontalAdvance(label)
-                # Only draw if it won't overlap the previous label
-                if x > prev_label_end + 4:
-                    painter.drawText(x, 11, label)
+                if x > prev_label_end + 6:
+                    painter.drawText(x, 12, label)
                     prev_label_end = x + label_w
-                prev_month = day.month
+                prev_month = monday.month
 
-        # Cell colours
-        bg_color = QColor(c["bg"])
-        border_color = QColor(c["muted"])
-        border_color.setAlpha(50)
+        # ── Cells ──
+        empty_color = QColor(c["card"])
+        empty_color = empty_color.lighter(110)
         active_color = QColor(c["accent"])
+        # Dimmer shade for inactive cells
+        inactive_color = QColor(c["bg"])
+        inactive_color.setAlpha(180)
 
         for week in range(self._num_weeks):
             for dow in range(7):
                 day = self._start + timedelta(weeks=week, days=dow)
                 if day > self._today:
                     continue
-                x = self._week_xs[week]
-                y = month_h + dow * (cell + gap)
+                x = week * step
+                y = month_h + dow * step
 
                 day_str = day.strftime("%Y-%m-%d")
                 if day_str in self._active:
                     painter.setBrush(active_color)
                     painter.setPen(Qt.PenStyle.NoPen)
                 else:
-                    painter.setBrush(bg_color)
-                    painter.setPen(QPen(border_color, 1))
+                    painter.setBrush(inactive_color)
+                    painter.setPen(Qt.PenStyle.NoPen)
 
-                painter.drawRoundedRect(x, y, cell, cell, 2, 2)
+                painter.drawRoundedRect(x, y, cell, cell,
+                                        self.RADIUS, self.RADIUS)
 
         painter.end()
 
@@ -394,19 +381,21 @@ class StatsScreen(BaseScreen):
         row.setSpacing(0)
 
         # Fixed day labels column
-        cell, gap = _ConsistencyCalendar.CELL, _ConsistencyCalendar.GAP
+        cell = _ConsistencyCalendar.CELL
+        step = cell + _ConsistencyCalendar.GAP
+        month_h = 18
         day_col = QWidget()
-        day_col.setFixedWidth(22)
-        day_col.setFixedHeight(7 * (cell + gap) + 16)
+        day_col.setFixedWidth(24)
+        day_col.setFixedHeight(7 * step + month_h)
         day_col.setStyleSheet(f"background-color: {c['card']};")
         day_labels_layout = QVBoxLayout(day_col)
-        day_labels_layout.setContentsMargins(0, 16, 2, 0)
+        day_labels_layout.setContentsMargins(0, month_h, 3, 0)
         day_labels_layout.setSpacing(0)
         for label in ["M", "T", "W", "T", "F", "S", "S"]:
             lbl = QLabel(label)
-            lbl.setFont(QFont(_UI_FONT, 7))
+            lbl.setFont(QFont(_UI_FONT, 8))
             lbl.setStyleSheet(f"color: {c['muted']};")
-            lbl.setFixedHeight(cell + gap)
+            lbl.setFixedHeight(step)
             lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
             day_labels_layout.addWidget(lbl)
         day_labels_layout.addStretch()
