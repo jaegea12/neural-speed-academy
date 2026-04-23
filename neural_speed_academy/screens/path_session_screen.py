@@ -623,4 +623,4 @@ class PathBuilderScreen(BaseScreen):
             "steps": steps,
         }
         self.navigator.user_repo.save(user)
-        self.navigator.navigate_to("paths")
+        self.navigator.navigate_to("custom_paths")

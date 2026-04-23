@@ -130,7 +130,8 @@ class Navigator:
                 if pp and pp.current_step == step_idx:
                     pp.current_step += 1
                     from neural_speed_academy.config import TRAINING_PATHS
-                    path_data = TRAINING_PATHS.get(path_id, {})
+                    path_data = (TRAINING_PATHS.get(path_id)
+                                 or user.custom_paths.get(path_id, {}))
                     if pp.current_step >= len(path_data.get("steps", [])):
                         pp.completed = True
                         user.active_path = None
