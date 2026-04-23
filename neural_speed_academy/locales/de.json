@@ -630,5 +630,11 @@
   "split.narrow": "Eng",
   "split.medium": "Mittel",
   "split.standard": "Standard",
-  "split.wide": "Weit"
+  "split.wide": "Weit",
+  "paths.copy": "KOPIEREN",
+  "paths.edit": "BEARBEITEN",
+  "paths.delete": "LÖSCHEN",
+  "paths.delete_confirm_title": "Pfad löschen",
+  "paths.delete_confirm_body": "Möchten Sie diesen benutzerdefinierten Pfad wirklich löschen?",
+  "path.session.edit_custom_path": "PFAD BEARBEITEN"
 }

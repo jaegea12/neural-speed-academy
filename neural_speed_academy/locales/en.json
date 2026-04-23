@@ -630,5 +630,11 @@
   "split.narrow": "Narrow",
   "split.medium": "Medium",
   "split.standard": "Standard",
-  "split.wide": "Wide"
+  "split.wide": "Wide",
+  "paths.copy": "COPY",
+  "paths.edit": "EDIT",
+  "paths.delete": "DELETE",
+  "paths.delete_confirm_title": "Delete Path",
+  "paths.delete_confirm_body": "Are you sure you want to delete this custom path?",
+  "path.session.edit_custom_path": "EDIT CUSTOM PATH"
 }

@@ -630,5 +630,11 @@
   "split.narrow": "Stretto",
   "split.medium": "Medio",
   "split.standard": "Standard",
-  "split.wide": "Ampio"
+  "split.wide": "Ampio",
+  "paths.copy": "COPIA",
+  "paths.edit": "MODIFICA",
+  "paths.delete": "ELIMINA",
+  "paths.delete_confirm_title": "Elimina percorso",
+  "paths.delete_confirm_body": "Sei sicuro di voler eliminare questo percorso personalizzato?",
+  "path.session.edit_custom_path": "MODIFICA PERCORSO"
 }

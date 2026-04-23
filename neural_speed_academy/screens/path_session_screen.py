@@ -429,13 +429,33 @@ class PathBuilderScreen(BaseScreen):
         self.setStyleSheet(f"background-color: {c['bg']};")
         self.add_nav_bar()
         self._steps = []
+        self._edit_path_id: str | None = None
+
+        # Pre-populate from copy or edit
+        source_data = None
+        copy_from = kwargs.get("copy_from")
+        edit_id = kwargs.get("edit_path_id")
+        if copy_from:
+            source_data = TRAINING_PATHS.get(copy_from)
+            if not source_data:
+                user = self.navigator.get_user()
+                if user:
+                    source_data = user.custom_paths.get(copy_from)
+        elif edit_id:
+            user = self.navigator.get_user()
+            if user:
+                source_data = user.custom_paths.get(edit_id)
+            if source_data:
+                self._edit_path_id = edit_id
 
         container = QWidget()
         container.setStyleSheet(f"background-color: {c['bg']};")
         cl = QVBoxLayout(container)
         cl.setContentsMargins(40, 10, 40, 10)
 
-        title = QLabel(tr("path.session.create_custom_path"))
+        heading = (tr("path.session.edit_custom_path") if self._edit_path_id
+                   else tr("path.session.create_custom_path"))
+        title = QLabel(heading)
         title.setFont(make_qfont("header"))
         title.setStyleSheet(f"color: {c['accent']};")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -456,6 +476,16 @@ class PathBuilderScreen(BaseScreen):
         name_row.addWidget(self._name_entry)
         name_row.addStretch()
         cl.addLayout(name_row)
+
+        # Load source steps and name
+        if source_data:
+            self._steps = [
+                (t, l, dict(p)) for t, l, p in source_data["steps"]
+            ]
+            pre_name = source_data["name"]
+            if copy_from and not edit_id:
+                pre_name = f"{pre_name} (Copy)"
+            self._name_entry.setText(pre_name)
 
         # Two columns
         cols = QHBoxLayout()
@@ -616,14 +646,18 @@ class PathBuilderScreen(BaseScreen):
             QMessageBox.information(self, tr("path.session.no_exercises"), tr("path.session.add_at_least_one_exercise_to_y"))
             return
 
-        path_id = f"custom_{name.lower().replace(' ', '_')}"
-        base_id = path_id
-        counter = 1
-        while path_id in user.custom_paths or path_id in TRAINING_PATHS:
-            path_id = f"{base_id}_{counter}"
-            counter += 1
-
         steps = [(t, l, dict(p)) for t, l, p in self._steps]
+
+        if self._edit_path_id:
+            path_id = self._edit_path_id
+        else:
+            path_id = f"custom_{name.lower().replace(' ', '_')}"
+            base_id = path_id
+            counter = 1
+            while path_id in user.custom_paths or path_id in TRAINING_PATHS:
+                path_id = f"{base_id}_{counter}"
+                counter += 1
+
         user.custom_paths[path_id] = {
             "name": name,
             "description": f"Custom path with {len(steps)} exercises",

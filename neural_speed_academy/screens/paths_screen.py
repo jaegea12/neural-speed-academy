@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QFrame, QGridLayout, QScrollArea,
+    QFrame, QGridLayout, QScrollArea, QMessageBox,
 )
 from PyQt6.QtCore import Qt
 
@@ -255,8 +255,27 @@ class PathSelectionScreen(BaseScreen):
         btn.clicked.connect(lambda checked, pid=path_id: self._start_path(pid))
         action_col.addWidget(btn)
 
+        copy_btn = QPushButton(tr("paths.copy"))
+        copy_btn.setFixedWidth(120)
+        copy_btn.setStyleSheet(
+            btn_css(c["card"], c["fg"], padding="4px 12px",
+                    radius=3, font_key="btn_sm")
+        )
+        copy_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        copy_btn.clicked.connect(
+            lambda checked, pid=path_id: self._copy_path(pid)
+        )
+        action_col.addWidget(copy_btn)
+
         row.addLayout(action_col)
         return card
+
+    def _copy_path(self, path_id: str) -> None:
+        user = self.navigator.get_user()
+        if not user:
+            self.navigator.require_login("paths")
+            return
+        self.navigator.navigate_to("path_builder", copy_from=path_id)
 
     def _create_custom_path(self) -> None:
         user = self.navigator.get_user()
@@ -350,15 +369,66 @@ class CustomPathsScreen(BaseScreen):
         info.setStyleSheet(f"color: {c['muted']};")
         cl.addWidget(info)
 
-        btn = QPushButton(tr("mot.start"))
-        btn.setStyleSheet(
+        start_btn = QPushButton(tr("mot.start"))
+        start_btn.setStyleSheet(
             btn_css(c["accent"], c["btn_text"], padding="4px", radius=3,
                     font_key="btn_sm")
         )
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.clicked.connect(lambda checked, pid=path_id: self._start(pid))
-        cl.addWidget(btn)
+        start_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        start_btn.clicked.connect(
+            lambda checked, pid=path_id: self._start(pid)
+        )
+        cl.addWidget(start_btn)
+
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(4)
+
+        edit_btn = QPushButton(tr("paths.edit"))
+        edit_btn.setStyleSheet(
+            btn_css(c["card"], c["fg"], padding="3px", radius=3,
+                    font_key="btn_sm")
+        )
+        edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        edit_btn.clicked.connect(
+            lambda checked, pid=path_id: self._edit_path(pid)
+        )
+        btn_row.addWidget(edit_btn)
+
+        del_btn = QPushButton(tr("paths.delete"))
+        del_btn.setStyleSheet(
+            btn_css(c["card"], c["alert"], padding="3px", radius=3,
+                    font_key="btn_sm")
+        )
+        del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        del_btn.clicked.connect(
+            lambda checked, pid=path_id: self._delete_path(pid)
+        )
+        btn_row.addWidget(del_btn)
+
+        cl.addLayout(btn_row)
         return card
+
+    def _edit_path(self, path_id: str) -> None:
+        self.navigator.navigate_to("path_builder", edit_path_id=path_id)
+
+    def _delete_path(self, path_id: str) -> None:
+        user = self.navigator.get_user()
+        if not user:
+            return
+        reply = QMessageBox.question(
+            self, tr("paths.delete_confirm_title"),
+            tr("paths.delete_confirm_body"),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        user.custom_paths.pop(path_id, None)
+        user.path_progress.pop(path_id, None)
+        if user.active_path == path_id:
+            user.active_path = None
+        self.navigator.user_repo.save(user)
+        self.navigator.navigate_to("custom_paths")
 
     def _start(self, path_id: str) -> None:
         user = self.navigator.get_user()

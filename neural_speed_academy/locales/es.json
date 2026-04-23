@@ -630,5 +630,11 @@
   "split.narrow": "Estrecho",
   "split.medium": "Medio",
   "split.standard": "Estándar",
-  "split.wide": "Amplio"
+  "split.wide": "Amplio",
+  "paths.copy": "COPIAR",
+  "paths.edit": "EDITAR",
+  "paths.delete": "ELIMINAR",
+  "paths.delete_confirm_title": "Eliminar ruta",
+  "paths.delete_confirm_body": "¿Está seguro de que desea eliminar esta ruta personalizada?",
+  "path.session.edit_custom_path": "EDITAR RUTA"
 }
