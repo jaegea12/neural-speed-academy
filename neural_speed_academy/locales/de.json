@@ -621,5 +621,14 @@
   "slide.cat.nutrition": "Ernährung",
   "seq.items": "{n} Elemente",
   "menus.n_seconds": "{n} Sekunden",
-  "common.error": "Fehler"
+  "common.error": "Fehler",
+  "priming.saccade_random": "Zufällige Sakkaden",
+  "priming.pursuit_wave": "Folgebewegung: Welle",
+  "priming.pursuit_lemniscate": "Folgebewegung: Lemniskate",
+  "priming.pursuit_spiral": "Folgebewegung: Spirale",
+  "menu.label.spread": "Streuung",
+  "split.narrow": "Eng",
+  "split.medium": "Mittel",
+  "split.standard": "Standard",
+  "split.wide": "Weit"
 }

@@ -334,8 +334,12 @@ EXERCISE_CATALOG = [
         ("Vertical Saccades", {"mode": "saccade_v", "delay": 500}),
         ("Diagonal Saccades", {"mode": "saccade_diag", "delay": 450}),
         ("Expanding Saccades", {"mode": "saccade_expand", "delay": 500}),
+        ("Random Saccades", {"mode": "saccade_random", "delay": 500}),
         ("Smooth Pursuit Circle", {"mode": "pursuit_circle", "cycles": 10}),
         ("Figure-8 Pursuit", {"mode": "pursuit_figure8", "cycles": 12}),
+        ("Wave Pursuit", {"mode": "pursuit_wave", "cycles": 8}),
+        ("Lemniscate Pursuit", {"mode": "pursuit_lemniscate", "cycles": 10}),
+        ("Spiral Pursuit", {"mode": "pursuit_spiral", "cycles": 6}),
     ]),
     ("flash", "Flash Digits", [
         ("3 Digits", {"digits": 3, "rounds": 10}),
@@ -394,6 +398,9 @@ EXERCISE_CATALOG = [
         ("Sequential", {"mode": "sequential"}),
         ("Simultaneous", {"mode": "simultaneous"}),
         ("Rapid", {"mode": "rapid"}),
+        ("Sequential · Wide", {"mode": "sequential", "eccentricity": 80}),
+        ("Simultaneous · Wide", {"mode": "simultaneous", "eccentricity": 80}),
+        ("Rapid · Narrow", {"mode": "rapid", "eccentricity": 40}),
     ]),
     ("reaction_time", "Reaction Time", [
         ("Simple", {"mode": "simple"}),

@@ -478,9 +478,13 @@ class PrimingMenuScreen(BaseMenuScreen):
                 (tr("priming.saccade_v"),   {"mode": "saccade_v", "use_delay": True}),
                 (tr("priming.saccade_diag"),   {"mode": "saccade_diag", "use_delay": True}),
                 (tr("priming.saccade_expand"),  {"mode": "saccade_expand", "use_delay": True}),
+                (tr("priming.saccade_random"),  {"mode": "saccade_random", "use_delay": True}),
                 (tr("priming.pursuit_line"),       {"mode": "pursuit_line", "use_delay": False}),
                 (tr("priming.pursuit_circle"),     {"mode": "pursuit_circle", "use_delay": False}),
                 (tr("priming.pursuit_figure8"),   {"mode": "pursuit_figure8", "use_delay": False}),
+                (tr("priming.pursuit_wave"),       {"mode": "pursuit_wave", "use_delay": False}),
+                (tr("priming.pursuit_lemniscate"), {"mode": "pursuit_lemniscate", "use_delay": False}),
+                (tr("priming.pursuit_spiral"),     {"mode": "pursuit_spiral", "use_delay": False}),
             ],
             params=[
                 (tr("menu.label.speed"), "speed", [
@@ -1119,6 +1123,12 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
                     (tr("split.simultaneous"), "simultaneous"),
                     (tr("split.rapid"), "rapid"),
                 ], "sequential"),
+                (tr("menu.label.spread"), "eccentricity", [
+                    (tr("split.narrow"), 40),
+                    (tr("split.medium"), 55),
+                    (tr("split.standard"), 65),
+                    (tr("split.wide"), 80),
+                ], 65),
                 (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("15", 15), ("20", 20), ("25", 25),
                 ], 15),
@@ -1137,6 +1147,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
             mode=self._tp_param_values.get("mode", "sequential"),
             center_ms=preset_vals["center_ms"],
             peripheral_ms=preset_vals["peripheral_ms"],
+            eccentricity=self._tp_param_values.get("eccentricity", 65),
             rounds=self._tp_param_values.get("rounds", 15),
         )
 

@@ -82,6 +82,7 @@ class SplitAttentionExercise(BaseExercise):
         )
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._mode = kwargs.get("mode", "sequential")
+        self._eccentricity = kwargs.get("eccentricity", cfg["eccentricity"])
 
         # Skip config screen when launched from preset menu
         if kwargs:
@@ -432,7 +433,7 @@ class SplitAttentionExercise(BaseExercise):
         aw = self._arena.width()
         ah = self._arena.height()
         cx, cy = aw // 2, ah // 2
-        ecc_frac = cfg["eccentricity"] / 100.0
+        ecc_frac = self._eccentricity / 100.0
         sx = int(cx + dx * ecc_frac * (aw // 2 - 50))
         sy = int(cy + dy * ecc_frac * (ah // 2 - 50))
         sw = self._periph_lbl.width()
