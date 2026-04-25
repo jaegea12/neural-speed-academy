@@ -99,8 +99,13 @@ class PathSessionScreen(BaseScreen):
 
         cl.addSpacing(10)
 
-        # Launch button
+        # Launch + config buttons
         ex_type, label, params = steps[current]
+
+        btn_row_top = QHBoxLayout()
+        btn_row_top.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        btn_row_top.setSpacing(8)
+
         launch = QPushButton(f"\u25b6  {label}")
         launch.setFont(make_qfont("btn_lg"))
         launch.setStyleSheet(
@@ -111,7 +116,36 @@ class PathSessionScreen(BaseScreen):
         launch.clicked.connect(
             lambda: self._launch_step(ex_type, params, path_id, current)
         )
-        cl.addWidget(launch, alignment=Qt.AlignmentFlag.AlignCenter)
+        btn_row_top.addWidget(launch)
+
+        # Config button (only if schema exists for this exercise type)
+        schema = STEP_CONFIG_SCHEMA.get(ex_type)
+        self._config_panel = None
+        if schema:
+            cfg_btn = QPushButton("\u2699")
+            cfg_btn.setFont(make_qfont("btn_lg"))
+            cfg_btn.setFixedSize(48, 48)
+            cfg_btn.setStyleSheet(
+                f"QPushButton {{ background-color: {c['card']}; color: {c['fg']}; "
+                f"border: 2px solid transparent; border-radius: 4px; }}"
+                f"QPushButton:hover {{ background-color: {c['accent']}; "
+                f"color: {c['btn_text']}; }}"
+            )
+            cfg_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            cfg_btn.setToolTip(tr("path.cfg.configure_step"))
+            cfg_btn.clicked.connect(lambda: self._toggle_config_panel())
+            btn_row_top.addWidget(cfg_btn)
+
+        cl.addLayout(btn_row_top)
+
+        # Config panel (hidden by default)
+        if schema:
+            self._config_panel = self._build_config_panel(
+                schema, params, ex_type, path_id, current,
+            )
+            self._config_panel.setVisible(False)
+            cl.addWidget(self._config_panel,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
 
         # Nav buttons
         nav_row = QHBoxLayout()
@@ -324,6 +358,102 @@ class PathSessionScreen(BaseScreen):
 
         self._layout.addWidget(container, 1)
 
+    def _toggle_config_panel(self) -> None:
+        if self._config_panel:
+            self._config_panel.setVisible(
+                not self._config_panel.isVisible()
+            )
+
+    def _build_config_panel(
+        self, schema: list, params: dict,
+        ex_type: str, path_id: str, step_idx: int,
+    ) -> QFrame:
+        c = COLORS
+        panel = QFrame()
+        panel.setStyleSheet(
+            f"background-color: {c['card']}; border-radius: 6px; "
+            f"padding: 10px;"
+        )
+        panel.setFixedWidth(500)
+        pl = QVBoxLayout(panel)
+        pl.setSpacing(6)
+
+        title = QLabel(tr("path.cfg.configure_step"))
+        title.setFont(make_qfont("btn_bold"))
+        title.setStyleSheet(f"color: {c['accent']};")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        pl.addWidget(title)
+
+        self._cfg_buttons: dict[str, dict] = {}
+
+        for label_key, param_key, choices in schema:
+            row = QHBoxLayout()
+            row.setSpacing(6)
+
+            lbl = QLabel(tr(label_key))
+            lbl.setFont(make_qfont("btn_sm"))
+            lbl.setStyleSheet(f"color: {c['fg']};")
+            lbl.setFixedWidth(80)
+            row.addWidget(lbl)
+
+            current_val = params.get(param_key)
+            self._cfg_buttons[param_key] = {}
+
+            for display, value in choices:
+                btn = QPushButton(display)
+                btn.setFont(make_qfont("btn_sm"))
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                is_active = (current_val == value)
+                btn.setStyleSheet(self._cfg_btn_style(c, is_active))
+                btn.clicked.connect(
+                    lambda checked, pk=param_key, v=value:
+                        self._cfg_select(pk, v, params, path_id, step_idx)
+                )
+                self._cfg_buttons[param_key][value] = btn
+                row.addWidget(btn)
+
+            row.addStretch()
+            pl.addLayout(row)
+
+        return panel
+
+    @staticmethod
+    def _cfg_btn_style(c: dict, active: bool) -> str:
+        if active:
+            return (
+                f"QPushButton {{ background-color: {c['accent']}; "
+                f"color: {c['btn_text']}; border: 2px solid transparent; "
+                f"padding: 3px 10px; border-radius: 3px; }}"
+            )
+        return (
+            f"QPushButton {{ background-color: {c['bg']}; "
+            f"color: {c['fg']}; border: 2px solid transparent; "
+            f"padding: 3px 10px; border-radius: 3px; }}"
+            f"QPushButton:hover {{ background-color: {c['accent']}; "
+            f"color: {c['btn_text']}; }}"
+        )
+
+    def _cfg_select(
+        self, param_key: str, value, params: dict,
+        path_id: str, step_idx: int,
+    ) -> None:
+        c = COLORS
+        params[param_key] = value
+
+        # Update button styles
+        for v, btn in self._cfg_buttons.get(param_key, {}).items():
+            btn.setStyleSheet(self._cfg_btn_style(c, v == value))
+
+        # Persist to user profile (custom paths only)
+        user = self.navigator.get_user()
+        if user and path_id in user.custom_paths:
+            user.custom_paths[path_id]["steps"][step_idx] = (
+                user.custom_paths[path_id]["steps"][step_idx][0],
+                user.custom_paths[path_id]["steps"][step_idx][1],
+                dict(params),
+            )
+            self.navigator.user_repo.save(user)
+
     def _advance_step(self, path_id: str, step_idx: int) -> None:
         user = self.navigator.get_user()
         if not user:
@@ -429,6 +559,88 @@ EXERCISE_CATALOG = [
         ("Review Session", {}),
     ]),
 ]
+
+# Per-exercise adjustable params shown in the path session config panel.
+# Maps ex_type -> list of (i18n_key, param_key, [(label, value), ...])
+STEP_CONFIG_SCHEMA: dict[str, list[tuple[str, str, list]]] = {
+    "priming": [
+        ("path.cfg.speed", "delay", [
+            ("Slow", 700), ("Medium", 500), ("Fast", 400),
+        ]),
+        ("path.cfg.duration", "duration_s", [
+            ("30s", 30.0), ("45s", 45.0), ("60s", 60.0),
+        ]),
+    ],
+    "flash": [
+        ("path.cfg.rounds", "rounds", [
+            ("8", 8), ("10", 10), ("12", 12), ("15", 15),
+        ]),
+    ],
+    "eyespan": [
+        ("path.cfg.width", "width", [
+            ("30%", 30), ("40%", 40), ("50%", 50), ("60%", 60), ("70%", 70),
+        ]),
+        ("path.cfg.rounds", "rounds", [
+            ("8", 8), ("10", 10), ("12", 12), ("15", 15),
+        ]),
+    ],
+    "schulte": [
+        ("path.cfg.grid_size", "grid_size", [
+            ("3×3", 3), ("4×4", 4), ("5×5", 5), ("6×6", 6), ("7×7", 7),
+        ]),
+    ],
+    "rsvp": [
+        ("path.cfg.wpm", "wpm", [
+            ("200", 200), ("300", 300), ("400", 400),
+            ("500", 500), ("600", 600), ("800", 800),
+        ]),
+    ],
+    "chunking": [
+        ("path.cfg.chunk_size", "chunk_size", [
+            ("2", 2), ("3", 3), ("4", 4), ("5", 5),
+        ]),
+        ("path.cfg.wpm", "wpm", [
+            ("180", 180), ("250", 250), ("350", 350), ("450", 450),
+        ]),
+    ],
+    "mot": [
+        ("path.cfg.targets", "targets", [
+            ("3", 3), ("4", 4), ("5", 5), ("6", 6),
+        ]),
+        ("path.cfg.duration", "duration", [
+            ("6s", 6), ("8s", 8), ("10s", 10),
+        ]),
+    ],
+    "split_attention": [
+        ("path.cfg.mode", "mode", [
+            ("Seq", "sequential"), ("Sim", "simultaneous"), ("Rapid", "rapid"),
+        ]),
+        ("path.cfg.rounds", "rounds", [
+            ("10", 10), ("15", 15), ("20", 20), ("25", 25),
+        ]),
+    ],
+    "reaction_time": [
+        ("path.cfg.mode", "mode", [
+            ("Simple", "simple"), ("Choice", "choice"), ("Go/No-Go", "go_nogo"),
+        ]),
+        ("path.cfg.rounds", "rounds", [
+            ("10", 10), ("15", 15), ("20", 20),
+        ]),
+    ],
+    "slide_processing": [
+        ("path.cfg.display_time", "display_s", [
+            ("5s", 5), ("8s", 8), ("10s", 10), ("12s", 12),
+        ]),
+        ("path.cfg.slides", "slides", [
+            ("3", 3), ("5", 5), ("7", 7),
+        ]),
+    ],
+    "peripheral_flash": [
+        ("path.cfg.rounds", "rounds", [
+            ("10", 10), ("15", 15), ("20", 20),
+        ]),
+    ],
+}
 
 
 class PathBuilderScreen(BaseScreen):

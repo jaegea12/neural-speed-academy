@@ -639,5 +639,17 @@
   "path.session.edit_custom_path": "EDIT CUSTOM PATH",
   "path.session.default_text": "Default (current text)",
   "path.session.select_text": "Select Text",
-  "path.session.select_text_for_step": "Choose a custom text for this exercise:"
+  "path.session.select_text_for_step": "Choose a custom text for this exercise:",
+  "path.cfg.configure_step": "Configure Step",
+  "path.cfg.speed": "Speed",
+  "path.cfg.duration": "Duration",
+  "path.cfg.rounds": "Rounds",
+  "path.cfg.width": "Width",
+  "path.cfg.grid_size": "Grid Size",
+  "path.cfg.wpm": "WPM",
+  "path.cfg.chunk_size": "Chunk",
+  "path.cfg.targets": "Targets",
+  "path.cfg.mode": "Mode",
+  "path.cfg.display_time": "Display",
+  "path.cfg.slides": "Slides"
 }

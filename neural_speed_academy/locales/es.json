@@ -639,5 +639,17 @@
   "path.session.edit_custom_path": "EDITAR RUTA",
   "path.session.default_text": "Predeterminado (texto actual)",
   "path.session.select_text": "Seleccionar texto",
-  "path.session.select_text_for_step": "Elija un texto personalizado para este ejercicio:"
+  "path.session.select_text_for_step": "Elija un texto personalizado para este ejercicio:",
+  "path.cfg.configure_step": "Configurar paso",
+  "path.cfg.speed": "Velocidad",
+  "path.cfg.duration": "Duración",
+  "path.cfg.rounds": "Rondas",
+  "path.cfg.width": "Ancho",
+  "path.cfg.grid_size": "Tamaño",
+  "path.cfg.wpm": "PPM",
+  "path.cfg.chunk_size": "Bloque",
+  "path.cfg.targets": "Objetivos",
+  "path.cfg.mode": "Modo",
+  "path.cfg.display_time": "Mostrar",
+  "path.cfg.slides": "Diapositivas"
 }

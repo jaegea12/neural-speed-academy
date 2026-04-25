@@ -639,5 +639,17 @@
   "path.session.edit_custom_path": "MODIFIER LE PARCOURS",
   "path.session.default_text": "Par défaut (texte actuel)",
   "path.session.select_text": "Sélectionner un texte",
-  "path.session.select_text_for_step": "Choisissez un texte personnalisé pour cet exercice :"
+  "path.session.select_text_for_step": "Choisissez un texte personnalisé pour cet exercice :",
+  "path.cfg.configure_step": "Configurer l'étape",
+  "path.cfg.speed": "Vitesse",
+  "path.cfg.duration": "Durée",
+  "path.cfg.rounds": "Tours",
+  "path.cfg.width": "Largeur",
+  "path.cfg.grid_size": "Taille grille",
+  "path.cfg.wpm": "MPM",
+  "path.cfg.chunk_size": "Bloc",
+  "path.cfg.targets": "Cibles",
+  "path.cfg.mode": "Mode",
+  "path.cfg.display_time": "Affichage",
+  "path.cfg.slides": "Diapos"
 }

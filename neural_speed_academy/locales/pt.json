@@ -639,5 +639,17 @@
   "path.session.edit_custom_path": "EDITAR CAMINHO",
   "path.session.default_text": "Padrão (texto atual)",
   "path.session.select_text": "Selecionar texto",
-  "path.session.select_text_for_step": "Escolha um texto personalizado para este exercício:"
+  "path.session.select_text_for_step": "Escolha um texto personalizado para este exercício:",
+  "path.cfg.configure_step": "Configurar etapa",
+  "path.cfg.speed": "Velocidade",
+  "path.cfg.duration": "Duração",
+  "path.cfg.rounds": "Rodadas",
+  "path.cfg.width": "Largura",
+  "path.cfg.grid_size": "Tamanho",
+  "path.cfg.wpm": "PPM",
+  "path.cfg.chunk_size": "Bloco",
+  "path.cfg.targets": "Alvos",
+  "path.cfg.mode": "Modo",
+  "path.cfg.display_time": "Exibição",
+  "path.cfg.slides": "Slides"
 }

@@ -639,5 +639,17 @@
   "path.session.edit_custom_path": "MODIFICA PERCORSO",
   "path.session.default_text": "Predefinito (testo attuale)",
   "path.session.select_text": "Seleziona testo",
-  "path.session.select_text_for_step": "Scegli un testo personalizzato per questo esercizio:"
+  "path.session.select_text_for_step": "Scegli un testo personalizzato per questo esercizio:",
+  "path.cfg.configure_step": "Configura passaggio",
+  "path.cfg.speed": "Velocità",
+  "path.cfg.duration": "Durata",
+  "path.cfg.rounds": "Turni",
+  "path.cfg.width": "Larghezza",
+  "path.cfg.grid_size": "Dimensione",
+  "path.cfg.wpm": "PPM",
+  "path.cfg.chunk_size": "Blocco",
+  "path.cfg.targets": "Obiettivi",
+  "path.cfg.mode": "Modalità",
+  "path.cfg.display_time": "Visualizza",
+  "path.cfg.slides": "Diapositive"
 }

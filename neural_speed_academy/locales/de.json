@@ -639,5 +639,17 @@
   "path.session.edit_custom_path": "PFAD BEARBEITEN",
   "path.session.default_text": "Standard (aktueller Text)",
   "path.session.select_text": "Text auswählen",
-  "path.session.select_text_for_step": "Wählen Sie einen benutzerdefinierten Text für diese Übung:"
+  "path.session.select_text_for_step": "Wählen Sie einen benutzerdefinierten Text für diese Übung:",
+  "path.cfg.configure_step": "Schritt konfigurieren",
+  "path.cfg.speed": "Tempo",
+  "path.cfg.duration": "Dauer",
+  "path.cfg.rounds": "Runden",
+  "path.cfg.width": "Breite",
+  "path.cfg.grid_size": "Rastergröße",
+  "path.cfg.wpm": "WPM",
+  "path.cfg.chunk_size": "Chunk",
+  "path.cfg.targets": "Ziele",
+  "path.cfg.mode": "Modus",
+  "path.cfg.display_time": "Anzeige",
+  "path.cfg.slides": "Folien"
 }
