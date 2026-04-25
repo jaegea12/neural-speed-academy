@@ -636,5 +636,8 @@
   "paths.delete": "ELIMINA",
   "paths.delete_confirm_title": "Elimina percorso",
   "paths.delete_confirm_body": "Sei sicuro di voler eliminare questo percorso personalizzato?",
-  "path.session.edit_custom_path": "MODIFICA PERCORSO"
+  "path.session.edit_custom_path": "MODIFICA PERCORSO",
+  "path.session.default_text": "Predefinito (testo attuale)",
+  "path.session.select_text": "Seleziona testo",
+  "path.session.select_text_for_step": "Scegli un testo personalizzato per questo esercizio:"
 }

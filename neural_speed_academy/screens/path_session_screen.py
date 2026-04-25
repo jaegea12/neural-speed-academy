@@ -8,6 +8,7 @@ import random
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QFrame, QProgressBar, QScrollArea, QLineEdit, QMessageBox,
+    QInputDialog,
 )
 from PyQt6.QtCore import Qt
 
@@ -178,6 +179,18 @@ class PathSessionScreen(BaseScreen):
             self.navigator.user_repo.save(user)
 
         self.navigator._path_step_pending = (path_id, step_idx)
+
+        # Work on a copy so we don't mutate the stored step params
+        params = dict(params)
+
+        # Apply custom text if the step specifies one
+        text_key = params.pop("text_key", None)
+        if text_key:
+            from neural_speed_academy.theme import theme_manager
+            text = theme_manager.custom_texts.get(text_key, "")
+            if text:
+                theme_manager.training_text = text
+                theme_manager.save()
 
         if ex_type == "priming":
             self.navigator.launch_exercise(PrimingExercise, **params)
@@ -580,8 +593,25 @@ class PathBuilderScreen(BaseScreen):
         cl.addLayout(btn_row)
         self._layout.addWidget(container, 1)
 
+    _TEXT_EXERCISES = {"pacer", "rsvp", "chunking"}
+
     def _add_step(self, ex_type: str, label: str, params: dict) -> None:
-        self._steps.append((ex_type, label, params))
+        p = dict(params)
+        if ex_type in self._TEXT_EXERCISES:
+            from neural_speed_academy.theme import theme_manager
+            custom = theme_manager.custom_texts
+            if custom:
+                names = sorted(custom)
+                choices = [tr("path.session.default_text")] + names
+                chosen, ok = QInputDialog.getItem(
+                    self, tr("path.session.select_text"),
+                    tr("path.session.select_text_for_step"),
+                    choices, 0, False,
+                )
+                if ok and chosen and chosen != choices[0]:
+                    p["text_key"] = chosen
+                    label = f"{label} [{chosen}]"
+        self._steps.append((ex_type, label, p))
         self._refresh_steps()
 
     def _remove_step(self, index: int) -> None:

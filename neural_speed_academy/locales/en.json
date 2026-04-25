@@ -636,5 +636,8 @@
   "paths.delete": "DELETE",
   "paths.delete_confirm_title": "Delete Path",
   "paths.delete_confirm_body": "Are you sure you want to delete this custom path?",
-  "path.session.edit_custom_path": "EDIT CUSTOM PATH"
+  "path.session.edit_custom_path": "EDIT CUSTOM PATH",
+  "path.session.default_text": "Default (current text)",
+  "path.session.select_text": "Select Text",
+  "path.session.select_text_for_step": "Choose a custom text for this exercise:"
 }

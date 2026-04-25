@@ -636,5 +636,8 @@
   "paths.delete": "ELIMINAR",
   "paths.delete_confirm_title": "Eliminar ruta",
   "paths.delete_confirm_body": "¿Está seguro de que desea eliminar esta ruta personalizada?",
-  "path.session.edit_custom_path": "EDITAR RUTA"
+  "path.session.edit_custom_path": "EDITAR RUTA",
+  "path.session.default_text": "Predeterminado (texto actual)",
+  "path.session.select_text": "Seleccionar texto",
+  "path.session.select_text_for_step": "Elija un texto personalizado para este ejercicio:"
 }

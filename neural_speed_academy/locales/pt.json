@@ -636,5 +636,8 @@
   "paths.delete": "EXCLUIR",
   "paths.delete_confirm_title": "Excluir caminho",
   "paths.delete_confirm_body": "Tem certeza de que deseja excluir este caminho personalizado?",
-  "path.session.edit_custom_path": "EDITAR CAMINHO"
+  "path.session.edit_custom_path": "EDITAR CAMINHO",
+  "path.session.default_text": "Padrão (texto atual)",
+  "path.session.select_text": "Selecionar texto",
+  "path.session.select_text_for_step": "Escolha um texto personalizado para este exercício:"
 }
