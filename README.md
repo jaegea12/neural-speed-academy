@@ -2,7 +2,7 @@
 
 A desktop application for speed reading and cognitive training, built with Python and PyQt6.
 
-15 exercises across three categories — Perception, Cognition, and Reading — with structured training paths, per-user profiles, and data export for research use.
+15 exercises across three categories — Perception, Cognition, and Reading — with structured training paths, per-user profiles, and data export for research use. Available in 6 languages (EN, DE, FR, ES, IT, PT).
 
 ## Exercises
 
@@ -34,11 +34,11 @@ A desktop application for speed reading and cognitive training, built with Pytho
 | **Slide Processing** | Absorb text slides with facts, then answer comprehension questions. Built-in and custom slide sets |
 
 ### Visual Warmup
-- **Eye Priming** — saccade and smooth pursuit exercises (horizontal, vertical, diagonal, expanding, circular, figure-8)
+- **Eye Priming** — saccade and smooth pursuit exercises (horizontal, vertical, diagonal, expanding, random, circular, figure-8, wave, lemniscate, spiral)
 
 ## Training Paths
 
-16 built-in training paths with progress tracking, plus a path builder for creating custom sequences. Paths combine multiple exercises into structured sessions with configurable difficulty.
+21 built-in training paths across 5 categories (Daily, Reading, Cognitive, Visual, Information Processing) with progress tracking. Path builder for creating custom sequences with copy, edit, and delete support. Per-step config panel for adjusting exercise params before launch. Custom learning material can be attached to text-based exercises.
 
 ## Slide Creator
 
@@ -46,7 +46,7 @@ In-app editor for creating custom slide sets with title, bullet points, and mult
 
 ## Features
 
-- **9 color profiles** — Dark, Light, High Contrast, Warm/Focus, Twilight, Soft Light, Silver, Monochrome, Ember. All WCAG AA compliant
+- **11 color profiles** — Dark, Light, High Contrast, Warm/Focus, Twilight, Soft Light, Silver, Monochrome, Ember, Dark Blue, Solarized. All WCAG AA compliant
 - **Font scaling** — 6 steps from 80% to 150%, per-user preference
 - **Per-user profiles** — individual theme, font scale, progress, and history. Optional password protection
 - **Unified config menus** — two-panel layout with preset/difficulty toggles and adjustable parameters
@@ -64,7 +64,7 @@ In-app editor for creating custom slide sets with title, bullet points, and mult
 ## Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/neural-speed-academy.git
+git clone https://code.roche.com/jaegea12/neural-speed-academy.git
 cd neural-speed-academy
 pip install PyQt6>=6.5
 python nsa.py
@@ -132,8 +132,10 @@ Created at runtime in the working directory (not committed):
 
 GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 
-## Credits
+## Author
 
-Created by Adam Jaeger — admjae@proton.me
+Adam Jäger — [admjae@proton.me](mailto:admjae@proton.me)
+
+## Credits
 
 Repository setup and GitLab integration by Orlando Pereira

@@ -2,6 +2,7 @@
 name = "neural-speed-academy"
 version = "1.0.0"
 description = "A desktop application for speed reading and cognitive training"
+authors = [{name = "Adam Jäger", email = "admjae@proton.me"}]
 license = {text = "GPL-3.0-only"}
 requires-python = ">=3.10"
 dependencies = [
