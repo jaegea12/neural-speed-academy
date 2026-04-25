@@ -43,6 +43,7 @@ class BaseMenuScreen(BaseScreen):
         default_preset: int = 0,
         left_stretch: int = 1,
         right_stretch: int = 1,
+        subtitle: str | None = None,
     ) -> None:
         """Build a two-panel config screen.
 
@@ -88,6 +89,13 @@ class BaseMenuScreen(BaseScreen):
         title_row.addWidget(guide_btn)
         title_row.addStretch()
         cl.addLayout(title_row)
+
+        if subtitle:
+            sub_lbl = QLabel(subtitle)
+            sub_lbl.setFont(make_qfont("btn_sm"))
+            sub_lbl.setStyleSheet(f"color: {c['muted']};")
+            sub_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(sub_lbl)
 
         cl.addSpacing(10)
 
@@ -1107,6 +1115,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.split_attention"), "split_attention", None,
+            subtitle=tr("menu.english_only_hint"),
             left_label=tr("menu.label.difficulty"),
             presets=[
                 (tr("menu.diff.beginner"),    {"center_ms": 150, "peripheral_ms": 120}),

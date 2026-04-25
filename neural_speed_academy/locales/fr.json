@@ -651,5 +651,6 @@
   "path.cfg.targets": "Cibles",
   "path.cfg.mode": "Mode",
   "path.cfg.display_time": "Affichage",
-  "path.cfg.slides": "Diapos"
+  "path.cfg.slides": "Diapos",
+  "menu.english_only_hint": "🇬🇧 Les exercices de mots sont actuellement en anglais uniquement"
 }

@@ -651,5 +651,6 @@
   "path.cfg.targets": "Targets",
   "path.cfg.mode": "Mode",
   "path.cfg.display_time": "Display",
-  "path.cfg.slides": "Slides"
+  "path.cfg.slides": "Slides",
+  "menu.english_only_hint": "🇬🇧 Word drills are currently in English only"
 }

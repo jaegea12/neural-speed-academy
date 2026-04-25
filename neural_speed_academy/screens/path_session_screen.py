@@ -829,6 +829,14 @@ class PathBuilderScreen(BaseScreen):
         self._steps.append((ex_type, label, p))
         self._refresh_steps()
 
+    def _move_step(self, index: int, direction: int) -> None:
+        new_idx = index + direction
+        if 0 <= new_idx < len(self._steps):
+            self._steps[index], self._steps[new_idx] = (
+                self._steps[new_idx], self._steps[index]
+            )
+            self._refresh_steps()
+
     def _remove_step(self, index: int) -> None:
         if 0 <= index < len(self._steps):
             self._steps.pop(index)
@@ -862,6 +870,34 @@ class PathBuilderScreen(BaseScreen):
             lbl.setFont(make_qfont("body"))
             lbl.setStyleSheet(f"color: {c['fg']};")
             row.addWidget(lbl, 1)
+
+            action_style = (
+                f"QPushButton {{ color: {c['muted']}; background: transparent; "
+                f"border: 2px solid transparent; padding: 0 2px; }}"
+                f"QPushButton:hover {{ color: {c['fg']}; }}"
+            )
+
+            up_btn = QPushButton("\u25B2")
+            up_btn.setFont(make_qfont("btn_sm"))
+            up_btn.setStyleSheet(action_style)
+            up_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            up_btn.setFixedWidth(24)
+            up_btn.setEnabled(i > 0)
+            up_btn.clicked.connect(
+                lambda checked, idx=i: self._move_step(idx, -1)
+            )
+            row.addWidget(up_btn)
+
+            dn_btn = QPushButton("\u25BC")
+            dn_btn.setFont(make_qfont("btn_sm"))
+            dn_btn.setStyleSheet(action_style)
+            dn_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            dn_btn.setFixedWidth(24)
+            dn_btn.setEnabled(i < len(self._steps) - 1)
+            dn_btn.clicked.connect(
+                lambda checked, idx=i: self._move_step(idx, 1)
+            )
+            row.addWidget(dn_btn)
 
             rm = QPushButton(tr("path.session.u2717"))
             rm.setFont(make_qfont("btn_sm"))

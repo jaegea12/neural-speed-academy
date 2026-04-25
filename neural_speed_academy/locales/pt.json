@@ -651,5 +651,6 @@
   "path.cfg.targets": "Alvos",
   "path.cfg.mode": "Modo",
   "path.cfg.display_time": "Exibição",
-  "path.cfg.slides": "Slides"
+  "path.cfg.slides": "Slides",
+  "menu.english_only_hint": "🇬🇧 Os exercícios de palavras estão atualmente apenas em inglês"
 }
