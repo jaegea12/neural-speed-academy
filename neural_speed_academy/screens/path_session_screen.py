@@ -99,8 +99,10 @@ class PathSessionScreen(BaseScreen):
 
         cl.addSpacing(10)
 
-        # Launch + config buttons
-        ex_type, label, params = steps[current]
+        # Launch + config buttons — copy params to avoid mutating
+        # the global TRAINING_PATHS dict when the config panel edits values
+        ex_type, label, _orig_params = steps[current]
+        params = dict(_orig_params)
 
         btn_row_top = QHBoxLayout()
         btn_row_top.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -217,14 +219,15 @@ class PathSessionScreen(BaseScreen):
         # Work on a copy so we don't mutate the stored step params
         params = dict(params)
 
-        # Apply custom text if the step specifies one
+        # Apply custom text if the step specifies one.
+        # Store the original on the navigator so finish_exercise can restore it.
         text_key = params.pop("text_key", None)
         if text_key:
             from neural_speed_academy.theme import theme_manager
+            self.navigator._path_prev_text = theme_manager.training_text
             text = theme_manager.custom_texts.get(text_key, "")
             if text:
                 theme_manager.training_text = text
-                theme_manager.save()
 
         if ex_type == "priming":
             self.navigator.launch_exercise(PrimingExercise, **params)
