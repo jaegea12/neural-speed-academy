@@ -652,5 +652,8 @@
   "path.cfg.mode": "Mode",
   "path.cfg.display_time": "Display",
   "path.cfg.slides": "Slides",
-  "menu.english_only_hint": "🇬🇧 Word drills are currently in English only"
+  "menu.english_only_hint": "🇬🇧 Word drills are currently in English only",
+  "mot.correct": "Correct",
+  "mot.wrong": "Wrong",
+  "mot.missed": "Missed"
 }

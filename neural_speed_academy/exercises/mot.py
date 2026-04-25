@@ -215,18 +215,23 @@ class _MotArena(QWidget):
         painter.drawRoundedRect(arena_rect, 8, 8)
 
         for dot in self.dots:
+            symbol = ""
+
             if self.phase == self.PHASE_HIGHLIGHT:
                 if dot.is_target:
+                    # Bright accent fill + thick ring for visibility
                     painter.setBrush(QBrush(QColor(c["accent"])))
-                    painter.setPen(QPen(QColor(c["accent"]).darker(120), 2))
+                    painter.setPen(QPen(QColor(c["btn_text"]), 3))
                 else:
                     painter.setBrush(QBrush(QColor(c["muted"])))
                     painter.setPen(QPen(QColor(c["muted"]).darker(120), 1))
 
             elif self.phase == self.PHASE_TRACKING:
-                # All dots look identical
-                painter.setBrush(QBrush(QColor(c["fg"])))
-                painter.setPen(QPen(QColor(c["fg"]).darker(120), 1))
+                # All dots identical — use card color for better contrast
+                dot_color = QColor(c["fg"])
+                dot_color.setAlpha(200)
+                painter.setBrush(QBrush(dot_color))
+                painter.setPen(QPen(QColor(c["fg"]).darker(130), 2))
 
             elif self.phase == self.PHASE_SELECTION:
                 if dot.selected:
@@ -234,28 +239,69 @@ class _MotArena(QWidget):
                     painter.setPen(QPen(QColor(c["accent"]).darker(120), 2))
                 else:
                     painter.setBrush(QBrush(QColor(c["fg"])))
-                    painter.setPen(QPen(QColor(c["fg"]).darker(120), 1))
+                    painter.setPen(QPen(QColor(c["fg"]).darker(130), 2))
 
             elif self.phase == self.PHASE_RESULT:
                 if dot.is_target and dot.selected:
-                    # Correct
+                    # Correct — green with checkmark
                     painter.setBrush(QBrush(QColor(c["success"])))
-                    painter.setPen(QPen(QColor(c["success"]).darker(120), 2))
+                    painter.setPen(QPen(QColor(c["success"]).darker(130), 2))
+                    symbol = "\u2713"
                 elif dot.is_target and not dot.selected:
-                    # Missed target
-                    painter.setBrush(QBrush(QColor(c["alert"])))
-                    painter.setPen(QPen(QColor(c["alert"]).darker(120), 2))
+                    # Missed target — accent outline, hollow, with circle
+                    painter.setBrush(Qt.BrushStyle.NoBrush)
+                    painter.setPen(QPen(QColor(c["accent"]), 3))
+                    symbol = "\u25CB"
                 elif not dot.is_target and dot.selected:
-                    # Wrong selection
-                    painter.setBrush(QBrush(QColor("#ef4444")))
-                    painter.setPen(QPen(QColor("#ef4444").darker(120), 2))
+                    # Wrong selection — red with cross
+                    painter.setBrush(QBrush(QColor("#dc2626")))
+                    painter.setPen(QPen(QColor("#dc2626").darker(130), 2))
+                    symbol = "\u2717"
                 else:
-                    painter.setBrush(QBrush(QColor(c["muted"])))
-                    painter.setPen(QPen(QColor(c["muted"]).darker(120), 1))
+                    # Unselected distractor — dim
+                    dim = QColor(c["muted"])
+                    dim.setAlpha(100)
+                    painter.setBrush(QBrush(dim))
+                    painter.setPen(Qt.PenStyle.NoPen)
 
             painter.drawEllipse(
                 QPointF(dot.x, dot.y), dot.radius, dot.radius,
             )
+
+            # Draw symbol on result dots
+            if symbol and self.phase == self.PHASE_RESULT:
+                font = painter.font()
+                font.setPixelSize(int(dot.radius * 1.2))
+                font.setBold(True)
+                painter.setFont(font)
+                painter.setPen(QColor(c["btn_text"]))
+                symbol_rect = QRectF(
+                    dot.x - dot.radius, dot.y - dot.radius,
+                    dot.radius * 2, dot.radius * 2,
+                )
+                painter.drawText(
+                    symbol_rect,
+                    Qt.AlignmentFlag.AlignCenter,
+                    symbol,
+                )
+
+        # Legend during result phase
+        if self.phase == self.PHASE_RESULT:
+            legend_font = painter.font()
+            legend_font.setPixelSize(12)
+            legend_font.setBold(False)
+            painter.setFont(legend_font)
+            legend_y = self.height() - 20
+            legend_items = [
+                (QColor(c["success"]), "\u2713 " + tr("mot.correct")),
+                (QColor("#dc2626"), "\u2717 " + tr("mot.wrong")),
+                (QColor(c["accent"]), "\u25CB " + tr("mot.missed")),
+            ]
+            legend_x = 10
+            for color, text in legend_items:
+                painter.setPen(color)
+                painter.drawText(legend_x, legend_y, text)
+                legend_x += painter.fontMetrics().horizontalAdvance(text) + 16
 
         painter.end()
 

@@ -652,5 +652,8 @@
   "path.cfg.mode": "Modo",
   "path.cfg.display_time": "Mostrar",
   "path.cfg.slides": "Diapositivas",
-  "menu.english_only_hint": "🇬🇧 Los ejercicios de palabras están actualmente solo en inglés"
+  "menu.english_only_hint": "🇬🇧 Los ejercicios de palabras están actualmente solo en inglés",
+  "mot.correct": "Correcto",
+  "mot.wrong": "Incorrecto",
+  "mot.missed": "Perdido"
 }

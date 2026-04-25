@@ -652,5 +652,8 @@
   "path.cfg.mode": "Modus",
   "path.cfg.display_time": "Anzeige",
   "path.cfg.slides": "Folien",
-  "menu.english_only_hint": "🇬🇧 Wortübungen sind derzeit nur auf Englisch verfügbar"
+  "menu.english_only_hint": "🇬🇧 Wortübungen sind derzeit nur auf Englisch verfügbar",
+  "mot.correct": "Richtig",
+  "mot.wrong": "Falsch",
+  "mot.missed": "Verpasst"
 }
