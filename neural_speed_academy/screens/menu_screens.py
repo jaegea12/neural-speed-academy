@@ -21,7 +21,7 @@ class BaseMenuScreen(BaseScreen):
     @staticmethod
     def _difficulty_color(index: int, total: int) -> str:
         if total <= 1:
-            return "diff_beginner"
+            return "accent"
         frac = index / (total - 1)
         if frac < 0.33:
             return "diff_beginner"
@@ -355,6 +355,7 @@ class WordsMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.word_drills"), "flash", None,
+            subtitle=tr("menu.english_only_hint"),
             left_label=tr("menu.label.mode"),
             presets=[
                 (tr("words.ambiguous"), {"mode": "flash_word"}),
