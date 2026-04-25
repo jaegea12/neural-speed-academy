@@ -70,7 +70,9 @@ class ReactionTimeExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
-        self._mode = kwargs.get("mode", "simple")
+        mode = kwargs.get("mode", "simple")
+        # Normalize: paths/menus use "go_nogo", exercise uses "go_no_go"
+        self._mode = "go_no_go" if mode == "go_nogo" else mode
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._go_ratio = kwargs.get("go_ratio", cfg["go_ratio"])
 
