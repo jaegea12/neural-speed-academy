@@ -76,6 +76,25 @@ class ReactionTimeExercise(BaseExercise):
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._go_ratio = kwargs.get("go_ratio", cfg["go_ratio"])
 
+        # Pre-generate go/no-go trial sequence for even distribution
+        self._go_sequence: list[bool] = []
+        if self._mode == "go_no_go":
+            n_go = round(self._total_rounds * self._go_ratio)
+            n_nogo = self._total_rounds - n_go
+            seq = [True] * n_go + [False] * n_nogo
+            random.shuffle(seq)
+            # Avoid starting with more than 2 consecutive go trials
+            for i in range(min(3, len(seq))):
+                if not seq[i]:
+                    break
+            else:
+                # Force a no-go into position 1 or 2
+                for j in range(3, len(seq)):
+                    if not seq[j]:
+                        seq[2], seq[j] = seq[j], seq[2]
+                        break
+            self._go_sequence = seq
+
         # Skip config screen when launched from preset menu
         if kwargs:
             self._round = 0
@@ -204,6 +223,22 @@ class ReactionTimeExercise(BaseExercise):
         self._mode = ["simple", "choice", "go_no_go"][
             self._mode_combo.currentIndex()
         ]
+        # Generate balanced go/no-go sequence
+        self._go_sequence = []
+        if self._mode == "go_no_go":
+            n_go = round(self._total_rounds * self._go_ratio)
+            n_nogo = self._total_rounds - n_go
+            seq = [True] * n_go + [False] * n_nogo
+            random.shuffle(seq)
+            for i in range(min(3, len(seq))):
+                if not seq[i]:
+                    break
+            else:
+                for j in range(3, len(seq)):
+                    if not seq[j]:
+                        seq[2], seq[j] = seq[j], seq[2]
+                        break
+            self._go_sequence = seq
         self._round = 0
         self._reaction_times = []
         self._correct = 0
@@ -407,7 +442,10 @@ class ReactionTimeExercise(BaseExercise):
             self._is_go_trial = True
 
         else:  # go_no_go
-            self._is_go_trial = random.random() < self._go_ratio
+            if self._round < len(self._go_sequence):
+                self._is_go_trial = self._go_sequence[self._round]
+            else:
+                self._is_go_trial = random.random() < self._go_ratio
             if self._is_go_trial:
                 self._stimulus_lbl.setText(tr("reaction.time.u25cf"))
                 self._stimulus_lbl.setStyleSheet(
