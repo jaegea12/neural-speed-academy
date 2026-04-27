@@ -214,20 +214,31 @@ class _MotArena(QWidget):
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRoundedRect(arena_rect, 8, 8)
 
+        # Colorblind-safe palette — avoids red/green confusion.
+        # Green for targets/correct, blue for wrong, orange for missed.
+        # Symbols (✓ ✗ ○) provide redundant shape coding.
+        _TARGET = QColor("#00C853")       # green — targets & correct
+        _TARGET_DK = _TARGET.darker(130)
+        _WRONG = QColor("#4285F4")        # blue — wrong picks
+        _WRONG_DK = _WRONG.darker(130)
+        _MISSED = QColor("#FF9800")       # orange — missed targets
+        _MISSED_DK = _MISSED.darker(130)
+
         for dot in self.dots:
             symbol = ""
+            draw_radius = dot.radius
 
             if self.phase == self.PHASE_HIGHLIGHT:
                 if dot.is_target:
-                    # Bright accent fill + thick ring for visibility
-                    painter.setBrush(QBrush(QColor(c["accent"])))
-                    painter.setPen(QPen(QColor(c["btn_text"]), 3))
+                    painter.setBrush(QBrush(_TARGET))
+                    painter.setPen(QPen(_TARGET_DK, 3))
+                    draw_radius = dot.radius * 1.15  # slightly larger
                 else:
                     painter.setBrush(QBrush(QColor(c["muted"])))
                     painter.setPen(QPen(QColor(c["muted"]).darker(120), 1))
 
             elif self.phase == self.PHASE_TRACKING:
-                # All dots identical — use card color for better contrast
+                # All dots identical during tracking
                 dot_color = QColor(c["fg"])
                 dot_color.setAlpha(200)
                 painter.setBrush(QBrush(dot_color))
@@ -235,27 +246,27 @@ class _MotArena(QWidget):
 
             elif self.phase == self.PHASE_SELECTION:
                 if dot.selected:
-                    painter.setBrush(QBrush(QColor(c["accent"])))
-                    painter.setPen(QPen(QColor(c["accent"]).darker(120), 2))
+                    painter.setBrush(QBrush(_TARGET))
+                    painter.setPen(QPen(_TARGET_DK, 3))
                 else:
                     painter.setBrush(QBrush(QColor(c["fg"])))
                     painter.setPen(QPen(QColor(c["fg"]).darker(130), 2))
 
             elif self.phase == self.PHASE_RESULT:
                 if dot.is_target and dot.selected:
-                    # Correct — green with checkmark
-                    painter.setBrush(QBrush(QColor(c["success"])))
-                    painter.setPen(QPen(QColor(c["success"]).darker(130), 2))
+                    # Correct — green ✓
+                    painter.setBrush(QBrush(_TARGET))
+                    painter.setPen(QPen(_TARGET_DK, 2))
                     symbol = "\u2713"
                 elif dot.is_target and not dot.selected:
-                    # Missed target — accent outline, hollow, with circle
+                    # Missed — orange ○
                     painter.setBrush(Qt.BrushStyle.NoBrush)
-                    painter.setPen(QPen(QColor(c["accent"]), 3))
+                    painter.setPen(QPen(_MISSED, 3))
                     symbol = "\u25CB"
                 elif not dot.is_target and dot.selected:
-                    # Wrong selection — red with cross
-                    painter.setBrush(QBrush(QColor("#dc2626")))
-                    painter.setPen(QPen(QColor("#dc2626").darker(130), 2))
+                    # Wrong — blue ✗
+                    painter.setBrush(QBrush(_WRONG))
+                    painter.setPen(QPen(_WRONG_DK, 2))
                     symbol = "\u2717"
                 else:
                     # Unselected distractor — dim
@@ -265,7 +276,7 @@ class _MotArena(QWidget):
                     painter.setPen(Qt.PenStyle.NoPen)
 
             painter.drawEllipse(
-                QPointF(dot.x, dot.y), dot.radius, dot.radius,
+                QPointF(dot.x, dot.y), draw_radius, draw_radius,
             )
 
             # Draw symbol on result dots
@@ -274,7 +285,11 @@ class _MotArena(QWidget):
                 font.setPixelSize(int(dot.radius * 1.2))
                 font.setBold(True)
                 painter.setFont(font)
-                painter.setPen(QColor(c["btn_text"]))
+                # Use black or white text depending on fill
+                if dot.is_target and not dot.selected:
+                    painter.setPen(_MISSED)  # hollow dot — use outline color
+                else:
+                    painter.setPen(QColor("#000000" if symbol == "\u2713" else "#ffffff"))
                 symbol_rect = QRectF(
                     dot.x - dot.radius, dot.y - dot.radius,
                     dot.radius * 2, dot.radius * 2,
@@ -293,9 +308,9 @@ class _MotArena(QWidget):
             painter.setFont(legend_font)
             legend_y = self.height() - 20
             legend_items = [
-                (QColor(c["success"]), "\u2713 " + tr("mot.correct")),
-                (QColor("#dc2626"), "\u2717 " + tr("mot.wrong")),
-                (QColor(c["accent"]), "\u25CB " + tr("mot.missed")),
+                (_TARGET, "\u2713 " + tr("mot.correct")),
+                (_WRONG, "\u2717 " + tr("mot.wrong")),
+                (_MISSED, "\u25CB " + tr("mot.missed")),
             ]
             legend_x = 10
             for color, text in legend_items:

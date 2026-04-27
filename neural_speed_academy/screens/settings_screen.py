@@ -152,7 +152,7 @@ class SettingsScreen(BaseScreen):
 
         cl.addLayout(top_row)
 
-        cl.addSpacing(15)
+        cl.addSpacing(30)
 
         # --- Font Scale ---
         scale_row = QHBoxLayout()
@@ -217,7 +217,7 @@ class SettingsScreen(BaseScreen):
         scale_row.addStretch(1)
         cl.addLayout(scale_row)
 
-        cl.addSpacing(15)
+        cl.addSpacing(25)
 
         # --- Training Text (constrained width) ---
         text_wrapper = QHBoxLayout()
