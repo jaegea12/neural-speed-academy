@@ -693,6 +693,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         self._time_buttons: dict[int, QPushButton] = {}
         self._slide_buttons: dict[int, QPushButton] = {}
         self._lines_buttons: dict[int, QPushButton] = {}
+        self._tp_selected_preset = 0
+        self._tp_param_values: dict[str, object] = {}
 
     def build(self, **kwargs) -> None:
         from neural_speed_academy.exercises.slide_processing import (
