@@ -120,6 +120,13 @@ class Navigator:
             self.to_dashboard()
 
     def finish_exercise(self) -> None:
+        # Restore training text if a path step overrode it
+        prev_text = getattr(self, "_path_prev_text", None)
+        if prev_text is not None:
+            from neural_speed_academy.theme import theme_manager
+            theme_manager.training_text = prev_text
+            self._path_prev_text = None
+
         pending = self._path_step_pending
         if pending:
             path_id, step_idx = pending
@@ -130,7 +137,8 @@ class Navigator:
                 if pp and pp.current_step == step_idx:
                     pp.current_step += 1
                     from neural_speed_academy.config import TRAINING_PATHS
-                    path_data = TRAINING_PATHS.get(path_id, {})
+                    path_data = (TRAINING_PATHS.get(path_id)
+                                 or user.custom_paths.get(path_id, {}))
                     if pp.current_step >= len(path_data.get("steps", [])):
                         pp.completed = True
                         user.active_path = None

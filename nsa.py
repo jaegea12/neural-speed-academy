@@ -14,36 +14,39 @@ from neural_speed_academy.theme import COLORS, theme_manager, screen_metrics, lo
 from neural_speed_academy.repositories.user_repository import JsonUserRepository
 from neural_speed_academy.navigation.navigator import Navigator
 
-from neural_speed_academy.screens.main_menu_screen import MainMenuScreen
-from neural_speed_academy.screens.login_screen import LoginScreen
-from neural_speed_academy.screens.settings_screen import SettingsScreen
-from neural_speed_academy.screens.dashboard_screen import DashboardScreen
-from neural_speed_academy.screens.stats_screen import StatsScreen
-from neural_speed_academy.screens.introduction_screen import IntroductionScreen
-from neural_speed_academy.screens.language_screen import LanguageScreen
-from neural_speed_academy.screens.menu_screens import (
-    FlashMenuScreen, WordsMenuScreen, EyespanMenuScreen, SchulteMenuScreen,
-    PrimingMenuScreen, SequenceMemoryMenuScreen, PeripheralFlashMenuScreen,
-    RapidDecisionMenuScreen, MotMenuScreen, SplitAttentionMenuScreen,
-    ReactionTimeMenuScreen, SlideProcessingMenuScreen,
-)
-from neural_speed_academy.screens.slide_creator_screen import SlideCreatorScreen
-from neural_speed_academy.screens.paths_screen import PathSelectionScreen, CustomPathsScreen
-from neural_speed_academy.screens.path_session_screen import (
-    PathSessionScreen, PathBuilderScreen,
-)
 
-from neural_speed_academy.exercises.flash import FlashExercise
-from neural_speed_academy.exercises.rsvp import RsvpExercise
-from neural_speed_academy.exercises.chunking import ChunkingExercise
-from neural_speed_academy.exercises.pacer import PacerExercise
-from neural_speed_academy.exercises.priming import PrimingExercise
-from neural_speed_academy.exercises.spaced_repetition import SpacedRepetitionExercise
+
+def _lazy(module: str, attr: str):
+    """Import a class lazily — module is loaded on first call."""
+    return getattr(__import__(module, fromlist=[attr]), attr)
+
+
+# Screens and exercises are imported lazily inside register_screen lambdas
+# and _exercise_callbacks() to reduce startup time.
+
+
+def _set_timer_resolution():
+    """Request 1ms timer resolution on Windows for smooth animations.
+
+    Windows defaults to ~15.6ms granularity, causing jitter in QTimer-
+    based animations (MOT at 16ms, priming pursuit at 20ms). Returns a
+    cleanup function to restore the default on exit.
+    """
+    if sys.platform != "win32":
+        return lambda: None
+    try:
+        import ctypes
+        winmm = ctypes.windll.winmm
+        winmm.timeBeginPeriod(1)
+        return lambda: winmm.timeEndPeriod(1)
+    except (AttributeError, OSError):
+        return lambda: None
 
 
 class NeuralSpeedAcademy:
 
     def __init__(self):
+        self._restore_timer = _set_timer_resolution()
         self.app = QApplication(sys.argv)
         self.app.setApplicationName("Neural Speed Academy")
 
@@ -84,82 +87,67 @@ class NeuralSpeedAcademy:
         self.navigator = Navigator(self.stack, self.user_repo)
         self.navigator._app = self
 
-        # Exercises
-        self.flash_exercise = FlashExercise(self.navigator)
-        self.rsvp_exercise = RsvpExercise(self.navigator)
-        self.chunking_exercise = ChunkingExercise(self.navigator)
-        self.pacer_exercise = PacerExercise(self.navigator)
-        self.priming_exercise = PrimingExercise(self.navigator)
-
         # Register screens
         self._register_screens()
 
     def _register_screens(self) -> None:
         nav = self.navigator
 
-        nav.register_screen(
-            "main_menu", lambda: MainMenuScreen(nav))
-        nav.register_screen(
-            "login", lambda: LoginScreen(nav))
-        nav.register_screen(
-            "settings", lambda: SettingsScreen(nav))
-        nav.register_screen(
-            "dashboard", lambda: DashboardScreen(nav, self._exercise_callbacks()))
-        nav.register_screen(
-            "stats", lambda: StatsScreen(nav))
-        nav.register_screen(
-            "introduction", lambda: IntroductionScreen(nav))
-        nav.register_screen(
-            "language", lambda: LanguageScreen(nav))
-        nav.register_screen(
-            "paths", lambda: PathSelectionScreen(nav))
-        nav.register_screen(
-            "custom_paths", lambda: CustomPathsScreen(nav))
-        nav.register_screen(
-            "path_session", lambda: PathSessionScreen(nav))
-        nav.register_screen(
-            "path_builder", lambda: PathBuilderScreen(nav))
+        def _reg(name, factory):
+            nav.register_screen(name, factory)
+
+        # Core screens (lazy imports)
+        _reg("main_menu", lambda: _lazy(
+            "neural_speed_academy.screens.main_menu_screen", "MainMenuScreen")(nav))
+        _reg("login", lambda: _lazy(
+            "neural_speed_academy.screens.login_screen", "LoginScreen")(nav))
+        _reg("settings", lambda: _lazy(
+            "neural_speed_academy.screens.settings_screen", "SettingsScreen")(nav))
+        _reg("dashboard", lambda: _lazy(
+            "neural_speed_academy.screens.dashboard_screen", "DashboardScreen")(
+            nav, self._exercise_callbacks()))
+        _reg("stats", lambda: _lazy(
+            "neural_speed_academy.screens.stats_screen", "StatsScreen")(nav))
+        _reg("introduction", lambda: _lazy(
+            "neural_speed_academy.screens.introduction_screen", "IntroductionScreen")(nav))
+        _reg("language", lambda: _lazy(
+            "neural_speed_academy.screens.language_screen", "LanguageScreen")(nav))
+        _reg("paths", lambda: _lazy(
+            "neural_speed_academy.screens.paths_screen", "PathSelectionScreen")(nav))
+        _reg("custom_paths", lambda: _lazy(
+            "neural_speed_academy.screens.paths_screen", "CustomPathsScreen")(nav))
+        _reg("path_session", lambda: _lazy(
+            "neural_speed_academy.screens.path_session_screen", "PathSessionScreen")(nav))
+        _reg("path_builder", lambda: _lazy(
+            "neural_speed_academy.screens.path_session_screen", "PathBuilderScreen")(nav))
 
         # Exercise menu screens
-        nav.register_screen(
-            "flash_menu",
-            lambda: FlashMenuScreen(nav, self.flash_exercise))
-        nav.register_screen(
-            "words_menu",
-            lambda: WordsMenuScreen(nav, self.flash_exercise))
-        nav.register_screen(
-            "eyespan_menu",
-            lambda: EyespanMenuScreen(nav, self.flash_exercise))
-        nav.register_screen(
-            "schulte_menu",
-            lambda: SchulteMenuScreen(nav))
-        nav.register_screen(
-            "priming_menu",
-            lambda: PrimingMenuScreen(nav, self.priming_exercise))
-        nav.register_screen(
-            "sequence_memory_menu",
-            lambda: SequenceMemoryMenuScreen(nav))
-        nav.register_screen(
-            "peripheral_flash_menu",
-            lambda: PeripheralFlashMenuScreen(nav))
-        nav.register_screen(
-            "rapid_decision_menu",
-            lambda: RapidDecisionMenuScreen(nav))
-        nav.register_screen(
-            "mot_menu",
-            lambda: MotMenuScreen(nav))
-        nav.register_screen(
-            "split_attention_menu",
-            lambda: SplitAttentionMenuScreen(nav))
-        nav.register_screen(
-            "reaction_time_menu",
-            lambda: ReactionTimeMenuScreen(nav))
-        nav.register_screen(
-            "slide_processing_menu",
-            lambda: SlideProcessingMenuScreen(nav))
-        nav.register_screen(
-            "slide_creator",
-            lambda: SlideCreatorScreen(nav))
+        _reg("flash_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "FlashMenuScreen")(nav))
+        _reg("words_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "WordsMenuScreen")(nav))
+        _reg("eyespan_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "EyespanMenuScreen")(nav))
+        _reg("schulte_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "SchulteMenuScreen")(nav))
+        _reg("priming_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "PrimingMenuScreen")(nav))
+        _reg("sequence_memory_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "SequenceMemoryMenuScreen")(nav))
+        _reg("peripheral_flash_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "PeripheralFlashMenuScreen")(nav))
+        _reg("rapid_decision_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "RapidDecisionMenuScreen")(nav))
+        _reg("mot_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "MotMenuScreen")(nav))
+        _reg("split_attention_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "SplitAttentionMenuScreen")(nav))
+        _reg("reaction_time_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "ReactionTimeMenuScreen")(nav))
+        _reg("slide_processing_menu", lambda: _lazy(
+            "neural_speed_academy.screens.menu_screens", "SlideProcessingMenuScreen")(nav))
+        _reg("slide_creator", lambda: _lazy(
+            "neural_speed_academy.screens.slide_creator_screen", "SlideCreatorScreen")(nav))
 
     def _exercise_callbacks(self) -> dict:
         nav = self.navigator
@@ -169,9 +157,12 @@ class NeuralSpeedAcademy:
             "menu_eyespan": lambda: nav.navigate_to("eyespan_menu"),
             "menu_priming": lambda: nav.navigate_to("priming_menu"),
             "menu_schulte": lambda: nav.navigate_to("schulte_menu"),
-            "setup_pacer": lambda: nav.launch_exercise(PacerExercise),
-            "setup_rsvp": lambda: nav.launch_exercise(RsvpExercise),
-            "setup_chunking": lambda: nav.launch_exercise(ChunkingExercise),
+            "setup_pacer": lambda: nav.launch_exercise(
+                _lazy("neural_speed_academy.exercises.pacer", "PacerExercise")),
+            "setup_rsvp": lambda: nav.launch_exercise(
+                _lazy("neural_speed_academy.exercises.rsvp", "RsvpExercise")),
+            "setup_chunking": lambda: nav.launch_exercise(
+                _lazy("neural_speed_academy.exercises.chunking", "ChunkingExercise")),
             "menu_sequence_memory": lambda: nav.navigate_to("sequence_memory_menu"),
             "menu_peripheral_flash": lambda: nav.navigate_to("peripheral_flash_menu"),
             "menu_rapid_decision": lambda: nav.navigate_to("rapid_decision_menu"),
@@ -179,22 +170,24 @@ class NeuralSpeedAcademy:
             "menu_split_attention": lambda: nav.navigate_to("split_attention_menu"),
             "menu_reaction_time": lambda: nav.navigate_to("reaction_time_menu"),
             "menu_slide_processing": lambda: nav.navigate_to("slide_processing_menu"),
-            "start_sr": lambda: nav.launch_exercise(SpacedRepetitionExercise),
+            "start_sr": lambda: nav.launch_exercise(
+                _lazy("neural_speed_academy.exercises.spaced_repetition",
+                      "SpacedRepetitionExercise")),
             "show_paths": lambda: nav.navigate_to("paths"),
             "show_stats": lambda: nav.navigate_to("stats"),
         }
 
     _WINDOWED_MIN_W, _WINDOWED_MIN_H = 900, 650
 
+    @staticmethod
+    def _is_wayland() -> bool:
+        """Detect if running under Wayland (move/position calls are no-ops)."""
+        return os.environ.get("XDG_SESSION_TYPE") == "wayland" or \
+               os.environ.get("WAYLAND_DISPLAY", "") != ""
+
     def _set_windowed(self) -> None:
         from PyQt6.QtWidgets import QApplication
         from PyQt6.QtCore import Qt as QtCore_Qt
-        # #win #linux #osx — setWindowFlags behaves differently per WM:
-        #   Windows: works reliably, restores title bar and resize handles.
-        #   Linux/X11: some WMs ignore flags or add extra decorations.
-        #   Linux/Wayland: setWindowFlags may be ignored entirely; window
-        #     position via move() is also unsupported (compositor decides).
-        #   macOS: works but showNormal() after fullscreen can briefly flash.
         self.window.setWindowFlags(
             QtCore_Qt.WindowType.Window
             | QtCore_Qt.WindowType.WindowCloseButtonHint
@@ -203,6 +196,9 @@ class NeuralSpeedAcademy:
         )
         self.window.setMaximumSize(16777215, 16777215)
         self.window.setMinimumSize(self._WINDOWED_MIN_W, self._WINDOWED_MIN_H)
+        # showNormal() first so it doesn't override our resize() with
+        # the stale pre-fullscreen geometry
+        self.window.showNormal()
         # Size to 75% of available screen, but at least the minimum
         screen = QApplication.primaryScreen()
         if screen:
@@ -214,12 +210,10 @@ class NeuralSpeedAcademy:
             self.window.resize(w, h)
         else:
             self.window.resize(self._WINDOWED_MIN_W, self._WINDOWED_MIN_H)
-        self.window.showNormal()
         # Update screen metrics to match window size
         screen_metrics.update_from_window(self.window.width(), self.window.height())
-        # #linux — move() is a no-op on Wayland; window stays where the
-        # compositor placed it. Works on X11, Windows, and macOS.
-        if screen:
+        # Center on screen — skip on Wayland where move() is a no-op
+        if screen and not self._is_wayland():
             geo = screen.availableGeometry()
             x = (geo.width() - self.window.width()) // 2 + geo.x()
             y = (geo.height() - self.window.height()) // 2 + geo.y()
@@ -354,7 +348,10 @@ class NeuralSpeedAcademy:
             self._set_fullscreen()
         else:
             self._set_windowed()
-        sys.exit(self.app.exec())
+        try:
+            sys.exit(self.app.exec())
+        finally:
+            self._restore_timer()
 
 
 if __name__ == "__main__":

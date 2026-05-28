@@ -218,48 +218,109 @@ class _MotArena(QWidget):
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRoundedRect(arena_rect, 8, 8)
 
+        # Colorblind-safe palette — avoids red/green confusion.
+        # Green for targets/correct, blue for wrong, orange for missed.
+        # Symbols (✓ ✗ ○) provide redundant shape coding.
+        _TARGET = QColor("#00C853")       # green — targets & correct
+        _TARGET_DK = _TARGET.darker(130)
+        _WRONG = QColor("#4285F4")        # blue — wrong picks
+        _WRONG_DK = _WRONG.darker(130)
+        _MISSED = QColor("#FF9800")       # orange — missed targets
+        _MISSED_DK = _MISSED.darker(130)
+
         for dot in self.dots:
+            symbol = ""
+            draw_radius = dot.radius
+
             if self.phase == self.PHASE_HIGHLIGHT:
                 if dot.is_target:
-                    painter.setBrush(QBrush(QColor(c["accent"])))
-                    painter.setPen(QPen(QColor(c["accent"]).darker(120), 2))
+                    painter.setBrush(QBrush(_TARGET))
+                    painter.setPen(QPen(_TARGET_DK, 3))
+                    draw_radius = dot.radius * 1.15  # slightly larger
                 else:
                     painter.setBrush(QBrush(QColor(c["muted"])))
                     painter.setPen(QPen(QColor(c["muted"]).darker(120), 1))
 
             elif self.phase == self.PHASE_TRACKING:
-                # All dots look identical
-                painter.setBrush(QBrush(QColor(c["fg"])))
-                painter.setPen(QPen(QColor(c["fg"]).darker(120), 1))
+                # All dots identical during tracking
+                dot_color = QColor(c["fg"])
+                dot_color.setAlpha(200)
+                painter.setBrush(QBrush(dot_color))
+                painter.setPen(QPen(QColor(c["fg"]).darker(130), 2))
 
             elif self.phase == self.PHASE_SELECTION:
                 if dot.selected:
-                    painter.setBrush(QBrush(QColor(c["accent"])))
-                    painter.setPen(QPen(QColor(c["accent"]).darker(120), 2))
+                    painter.setBrush(QBrush(_TARGET))
+                    painter.setPen(QPen(_TARGET_DK, 3))
                 else:
                     painter.setBrush(QBrush(QColor(c["fg"])))
-                    painter.setPen(QPen(QColor(c["fg"]).darker(120), 1))
+                    painter.setPen(QPen(QColor(c["fg"]).darker(130), 2))
 
             elif self.phase == self.PHASE_RESULT:
                 if dot.is_target and dot.selected:
-                    # Correct
-                    painter.setBrush(QBrush(QColor(c["success"])))
-                    painter.setPen(QPen(QColor(c["success"]).darker(120), 2))
+                    # Correct — green ✓
+                    painter.setBrush(QBrush(_TARGET))
+                    painter.setPen(QPen(_TARGET_DK, 2))
+                    symbol = "\u2713"
                 elif dot.is_target and not dot.selected:
-                    # Missed target
-                    painter.setBrush(QBrush(QColor(c["alert"])))
-                    painter.setPen(QPen(QColor(c["alert"]).darker(120), 2))
+                    # Missed — orange ○
+                    painter.setBrush(Qt.BrushStyle.NoBrush)
+                    painter.setPen(QPen(_MISSED, 3))
+                    symbol = "\u25CB"
                 elif not dot.is_target and dot.selected:
-                    # Wrong selection
-                    painter.setBrush(QBrush(QColor("#ef4444")))
-                    painter.setPen(QPen(QColor("#ef4444").darker(120), 2))
+                    # Wrong — blue ✗
+                    painter.setBrush(QBrush(_WRONG))
+                    painter.setPen(QPen(_WRONG_DK, 2))
+                    symbol = "\u2717"
                 else:
-                    painter.setBrush(QBrush(QColor(c["muted"])))
-                    painter.setPen(QPen(QColor(c["muted"]).darker(120), 1))
+                    # Unselected distractor — dim
+                    dim = QColor(c["muted"])
+                    dim.setAlpha(100)
+                    painter.setBrush(QBrush(dim))
+                    painter.setPen(Qt.PenStyle.NoPen)
 
             painter.drawEllipse(
-                QPointF(dot.x, dot.y), dot.radius, dot.radius,
+                QPointF(dot.x, dot.y), draw_radius, draw_radius,
             )
+
+            # Draw symbol on result dots
+            if symbol and self.phase == self.PHASE_RESULT:
+                font = painter.font()
+                font.setPixelSize(int(dot.radius * 1.2))
+                font.setBold(True)
+                painter.setFont(font)
+                # Use black or white text depending on fill
+                if dot.is_target and not dot.selected:
+                    painter.setPen(_MISSED)  # hollow dot — use outline color
+                else:
+                    painter.setPen(QColor("#000000" if symbol == "\u2713" else "#ffffff"))
+                symbol_rect = QRectF(
+                    dot.x - dot.radius, dot.y - dot.radius,
+                    dot.radius * 2, dot.radius * 2,
+                )
+                painter.drawText(
+                    symbol_rect,
+                    Qt.AlignmentFlag.AlignCenter,
+                    symbol,
+                )
+
+        # Legend during result phase
+        if self.phase == self.PHASE_RESULT:
+            legend_font = painter.font()
+            legend_font.setPixelSize(12)
+            legend_font.setBold(False)
+            painter.setFont(legend_font)
+            legend_y = self.height() - 20
+            legend_items = [
+                (_TARGET, "\u2713 " + tr("mot.correct")),
+                (_WRONG, "\u2717 " + tr("mot.wrong")),
+                (_MISSED, "\u25CB " + tr("mot.missed")),
+            ]
+            legend_x = 10
+            for color, text in legend_items:
+                painter.setPen(color)
+                painter.drawText(legend_x, legend_y, text)
+                legend_x += painter.fontMetrics().horizontalAdvance(text) + 16
 
         painter.end()
 

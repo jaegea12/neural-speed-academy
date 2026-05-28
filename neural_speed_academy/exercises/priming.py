@@ -5,6 +5,7 @@ All modes target ~45 seconds duration for an effective warmup.
 from __future__ import annotations
 
 import math
+import random
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt6.QtCore import Qt
@@ -18,9 +19,13 @@ MODE_LABELS = {
     "saccade_v": "VERTICAL SACCADES",
     "saccade_diag": "DIAGONAL SACCADES",
     "saccade_expand": "EXPANDING SACCADES",
+    "saccade_random": "RANDOM SACCADES",
     "pursuit_line": "SMOOTH PURSUIT \u2014 LINE",
     "pursuit_circle": "SMOOTH PURSUIT \u2014 CIRCLE",
     "pursuit_figure8": "SMOOTH PURSUIT \u2014 FIGURE 8",
+    "pursuit_wave": "SMOOTH PURSUIT \u2014 WAVE",
+    "pursuit_lemniscate": "SMOOTH PURSUIT \u2014 LEMNISCATE",
+    "pursuit_spiral": "SMOOTH PURSUIT \u2014 SPIRAL",
 }
 
 
@@ -136,6 +141,13 @@ class PrimingExercise(BaseExercise):
                     self._pattern.append((0.5 - frac, 0.5))
                 else:
                     self._pattern.append((0.5 + frac, 0.5))
+        elif self.mode == "saccade_random":
+            margin = 0.15
+            self._pattern = [
+                (random.uniform(margin, 1 - margin),
+                 random.uniform(margin, 1 - margin))
+                for _ in range(n)
+            ]
         self._pattern_idx = 0
 
     def _saccade_step(self) -> None:
@@ -181,6 +193,22 @@ class PrimingExercise(BaseExercise):
             angle = 2 * math.pi * c * t
             x = 0.5 + 0.3 * math.sin(angle)
             y = 0.5 + 0.2 * math.sin(2 * angle)
+            return (x, y)
+        elif self.mode == "pursuit_wave":
+            x = 0.1 + 0.8 * (t * c % 1.0)
+            y = 0.5 + 0.25 * math.sin(2 * math.pi * 3 * t * c)
+            return (x, y)
+        elif self.mode == "pursuit_lemniscate":
+            angle = 2 * math.pi * c * t
+            denom = 1 + math.sin(angle) ** 2
+            x = 0.5 + 0.3 * math.cos(angle) / denom
+            y = 0.5 + 0.2 * math.sin(angle) * math.cos(angle) / denom
+            return (x, y)
+        elif self.mode == "pursuit_spiral":
+            angle = 2 * math.pi * c * t
+            r = 0.25 * t
+            x = 0.5 + r * math.cos(angle)
+            y = 0.5 + r * math.sin(angle)
             return (x, y)
         return (0.5, 0.5)
 

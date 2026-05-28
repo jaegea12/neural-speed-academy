@@ -21,7 +21,7 @@ class BaseMenuScreen(BaseScreen):
     @staticmethod
     def _difficulty_color(index: int, total: int) -> str:
         if total <= 1:
-            return "diff_beginner"
+            return "accent"
         frac = index / (total - 1)
         if frac < 0.33:
             return "diff_beginner"
@@ -43,6 +43,7 @@ class BaseMenuScreen(BaseScreen):
         default_preset: int = 0,
         left_stretch: int = 1,
         right_stretch: int = 1,
+        subtitle: str | None = None,
     ) -> None:
         """Build a two-panel config screen.
 
@@ -88,6 +89,13 @@ class BaseMenuScreen(BaseScreen):
         title_row.addWidget(guide_btn)
         title_row.addStretch()
         cl.addLayout(title_row)
+
+        if subtitle:
+            sub_lbl = QLabel(subtitle)
+            sub_lbl.setFont(make_qfont("btn_sm"))
+            sub_lbl.setStyleSheet(f"color: {c['muted']};")
+            sub_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cl.addWidget(sub_lbl)
 
         cl.addSpacing(10)
 
@@ -179,8 +187,19 @@ class BaseMenuScreen(BaseScreen):
         cl.addLayout(columns)
         cl.addStretch()
 
-        # Apply initial state
-        self._tp_select_preset(default_preset)
+        # Restore last-used config or fall back to default preset
+        saved = theme_manager.get_exercise_config(type(self).__name__)
+        if saved:
+            preset_idx = saved.pop("_preset", default_preset)
+            if not (0 <= preset_idx < len(presets)):
+                preset_idx = default_preset
+            self._tp_select_preset(preset_idx)
+            # Override individual params with saved values
+            for key, value in saved.items():
+                if key in self._tp_param_buttons:
+                    self._tp_select_param(key, value)
+        else:
+            self._tp_select_preset(default_preset)
 
     def _tp_toggle_on(self) -> str:
         c = COLORS
@@ -245,6 +264,16 @@ class BaseMenuScreen(BaseScreen):
             else:
                 btn.setStyleSheet(self._tp_toggle_off())
 
+    def _tp_save_config(self, exercise_cls=None) -> None:
+        """Silently persist current menu config for next visit.
+
+        Uses the menu screen class name as key (unique per exercise).
+        """
+        theme_manager.save_exercise_config(type(self).__name__, {
+            "_preset": self._tp_selected_preset,
+            **self._tp_param_values,
+        })
+
     def _tp_launch(self, exercise_cls) -> None:
         kwargs = dict(self._tp_param_values)
         # Add any preset-only values not covered by param buttons
@@ -252,6 +281,7 @@ class BaseMenuScreen(BaseScreen):
         for key, value in preset_vals.items():
             if key not in self._tp_param_buttons:
                 kwargs[key] = value
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(exercise_cls, **kwargs)
 
 
@@ -309,6 +339,7 @@ class FlashMenuScreen(BaseMenuScreen):
         else:  # chaos
             low, high = 1, 10
 
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             FlashExercise, mode="flash_num", rounds=rounds,
             level_func=lambda _: random.randint(low, high),
@@ -324,6 +355,7 @@ class WordsMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.word_drills"), "flash", None,
+            subtitle=tr("menu.english_only_hint"),
             left_label=tr("menu.label.mode"),
             presets=[
                 (tr("words.ambiguous"), {"mode": "flash_word"}),
@@ -340,6 +372,7 @@ class WordsMenuScreen(BaseMenuScreen):
         from neural_speed_academy.exercises.flash import FlashExercise
 
         rounds = self._tp_param_values.get("rounds", 10)
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             FlashExercise, mode="flash_word", rounds=rounds,
             level_func=lambda _: 0,
@@ -393,6 +426,7 @@ class EyespanMenuScreen(BaseMenuScreen):
         width = self._tp_param_values.get("width", 50)
         rounds = self._tp_param_values.get("rounds", 10)
 
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             FlashExercise, mode="eyespan", rounds=rounds,
             level_func=lambda _: random.randint(low, high),
@@ -432,6 +466,7 @@ class SchulteMenuScreen(BaseMenuScreen):
         grid_size = preset_vals["grid_size"]
         fill_idx = self._tp_param_values.get("fill_idx", 1)
 
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             SchulteExercise, grid_size=grid_size, fill_idx=fill_idx,
         )
@@ -452,9 +487,13 @@ class PrimingMenuScreen(BaseMenuScreen):
                 (tr("priming.saccade_v"),   {"mode": "saccade_v", "use_delay": True}),
                 (tr("priming.saccade_diag"),   {"mode": "saccade_diag", "use_delay": True}),
                 (tr("priming.saccade_expand"),  {"mode": "saccade_expand", "use_delay": True}),
+                (tr("priming.saccade_random"),  {"mode": "saccade_random", "use_delay": True}),
                 (tr("priming.pursuit_line"),       {"mode": "pursuit_line", "use_delay": False}),
                 (tr("priming.pursuit_circle"),     {"mode": "pursuit_circle", "use_delay": False}),
                 (tr("priming.pursuit_figure8"),   {"mode": "pursuit_figure8", "use_delay": False}),
+                (tr("priming.pursuit_wave"),       {"mode": "pursuit_wave", "use_delay": False}),
+                (tr("priming.pursuit_lemniscate"), {"mode": "pursuit_lemniscate", "use_delay": False}),
+                (tr("priming.pursuit_spiral"),     {"mode": "pursuit_spiral", "use_delay": False}),
             ],
             params=[
                 (tr("menu.label.speed"), "speed", [
@@ -476,6 +515,7 @@ class PrimingMenuScreen(BaseMenuScreen):
         speed = self._tp_param_values.get("speed", "slow")
         duration_s = self._tp_param_values.get("duration_s", 45.0)
 
+        self._tp_save_config(exercise_cls)
         if use_delay:
             delay = 700 if speed == "slow" else 400
             self.navigator.launch_exercise(
@@ -532,6 +572,7 @@ class PeripheralFlashMenuScreen(BaseMenuScreen):
         from neural_speed_academy.exercises.peripheral_flash import (
             PeripheralFlashExercise,
         )
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             PeripheralFlashExercise,
             stim_type=self._tp_param_values.get("stim_type", "letters"),
@@ -580,6 +621,7 @@ class RapidDecisionMenuScreen(BaseMenuScreen):
             RapidDecisionGridExercise,
         )
         _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             RapidDecisionGridExercise,
             mode=self._tp_param_values.get("mode", "ascending"),
@@ -625,6 +667,7 @@ class MotMenuScreen(BaseMenuScreen):
         from neural_speed_academy.exercises.mot import MotExercise
 
         _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             MotExercise,
             targets=preset_vals["targets"],
@@ -650,6 +693,8 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
         self._time_buttons: dict[int, QPushButton] = {}
         self._slide_buttons: dict[int, QPushButton] = {}
         self._lines_buttons: dict[int, QPushButton] = {}
+        self._tp_selected_preset = 0
+        self._tp_param_values: dict[str, object] = {}
 
     def build(self, **kwargs) -> None:
         from neural_speed_academy.exercises.slide_processing import (
@@ -1017,6 +1062,7 @@ class SlideProcessingMenuScreen(BaseMenuScreen):
             kwargs["category"] = "custom_only"
             kwargs["skip_config"] = True
 
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(exercise_cls, **kwargs)
 
 
@@ -1055,6 +1101,7 @@ class ReactionTimeMenuScreen(BaseMenuScreen):
         go_ratio = self._tp_param_values.get("go_ratio", 0.7)
         if mode != "go_no_go":
             go_ratio = 1.0
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             ReactionTimeExercise,
             mode=mode,
@@ -1071,6 +1118,7 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
     def build(self, **kwargs) -> None:
         self._create_two_panel_menu(
             tr("menu.split_attention"), "split_attention", None,
+            subtitle=tr("menu.english_only_hint"),
             left_label=tr("menu.label.difficulty"),
             presets=[
                 (tr("menu.diff.beginner"),    {"center_ms": 150, "peripheral_ms": 120}),
@@ -1087,6 +1135,12 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
                     (tr("split.simultaneous"), "simultaneous"),
                     (tr("split.rapid"), "rapid"),
                 ], "sequential"),
+                (tr("menu.label.spread"), "eccentricity", [
+                    (tr("split.narrow"), 40),
+                    (tr("split.medium"), 55),
+                    (tr("split.standard"), 65),
+                    (tr("split.wide"), 80),
+                ], 65),
                 (tr("menu.label.rounds"), "rounds", [
                     ("10", 10), ("15", 15), ("20", 20), ("25", 25),
                 ], 15),
@@ -1099,11 +1153,13 @@ class SplitAttentionMenuScreen(BaseMenuScreen):
             SplitAttentionExercise,
         )
         _, preset_vals = self._tp_presets[self._tp_selected_preset]
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             SplitAttentionExercise,
             mode=self._tp_param_values.get("mode", "sequential"),
             center_ms=preset_vals["center_ms"],
             peripheral_ms=preset_vals["peripheral_ms"],
+            eccentricity=self._tp_param_values.get("eccentricity", 65),
             rounds=self._tp_param_values.get("rounds", 15),
         )
 
@@ -1154,6 +1210,7 @@ class SequenceMemoryMenuScreen(BaseMenuScreen):
         flash_ms = self._tp_param_values.get("flash_ms", 800)
         rounds = self._tp_param_values.get("rounds", 10)
 
+        self._tp_save_config(exercise_cls)
         self.navigator.launch_exercise(
             SequenceMemoryExercise, mode=mode,
             start_length=start_length, flash_ms=flash_ms, rounds=rounds,

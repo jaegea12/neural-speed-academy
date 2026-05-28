@@ -17,20 +17,59 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from neural_speed_academy.theme import COLORS, make_qfont, input_css, screen_metrics
+# Regex pattern for word tokenisation — includes accented Latin characters
+# so that German (ä ö ü ß), French (é è ê ë ç), Spanish (ñ á í ó ú),
+# Italian, and Portuguese words are captured correctly.
+_WORD_RE = re.compile(r"[a-zA-ZÀ-ÖØ-öø-ÿ]+")
+
 from neural_speed_academy.i18n import tr
 
 _STOP_WORDS = frozenset(
+    # English
     "the a an and or but in on at to for of is it that this with from by as "
     "are was were be been has have had do does did not no nor so if then than "
     "can will would could should may might shall its you your we our they them "
     "he she his her my me us who what when where how all each every some any "
     "also just about more most very much many such only other into over after "
     "before between through during without again further once here there which "
-    "these those being both same own too up out off down".split()
+    "these those being both same own too up out off down "
+    # German
+    "der die das ein eine einer eines einem einen und oder aber in auf an zu "
+    "für von ist es dass dies mit aus als sind war waren sein hat haben hatte "
+    "nicht kein noch wenn dann als kann wird würde soll darf mag ihr euer "
+    "wir sie er ich mich mir uns ihm ihn ihr was wer wie wo alle jede jeder "
+    "auch nur über nach vor zwischen durch ohne wieder mehr sehr viel viele "
+    "andere andere anderen anderer anderes hier dort diese dieser dieses "
+    "dem den des sich man "
+    # French
+    "le la les un une des et ou mais dans sur pour de est ce que qui avec par "
+    "sont était été être ont avoir avait pas non plus si alors comme peut sera "
+    "nous vous ils elles lui elle mon ton son notre votre leur mes tes ses nos "
+    "vos leurs tout tous toute toutes autre autres même ici cette cet ces "
+    "aux du au "
+    # Spanish
+    "el la los las un una unos unas del al por para con sin sobre entre desde "
+    "hasta como más pero sino también muy cada todo toda todos todas otro otra "
+    "otros otras este esta estos estas ese esa esos esas aquel aquella "
+    "que quien cual donde cuando como hay ser estar tener hacer poder decir "
+    "fue era sido está son han nos les "
+    # Italian
+    "il lo la gli le un una dei del della delle degli alla alle nel nella "
+    "nelle nei con per tra fra che chi come dove quando più anche molto ogni "
+    "tutto tutti tutta tutte altro altra altri altre questo questa questi queste "
+    "quello quella quelli quelle suo sua suoi sue nostro nostra loro "
+    "essere avere fare potere dire stato sono era hanno "
+    # Portuguese
+    "que de em um uma para com não mais por mas como dos das nos nas pelo pela "
+    "seu sua seus suas este esta estes estas esse essa esses essas aquele "
+    "aquela todo toda todos todas outro outra outros outras muito muita muitos "
+    "ser estar ter fazer poder dizer foi era são tem".split()
 )
 
-# Common English suffixes for lightweight stemming (no external deps)
+# Suffix rules for lightweight multilingual stemming (no external deps).
+# Ordered longest-first so the most specific rule matches first.
 _SUFFIX_RULES: list[tuple[str, str]] = [
+    # ── English ──
     ("ational", "ate"),
     ("tional", "tion"),
     ("encies", "ence"),
@@ -77,18 +116,67 @@ _SUFFIX_RULES: list[tuple[str, str]] = [
     ("ed", ""),
     ("er", ""),
     ("ly", ""),
-    ("es", ""),
     ("al", ""),
     ("en", ""),
+    # ── German ──
+    ("ungen", ""),    # Bewegungen → Beweg
+    ("keit", ""),     # Geschwindigkeit → Geschwindig
+    ("heit", ""),     # Freiheit → Frei
+    ("lich", ""),     # natürlich → natür
+    ("isch", ""),     # technisch → techn
+    ("ung", ""),      # Übung → Üb
+    ("ern", ""),      # verbessern → verbess
+    ("eln", ""),      # handeln → hand
+    ("ens", ""),      # Lesens → Les
+    # ── French ──
+    ("ement", ""),    # rapidement → rapid
+    ("ation", ""),    # information → inform
+    ("ments", ""),    # mouvements → mouv  (also English)
+    ("eurs", ""),     # lecteurs → lect
+    ("euse", ""),     # heureuse → heur
+    ("eux", ""),      # heureux → heur
+    ("eur", ""),      # lecteur → lect
+    # ── Spanish ──
+    ("ción", ""),     # información → inform
+    ("iones", ""),    # informaciones → informac
+    ("mente", ""),    # rápidamente → rápida
+    ("ando", ""),     # leyendo → ley  (gerund)
+    ("endo", ""),     # corriendo → corri
+    ("ados", ""),     # entrenados → entren
+    ("adas", ""),     # entrenadas → entren
+    ("ado", ""),      # entrenado → entren
+    ("ada", ""),      # entrenada → entren
+    # ── Italian ──
+    ("zione", ""),    # informazione → inform
+    ("zioni", ""),    # informazioni → inform
+    ("mente", ""),    # rapidamente → rapida  (also Spanish)
+    ("ando", ""),     # leggendo → legg  (also Spanish)
+    ("endo", ""),     # correndo → corr
+    ("ato", ""),      # allenato → allen
+    ("ata", ""),      # allenata → allen
+    ("ati", ""),      # allenati → allen
+    ("ate", ""),      # allenate → allen  (also English)
+    # ── Portuguese ──
+    ("ação", ""),     # informação → inform
+    ("ções", ""),     # informações → informa
+    ("mente", ""),    # rapidamente → rapida
+    ("ando", ""),     # lendo → l  (gerund, also Spanish)
+    ("endo", ""),     # correndo → corr
+    ("ados", ""),     # treinados → trein
+    ("adas", ""),     # treinadas → trein
+    ("ado", ""),      # treinado → trein
+    ("ada", ""),      # treinada → trein
+    # ── Shared short suffixes (applied last) ──
+    ("es", ""),
     ("s", ""),
 ]
 
 
 def _stem(word: str) -> str:
-    """Lightweight English stemmer — reduce a word to an approximate root.
+    """Lightweight multilingual stemmer — reduce a word to an approximate root.
 
-    Not as thorough as Porter/Snowball but requires no external libraries
-    and handles the most common inflections well enough for recall scoring.
+    Handles common inflections in EN/DE/FR/ES/IT/PT without external
+    libraries.  Good enough for recall scoring and keyword grouping.
     """
     if len(word) <= 4:
         return word
@@ -107,22 +195,59 @@ def extract_keywords(text: str, max_keywords: int = 8) -> list[str]:
     """Extract key content words from text by frequency.
 
     Uses stemming to group inflected forms, then picks the most common
-    surface form for each stem group. Words in the first 25% of text
-    get a 1.5x weight (topic words tend to appear early).
+    surface form for each stem group.
+
+    Weighting:
+    - Words in the first/last sentence of each paragraph get 2× weight
+      (topic sentences carry the main ideas).
+    - Words in the first 25% of the overall text get 1.5× weight
+      (introductions establish the subject).
+    - Minimum word length is 5 characters to filter trivial words.
     """
-    words = re.findall(r"[a-zA-Z]+", text.lower())
+    words = _WORD_RE.findall(text.lower())
     if not words:
         return []
 
     quarter = max(len(words) // 4, 1)
 
+    # Build a set of word positions that fall in paragraph boundary sentences
+    _boundary_positions: set[int] = set()
+    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+    global_pos = 0
+    for para in paragraphs:
+        para_lower = para.lower()
+        # Split paragraph into sentences (rough heuristic)
+        sentences = re.split(r'(?<=[.!?])\s+', para_lower)
+        if not sentences:
+            continue
+        first_sent = sentences[0]
+        last_sent = sentences[-1] if len(sentences) > 1 else ""
+        # Find word positions in this paragraph
+        para_words = _WORD_RE.findall(para_lower)
+        first_sent_words = set(_WORD_RE.findall(first_sent))
+        last_sent_words = set(_WORD_RE.findall(last_sent))
+        seen_first: dict[str, int] = {}
+        for j, pw in enumerate(para_words):
+            pos = global_pos + j
+            if pw in first_sent_words:
+                if seen_first.get(pw, 0) < first_sent.count(pw):
+                    _boundary_positions.add(pos)
+                    seen_first[pw] = seen_first.get(pw, 0) + 1
+            if pw in last_sent_words:
+                _boundary_positions.add(pos)
+        global_pos += len(para_words)
+
     # stem -> {surface_form -> weighted_count}
     stem_groups: dict[str, dict[str, float]] = {}
 
     for i, w in enumerate(words):
-        if len(w) < 4 or w in _STOP_WORDS:
+        if len(w) < 5 or w in _STOP_WORDS:
             continue
-        weight = 1.5 if i < quarter else 1.0
+        weight = 1.0
+        if i < quarter:
+            weight = 1.5
+        if i in _boundary_positions:
+            weight *= 2.0
         s = _stem(w)
         if s not in stem_groups:
             stem_groups[s] = {}
@@ -165,7 +290,7 @@ def score_recall(
         (keyword, match_type) pairs. match_type is "exact", "stem",
         "partial", or "miss".
     """
-    summary_words = set(re.findall(r"[a-zA-Z]+", summary_text.lower()))
+    summary_words = set(_WORD_RE.findall(summary_text.lower()))
     summary_stems = _get_stems(summary_words)
 
     matches: list[tuple[str, str]] = []

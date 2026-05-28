@@ -83,6 +83,17 @@ class BaseExercise(QWidget):
             elif item.layout():
                 BaseExercise._clear_layout(item.layout())
 
+    @staticmethod
+    def _flush_widget(widget) -> None:
+        """Force a widget to repaint and flush to screen.
+
+        Uses update() + processEvents() instead of repaint() for
+        reliable rendering on all platforms including Wayland.
+        """
+        from PyQt6.QtWidgets import QApplication
+        widget.update()
+        QApplication.processEvents()
+
     def _after(self, ms: int, callback) -> QTimer:
         """Schedule a callback after ms milliseconds. Returns the timer."""
         timer = QTimer(self)

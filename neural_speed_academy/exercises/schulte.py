@@ -119,7 +119,7 @@ class SchulteExercise(BaseExercise):
                     f"QPushButton {{ background-color: {c['grid_btn']}; "
                     f"color: {c['grid_text']}; border: 2px solid transparent; "
                     f"border-radius: 4px; }}"
-                    f"QPushButton:hover {{ opacity: 0.9; }}"
+                    f"QPushButton:hover {{ border: 2px solid {c['muted']}; }}"
                 )
                 btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 btn.clicked.connect(

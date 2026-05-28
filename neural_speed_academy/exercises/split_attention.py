@@ -82,6 +82,7 @@ class SplitAttentionExercise(BaseExercise):
         )
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._mode = kwargs.get("mode", "sequential")
+        self._eccentricity = kwargs.get("eccentricity", cfg["eccentricity"])
 
         # Skip config screen when launched from preset menu
         if kwargs:
@@ -432,7 +433,7 @@ class SplitAttentionExercise(BaseExercise):
         aw = self._arena.width()
         ah = self._arena.height()
         cx, cy = aw // 2, ah // 2
-        ecc_frac = cfg["eccentricity"] / 100.0
+        ecc_frac = self._eccentricity / 100.0
         sx = int(cx + dx * ecc_frac * (aw // 2 - 50))
         sy = int(cy + dy * ecc_frac * (ah // 2 - 50))
         sw = self._periph_lbl.width()
@@ -477,14 +478,13 @@ class SplitAttentionExercise(BaseExercise):
         self._fixation.hide()
 
         if self._mode in ("simultaneous", "rapid"):
-            # Show both at once — raise to front and force repaint
-            # #linux — repaint() may not flush immediately on Wayland
+            # Show both at once — raise to front and flush to screen
             self._center_lbl.raise_()
             self._periph_lbl.raise_()
             self._center_lbl.show()
             self._periph_lbl.show()
-            self._center_lbl.repaint()
-            self._periph_lbl.repaint()
+            self._flush_widget(self._center_lbl)
+            self._flush_widget(self._periph_lbl)
             # Hide center after center_ms
             self._after(self._center_ms, self._hide_center)
             # Hide peripheral after peripheral_ms
@@ -497,7 +497,7 @@ class SplitAttentionExercise(BaseExercise):
             # Sequential: center first, then peripheral
             self._center_lbl.raise_()
             self._center_lbl.show()
-            self._center_lbl.repaint()
+            self._flush_widget(self._center_lbl)
             self._after(self._center_ms, self._seq_hide_center)
 
     def _hide_center(self) -> None:
@@ -520,7 +520,7 @@ class SplitAttentionExercise(BaseExercise):
             return
         self._periph_lbl.raise_()
         self._periph_lbl.show()
-        self._periph_lbl.repaint()
+        self._flush_widget(self._periph_lbl)
         self._after(self._peripheral_ms, self._seq_hide_peripheral)
 
     def _seq_hide_peripheral(self) -> None:

@@ -113,7 +113,6 @@ class SettingsScreen(BaseScreen):
                     btn.setChecked(True)
                 self._profile_group.addButton(btn)
                 col.addWidget(btn)
-            col.addStretch()
             theme_cols.addLayout(col)
         profile_section.addLayout(theme_cols)
         self._profile_group.buttonClicked.connect(self._on_profile_changed)
@@ -147,14 +146,13 @@ class SettingsScreen(BaseScreen):
             self._disp_group.addButton(btn)
             disp_section.addWidget(btn)
         self._disp_group.buttonClicked.connect(self._on_display_changed)
-        disp_section.addStretch()
         top_row.addLayout(disp_section, 1)
 
         top_row.addStretch(1)
 
         cl.addLayout(top_row)
 
-        cl.addSpacing(15)
+        cl.addSpacing(30)
 
         # --- Font Scale ---
         scale_row = QHBoxLayout()
@@ -219,7 +217,7 @@ class SettingsScreen(BaseScreen):
         scale_row.addStretch(1)
         cl.addLayout(scale_row)
 
-        cl.addSpacing(15)
+        cl.addSpacing(25)
 
         # --- Training Text (constrained width) ---
         text_wrapper = QHBoxLayout()

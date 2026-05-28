@@ -70,9 +70,30 @@ class ReactionTimeExercise(BaseExercise):
         c = COLORS
         self.setStyleSheet(f"background-color: {c['bg']};")
 
-        self._mode = kwargs.get("mode", "simple")
+        mode = kwargs.get("mode", "simple")
+        # Normalize: paths/menus use "go_nogo", exercise uses "go_no_go"
+        self._mode = "go_no_go" if mode == "go_nogo" else mode
         self._total_rounds = kwargs.get("rounds", cfg["default_rounds"])
         self._go_ratio = kwargs.get("go_ratio", cfg["go_ratio"])
+
+        # Pre-generate go/no-go trial sequence for even distribution
+        self._go_sequence: list[bool] = []
+        if self._mode == "go_no_go":
+            n_go = round(self._total_rounds * self._go_ratio)
+            n_nogo = self._total_rounds - n_go
+            seq = [True] * n_go + [False] * n_nogo
+            random.shuffle(seq)
+            # Avoid starting with more than 2 consecutive go trials
+            for i in range(min(3, len(seq))):
+                if not seq[i]:
+                    break
+            else:
+                # Force a no-go into position 1 or 2
+                for j in range(3, len(seq)):
+                    if not seq[j]:
+                        seq[2], seq[j] = seq[j], seq[2]
+                        break
+            self._go_sequence = seq
 
         # Skip config screen when launched from preset menu
         if kwargs:
@@ -202,6 +223,22 @@ class ReactionTimeExercise(BaseExercise):
         self._mode = ["simple", "choice", "go_no_go"][
             self._mode_combo.currentIndex()
         ]
+        # Generate balanced go/no-go sequence
+        self._go_sequence = []
+        if self._mode == "go_no_go":
+            n_go = round(self._total_rounds * self._go_ratio)
+            n_nogo = self._total_rounds - n_go
+            seq = [True] * n_go + [False] * n_nogo
+            random.shuffle(seq)
+            for i in range(min(3, len(seq))):
+                if not seq[i]:
+                    break
+            else:
+                for j in range(3, len(seq)):
+                    if not seq[j]:
+                        seq[2], seq[j] = seq[j], seq[2]
+                        break
+            self._go_sequence = seq
         self._round = 0
         self._reaction_times = []
         self._correct = 0
@@ -252,10 +289,6 @@ class ReactionTimeExercise(BaseExercise):
         self._layout.addWidget(self._arena, 1)
 
         # Stimulus label (large shape in center of arena)
-        # #linux — repaint() calls below force immediate redraw for
-        # timing-critical stimulus display. On some Linux compositors
-        # (especially Wayland), repaint() may not flush to screen
-        # immediately, adding a few ms of display latency.
         self._stimulus_lbl = QLabel("", self._arena)
         self._stimulus_lbl.setFont(QFont("Inter", 120))
         self._stimulus_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -353,7 +386,7 @@ class ReactionTimeExercise(BaseExercise):
             f"color: {c['muted']}; background: transparent;"
         )
         self._stimulus_lbl.show()
-        self._stimulus_lbl.repaint()
+        self._flush_widget(self._stimulus_lbl)
 
         # Instruction
         if self._mode == "simple":
@@ -409,7 +442,10 @@ class ReactionTimeExercise(BaseExercise):
             self._is_go_trial = True
 
         else:  # go_no_go
-            self._is_go_trial = random.random() < self._go_ratio
+            if self._round < len(self._go_sequence):
+                self._is_go_trial = self._go_sequence[self._round]
+            else:
+                self._is_go_trial = random.random() < self._go_ratio
             if self._is_go_trial:
                 self._stimulus_lbl.setText(tr("reaction.time.u25cf"))
                 self._stimulus_lbl.setStyleSheet(
@@ -423,7 +459,7 @@ class ReactionTimeExercise(BaseExercise):
 
         self._stimulus_lbl.raise_()
         self._stimulus_lbl.show()
-        self._stimulus_lbl.repaint()
+        self._flush_widget(self._stimulus_lbl)
 
         self._stimulus_time = time.perf_counter()
         self._waiting_for_response = True
@@ -470,7 +506,7 @@ class ReactionTimeExercise(BaseExercise):
             self._stimulus_lbl.setStyleSheet(
                 f"color: {c['alert']}; background: transparent;"
             )
-            self._stimulus_lbl.repaint()
+            self._flush_widget(self._stimulus_lbl)
             self._feedback_lbl.setText(tr("reaction.time.too_early_wait_for_the_stimulu"))
             self._feedback_lbl.setStyleSheet(f"color: {c['alert']};")
             self._input_locked = True
