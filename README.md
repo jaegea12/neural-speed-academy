@@ -2,7 +2,7 @@
 
 A desktop application for speed reading and cognitive training, built with Python and PyQt6.
 
-15 exercises across three categories — Perception, Cognition, and Reading — with structured training paths, per-user profiles, and data export for research use. Available in 6 languages (EN, DE, FR, ES, IT, PT).
+15 exercises across three categories — Perception, Cognition, and Reading — with structured training paths, per-user profiles, and data export for research use. Available in 6 languages (EN, DE...)
 
 ## Exercises
 
@@ -38,7 +38,7 @@ A desktop application for speed reading and cognitive training, built with Pytho
 
 ## Training Paths
 
-21 built-in training paths across 5 categories (Daily, Reading, Cognitive, Visual, Information Processing) with progress tracking. Path builder for creating custom sequences with copy, edit, and delete support. Per-step config panel for adjusting exercise params before launch. Custom learning material can be attached to text-based exercises.
+21 built-in training paths across 5 categories (Daily, Reading, Cognitive, Visual, Information Processing) with progress tracking. Path builder for creating custom sequences with copy, edit, and d...
 
 ## Slide Creator
 
@@ -135,6 +135,12 @@ GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 ## Author
 
 Adam Jäger — [admjae@proton.me](mailto:admjae@proton.me)
+
+## Support
+
+If you find Neural Speed Academy helpful and want to support the project, you can buy me a coffee:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?logo=buymeacoffee)](https://buymeacoffee.com/neural.speed.academy)
 
 ## Credits
 
