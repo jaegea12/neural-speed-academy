@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+from typing import Optional
 
 
 # --- Color Profiles ---
@@ -467,19 +468,20 @@ class ThemeManager:
     """Manages app-level settings: color profile and shared training text.
 
     Settings are stored in a JSON file independent of user profiles.
+    Compatible with Python 3.10+.
     """
 
     # Map FOV keys to default Schulte cell size indices
     _FOV_TO_CELL = {"narrow": 0, "standard": 1, "wide": 2, "full": 3, "ultra": 3}
 
-    def __init__(self, profile: str = DEFAULT_PROFILE):
+    def __init__(self, profile: str = DEFAULT_PROFILE) -> None:
         self._profile = profile
         self._training_text = DEFAULT_TRAINING_TEXT
         self._fov = DEFAULT_FOV
         self._font_scale: float = 1.0
         self._fullscreen: bool = True
-        self._schulte_grid_size: int | None = None  # None = use config default
-        self._schulte_cell_idx: int | None = None   # None = derive from FOV
+        self._schulte_grid_size: Optional[int] = None  # None = use config default
+        self._schulte_cell_idx: Optional[int] = None   # None = derive from FOV
         self._schulte_fill_idx: int = 1             # 0=60%, 1=75%, 2=90%
         self._custom_texts: dict[str, str] = {}     # name -> text
         self._exercise_configs: dict[str, dict] = {}  # exercise_key -> last-used params
@@ -636,28 +638,43 @@ class ThemeManager:
         try:
             with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
+            # Validate data is dict
+            if not isinstance(data, dict):
+                return
             profile = data.get("profile", DEFAULT_PROFILE)
             if profile in THEME_PROFILES:
                 self.set_profile(profile)
             text = data.get("training_text", "")
-            if text:
+            if text and isinstance(text, str):
                 self._training_text = text
             fov = data.get("fov", DEFAULT_FOV)
             if fov in FOV_PRESETS:
                 self._fov = fov
             if "font_scale" in data:
-                self._font_scale = max(0.8, min(1.5, float(data["font_scale"])))
+                try:
+                    self._font_scale = max(0.8, min(1.5, float(data["font_scale"])))
+                except (TypeError, ValueError):
+                    pass
             if "fullscreen" in data:
                 self._fullscreen = bool(data["fullscreen"])
             sg = data.get("schulte_grid_size")
             if sg is not None:
-                self._schulte_grid_size = int(sg)
+                try:
+                    self._schulte_grid_size = int(sg)
+                except (TypeError, ValueError):
+                    pass
             sc = data.get("schulte_cell_idx")
             if sc is not None:
-                self._schulte_cell_idx = int(sc)
+                try:
+                    self._schulte_cell_idx = int(sc)
+                except (TypeError, ValueError):
+                    pass
             sf = data.get("schulte_fill_idx")
             if sf is not None:
-                self._schulte_fill_idx = int(sf)
+                try:
+                    self._schulte_fill_idx = int(sf)
+                except (TypeError, ValueError):
+                    pass
             ct = data.get("custom_texts")
             if isinstance(ct, dict):
                 self._custom_texts = {k: v for k, v in ct.items()
@@ -673,7 +690,7 @@ class ThemeManager:
                 self._locale = locale
                 from neural_speed_academy.i18n import load_locale
                 load_locale(locale)
-        except (IOError, json.JSONDecodeError, TypeError):
+        except (IOError, json.JSONDecodeError, TypeError, ValueError):
             pass
 
     def reset_defaults(self) -> None:
@@ -940,4 +957,3 @@ def global_focus_css() -> str:
         f"QTextEdit:focus {{ border: 2px solid {accent}; }}"
         f"QLineEdit:focus {{ border: 2px solid {accent}; }}"
     )
-
