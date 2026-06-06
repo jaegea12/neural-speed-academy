@@ -140,11 +140,12 @@ class MainMenuScreen(BaseScreen):
         c = COLORS
         dialog = QDialog(self)
         dialog.setWindowTitle(tr("main.menu.about"))
-        dialog.setFixedSize(580, 380)
+        dialog.setFixedSize(600, 480)  # Increased height to fit all content
         dialog.setStyleSheet(f"background-color: {c['card']};")
 
         layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(40, 30, 40, 15)
+        layout.setContentsMargins(40, 30, 40, 20)
+        layout.setSpacing(12)
 
         title = QLabel(tr("login.neural_speed_academy"))
         title.setFont(make_qfont("header"))
@@ -157,6 +158,7 @@ class MainMenuScreen(BaseScreen):
         body.setFont(make_qfont("body"))
         body.setStyleSheet(f"color: {c['text_on_card']};")
         body.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        body.setWordWrap(True)
         layout.addWidget(body)
 
         from neural_speed_academy import __version__
@@ -171,7 +173,21 @@ class MainMenuScreen(BaseScreen):
         credit.setFont(make_qfont("btn_sm"))
         credit.setStyleSheet(f"color: {c['muted']};")
         credit.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        credit.setWordWrap(True)
         layout.addWidget(credit)
+
+        # Support link button
+        support_btn = QPushButton("☕ Buy Me a Coffee")
+        support_btn.setFont(make_qfont("btn"))
+        support_btn.setStyleSheet(
+            btn_css(c["accent"], c["btn_text"], padding="6px 16px")
+        )
+        support_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        support_btn.setToolTip("Support the project")
+        support_btn.clicked.connect(self._open_support_link)
+        layout.addWidget(support_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        layout.addStretch()
 
         close_btn = QPushButton(tr("nav.close"))
         close_btn.setStyleSheet(
@@ -182,6 +198,12 @@ class MainMenuScreen(BaseScreen):
         layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         dialog.exec()
+
+    @staticmethod
+    def _open_support_link() -> None:
+        """Open the Buy Me a Coffee link in the default browser."""
+        import webbrowser
+        webbrowser.open("https://buymeacoffee.com/neural.speed.academy")
 
     def _quit(self) -> None:
         c = COLORS
