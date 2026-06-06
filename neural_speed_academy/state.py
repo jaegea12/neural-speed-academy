@@ -1,6 +1,7 @@
 """
 State containers for Neural Speed Academy.
 Uses dataclasses for type safety and clarity.
+Compatible with Python 3.10+.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ class HistoryEntry:
 
     @classmethod
     def create(cls, exercise: str, result: str,
-               metadata: dict | None = None) -> "HistoryEntry":
+               metadata: Optional[dict] = None) -> HistoryEntry:
         """Create a new history entry with current timestamp."""
         return cls(
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -40,7 +41,7 @@ class HistoryEntry:
         return d
 
     @classmethod
-    def from_dict(cls, data: dict) -> "HistoryEntry":
+    def from_dict(cls, data: dict) -> HistoryEntry:
         """Create from dictionary (JSON deserialization)."""
         return cls(
             timestamp=data.get("timestamp", ""),
@@ -67,7 +68,7 @@ class PathProgress:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "PathProgress":
+    def from_dict(cls, data: dict) -> PathProgress:
         return cls(
             path_id=data.get("path_id", ""),
             current_step=data.get("current_step", 0),
@@ -133,7 +134,7 @@ class SRCard:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "SRCard":
+    def from_dict(cls, data: dict) -> SRCard:
         return cls(
             front=data.get("front", ""),
             back=data.get("back", ""),
@@ -173,7 +174,7 @@ class SRDeck:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "SRDeck":
+    def from_dict(cls, data: dict) -> SRDeck:
         cards = [SRCard.from_dict(c) for c in data.get("cards", [])]
         return cls(
             name=data.get("name", ""),
@@ -199,7 +200,7 @@ class UserProfile:
     theme: str = ""  # empty = use global default
     font_scale: float = 0.0  # 0 = use global default
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.last_login:
             self.last_login = datetime.now().strftime("%Y-%m-%d")
 
@@ -226,7 +227,7 @@ class UserProfile:
 
     def update_personal_best(
         self, exercise: str, score: int, total: int,
-        metadata: dict | None = None,
+        metadata: Optional[dict] = None,
     ) -> bool:
         """Update personal best for an exercise if the new score is higher.
 
@@ -255,7 +256,7 @@ class UserProfile:
 
     def add_history(self, exercise: str, result: str,
                     max_entries: int = 50,
-                    metadata: dict | None = None) -> None:
+                    metadata: Optional[dict] = None) -> None:
         """Add a history entry, keeping only the most recent entries."""
         entry = HistoryEntry.create(exercise, result, metadata)
         self.history.insert(0, entry)
@@ -287,7 +288,7 @@ class UserProfile:
         return d
 
     @classmethod
-    def from_dict(cls, data: dict) -> "UserProfile":
+    def from_dict(cls, data: dict) -> UserProfile:
         """Create from dictionary (JSON deserialization)."""
         history = []
         for item in data.get("history", []):
@@ -307,6 +308,16 @@ class UserProfile:
         for k, v in data.get("path_progress", {}).items():
             if isinstance(v, dict):
                 pp[k] = PathProgress.from_dict(v)
+        
+        # Safely extract font_scale with type checking
+        font_scale = 0.0
+        fs = data.get("font_scale", 0.0)
+        if fs is not None:
+            try:
+                font_scale = float(fs)
+            except (TypeError, ValueError):
+                font_scale = 0.0
+        
         return cls(
             name=data.get("name", ""),
             xp=data.get("xp", 0),
@@ -320,7 +331,7 @@ class UserProfile:
             custom_paths=data.get("custom_paths", {}),
             sr_decks=[SRDeck.from_dict(d) for d in data.get("sr_decks", [])],
             theme=data.get("theme", ""),
-            font_scale=float(data.get("font_scale", 0.0)),
+            font_scale=font_scale,
         )
 
 
